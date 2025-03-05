@@ -3,7 +3,8 @@ class Auth
 {
   private $conn;
   private $table_name = "users";
-  private $secret_key = "your_secret_key"; // Should be in environment variables in production
+  private $secret_key = "kttProjects2024SecretKey"; // Hardcoded secret key
+  private $jwt_expiration = 86400; // 24 hours in seconds
 
   public function __construct($db)
   {
@@ -26,7 +27,8 @@ class Auth
       'user_id' => $user_id,
       'email' => $email,
       'role_id' => $role_id,
-      'exp' => time() + (60 * 60 * 24) // 24 hours
+      'exp' => time() + $this->jwt_expiration,
+      'iat' => time()
     ]);
 
     $base64UrlHeader = $this->base64url_encode($header);
@@ -49,9 +51,34 @@ class Auth
     return password_verify($input, $stored_hash);
   }
 
+  public function validatePasswordStrength($password)
+  {
+    if (strlen($password) < 8) {
+      return ['valid' => false, 'message' => 'Password must be at least 8 characters long'];
+    }
+
+    if (!preg_match('/[A-Z]/', $password)) {
+      return ['valid' => false, 'message' => 'Password must contain at least one uppercase letter'];
+    }
+
+    if (!preg_match('/[a-z]/', $password)) {
+      return ['valid' => false, 'message' => 'Password must contain at least one lowercase letter'];
+    }
+
+    if (!preg_match('/[0-9]/', $password)) {
+      return ['valid' => false, 'message' => 'Password must contain at least one number'];
+    }
+
+    if (!preg_match('/[^A-Za-z0-9]/', $password)) {
+      return ['valid' => false, 'message' => 'Password must contain at least one special character'];
+    }
+
+    return ['valid' => true];
+  }
+
   public function hashPassword($password)
   {
-    return password_hash($password, PASSWORD_DEFAULT);
+    return password_hash($password, PASSWORD_DEFAULT, ['cost' => 12]);
   }
 
   public function generateVerificationToken()
@@ -105,6 +132,7 @@ class Auth
       }
       return false;
     } catch (PDOException $e) {
+      error_log("Database error in createUser: " . $e->getMessage());
       return false;
     }
   }

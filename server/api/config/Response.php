@@ -15,10 +15,16 @@ class Response {
         ]);
     }
 
-    public static function error($message = 'Error', $status = 400) {
-        return self::json([
+    public static function error($message = 'Error', $status = 400, $details = null) {
+        $response = [
             'status' => 'error',
             'message' => $message
-        ], $status);
+        ];
+        
+        if ($details) {
+            $response['error_details'] = $details;
+        }
+        
+        return self::json($response, $status);
     }
 }

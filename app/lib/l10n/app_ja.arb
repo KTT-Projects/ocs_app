@@ -4,7 +4,7 @@
   "@appTitle": {
     "description": "アプリケーションのタイトル"
   },
-  "welcomeBack": "おかえりなさい",
+  "welcomeBack": "おかえりなさいませ",
   "@welcomeBack": {
     "description": "ログイン画面のウェルカムメッセージ"
   },

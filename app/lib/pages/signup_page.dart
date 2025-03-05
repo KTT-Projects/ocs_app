@@ -15,12 +15,13 @@ class _SignupPageState extends State<SignupPage> {
   final _apiClient = ApiClient();
   bool _isLoading = false;
   String? _errorMessage;
+  bool _registrationComplete = false;
 
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _studentIdController = TextEditingController();
-  
+
   int? _selectedInstitutionId;
   List<Map<String, dynamic>> _institutions = [];
 
@@ -50,9 +51,39 @@ class _SignupPageState extends State<SignupPage> {
     }
   }
 
+  void _showVerificationDialog(BuildContext context, String email) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Verify Your Email'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('A verification email has been sent to $email'),
+                const SizedBox(height: 8),
+                const Text('Please check your inbox and click the verification link to activate your account.'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+                Navigator.of(context).pop(); // Return to login page
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _handleSignup() async {
     final l10n = AppLocalizations.of(context)!;
-    
+
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -63,7 +94,7 @@ class _SignupPageState extends State<SignupPage> {
     });
 
     try {
-      await _apiClient.register(
+      final result = await _apiClient.register(
         email: _emailController.text,
         password: _passwordController.text,
         institutionId: _selectedInstitutionId!,
@@ -71,10 +102,8 @@ class _SignupPageState extends State<SignupPage> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.signUpToGetStarted)),
-        );
-        Navigator.pop(context); // Return to login page
+        setState(() => _registrationComplete = true);
+        _showVerificationDialog(context, _emailController.text);
       }
     } catch (e) {
       setState(() => _errorMessage = e.toString());
@@ -142,16 +171,16 @@ class _SignupPageState extends State<SignupPage> {
                                 Text(
                                   l10n.createAccount,
                                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                    color: Theme.of(context).colorScheme.onPrimary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                        color: Theme.of(context).colorScheme.onPrimary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
                                   l10n.signUpToGetStarted,
                                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
-                                  ),
+                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                      ),
                                 ),
                                 if (_errorMessage != null) ...[
                                   const SizedBox(height: 16),
@@ -183,32 +212,66 @@ class _SignupPageState extends State<SignupPage> {
                                   validator: (value) => value?.isEmpty ?? true ? l10n.fullName : null,
                                 ),
                                 const SizedBox(height: 16),
-                                DropdownButtonFormField<int>(
-                                  value: _selectedInstitutionId,
-                                  items: _institutions.map((institution) {
-                                    return DropdownMenuItem(
-                                      value: institution['id'] as int,
-                                      child: Text(institution['name'] as String),
-                                    );
-                                  }).toList(),
-                                  onChanged: (value) {
-                                    setState(() => _selectedInstitutionId = value);
-                                  },
-                                  decoration: InputDecoration(
-                                    hintText: l10n.selectInstitution,
-                                    prefixIcon: Icon(
-                                      Icons.school_outlined,
-                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                Theme(
+                                  data: Theme.of(context).copyWith(
+                                    inputDecorationTheme: InputDecorationTheme(
+                                      filled: true,
+                                      fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                                     ),
-                                    hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
-                                    filled: true,
-                                    fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide.none,
+                                    dropdownMenuTheme: DropdownMenuThemeData(
+                                      menuStyle: MenuStyle(
+                                        shape: MaterialStateProperty.all(
+                                          RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                      ),
+                                      inputDecorationTheme: InputDecorationTheme(
+                                        filled: true,
+                                        fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: BorderSide.none,
+                                        ),
+                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                      ),
                                     ),
                                   ),
-                                  validator: (value) => value == null ? l10n.pleaseSelectInstitution : null,
+                                  child: DropdownButtonFormField<int>(
+                                    value: _selectedInstitutionId,
+                                    items: _institutions.map((institution) {
+                                      return DropdownMenuItem(
+                                        value: int.parse(institution['id'].toString()),
+                                        child: Text(
+                                          (institution['name'] as String).split('/')[Localizations.localeOf(context).languageCode == 'ja' ? 1 : 0].trim(),
+                                          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                        ),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      setState(() => _selectedInstitutionId = value);
+                                    },
+                                    decoration: InputDecoration(
+                                      hintText: l10n.selectInstitution,
+                                      prefixIcon: Icon(
+                                        Icons.school_outlined,
+                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                      ),
+                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                      errorStyle: TextStyle(color: Theme.of(context).colorScheme.error),
+                                    ),
+                                    dropdownColor: Theme.of(context).colorScheme.primary.withOpacity(0.9),
+                                    icon: Icon(
+                                      Icons.arrow_drop_down,
+                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                    ),
+                                    validator: (value) => value == null ? l10n.pleaseSelectInstitution : null,
+                                  ),
                                 ),
                                 const SizedBox(height: 16),
                                 TextFormField(
@@ -296,7 +359,7 @@ class _SignupPageState extends State<SignupPage> {
                                   width: double.infinity,
                                   height: 48,
                                   child: ElevatedButton(
-                                    onPressed: _isLoading ? null : _handleSignup,
+                                    onPressed: _isLoading || _registrationComplete ? null : _handleSignup,
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Theme.of(context).colorScheme.secondary,
                                       foregroundColor: Theme.of(context).colorScheme.onSecondary,

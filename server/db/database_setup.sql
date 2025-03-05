@@ -8,12 +8,8 @@ SET
 SET
   utf8mb4;
 
--- Create database if it doesn't exist
-CREATE DATABASE IF NOT EXISTS ocs_db CHARACTER
-SET
-  utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-USE ocs_db;
+-- Use existing database
+USE on294_ocs;
 
 -- Educational institutions table
 CREATE TABLE
