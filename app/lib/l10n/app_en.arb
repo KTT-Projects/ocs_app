@@ -1,0 +1,90 @@
+{
+  "@@locale": "en",
+  "appTitle": "Osakikamijima Community Site",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "welcomeBack": "Welcome Back",
+  "@welcomeBack": {
+    "description": "Welcome message on login screen"
+  },
+  "signInToContinue": "Sign in to continue",
+  "@signInToContinue": {
+    "description": "Subtitle on login screen"
+  },
+  "email": "Institution-issued Email Address",
+  "@email": {
+    "description": "Label for the institution-issued email address input field"
+  },
+  "password": "Password",
+  "@password": {
+    "description": "Label for the password input field"
+  },
+  "signIn": "Sign In",
+  "@signIn": {
+    "description": "Text for the sign in button"
+  },
+  "newToApp": "New to the app?",
+  "@newToApp": {
+    "description": "Text prompting account creation"
+  },
+  "signUp": "Sign Up",
+  "@signUp": {
+    "description": "Text for the sign up link"
+  },
+  "forgotPassword": "Forgot Password?",
+  "@forgotPassword": {
+    "description": "Text for the password reset link"
+  },
+  "createAccount": "Create Account",
+  "@createAccount": {
+    "description": "Title on the sign up screen"
+  },
+  "signUpToGetStarted": "Sign up to get started",
+  "@signUpToGetStarted": {
+    "description": "Subtitle on the sign up screen"
+  },
+  "fullName": "Full Name (No Nicknames)",
+  "@fullName": {
+    "description": "Label for the full name input field (no nicknames allowed)"
+  },
+  "alreadyHaveAccount": "Already have an account?",
+  "@alreadyHaveAccount": {
+    "description": "Text prompting to sign in"
+  },
+  "studentId": "Student ID",
+  "@studentId": {
+    "description": "Label for the student ID input field"
+  },
+  "selectInstitution": "Select Institution",
+  "@selectInstitution": {
+    "description": "Label for the institution selection dropdown"
+  },
+  "loading": "Loading...",
+  "@loading": {
+    "description": "Text shown during loading states"
+  },
+  "errorMessage": "Error: {message}",
+  "@errorMessage": {
+    "description": "Generic error message format",
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "passwordRequirements": "Password must be at least 8 characters",
+  "@passwordRequirements": {
+    "description": "Password requirements hint"
+  },
+  "invalidEmail": "Please enter a valid institution email address",
+  "@invalidEmail": {
+    "description": "Error message for invalid email"
+  },
+  "invalidStudentId": "Please enter a valid student ID",
+  "@invalidStudentId": {
+    "description": "Error message for invalid student ID"
+  },
+  "pleaseSelectInstitution": "Please select your institution",
+  "@pleaseSelectInstitution": {
+    "description": "Error message for institution selection"
+  }
+}

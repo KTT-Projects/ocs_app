@@ -1,0 +1,90 @@
+{
+  "@@locale": "ja",
+  "appTitle": "大崎上島学生コミュニティサイト",
+  "@appTitle": {
+    "description": "アプリケーションのタイトル"
+  },
+  "welcomeBack": "おかえりなさい",
+  "@welcomeBack": {
+    "description": "ログイン画面のウェルカムメッセージ"
+  },
+  "signInToContinue": "続けるにはサインインしてください",
+  "@signInToContinue": {
+    "description": "ログイン画面のサブタイトル"
+  },
+  "email": "教育機関発行のメールアドレス",
+  "@email": {
+    "description": "教育機関発行のメールアドレス入力フィールドのラベル"
+  },
+  "password": "パスワード",
+  "@password": {
+    "description": "パスワード入力フィールドのラベル"
+  },
+  "signIn": "サインイン",
+  "@signIn": {
+    "description": "サインインボタンのテキスト"
+  },
+  "newToApp": "アプリを初めて使用しますか？",
+  "@newToApp": {
+    "description": "アカウント作成を促すテキスト"
+  },
+  "signUp": "新規登録",
+  "@signUp": {
+    "description": "新規登録リンクのテキスト"
+  },
+  "forgotPassword": "パスワードをお忘れですか？",
+  "@forgotPassword": {
+    "description": "パスワードリセットリンクのテキスト"
+  },
+  "createAccount": "アカウントを作成",
+  "@createAccount": {
+    "description": "新規登録画面のタイトル"
+  },
+  "signUpToGetStarted": "始めるには新規登録してください",
+  "@signUpToGetStarted": {
+    "description": "新規登録画面のサブタイトル"
+  },
+  "fullName": "氏名（ニックネーム不可）",
+  "@fullName": {
+    "description": "氏名入力フィールドのラベル（ニックネーム不可）"
+  },
+  "alreadyHaveAccount": "すでにアカウントをお持ちですか？",
+  "@alreadyHaveAccount": {
+    "description": "サインインを促すテキスト"
+  },
+  "studentId": "学生証番号",
+  "@studentId": {
+    "description": "学生証番号入力フィールドのラベル"
+  },
+  "selectInstitution": "教育機関を選択",
+  "@selectInstitution": {
+    "description": "教育機関選択ドロップダウンのラベル"
+  },
+  "loading": "読み込み中...",
+  "@loading": {
+    "description": "読み込み中に表示されるテキスト"
+  },
+  "errorMessage": "エラー: {message}",
+  "@errorMessage": {
+    "description": "一般的なエラーメッセージのフォーマット",
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "passwordRequirements": "パスワードは8文字以上である必要があります",
+  "@passwordRequirements": {
+    "description": "パスワード要件のヒント"
+  },
+  "invalidEmail": "有効な教育機関のメールアドレスを入力してください",
+  "@invalidEmail": {
+    "description": "無効なメールアドレスのエラーメッセージ"
+  },
+  "invalidStudentId": "有効な学生証番号を入力してください",
+  "@invalidStudentId": {
+    "description": "無効な学生証番号のエラーメッセージ"
+  },
+  "pleaseSelectInstitution": "教育機関を選択してください",
+  "@pleaseSelectInstitution": {
+    "description": "教育機関選択のエラーメッセージ"
+  }
+}
