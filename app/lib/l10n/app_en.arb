@@ -145,5 +145,55 @@
   "passwordHelper": "Must be at least 8 characters",
   "@passwordHelper": {
     "description": "Helper text for password field"
+  },
+  "registrationFailed": "Registration failed",
+  "@registrationFailed": {
+    "description": "Error message when registration fails"
+  },
+  "verificationFailed": "Verification failed",
+  "@verificationFailed": {
+    "description": "Error message when email verification fails"
+  },
+  "loginFailed": "Login failed",
+  "@loginFailed": {
+    "description": "Error message when login fails"
+  },
+  "loginSuccessful": "Login successful",
+  "@loginSuccessful": {
+    "description": "Success message when login is successful"
+  },
+  "failedToLoadInstitutions": "Failed to load institutions",
+  "@failedToLoadInstitutions": {
+    "description": "Error message when loading institutions fails"
+  },
+  "errorDetailsText": "Details:\n{errorType} at {errorFile}:{errorLine}\n\nStack trace:\n{stackTrace}",
+  "@errorDetailsText": {
+    "description": "Format for detailed error information",
+    "placeholders": {
+      "errorType": {},
+      "errorFile": {},
+      "errorLine": {},
+      "stackTrace": {}
+    }
+  },
+  "unknownErrorType": "Unknown error type",
+  "@unknownErrorType": {
+    "description": "Text for unknown error type"
+  },
+  "unknownFile": "unknown file",
+  "@unknownFile": {
+    "description": "Text for unknown file location"
+  },
+  "unknownLine": "unknown line",
+  "@unknownLine": {
+    "description": "Text for unknown line number"
+  },
+  "noStackTrace": "No stack trace available",
+  "@noStackTrace": {
+    "description": "Text when no stack trace is available"
+  },
+  "invalidCredentials": "Invalid email or password",
+  "@invalidCredentials": {
+    "description": "Error message when login credentials are invalid"
   }
 }

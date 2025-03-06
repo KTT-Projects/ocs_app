@@ -16,6 +16,7 @@ class _SignupPageState extends State<SignupPage> {
   bool _isLoading = false;
   String? _errorMessage;
   bool _registrationComplete = false;
+  bool _institutionsLoaded = false;
 
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -26,12 +27,6 @@ class _SignupPageState extends State<SignupPage> {
   List<Map<String, dynamic>> _institutions = [];
 
   @override
-  void initState() {
-    super.initState();
-    _loadInstitutions();
-  }
-
-  @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
@@ -39,10 +34,19 @@ class _SignupPageState extends State<SignupPage> {
     super.dispose();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_institutionsLoaded) {
+      _loadInstitutions();
+      _institutionsLoaded = true;
+    }
+  }
+
   Future<void> _loadInstitutions() async {
     try {
       setState(() => _isLoading = true);
-      _institutions = await _apiClient.getInstitutions();
+      _institutions = await _apiClient.getInstitutions(context);
     } catch (e) {
       setState(() => _errorMessage = e.toString());
     } finally {
@@ -58,7 +62,7 @@ class _SignupPageState extends State<SignupPage> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return StatefulBuilder(
           builder: (context, setState) {
             final l10n = AppLocalizations.of(context)!;
@@ -118,6 +122,7 @@ class _SignupPageState extends State<SignupPage> {
 
                           try {
                             await _apiClient.verifyEmail(
+                              context: dialogContext,
                               email: email,
                               otp: otpController.text,
                             );
@@ -170,6 +175,7 @@ class _SignupPageState extends State<SignupPage> {
 
     try {
       final result = await _apiClient.register(
+        context: context,
         email: _emailController.text,
         password: _passwordController.text,
         institutionId: _selectedInstitutionId!,

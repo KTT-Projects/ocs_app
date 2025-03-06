@@ -145,5 +145,55 @@
   "passwordHelper": "8文字以上である必要があります",
   "@passwordHelper": {
     "description": "パスワード入力フィールドのヘルパーテキスト"
+  },
+  "registrationFailed": "登録に失敗しました",
+  "@registrationFailed": {
+    "description": "登録失敗時のエラーメッセージ"
+  },
+  "verificationFailed": "確認に失敗しました",
+  "@verificationFailed": {
+    "description": "メール確認失敗時のエラーメッセージ"
+  },
+  "loginFailed": "ログインに失敗しました",
+  "@loginFailed": {
+    "description": "ログイン失敗時のエラーメッセージ"
+  },
+  "loginSuccessful": "ログインしました",
+  "@loginSuccessful": {
+    "description": "ログイン成功時のメッセージ"
+  },
+  "failedToLoadInstitutions": "教育機関の読み込みに失敗しました",
+  "@failedToLoadInstitutions": {
+    "description": "教育機関の読み込み失敗時のエラーメッセージ"
+  },
+  "errorDetailsText": "詳細:\n{errorType} at {errorFile}:{errorLine}\n\nスタックトレース:\n{stackTrace}",
+  "@errorDetailsText": {
+    "description": "詳細なエラー情報のフォーマット",
+    "placeholders": {
+      "errorType": {},
+      "errorFile": {},
+      "errorLine": {},
+      "stackTrace": {}
+    }
+  },
+  "unknownErrorType": "不明なエラータイプ",
+  "@unknownErrorType": {
+    "description": "不明なエラータイプのテキスト"
+  },
+  "unknownFile": "不明なファイル",
+  "@unknownFile": {
+    "description": "不明なファイル位置のテキスト"
+  },
+  "unknownLine": "不明な行",
+  "@unknownLine": {
+    "description": "不明な行番号のテキスト"
+  },
+  "noStackTrace": "スタックトレースは利用できません",
+  "@noStackTrace": {
+    "description": "スタックトレースが利用できない場合のテキスト"
+  },
+  "invalidCredentials": "メールアドレスまたはパスワードが正しくありません",
+  "@invalidCredentials": {
+    "description": "ログイン認証情報が無効な場合のエラーメッセージ"
   }
 }

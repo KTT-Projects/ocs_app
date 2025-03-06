@@ -50,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
     if (_showOtpField) {
       // Only validate OTP in verification mode
       if (_otpController.text.length != 6) {
-        setState(() => _errorMessage = 'Please enter all 6 digits');
+        setState(() => _errorMessage = l10n.invalidVerificationCode);
         return;
       }
     } else {
@@ -59,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
       if (_passwordController.text.isEmpty) {
-        setState(() => _errorMessage = 'Password is required');
+        setState(() => _errorMessage = l10n.passwordRequirements);
         return;
       }
     }
@@ -74,6 +74,7 @@ class _LoginPageState extends State<LoginPage> {
       if (_showOtpField) {
         // Verify OTP
         response = await _apiClient.verifyEmail(
+          context: context,
           email: _emailController.text,
           otp: _otpController.text,
         );
@@ -81,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
         if (mounted && response['status'] == 'success') {
           if (response['token'] != null) {
             // TODO: Store token securely
-            _showMessage(response['message'] ?? 'Email verified successfully', seconds: 4);
+            _showMessage(response['message'] ?? l10n.emailVerifiedSuccess, seconds: 4);
             setState(() {
               _showOtpField = false;
               _errorMessage = null;
@@ -90,12 +91,13 @@ class _LoginPageState extends State<LoginPage> {
             // TODO: Navigate to home page
             // Navigator.pushReplacement(...);
           } else {
-            setState(() => _errorMessage = 'Invalid verification response');
+            setState(() => _errorMessage = l10n.verificationFailed);
           }
         }
       } else {
         // Normal login attempt
         response = await _apiClient.login(
+          context: context,
           email: _emailController.text,
           password: _passwordController.text,
         );
@@ -113,9 +115,9 @@ class _LoginPageState extends State<LoginPage> {
             Future.delayed(Duration(milliseconds: 100), () {
               FocusScope.of(context).requestFocus(FocusNode());
             });
-            _showMessage(response['message'] ?? 'Please check your email for the verification code', seconds: 8);
+            _showMessage(l10n.verifyEmail, seconds: 8);
           } else if (response['status'] == 'success' && response['token'] != null) {
-            _showMessage('Login successful', seconds: 4);
+            _showMessage(l10n.loginSuccessful, seconds: 4);
             // TODO: Store token and navigate to home page
             // Navigator.pushReplacement(...);
           }
@@ -216,7 +218,7 @@ class _LoginPageState extends State<LoginPage> {
                                 if (_errorMessage != null) ...[
                                   const SizedBox(height: 16),
                                   Text(
-                                    _errorMessage!,
+                                    l10n.errorMessage(_errorMessage!),
                                     style: TextStyle(
                                       color: Theme.of(context).colorScheme.error,
                                     ),
