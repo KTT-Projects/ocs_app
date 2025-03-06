@@ -208,7 +208,7 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  _showOtpField ? 'Please verify your email address' : l10n.signInToContinue,
+                                  _showOtpField ? l10n.verifyEmail : l10n.signInToContinue,
                                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                         color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
                                       ),
@@ -288,7 +288,7 @@ class _LoginPageState extends State<LoginPage> {
                                       LengthLimitingTextInputFormatter(6),
                                     ],
                                     decoration: InputDecoration(
-                                      hintText: 'Enter 6-digit verification code',
+                                      hintText: l10n.enterOtp,
                                       counterText: '', // Hide character counter
                                       prefixIcon: Icon(
                                         Icons.security_outlined,
@@ -331,7 +331,7 @@ class _LoginPageState extends State<LoginPage> {
                                             ),
                                           )
                                         : Text(
-                                            _showOtpField ? 'Verify' : l10n.signIn,
+                                            _showOtpField ? l10n.verify : l10n.signIn,
                                             style: const TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold,
@@ -344,7 +344,7 @@ class _LoginPageState extends State<LoginPage> {
                                   TextButton(
                                     onPressed: _resetForm,
                                     child: Text(
-                                      'Back to Login',
+                                      l10n.backToLogin,
                                       style: TextStyle(
                                         color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
                                       ),

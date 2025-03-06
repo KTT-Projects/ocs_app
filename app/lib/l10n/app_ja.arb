@@ -94,5 +94,56 @@
   "pleaseSelectGrade": "学年を選択してください",
   "@pleaseSelectGrade": {
     "description": "学年選択のエラーメッセージ"
+  },
+  "verifyEmail": "メールアドレスを確認してください",
+  "@verifyEmail": {
+    "description": "メール確認が必要な場合に表示されるメッセージ"
+  },
+  "enterOtp": "6桁の認証コードを入力",
+  "@enterOtp": {
+    "description": "OTP入力フィールドのヒントテキスト"
+  },
+  "verify": "確認",
+  "@verify": {
+    "description": "確認ボタンのテキスト"
+  },
+  "backToLogin": "ログインに戻る",
+  "@backToLogin": {
+    "description": "ログインに戻るボタンのテキスト"
+  },
+  "verifyEmailTitle": "メールアドレスの確認",
+  "@verifyEmailTitle": {
+    "description": "メール確認ダイアログのタイトル"
+  },
+  "verificationCodeSent": "{email}に確認コードを送信しました",
+  "@verificationCodeSent": {
+    "description": "確認コードが送信された時のメッセージ",
+    "placeholders": {
+      "email": {}
+    }
+  },
+  "enterVerificationCode": "アカウントを確認するために6桁のコードを入力してください：",
+  "@enterVerificationCode": {
+    "description": "確認コード入力の説明"
+  },
+  "enterSixDigitCode": "6桁のコードを入力",
+  "@enterSixDigitCode": {
+    "description": "確認コード入力フィールドのヒントテキスト"
+  },
+  "later": "後で",
+  "@later": {
+    "description": "後で/スキップボタンのテキスト"
+  },
+  "invalidVerificationCode": "6桁の有効なコードを入力してください",
+  "@invalidVerificationCode": {
+    "description": "無効な確認コードのエラーメッセージ"
+  },
+  "emailVerifiedSuccess": "メールアドレスが確認されました！",
+  "@emailVerifiedSuccess": {
+    "description": "メール確認成功時のメッセージ"
+  },
+  "passwordHelper": "8文字以上である必要があります",
+  "@passwordHelper": {
+    "description": "パスワード入力フィールドのヘルパーテキスト"
   }
 }

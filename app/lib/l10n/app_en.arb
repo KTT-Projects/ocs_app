@@ -94,5 +94,56 @@
   "pleaseSelectGrade": "Please select your grade",
   "@pleaseSelectGrade": {
     "description": "Error message for grade selection"
+  },
+  "verifyEmail": "Please verify your email address",
+  "@verifyEmail": {
+    "description": "Message shown when email verification is needed"
+  },
+  "enterOtp": "Enter 6-digit verification code",
+  "@enterOtp": {
+    "description": "Hint text for OTP input field"
+  },
+  "verify": "Verify",
+  "@verify": {
+    "description": "Text for verify button"
+  },
+  "backToLogin": "Back to Login",
+  "@backToLogin": {
+    "description": "Text for back to login button"
+  },
+  "verifyEmailTitle": "Verify Your Email",
+  "@verifyEmailTitle": {
+    "description": "Title of email verification dialog"
+  },
+  "verificationCodeSent": "A verification code has been sent to {email}",
+  "@verificationCodeSent": {
+    "description": "Message shown when verification code is sent",
+    "placeholders": {
+      "email": {}
+    }
+  },
+  "enterVerificationCode": "Please enter the 6-digit code to verify your account:",
+  "@enterVerificationCode": {
+    "description": "Instructions for entering verification code"
+  },
+  "enterSixDigitCode": "Enter 6-digit code",
+  "@enterSixDigitCode": {
+    "description": "Hint text for verification code input"
+  },
+  "later": "Later",
+  "@later": {
+    "description": "Text for later/skip button"
+  },
+  "invalidVerificationCode": "Please enter a valid 6-digit code",
+  "@invalidVerificationCode": {
+    "description": "Error message for invalid verification code"
+  },
+  "emailVerifiedSuccess": "Email verified successfully!",
+  "@emailVerifiedSuccess": {
+    "description": "Success message when email is verified"
+  },
+  "passwordHelper": "Must be at least 8 characters",
+  "@passwordHelper": {
+    "description": "Helper text for password field"
   }
 }

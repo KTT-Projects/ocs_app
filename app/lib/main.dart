@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.portraitDown,
     ]);
     return MaterialApp(
-      title: '大崎上島コミュニティーサイト',
+      title: AppLocalizations.of(context)?.appTitle ?? 'Osakikamijima Community Site',
       debugShowCheckedModeBanner: false,
 
       // Localization support

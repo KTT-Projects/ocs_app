@@ -61,19 +61,20 @@ class _SignupPageState extends State<SignupPage> {
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (context, setState) {
+            final l10n = AppLocalizations.of(context)!;
             return AlertDialog(
-              title: const Text('Verify Your Email'),
+              title: Text(l10n.verifyEmailTitle),
               content: SingleChildScrollView(
                 child: ListBody(
                   children: <Widget>[
-                    Text('A verification code has been sent to $email'),
+                    Text(l10n.verificationCodeSent(email)),
                     const SizedBox(height: 16),
-                    const Text('Please enter the 6-digit code to verify your account:'),
+                    Text(l10n.enterVerificationCode),
                     const SizedBox(height: 16),
                     TextField(
                       controller: otpController,
-                      decoration: const InputDecoration(
-                        hintText: 'Enter 6-digit code',
+                      decoration: InputDecoration(
+                        hintText: l10n.enterSixDigitCode,
                         border: OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.number,
@@ -97,7 +98,7 @@ class _SignupPageState extends State<SignupPage> {
                     Navigator.of(context).pop(); // Close dialog
                     Navigator.of(context).pop(); // Return to login page
                   },
-                  child: const Text('Later'),
+                  child: Text(l10n.later),
                 ),
                 ElevatedButton(
                   onPressed: isVerifying
@@ -105,7 +106,7 @@ class _SignupPageState extends State<SignupPage> {
                       : () async {
                           if (otpController.text.length != 6) {
                             setState(() {
-                              errorMessage = 'Please enter a valid 6-digit code';
+                              errorMessage = l10n.invalidVerificationCode;
                             });
                             return;
                           }
@@ -124,8 +125,8 @@ class _SignupPageState extends State<SignupPage> {
                               Navigator.of(context).pop(); // Close dialog
                               Navigator.of(context).pop(); // Return to login page
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Email verified successfully!'),
+                                SnackBar(
+                                  content: Text(l10n.emailVerifiedSuccess),
                                   backgroundColor: Colors.green,
                                 ),
                               );
@@ -145,7 +146,7 @@ class _SignupPageState extends State<SignupPage> {
                             strokeWidth: 2,
                           ),
                         )
-                      : const Text('Verify'),
+                      : Text(l10n.verify),
                 ),
               ],
             );
@@ -435,14 +436,14 @@ class _SignupPageState extends State<SignupPage> {
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide.none,
                                     ),
-                                    helperText: 'Must be at least 8 characters',
+                                    helperText: l10n.passwordHelper,
                                     helperStyle: TextStyle(
                                       color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
                                     ),
                                   ),
                                   style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
                                   validator: (value) => (value?.length ?? 0) < 8
-                                      ? 'Password must be at least 8 characters'
+                                      ? l10n.passwordRequirements
                                       : null,
                                 ),
                                 const SizedBox(height: 24),
