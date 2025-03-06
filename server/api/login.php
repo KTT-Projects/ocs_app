@@ -7,7 +7,12 @@ require_once 'config/Database.php';
 require_once 'config/Auth.php';
 require_once 'config/Response.php';
 
-// Only allow POST requests
+// Handle preflight OPTIONS request
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+  exit(0);
+}
+
+// Only allow POST requests for actual API calls
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
   Response::error('Method not allowed', 405);
 }
@@ -27,6 +32,9 @@ foreach ($required_fields as $field) {
   }
 }
 
+// Get posted OTP if provided
+$otp = isset($data['otp']) ? $data['otp'] : null;
+
 // Initialize database connection
 $database = new Database();
 $db = $database->getConnection();
@@ -39,12 +47,34 @@ if (!$result) {
   Response::error('Invalid email or password', 401);
 }
 
-if (isset($result['error'])) {
-  Response::error($result['error'], 403);
-}
+// Handle response based on login status
+if (isset($result['status'])) {
+  if ($result['status'] === 'needs_verification') {
+    // Create mailer instance
+    require_once 'config/Mailer.php';
+    $mailer = new Mailer();
 
-// Return JWT token and user data
-Response::success([
-  'token' => $result['token'],
-  'user' => $result['user']
-]);
+    // Send verification email with OTP
+    $verificationOtp = $auth->getUserByEmail($data['email'])['verification_otp'];
+    if ($mailer->sendVerificationEmail($data['email'], $verificationOtp)) {
+      Response::json([
+        'status' => 'needs_verification',
+        'message' => 'Please enter the verification code sent to your email',
+        'user_id' => $result['user_id']
+      ]);
+    } else {
+      Response::error('Failed to send verification email', 500);
+    }
+  } else if ($result['status'] === 'success') {
+    Response::json([
+      'status' => 'success',
+      'message' => 'Login successful',
+      'token' => $result['token'],
+      'user' => $result['user']
+    ]);
+  }
+} else if (isset($result['error'])) {
+  Response::error($result['error'], 400);
+} else {
+  Response::error('Invalid credentials', 401);
+}

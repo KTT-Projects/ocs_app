@@ -14,15 +14,21 @@ class Security
 
   private function createRateLimitTable()
   {
-    $query = "CREATE TABLE IF NOT EXISTS rate_limits (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            ip_address VARCHAR(45) NOT NULL,
-            endpoint VARCHAR(255) NOT NULL,
-            request_count INT DEFAULT 1,
-            window_start TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            INDEX idx_ip_endpoint (ip_address, endpoint)
-        )";
-    $this->conn->exec($query);
+    try {
+      $query = "CREATE TABLE IF NOT EXISTS rate_limits (
+              id INT AUTO_INCREMENT PRIMARY KEY,
+              ip_address VARCHAR(45) NOT NULL,
+              endpoint VARCHAR(255) NOT NULL,
+              request_count INT DEFAULT 1,
+              window_start TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              INDEX idx_ip_endpoint (ip_address, endpoint)
+          )";
+      $this->conn->exec($query);
+    } catch (PDOException $e) {
+      error_log("Failed to create rate_limits table: " . $e->getMessage());
+      // Don't throw the error, as the table might already exist
+      // or we might have read-only permissions
+    }
   }
 
   public function checkRateLimit($ip_address, $endpoint)

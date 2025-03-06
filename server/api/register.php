@@ -13,131 +13,136 @@ require_once 'config/Mailer.php';
 require_once 'config/Security.php';
 
 try {
-    // Initialize security
-    $database = new Database();
-    $db = $database->getConnection();
-    if (!$db) {
-        Response::error('Database connection failed');
+  // Initialize security
+  $database = new Database();
+  $db = $database->getConnection();
+  if (!$db) {
+    Response::error('Database connection failed');
+  }
+  $security = new Security($db);
+
+  // Apply CORS headers
+  $security->corsHeaders();
+
+  // Only allow POST requests
+  if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit(0); // Handle preflight request
+  }
+
+  if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    Response::error('Method not allowed', 405);
+  }
+
+  // Check rate limit
+  $client_ip = $security->getClientIp();
+  if (!$security->checkRateLimit($client_ip, 'register')) {
+    Response::error('Too many requests. Please try again later.', 429);
+  }
+
+  // Get posted data
+  $data = json_decode(file_get_contents("php://input"), true);
+
+  if (!$data) {
+    Response::error('Invalid input format');
+  }
+
+  // Required fields
+  $required_fields = ['email', 'password', 'institution_id', 'grade'];
+  foreach ($required_fields as $field) {
+    if (!isset($data[$field]) || empty($data[$field])) {
+      Response::error("Missing required field: $field");
     }
-    $security = new Security($db);
+  }
 
-    // Apply CORS headers
-    $security->corsHeaders();
+  // Sanitize inputs
+  $data = $security->sanitizeInput($data);
 
-    // Only allow POST requests
-    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-        exit(0); // Handle preflight request
-    }
+  // Initialize auth
+  $auth = new Auth($db);
+  $mailer = new Mailer();
 
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        Response::error('Method not allowed', 405);
-    }
+  // Validate email format
+  if (!$auth->validateEmail($data['email'])) {
+    Response::error('Invalid email format');
+  }
 
-    // Check rate limit
-    $client_ip = $security->getClientIp();
-    if (!$security->checkRateLimit($client_ip, 'register')) {
-        Response::error('Too many requests. Please try again later.', 429);
-    }
+  // Validate password strength
+  $password_validation = $auth->validatePasswordStrength($data['password']);
+  if (!$password_validation['valid']) {
+    Response::error($password_validation['message']);
+  }
 
-    // Get posted data
-    $data = json_decode(file_get_contents("php://input"), true);
+  // Validate grade value
+  $grade = intval($data['grade']);
+  if (!($grade >= 7 && $grade <= 14 || $grade === 99)) {
+    Response::error('Invalid grade value. Must be between G7 and G14, or OB (99).');
+  }
 
-    if (!$data) {
-        Response::error('Invalid input format');
-    }
+  // Validate institution domain
+  // if (!$auth->checkInstitutionDomain($data['email'], $data['institution_id'])) {
+  //   Response::error('Email domain does not match the selected institution');
+  // }
 
-    // Required fields
-    $required_fields = ['email', 'password', 'institution_id', 'student_id'];
-    foreach ($required_fields as $field) {
-        if (!isset($data[$field]) || empty($data[$field])) {
-            Response::error("Missing required field: $field");
-        }
-    }
+  // Check if user already exists
+  if ($auth->getUserByEmail($data['email'])) {
+    Response::error('Email already registered', 409);
+  }
 
-    // Sanitize inputs
-    $data = $security->sanitizeInput($data);
+  // Create user
+  $result = $auth->createUser(
+    $data['email'],
+    $data['password'],
+    1, // Default role_id for students
+    $data['institution_id'],
+    $grade
+  );
 
-    // Initialize auth
-    $auth = new Auth($db);
-    $mailer = new Mailer();
+  if (!$result) {
+    Response::error('Failed to create user account');
+  }
 
-    // Validate email format
-    if (!$auth->validateEmail($data['email'])) {
-        Response::error('Invalid email format');
-    }
-
-    // Validate password strength
-    $password_validation = $auth->validatePasswordStrength($data['password']);
-    if (!$password_validation['valid']) {
-        Response::error($password_validation['message']);
-    }
-
-    // Validate student ID format
-    if (!$security->validateStudentId($data['student_id'])) {
-        Response::error('Invalid student ID format. Only alphanumeric characters, dots, underscores, and hyphens are allowed.');
-    }
-
-    // Validate institution domain
-    if (!$auth->checkInstitutionDomain($data['email'], $data['institution_id'])) {
-        Response::error('Email domain does not match the selected institution');
-    }
-
-    // Check if user already exists
-    if ($auth->getUserByEmail($data['email'])) {
-        Response::error('Email already registered', 409);
-    }
-
-    // Create user
-    $result = $auth->createUser(
-        $data['email'],
-        $data['password'],
-        1, // Default role_id for students
-        $data['institution_id'],
-        $data['student_id']
-    );
-
-    if (!$result) {
-        Response::error('Failed to create user account');
-    }
-
-    // Send verification email
-    $emailSent = $mailer->sendVerificationEmail($data['email'], $result['verification_token']);
+  // Send verification email with OTP
+  try {
+    $emailSent = $mailer->sendVerificationEmail($data['email'], $result['verification_otp']);
 
     if (!$emailSent) {
-        // Log email sending failure but don't prevent account creation
-        error_log("Failed to send verification email to: " . $data['email']);
+      error_log("Failed to send verification email to: " . $data['email']);
+      error_log("PHP mail() configuration status: " . ini_get('sendmail_path'));
+      error_log("SMTP configuration: " . ini_get('SMTP') . ":" . ini_get('smtp_port'));
     }
+  } catch (Exception $e) {
+    error_log("Detailed email error: " . $e->getMessage());
+    $emailSent = false;
+  }
 
-    Response::success([
-        'message' => 'Registration successful. Please check your email to verify your account.',
-        'email_sent' => $emailSent
-    ]);
-
+  Response::success([
+    'message' => 'Registration successful. Please check your email to verify your account.',
+    'email_sent' => $emailSent
+  ]);
 } catch (PDOException $e) {
-    error_log("Database error: " . $e->getMessage());
-    $error_message = DEVELOPMENT_MODE ?
-        $e->getMessage() :
-        'Database error occurred. Please try again later.';
-    $error_details = DEVELOPMENT_MODE ? [
-        'error_type' => 'PDOException',
-        'error_code' => $e->getCode(),
-        'error_file' => $e->getFile(),
-        'error_line' => $e->getLine(),
-        'stack_trace' => $e->getTraceAsString()
-    ] : null;
-    Response::error($error_message, 500, $error_details);
+  error_log("Database error: " . $e->getMessage());
+  $error_message = DEVELOPMENT_MODE ?
+    $e->getMessage() :
+    'Database error occurred. Please try again later.';
+  $error_details = DEVELOPMENT_MODE ? [
+    'error_type' => 'PDOException',
+    'error_code' => $e->getCode(),
+    'error_file' => $e->getFile(),
+    'error_line' => $e->getLine(),
+    'stack_trace' => $e->getTraceAsString()
+  ] : null;
+  Response::error($error_message, 500, $error_details);
 } catch (Exception $e) {
-    error_log("Error: " . $e->getMessage());
-    $error_message = DEVELOPMENT_MODE ?
-        $e->getMessage() :
-        'An unexpected error occurred. Please try again later.';
-    $error_details = DEVELOPMENT_MODE ? [
-        'error_type' => get_class($e),
-        'error_code' => $e->getCode(),
-        'error_file' => $e->getFile(),
-        'error_line' => $e->getLine(),
-        'stack_trace' => $e->getTraceAsString()
-    ] : null;
-    Response::error($error_message, 500, $error_details);
+  error_log("Error: " . $e->getMessage());
+  $error_message = DEVELOPMENT_MODE ?
+    $e->getMessage() :
+    'An unexpected error occurred. Please try again later.';
+  $error_details = DEVELOPMENT_MODE ? [
+    'error_type' => get_class($e),
+    'error_code' => $e->getCode(),
+    'error_file' => $e->getFile(),
+    'error_line' => $e->getLine(),
+    'stack_trace' => $e->getTraceAsString()
+  ] : null;
+  Response::error($error_message, 500, $error_details);
 }
-?>

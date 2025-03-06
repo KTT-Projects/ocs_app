@@ -1,10 +1,10 @@
 {
   "@@locale": "ja",
-  "appTitle": "大崎上島学生コミュニティサイト",
+  "appTitle": "大崎上島コミュニティーサイト",
   "@appTitle": {
     "description": "アプリケーションのタイトル"
   },
-  "welcomeBack": "おかえりなさいませ",
+  "welcomeBack": "おかえりなさい",
   "@welcomeBack": {
     "description": "ログイン画面のウェルカムメッセージ"
   },
@@ -12,9 +12,9 @@
   "@signInToContinue": {
     "description": "ログイン画面のサブタイトル"
   },
-  "email": "教育機関発行のメールアドレス",
+  "email": "メールアドレス",
   "@email": {
-    "description": "教育機関発行のメールアドレス入力フィールドのラベル"
+    "description": "メールアドレス入力フィールドのラベル"
   },
   "password": "パスワード",
   "@password": {
@@ -52,9 +52,9 @@
   "@alreadyHaveAccount": {
     "description": "サインインを促すテキスト"
   },
-  "studentId": "学生証番号",
+  "studentId": "卒業する学年",
   "@studentId": {
-    "description": "学生証番号入力フィールドのラベル"
+    "description": "卒業する学年入力フィールドのラベル"
   },
   "selectInstitution": "教育機関を選択",
   "@selectInstitution": {
@@ -75,16 +75,24 @@
   "@passwordRequirements": {
     "description": "パスワード要件のヒント"
   },
-  "invalidEmail": "有効な教育機関のメールアドレスを入力してください",
+  "invalidEmail": "有効なメールアドレスを入力してください",
   "@invalidEmail": {
     "description": "無効なメールアドレスのエラーメッセージ"
   },
-  "invalidStudentId": "有効な学生証番号を入力してください",
+  "invalidStudentId": "有効な卒業する学年を入力してください",
   "@invalidStudentId": {
-    "description": "無効な学生証番号のエラーメッセージ"
+    "description": "無効な卒業する学年のエラーメッセージ"
   },
   "pleaseSelectInstitution": "教育機関を選択してください",
   "@pleaseSelectInstitution": {
     "description": "教育機関選択のエラーメッセージ"
+  },
+  "grade": "学年",
+  "@grade": {
+    "description": "学年選択ドロップダウンのラベル"
+  },
+  "pleaseSelectGrade": "学年を選択してください",
+  "@pleaseSelectGrade": {
+    "description": "学年選択のエラーメッセージ"
   }
 }

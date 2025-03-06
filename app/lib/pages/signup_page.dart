@@ -20,9 +20,9 @@ class _SignupPageState extends State<SignupPage> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _studentIdController = TextEditingController();
 
   int? _selectedInstitutionId;
+  int? _selectedGrade;
   List<Map<String, dynamic>> _institutions = [];
 
   @override
@@ -36,7 +36,6 @@ class _SignupPageState extends State<SignupPage> {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-    _studentIdController.dispose();
     super.dispose();
   }
 
@@ -52,30 +51,105 @@ class _SignupPageState extends State<SignupPage> {
   }
 
   void _showVerificationDialog(BuildContext context, String email) {
+    final otpController = TextEditingController();
+    bool isVerifying = false;
+    String? errorMessage;
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Verify Your Email'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('A verification email has been sent to $email'),
-                const SizedBox(height: 8),
-                const Text('Please check your inbox and click the verification link to activate your account.'),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Verify Your Email'),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: <Widget>[
+                    Text('A verification code has been sent to $email'),
+                    const SizedBox(height: 16),
+                    const Text('Please enter the 6-digit code to verify your account:'),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: otpController,
+                      decoration: const InputDecoration(
+                        hintText: 'Enter 6-digit code',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                      maxLength: 6,
+                    ),
+                    if (errorMessage != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        errorMessage!,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close dialog
+                    Navigator.of(context).pop(); // Return to login page
+                  },
+                  child: const Text('Later'),
+                ),
+                ElevatedButton(
+                  onPressed: isVerifying
+                      ? null
+                      : () async {
+                          if (otpController.text.length != 6) {
+                            setState(() {
+                              errorMessage = 'Please enter a valid 6-digit code';
+                            });
+                            return;
+                          }
+
+                          setState(() {
+                            isVerifying = true;
+                            errorMessage = null;
+                          });
+
+                          try {
+                            await _apiClient.verifyEmail(
+                              email: email,
+                              otp: otpController.text,
+                            );
+                            if (context.mounted) {
+                              Navigator.of(context).pop(); // Close dialog
+                              Navigator.of(context).pop(); // Return to login page
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Email verified successfully!'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            setState(() {
+                              errorMessage = e.toString();
+                              isVerifying = false;
+                            });
+                          }
+                        },
+                  child: isVerifying
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text('Verify'),
+                ),
               ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop(); // Close dialog
-                Navigator.of(context).pop(); // Return to login page
-              },
-            ),
-          ],
+            );
+          },
         );
       },
     );
@@ -98,7 +172,7 @@ class _SignupPageState extends State<SignupPage> {
         email: _emailController.text,
         password: _passwordController.text,
         institutionId: _selectedInstitutionId!,
-        studentId: _studentIdController.text,
+        grade: _selectedGrade!,
       );
 
       if (mounted) {
@@ -242,35 +316,78 @@ class _SignupPageState extends State<SignupPage> {
                                       ),
                                     ),
                                   ),
-                                  child: DropdownButtonFormField<int>(
-                                    value: _selectedInstitutionId,
-                                    items: _institutions.map((institution) {
-                                      return DropdownMenuItem(
-                                        value: int.parse(institution['id'].toString()),
-                                        child: Text(
-                                          (institution['name'] as String).split('/')[Localizations.localeOf(context).languageCode == 'ja' ? 1 : 0].trim(),
-                                          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                  child: Column(
+                                    children: [
+                                      DropdownButtonFormField<int>(
+                                        value: _selectedInstitutionId,
+                                        items: _institutions.map((institution) {
+                                          return DropdownMenuItem(
+                                            value: int.parse(institution['id'].toString()),
+                                            child: Text(
+                                              (institution['name'] as String).split('/')[Localizations.localeOf(context).languageCode == 'ja' ? 1 : 0].trim(),
+                                              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                            ),
+                                          );
+                                        }).toList(),
+                                        onChanged: (value) {
+                                          setState(() => _selectedInstitutionId = value);
+                                        },
+                                        decoration: InputDecoration(
+                                          hintText: l10n.selectInstitution,
+                                          prefixIcon: Icon(
+                                            Icons.school_outlined,
+                                            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                          ),
+                                          hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                          errorStyle: TextStyle(color: Theme.of(context).colorScheme.error),
                                         ),
-                                      );
-                                    }).toList(),
-                                    onChanged: (value) {
-                                      setState(() => _selectedInstitutionId = value);
-                                    },
-                                    decoration: InputDecoration(
-                                      hintText: l10n.selectInstitution,
-                                      prefixIcon: Icon(
-                                        Icons.school_outlined,
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                        dropdownColor: Theme.of(context).colorScheme.primary.withOpacity(0.9),
+                                        icon: Icon(
+                                          Icons.arrow_drop_down,
+                                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                        ),
+                                        validator: (value) => value == null ? l10n.pleaseSelectInstitution : null,
                                       ),
-                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
-                                      errorStyle: TextStyle(color: Theme.of(context).colorScheme.error),
-                                    ),
-                                    dropdownColor: Theme.of(context).colorScheme.primary.withOpacity(0.9),
-                                    icon: Icon(
-                                      Icons.arrow_drop_down,
-                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                    ),
-                                    validator: (value) => value == null ? l10n.pleaseSelectInstitution : null,
+                                      const SizedBox(height: 16),
+                                      DropdownButtonFormField<int>(
+                                        value: _selectedGrade,
+                                        items: [
+                                          for (var i = 7; i <= 14; i++)
+                                            DropdownMenuItem(
+                                              value: i,
+                                              child: Text(
+                                                'G$i',
+                                                style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                              ),
+                                            ),
+                                          DropdownMenuItem(
+                                            value: 99,
+                                            child: Text(
+                                              'OB',
+                                              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                            ),
+                                          ),
+                                        ],
+                                        onChanged: (value) {
+                                          setState(() => _selectedGrade = value);
+                                        },
+                                        decoration: InputDecoration(
+                                          hintText: l10n.grade,
+                                          prefixIcon: Icon(
+                                            Icons.grade_outlined,
+                                            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                          ),
+                                          hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                          errorStyle: TextStyle(color: Theme.of(context).colorScheme.error),
+                                        ),
+                                        dropdownColor: Theme.of(context).colorScheme.primary.withOpacity(0.9),
+                                        icon: Icon(
+                                          Icons.arrow_drop_down,
+                                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                        ),
+                                        validator: (value) => value == null ? l10n.pleaseSelectGrade : null,
+                                      ),
+                                    ],
                                   ),
                                 ),
                                 const SizedBox(height: 16),
@@ -303,26 +420,6 @@ class _SignupPageState extends State<SignupPage> {
                                 ),
                                 const SizedBox(height: 16),
                                 TextFormField(
-                                  controller: _studentIdController,
-                                  decoration: InputDecoration(
-                                    hintText: l10n.studentId,
-                                    prefixIcon: Icon(
-                                      Icons.badge_outlined,
-                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                    ),
-                                    hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
-                                    filled: true,
-                                    fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                  ),
-                                  style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-                                  validator: (value) => value?.isEmpty ?? true ? l10n.invalidStudentId : null,
-                                ),
-                                const SizedBox(height: 16),
-                                TextFormField(
                                   controller: _passwordController,
                                   obscureText: true,
                                   decoration: InputDecoration(
@@ -338,21 +435,15 @@ class _SignupPageState extends State<SignupPage> {
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide.none,
                                     ),
-                                    helperText: l10n.passwordRequirements,
+                                    helperText: 'Must be at least 8 characters',
                                     helperStyle: TextStyle(
                                       color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
                                     ),
                                   ),
                                   style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-                                  validator: (value) {
-                                    if (value?.isEmpty ?? true) {
-                                      return l10n.passwordRequirements;
-                                    }
-                                    if (value!.length < 8) {
-                                      return l10n.passwordRequirements;
-                                    }
-                                    return null;
-                                  },
+                                  validator: (value) => (value?.length ?? 0) < 8
+                                      ? 'Password must be at least 8 characters'
+                                      : null,
                                 ),
                                 const SizedBox(height: 24),
                                 SizedBox(

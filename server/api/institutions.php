@@ -12,6 +12,11 @@ header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type
 $database = new Database();
 $conn = $database->getConnection();
 
+// Handle preflight OPTIONS request
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+  exit(0);
+}
+
 // Get request method
 $method = $_SERVER['REQUEST_METHOD'];
 

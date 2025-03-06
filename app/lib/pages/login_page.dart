@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../services/api_client.dart';
 import 'signup_page.dart';
@@ -16,22 +17,51 @@ class _LoginPageState extends State<LoginPage> {
   final _apiClient = ApiClient();
   bool _isLoading = false;
   String? _errorMessage;
+  bool _showOtpField = false;
+  String? _userId;
 
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _otpController = TextEditingController();
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _otpController.dispose();
     super.dispose();
+  }
+
+  void _showMessage(String message, {bool isError = false, int seconds = 4}) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          duration: Duration(seconds: seconds),
+          backgroundColor: isError ? Theme.of(context).colorScheme.error : null,
+        ),
+      );
+    }
   }
 
   Future<void> _handleLogin() async {
     final l10n = AppLocalizations.of(context)!;
-    
-    if (!_formKey.currentState!.validate()) {
-      return;
+
+    if (_showOtpField) {
+      // Only validate OTP in verification mode
+      if (_otpController.text.length != 6) {
+        setState(() => _errorMessage = 'Please enter all 6 digits');
+        return;
+      }
+    } else {
+      // Validate all fields in login mode
+      if (!_formKey.currentState!.validate()) {
+        return;
+      }
+      if (_passwordController.text.isEmpty) {
+        setState(() => _errorMessage = 'Password is required');
+        return;
+      }
     }
 
     setState(() {
@@ -40,23 +70,76 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      final response = await _apiClient.login(
-        email: _emailController.text,
-        password: _passwordController.text,
-      );
-
-      if (mounted) {
-        // Handle successful login (store token, navigate to home, etc.)
-        // For now, just show a success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.signInToContinue)),
+      Map<String, dynamic> response;
+      if (_showOtpField) {
+        // Verify OTP
+        response = await _apiClient.verifyEmail(
+          email: _emailController.text,
+          otp: _otpController.text,
         );
+
+        if (mounted && response['status'] == 'success') {
+          if (response['token'] != null) {
+            // TODO: Store token securely
+            _showMessage(response['message'] ?? 'Email verified successfully', seconds: 4);
+            setState(() {
+              _showOtpField = false;
+              _errorMessage = null;
+              _otpController.clear();
+            });
+            // TODO: Navigate to home page
+            // Navigator.pushReplacement(...);
+          } else {
+            setState(() => _errorMessage = 'Invalid verification response');
+          }
+        }
+      } else {
+        // Normal login attempt
+        response = await _apiClient.login(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
+
+        if (mounted) {
+          if (response['status'] == 'needs_verification') {
+            setState(() {
+              _showOtpField = true;
+              _emailController.text = _emailController.text.trim();
+              _userId = response['user_id'].toString();
+              _passwordController.clear(); // Clear password for security
+            });
+
+            // Give time for the OTP field to be built before focusing
+            Future.delayed(Duration(milliseconds: 100), () {
+              FocusScope.of(context).requestFocus(FocusNode());
+            });
+            _showMessage(response['message'] ?? 'Please check your email for the verification code', seconds: 8);
+          } else if (response['status'] == 'success' && response['token'] != null) {
+            _showMessage('Login successful', seconds: 4);
+            // TODO: Store token and navigate to home page
+            // Navigator.pushReplacement(...);
+          }
+        }
       }
     } catch (e) {
-      setState(() => _errorMessage = e.toString());
+      if (mounted) {
+        setState(() => _errorMessage = e.toString());
+        _showMessage(e.toString(), isError: true);
+      }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
+  }
+
+  void _resetForm() {
+    setState(() {
+      _showOtpField = false;
+      _userId = null;
+      _otpController.clear();
+      _errorMessage = null;
+    });
   }
 
   @override
@@ -119,21 +202,21 @@ class _LoginPageState extends State<LoginPage> {
                                 Text(
                                   l10n.welcomeBack,
                                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                    color: Theme.of(context).colorScheme.onPrimary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                        color: Theme.of(context).colorScheme.onPrimary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  l10n.signInToContinue,
+                                  _showOtpField ? 'Please verify your email address' : l10n.signInToContinue,
                                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
-                                  ),
+                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                      ),
                                 ),
                                 if (_errorMessage != null) ...[
                                   const SizedBox(height: 16),
                                   Text(
-                                    l10n.errorMessage(_errorMessage!),
+                                    _errorMessage!,
                                     style: TextStyle(
                                       color: Theme.of(context).colorScheme.error,
                                     ),
@@ -142,6 +225,7 @@ class _LoginPageState extends State<LoginPage> {
                                 const SizedBox(height: 32),
                                 TextFormField(
                                   controller: _emailController,
+                                  enabled: !_showOtpField,
                                   decoration: InputDecoration(
                                     hintText: l10n.email,
                                     prefixIcon: Icon(
@@ -158,36 +242,69 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                                   style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
                                   validator: (value) {
-                                    if (value?.isEmpty ?? true) {
-                                      return l10n.invalidEmail;
-                                    }
-                                    if (!value!.contains('@')) {
-                                      return l10n.invalidEmail;
+                                    if (!_showOtpField) {
+                                      if (value?.isEmpty ?? true) {
+                                        return l10n.invalidEmail;
+                                      }
+                                      if (!value!.contains('@')) {
+                                        return l10n.invalidEmail;
+                                      }
                                     }
                                     return null;
                                   },
                                 ),
                                 const SizedBox(height: 16),
-                                TextFormField(
-                                  controller: _passwordController,
-                                  obscureText: true,
-                                  decoration: InputDecoration(
-                                    hintText: l10n.password,
-                                    prefixIcon: Icon(
-                                      Icons.lock_outline,
-                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                if (!_showOtpField) ...[
+                                  TextFormField(
+                                    controller: _passwordController,
+                                    obscureText: true,
+                                    decoration: InputDecoration(
+                                      hintText: l10n.password,
+                                      prefixIcon: Icon(
+                                        Icons.lock_outline,
+                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                      ),
+                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                      filled: true,
+                                      fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide.none,
+                                      ),
                                     ),
-                                    hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
-                                    filled: true,
-                                    fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide.none,
-                                    ),
+                                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
                                   ),
-                                  style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-                                  validator: (value) => value?.isEmpty ?? true ? l10n.passwordRequirements : null,
-                                ),
+                                ],
+                                if (_showOtpField) ...[
+                                  const SizedBox(height: 16),
+                                  TextFormField(
+                                    controller: _otpController,
+                                    autofocus: true,
+                                    maxLength: 6,
+                                    keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                                    autofillHints: null,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                      LengthLimitingTextInputFormatter(6),
+                                    ],
+                                    decoration: InputDecoration(
+                                      hintText: 'Enter 6-digit verification code',
+                                      counterText: '', // Hide character counter
+                                      prefixIcon: Icon(
+                                        Icons.security_outlined,
+                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                      ),
+                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                      filled: true,
+                                      fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                    ),
+                                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                  ),
+                                ],
                                 const SizedBox(height: 24),
                                 SizedBox(
                                   width: double.infinity,
@@ -214,7 +331,7 @@ class _LoginPageState extends State<LoginPage> {
                                             ),
                                           )
                                         : Text(
-                                            l10n.signIn,
+                                            _showOtpField ? 'Verify' : l10n.signIn,
                                             style: const TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold,
@@ -222,43 +339,57 @@ class _LoginPageState extends State<LoginPage> {
                                           ),
                                   ),
                                 ),
-                                const SizedBox(height: 16),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      l10n.newToApp,
+                                if (_showOtpField) ...[
+                                  const SizedBox(height: 8),
+                                  TextButton(
+                                    onPressed: _resetForm,
+                                    child: Text(
+                                      'Back to Login',
                                       style: TextStyle(
                                         color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
                                       ),
                                     ),
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(builder: (context) => const SignupPage()),
-                                        );
-                                      },
-                                      child: Text(
-                                        l10n.signUp,
+                                  ),
+                                ],
+                                if (!_showOtpField) ...[
+                                  const SizedBox(height: 16),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        l10n.newToApp,
                                         style: TextStyle(
-                                          color: Theme.of(context).colorScheme.secondary,
-                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                TextButton(
-                                  onPressed: () {},
-                                  child: Text(
-                                    l10n.forgotPassword,
-                                    style: TextStyle(
-                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(builder: (context) => const SignupPage()),
+                                          );
+                                        },
+                                        child: Text(
+                                          l10n.signUp,
+                                          style: TextStyle(
+                                            color: Theme.of(context).colorScheme.secondary,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  TextButton(
+                                    onPressed: () {},
+                                    child: Text(
+                                      l10n.forgotPassword,
+                                      style: TextStyle(
+                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                      ),
                                     ),
                                   ),
-                                ),
+                                ],
                               ],
                             ),
                           ),

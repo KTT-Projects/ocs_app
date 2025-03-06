@@ -5,14 +5,11 @@ class Mailer {
     private $apiUrl = "https://ocs.kttprojects.com";
     private $frontendUrl = "https://ocs.kttprojects.com";
 
-    public function sendVerificationEmail($to, $token) {
+    public function sendVerificationEmail($to, $otp) {
         try {
             $subject = "Verify Your Email Address";
             
-            // Create verification URL
-            $verifyUrl = $this->frontendUrl . "/verify?token=" . $token;
-            
-            // Create HTML message
+            // Create HTML message with OTP
             $message = "
             <html>
             <head>
@@ -22,21 +19,15 @@ class Mailer {
             <body>
                 <div style='max-width: 600px; margin: 0 auto; padding: 20px;'>
                     <h2>Welcome to Osakikamijima Student Community!</h2>
-                    <p>Thank you for signing up. Please verify your email address to complete your registration.</p>
-                    <p style='margin: 25px 0;'>
-                        <a href='{$verifyUrl}' 
-                           style='background-color: #4CAF50; 
-                                  color: white; 
-                                  padding: 12px 25px; 
-                                  text-decoration: none; 
-                                  border-radius: 5px;
-                                  display: inline-block;'>
-                            Verify Email Address
-                        </a>
-                    </p>
-                    <p>Or copy and paste this link in your browser:</p>
-                    <p>{$verifyUrl}</p>
-                    <p>This verification link will expire in 24 hours.</p>
+                    <p>Thank you for signing up. Please use the following code to verify your email address:</p>
+                    <div style='margin: 25px 0; text-align: center;'>
+                        <div style='font-size: 32px; letter-spacing: 5px; font-weight: bold;
+                                  background-color: #f5f5f5; padding: 15px;
+                                  border-radius: 5px; font-family: monospace;'>
+                            {$otp}
+                        </div>
+                    </div>
+                    <p>This verification code will expire in 10 minutes.</p>
                     <p>If you did not create an account, no further action is required.</p>
                 </div>
             </body>

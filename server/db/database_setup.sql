@@ -38,9 +38,10 @@ CREATE TABLE
     password_hash VARCHAR(255) NOT NULL,
     role_id INT NOT NULL,
     institution_id INT NOT NULL,
-    student_id VARCHAR(50),
+    grade TINYINT CHECK (grade BETWEEN 7 AND 14 OR grade = 99), -- 99 represents OB
     is_verified BOOLEAN DEFAULT FALSE,
-    verification_token VARCHAR(255),
+    verification_otp VARCHAR(6),
+    otp_expires_at TIMESTAMP,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

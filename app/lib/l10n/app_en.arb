@@ -12,9 +12,9 @@
   "@signInToContinue": {
     "description": "Subtitle on login screen"
   },
-  "email": "Institution-issued Email Address",
+  "email": "Email Address",
   "@email": {
-    "description": "Label for the institution-issued email address input field"
+    "description": "Label for the email address input field"
   },
   "password": "Password",
   "@password": {
@@ -52,9 +52,9 @@
   "@alreadyHaveAccount": {
     "description": "Text prompting to sign in"
   },
-  "studentId": "Student ID",
+  "studentId": "Graduation Year",
   "@studentId": {
-    "description": "Label for the student ID input field"
+    "description": "Label for the graduation year input field"
   },
   "selectInstitution": "Select Institution",
   "@selectInstitution": {
@@ -75,16 +75,24 @@
   "@passwordRequirements": {
     "description": "Password requirements hint"
   },
-  "invalidEmail": "Please enter a valid institution email address",
+  "invalidEmail": "Please enter a valid email address",
   "@invalidEmail": {
     "description": "Error message for invalid email"
   },
-  "invalidStudentId": "Please enter a valid student ID",
+  "invalidStudentId": "Please enter a valid graduation year",
   "@invalidStudentId": {
-    "description": "Error message for invalid student ID"
+    "description": "Error message for invalid graduation year"
   },
   "pleaseSelectInstitution": "Please select your institution",
   "@pleaseSelectInstitution": {
     "description": "Error message for institution selection"
+  },
+  "grade": "Grade",
+  "@grade": {
+    "description": "Label for the grade selection dropdown"
+  },
+  "pleaseSelectGrade": "Please select your grade",
+  "@pleaseSelectGrade": {
+    "description": "Error message for grade selection"
   }
 }

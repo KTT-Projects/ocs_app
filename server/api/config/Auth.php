@@ -16,7 +16,7 @@ class Auth
     return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
   }
 
-  private function generateJWT($user_id, $email, $role_id)
+  public function generateJWT($user_id, $email, $role_id)
   {
     $header = json_encode([
       'typ' => 'JWT',
@@ -57,22 +57,6 @@ class Auth
       return ['valid' => false, 'message' => 'Password must be at least 8 characters long'];
     }
 
-    if (!preg_match('/[A-Z]/', $password)) {
-      return ['valid' => false, 'message' => 'Password must contain at least one uppercase letter'];
-    }
-
-    if (!preg_match('/[a-z]/', $password)) {
-      return ['valid' => false, 'message' => 'Password must contain at least one lowercase letter'];
-    }
-
-    if (!preg_match('/[0-9]/', $password)) {
-      return ['valid' => false, 'message' => 'Password must contain at least one number'];
-    }
-
-    if (!preg_match('/[^A-Za-z0-9]/', $password)) {
-      return ['valid' => false, 'message' => 'Password must contain at least one special character'];
-    }
-
     return ['valid' => true];
   }
 
@@ -105,15 +89,18 @@ class Auth
     return false;
   }
 
-  public function createUser($email, $password, $role_id, $institution_id, $student_id = null)
+  public function createUser($email, $password, $role_id, $institution_id, $grade = null)
   {
     try {
-      $verification_token = $this->generateVerificationToken();
+      // Generate 6-digit OTP
+      $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+      // Set OTP expiration (10 minutes from now)
+      $otp_expires = date('Y-m-d H:i:s', strtotime('+10 minutes'));
       $password_hash = $this->hashPassword($password);
 
       $query = "INSERT INTO " . $this->table_name . "
-                    (email, password_hash, role_id, institution_id, student_id, verification_token)
-                    VALUES (?, ?, ?, ?, ?, ?)";
+                  (email, password_hash, role_id, institution_id, grade, verification_otp, otp_expires_at)
+                  VALUES (?, ?, ?, ?, ?, ?, ?)";
 
       $stmt = $this->conn->prepare($query);
 
@@ -122,12 +109,13 @@ class Auth
         $password_hash,
         $role_id,
         $institution_id,
-        $student_id,
-        $verification_token
+        $grade,
+        $otp,
+        $otp_expires
       ])) {
         return [
           'user_id' => $this->conn->lastInsertId(),
-          'verification_token' => $verification_token
+          'verification_otp' => $otp
         ];
       }
       return false;
@@ -137,26 +125,61 @@ class Auth
     }
   }
 
-  public function login($email, $password)
+  public function generateLoginOTP($user_id)
+  {
+    try {
+      $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+      $otp_expires = date('Y-m-d H:i:s', strtotime('+10 minutes'));
+
+      $query = "UPDATE " . $this->table_name . "
+                SET verification_otp = ?, otp_expires_at = ?
+                WHERE id = ?";
+
+      $stmt = $this->conn->prepare($query);
+      if ($stmt->execute([$otp, $otp_expires, $user_id])) {
+        return $otp;
+      }
+      return false;
+    } catch (PDOException $e) {
+      error_log("Database error in generateLoginOTP: " . $e->getMessage());
+      return false;
+    }
+  }
+
+  public function login($email, $password, $skipPasswordCheck = false)
   {
     $user = $this->getUserByEmail($email);
 
-    if ($user && $this->validatePassword($password, $user['password_hash'])) {
-      if (!$user['is_verified']) {
-        return ['error' => 'Account not verified'];
-      }
-
-      return [
-        'token' => $this->generateJWT($user['id'], $user['email'], $user['role_id']),
-        'user' => [
-          'id' => $user['id'],
-          'email' => $user['email'],
-          'role' => $user['role_name']
-        ]
-      ];
+    if (!$user) {
+      return false;
     }
 
-    return false;
+    if (!$skipPasswordCheck && !$this->validatePassword($password, $user['password_hash'])) {
+      return false;
+    }
+
+    if (!$user['is_verified']) {
+      // Generate and send OTP for verification
+      $otp = $this->generateLoginOTP($user['id']);
+      if ($otp) {
+        return [
+          'status' => 'needs_verification',
+          'message' => 'OTP sent to email',
+          'user_id' => $user['id']
+        ];
+      }
+      return ['error' => 'Failed to generate OTP'];
+    }
+
+    return [
+      'status' => 'success',
+      'token' => $this->generateJWT($user['id'], $user['email'], $user['role_id']),
+      'user' => [
+        'id' => $user['id'],
+        'email' => $user['email'],
+        'role' => $user['role_name']
+      ]
+    ];
   }
 
   public function getUserByEmail($email)

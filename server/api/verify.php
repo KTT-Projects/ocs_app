@@ -1,48 +1,77 @@
 <?php
 require_once 'config/Database.php';
 require_once 'config/Response.php';
+require_once 'config/Auth.php';
 
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: GET');
+header('Access-Control-Allow-Methods: POST');
+header('Access-Control-Allow-Headers: Content-Type');
 
-$database = new Database();
-$db = $database->getConnection();
-$response = new Response();
-
-if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-    $response->error('Invalid request method', 405);
-    exit();
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit(0);
 }
 
-// Get token from query string
-$token = isset($_GET['token']) ? $_GET['token'] : null;
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    Response::error('Invalid request method', 405);
+}
 
-if (!$token) {
-    $response->error('Verification token is required', 400);
-    exit();
+// Get JSON data
+$data = json_decode(file_get_contents("php://input"), true);
+$email = isset($data['email']) ? $data['email'] : null;
+$otp = isset($data['otp']) ? $data['otp'] : null;
+
+if (!$email || !$otp) {
+    Response::error('Email and OTP are required', 400);
 }
 
 try {
-    // Find user with matching token
-    $query = 'SELECT id FROM users WHERE verification_token = ? AND is_verified = 0';
+    $database = new Database();
+    $db = $database->getConnection();
+    $auth = new Auth($db);
+
+    // Find user with matching OTP that hasn't expired
+    $query = 'SELECT u.*, r.name as role_name 
+             FROM users u 
+             JOIN roles r ON u.role_id = r.id 
+             WHERE u.email = ? AND u.verification_otp = ? AND u.otp_expires_at > NOW()';
     $stmt = $db->prepare($query);
-    $stmt->execute([$token]);
+    $stmt->execute([$email, $otp]);
 
     if ($stmt->rowCount() === 0) {
-        $response->error('Invalid or expired verification token', 400);
-        exit();
+        Response::error('Invalid or expired OTP. Please request a new code.', 400);
     }
 
+    // Get user data from the earlier query
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    // Update user as verified
-    $query = 'UPDATE users SET is_verified = 1, verification_token = NULL WHERE id = ?';
-    $stmt = $db->prepare($query);
-    $stmt->execute([$user['id']]);
 
-    $response->success('Email verified successfully');
+    // Double check OTP matches exactly
+    if ($user['verification_otp'] !== $otp) {
+        Response::error('Invalid verification code', 400);
+    }
+    
+    // Update user as verified and clear OTP
+    $query = 'UPDATE users SET is_verified = 1, verification_otp = NULL, otp_expires_at = NULL WHERE id = ?';
+    $stmt = $db->prepare($query);
+    
+    if ($stmt->execute([$user['id']])) {
+        // After successful verification, attempt login
+        $result = $auth->login($email, null, true); // true means skip password check since we've verified OTP
+        
+        if ($result && $result['status'] === 'success') {
+            Response::json([
+                'status' => 'success',
+                'message' => 'Email verified successfully',
+                'token' => $result['token'],
+                'user' => $result['user']
+            ]);
+        } else {
+            Response::error('Verification successful but login failed', 500);
+        }
+    } else {
+        Response::error('Failed to update verification status', 500);
+    }
 
 } catch (PDOException $e) {
-    $response->error('Database error: ' . $e->getMessage(), 500);
+    Response::error('Database error: ' . $e->getMessage(), 500);
 }
