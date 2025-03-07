@@ -1,16 +1,18 @@
 <?php
-class Mailer {
-    private $from = "noreply@osakikamijima-student.com";
-    private $fromName = "Osakikamijima Student Community";
-    private $apiUrl = "https://ocs.kttprojects.com";
-    private $frontendUrl = "https://ocs.kttprojects.com";
+class Mailer
+{
+  private $from = "noreply@osakikamijima-student.com";
+  private $fromName = "Osakikamijima Student Community";
+  private $apiUrl = "https://ocs.kttprojects.com";
+  private $frontendUrl = "https://ocs.kttprojects.com";
 
-    public function sendVerificationEmail($to, $otp) {
-        try {
-            $subject = "Verify Your Email Address";
-            
-            // Create HTML message with OTP
-            $message = "
+  public function sendVerificationEmail($to, $otp)
+  {
+    try {
+      $subject = "Verify Your Email Address";
+
+      // Create HTML message with OTP
+      $message = "
             <html>
             <head>
                 <title>Email Verification</title>
@@ -34,25 +36,25 @@ class Mailer {
             </html>
             ";
 
-            // Headers with proper encoding
-            $headers = array(
-                'MIME-Version: 1.0',
-                'Content-type: text/html; charset=utf-8',
-                'From: =?UTF-8?B?' . base64_encode($this->fromName) . '?= <' . $this->from . '>',
-                'Reply-To: ' . $this->from,
-                'X-Mailer: PHP/' . phpversion()
-            );
+      // Headers with proper encoding
+      $headers = array(
+        'MIME-Version: 1.0',
+        'Content-type: text/html; charset=utf-8',
+        'From: =?UTF-8?B?' . base64_encode($this->fromName) . '?= <' . $this->from . '>',
+        'Reply-To: ' . $this->from,
+        'X-Mailer: PHP/' . phpversion()
+      );
 
-            // Try to send email
-            if (!mail($to, $subject, $message, implode("\r\n", $headers))) {
-                error_log("Failed to send verification email to: " . $to);
-                throw new Exception("Failed to send verification email");
-            }
+      // Try to send email
+      if (!mail($to, $subject, $message, implode("\r\n", $headers))) {
+        error_log("Failed to send verification email to: " . $to);
+        throw new Exception("Failed to send verification email");
+      }
 
-            return true;
-        } catch (Exception $e) {
-            error_log("Email sending error: " . $e->getMessage());
-            return false;
-        }
+      return true;
+    } catch (Exception $e) {
+      error_log("Email sending error: " . $e->getMessage());
+      return false;
     }
+  }
 }

@@ -16,7 +16,7 @@ class ApiClient {
 
   String _mapServerError(BuildContext context, String serverMessage) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     // Map known server error messages to localized strings
     switch (serverMessage) {
       case 'Invalid email or password':
@@ -55,12 +55,13 @@ class ApiClient {
 
       String fullError = errorMessage;
       if (errorDetails != null) {
-        fullError += '\n\n' + l10n.errorDetailsText(
-          errorDetails['error_type'] ?? l10n.unknownErrorType,
-          errorDetails['error_file'] ?? l10n.unknownFile,
-          errorDetails['error_line']?.toString() ?? l10n.unknownLine,
-          errorDetails['stack_trace'] ?? l10n.noStackTrace,
-        );
+        fullError += '\n\n' +
+            l10n.errorDetailsText(
+              errorDetails['error_type'] ?? l10n.unknownErrorType,
+              errorDetails['error_file'] ?? l10n.unknownFile,
+              errorDetails['error_line']?.toString() ?? l10n.unknownLine,
+              errorDetails['stack_trace'] ?? l10n.noStackTrace,
+            );
       }
 
       throw ApiException(fullError);
