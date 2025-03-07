@@ -195,5 +195,24 @@
   "invalidCredentials": "メールアドレスまたはパスワードが正しくありません",
   "@invalidCredentials": {
     "description": "ログイン認証情報が無効な場合のエラーメッセージ"
+  },
+  "backToRegistration": "登録に戻る",
+  "@backToRegistration": {
+    "description": "登録画面に戻るボタンのテキスト"
+  },
+  "invalidOrExpiredOtp": "認証コードが無効または期限切れです。新しいコードを発行してください。",
+  "@invalidOrExpiredOtp": {
+    "description": "認証コードが無効または期限切れの場合のエラーメッセージ"
+  },
+  "welcomeUser": "{name}さん、ようこそ！",
+  "@welcomeUser": {
+    "description": "ホームページのユーザー名付きウェルカムメッセージ",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "logout": "ログアウト",
+  "@logout": {
+    "description": "ログアウトボタンのテキスト"
   }
 }

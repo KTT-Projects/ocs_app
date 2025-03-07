@@ -22,6 +22,8 @@ class ApiClient {
       case 'Invalid email or password':
       case 'Invalid credentials':
         return l10n.invalidCredentials;
+      case 'Invalid or expired OTP. Please request a new code.':
+        return l10n.invalidOrExpiredOtp;
       default:
         return serverMessage;
     }

@@ -195,5 +195,24 @@
   "invalidCredentials": "Invalid email or password",
   "@invalidCredentials": {
     "description": "Error message when login credentials are invalid"
+  },
+  "backToRegistration": "Back to Registration",
+  "@backToRegistration": {
+    "description": "Text for back to registration button"
+  },
+  "invalidOrExpiredOtp": "Invalid or expired verification code. Please request a new code.",
+  "@invalidOrExpiredOtp": {
+    "description": "Error message shown when OTP is invalid or expired"
+  },
+  "welcomeUser": "Welcome, {name}!",
+  "@welcomeUser": {
+    "description": "Welcome message on home page with user's name",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "logout": "Logout",
+  "@logout": {
+    "description": "Text for logout button"
   }
 }

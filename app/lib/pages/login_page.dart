@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../services/api_client.dart';
 import 'signup_page.dart';
+import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -80,7 +81,7 @@ class _LoginPageState extends State<LoginPage> {
         );
 
         if (mounted && response['status'] == 'success') {
-          if (response['token'] != null) {
+          if (response['token'] != null && response['name'] != null) {
             // TODO: Store token securely
             _showMessage(response['message'] ?? l10n.emailVerifiedSuccess, seconds: 4);
             setState(() {
@@ -88,8 +89,12 @@ class _LoginPageState extends State<LoginPage> {
               _errorMessage = null;
               _otpController.clear();
             });
-            // TODO: Navigate to home page
-            // Navigator.pushReplacement(...);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomePage(userName: response['name']),
+              ),
+            );
           } else {
             setState(() => _errorMessage = l10n.verificationFailed);
           }
@@ -117,9 +122,15 @@ class _LoginPageState extends State<LoginPage> {
             });
             _showMessage(l10n.verifyEmail, seconds: 8);
           } else if (response['status'] == 'success' && response['token'] != null) {
+            final String userName = response['name'] ?? 'User';
             _showMessage(l10n.loginSuccessful, seconds: 4);
-            // TODO: Store token and navigate to home page
-            // Navigator.pushReplacement(...);
+            // TODO: Store token securely
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomePage(userName: userName),
+              ),
+            );
           }
         }
       }
