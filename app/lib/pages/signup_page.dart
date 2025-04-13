@@ -3,10 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../services/api_client.dart';
+import 'login_page.dart';
 import 'home_page.dart';
 
 class SignupPage extends StatefulWidget {
-  const SignupPage({super.key});
+  final ApiClient apiClient;
+
+  const SignupPage({
+    super.key,
+    required this.apiClient,
+  });
 
   @override
   State<SignupPage> createState() => _SignupPageState();
@@ -14,16 +20,17 @@ class SignupPage extends StatefulWidget {
 
 class _SignupPageState extends State<SignupPage> {
   final _formKey = GlobalKey<FormState>();
-  final _apiClient = ApiClient();
   bool _isLoading = false;
   String? _errorMessage;
   bool _registrationComplete = false;
   bool _institutionsLoaded = false;
 
   final _nameController = TextEditingController();
+  final _bioController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _otpController = TextEditingController();
+  bool _allowDm = true;
 
   int? _selectedInstitutionId;
   int? _selectedGrade;
@@ -33,6 +40,7 @@ class _SignupPageState extends State<SignupPage> {
   @override
   void dispose() {
     _nameController.dispose();
+    _bioController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _otpController.dispose();
@@ -51,7 +59,7 @@ class _SignupPageState extends State<SignupPage> {
   Future<void> _loadInstitutions() async {
     try {
       setState(() => _isLoading = true);
-      _institutions = await _apiClient.getInstitutions(context);
+      _institutions = await widget.apiClient.getInstitutions(context);
     } catch (e) {
       setState(() => _errorMessage = e.toString());
     } finally {
@@ -67,6 +75,31 @@ class _SignupPageState extends State<SignupPage> {
     });
   }
 
+  bool _validateFields() {
+    final l10n = AppLocalizations.of(context)!;
+
+    if (!_formKey.currentState!.validate()) {
+      return false;
+    }
+
+    if (_selectedInstitutionId == null) {
+      setState(() => _errorMessage = l10n.pleaseSelectInstitution);
+      return false;
+    }
+
+    if (_selectedGrade == null) {
+      setState(() => _errorMessage = l10n.pleaseSelectGrade);
+      return false;
+    }
+
+    if (_nameController.text.isEmpty) {
+      setState(() => _errorMessage = l10n.displayNameRequired);
+      return false;
+    }
+
+    return true;
+  }
+
   Future<void> _handleSignup() async {
     final l10n = AppLocalizations.of(context)!;
 
@@ -78,7 +111,7 @@ class _SignupPageState extends State<SignupPage> {
       }
     } else {
       // Validate all fields in signup mode
-      if (!_formKey.currentState!.validate()) {
+      if (!_validateFields()) {
         return;
       }
     }
@@ -91,7 +124,7 @@ class _SignupPageState extends State<SignupPage> {
     try {
       if (_showOtpField) {
         // Verify OTP
-        final response = await _apiClient.verifyEmail(
+        final response = await widget.apiClient.verifyEmail(
           context: context,
           email: _emailController.text,
           otp: _otpController.text,
@@ -105,11 +138,13 @@ class _SignupPageState extends State<SignupPage> {
                 backgroundColor: Colors.green,
               ),
             );
-            // Navigate to home page with the user's name
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => HomePage(userName: _nameController.text),
+                builder: (context) => HomePage(
+                  token: response['token'],
+                  apiClient: widget.apiClient,
+                ),
               ),
             );
           } else {
@@ -118,12 +153,15 @@ class _SignupPageState extends State<SignupPage> {
         }
       } else {
         // Normal signup
-        await _apiClient.register(
+        await widget.apiClient.register(
           context: context,
           email: _emailController.text,
           password: _passwordController.text,
           institutionId: _selectedInstitutionId!,
           grade: _selectedGrade!,
+          displayName: _nameController.text,
+          bio: _bioController.text,
+          allowDm: _allowDm,
         );
 
         if (mounted) {
@@ -178,7 +216,7 @@ class _SignupPageState extends State<SignupPage> {
               ),
             ),
           ),
-          // Responsive layout
+          // Content
           LayoutBuilder(
             builder: (context, constraints) {
               final maxWidth = constraints.maxWidth;
@@ -231,7 +269,7 @@ class _SignupPageState extends State<SignupPage> {
                                 if (_errorMessage != null) ...[
                                   const SizedBox(height: 16),
                                   Text(
-                                    l10n.errorMessage(_errorMessage!),
+                                    _errorMessage!,
                                     style: TextStyle(
                                       color: Theme.of(context).colorScheme.error,
                                     ),
@@ -256,10 +294,45 @@ class _SignupPageState extends State<SignupPage> {
                                       ),
                                     ),
                                     style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-                                    validator: (value) => value?.isEmpty ?? true ? l10n.fullName : null,
+                                    validator: (value) => value?.isEmpty ?? true ? l10n.displayNameRequired : null,
                                   ),
-                                ],
-                                if (!_showOtpField) ...[
+                                  const SizedBox(height: 16),
+                                  TextFormField(
+                                    controller: _bioController,
+                                    maxLines: 3,
+                                    decoration: InputDecoration(
+                                      hintText: l10n.bio,
+                                      prefixIcon: Icon(
+                                        Icons.description_outlined,
+                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                      ),
+                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                      filled: true,
+                                      fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                    ),
+                                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  SwitchListTile(
+                                    title: Text(
+                                      l10n.allowDirectMessages,
+                                      style: TextStyle(
+                                        color: Theme.of(context).colorScheme.onPrimary,
+                                      ),
+                                    ),
+                                    value: _allowDm,
+                                    onChanged: (value) {
+                                      setState(() => _allowDm = value);
+                                    },
+                                    tileColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
                                   const SizedBox(height: 16),
                                   Theme(
                                     data: Theme.of(context).copyWith(
@@ -299,7 +372,9 @@ class _SignupPageState extends State<SignupPage> {
                                             return DropdownMenuItem(
                                               value: int.parse(institution['id'].toString()),
                                               child: Text(
-                                                (institution['name'] as String).split('/')[Localizations.localeOf(context).languageCode == 'ja' ? 1 : 0].trim(),
+                                                (institution['name'] as String)
+                                                    .split('/')[Localizations.localeOf(context).languageCode == 'ja' ? 1 : 0]
+                                                    .trim(),
                                                 style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
                                               ),
                                             );

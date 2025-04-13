@@ -214,5 +214,129 @@
   "logout": "Logout",
   "@logout": {
     "description": "Text for logout button"
+  },
+  "failedToLoadProfile": "Failed to load profile",
+  "@failedToLoadProfile": {
+    "description": "Error message when loading user profile fails"
+  },
+  "setupProfile": "Setup Profile",
+  "@setupProfile": {
+    "description": "Title for profile setup screen"
+  },
+  "setupProfileSubtitle": "Tell us about yourself",
+  "@setupProfileSubtitle": {
+    "description": "Subtitle for profile setup screen"
+  },
+  "displayName": "Display Name",
+  "@displayName": {
+    "description": "Label for display name input field"
+  },
+  "bio": "Bio",
+  "@bio": {
+    "description": "Label for bio input field"
+  },
+  "allowDirectMessages": "Allow Direct Messages",
+  "@allowDirectMessages": {
+    "description": "Label for direct messages toggle"
+  },
+  "saveProfile": "Save Profile",
+  "@saveProfile": {
+    "description": "Text for save profile button"
+  },
+  "profileSetupFailed": "Failed to setup profile",
+  "@profileSetupFailed": {
+    "description": "Error message when profile setup fails"
+  },
+  "displayNameRequired": "Display name is required",
+  "@displayNameRequired": {
+    "description": "Error message when display name is empty"
+  },
+  "displayNameTooLong": "Display name must be less than 100 characters",
+  "@displayNameTooLong": {
+    "description": "Error message when display name is too long"
+  },
+  "communityFeatures": "Community Features",
+  "@communityFeatures": {
+    "description": "Title for the community features section"
+  },
+  "communityHub": "Osakikamijima Community Hub",
+  "@communityHub": {
+    "description": "Subtitle for the community hub"
+  },
+  "eventsFeature": "Events",
+  "@eventsFeature": {
+    "description": "Title for events feature"
+  },
+  "eventsDescription": "Discover local events and activities",
+  "@eventsDescription": {
+    "description": "Description for events feature"
+  },
+  "groupsFeature": "Groups",
+  "@groupsFeature": {
+    "description": "Title for groups feature"
+  },
+  "groupsDescription": "Join community groups and discussions",
+  "@groupsDescription": {
+    "description": "Description for groups feature"
+  },
+  "businessFeature": "Local Business",
+  "@businessFeature": {
+    "description": "Title for local business feature"
+  },
+  "businessDescription": "Support local businesses",
+  "@businessDescription": {
+    "description": "Description for local business feature"
+  },
+  "volunteerFeature": "Volunteer",
+  "@volunteerFeature": {
+    "description": "Title for volunteer feature"
+  },
+  "volunteerDescription": "Find volunteering opportunities",
+  "@volunteerDescription": {
+    "description": "Description for volunteer feature"
+  },
+  "localNews": "Local News & Updates",
+  "@localNews": {
+    "description": "Title for the local news section"
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Text for settings menu item"
+  },
+  "notifications": "Notifications",
+  "@notifications": {
+    "description": "Text for notifications button"
+  },
+  "profile": "Profile",
+  "@profile": {
+    "description": "Text for profile button"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Text for retry button"
+  },
+  "newCommunityCenter": "New Community Center Opening",
+  "@newCommunityCenter": {
+    "description": "Title for community center news"
+  },
+  "communityCenterDesc": "The new community center will open next week with various facilities.",
+  "@communityCenterDesc": {
+    "description": "Description for community center opening"
+  },
+  "beachCleanup": "Beach Cleanup Event",
+  "@beachCleanup": {
+    "description": "Title for beach cleanup event"
+  },
+  "beachCleanupDesc": "Join us for the monthly beach cleanup activity.",
+  "@beachCleanupDesc": {
+    "description": "Description for beach cleanup event"
+  },
+  "summerFestival": "Summer Festival Planning",
+  "@summerFestival": {
+    "description": "Title for summer festival planning"
+  },
+  "summerFestivalDesc": "Planning meeting for this year's summer festival.",
+  "@summerFestivalDesc": {
+    "description": "Description for summer festival planning"
   }
 }

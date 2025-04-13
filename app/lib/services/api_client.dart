@@ -13,6 +13,15 @@ class ApiException implements Exception {
 
 class ApiClient {
   static const String baseUrl = 'https://ocs.kttprojects.com/api';
+  String? _token;
+
+  void setToken(String? token) {
+    _token = token;
+  }
+
+  void clearToken() {
+    _token = null;
+  }
 
   String _mapServerError(BuildContext context, String serverMessage) {
     final l10n = AppLocalizations.of(context)!;
@@ -35,6 +44,9 @@ class ApiClient {
     required String password,
     required int institutionId,
     required int grade,
+    required String displayName,
+    String? bio,
+    bool allowDm = true,
   }) async {
     final l10n = AppLocalizations.of(context)!;
     final response = await http.post(
@@ -45,6 +57,9 @@ class ApiClient {
         'password': password,
         'institution_id': institutionId,
         'grade': grade,
+        'display_name': displayName,
+        'bio': bio,
+        'allow_dm': allowDm,
       }),
     );
 
@@ -150,6 +165,37 @@ class ApiClient {
       }
       final l10n = AppLocalizations.of(context)!;
       throw ApiException('${l10n.loginFailed}: ${e.toString()}');
+    }
+  }
+
+  Future<Map<String, dynamic>> getProfile(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/profile.php'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${_token}',
+        },
+      );
+
+      final data = json.decode(response.body);
+
+      if (response.statusCode != 200) {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.failedToLoadProfile));
+      }
+
+      if (data['status'] != 'success') {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.failedToLoadProfile));
+      }
+
+      return data['profile'];
+    } catch (e) {
+      if (e is ApiException) {
+        rethrow;
+      }
+      throw ApiException(l10n.failedToLoadProfile);
     }
   }
 

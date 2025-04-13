@@ -47,10 +47,10 @@ try {
   }
 
   // Required fields
-  $required_fields = ['email', 'password', 'institution_id', 'grade'];
+  $required_fields = ['email', 'password', 'institution_id', 'grade', 'display_name'];
   foreach ($required_fields as $field) {
     if (!isset($data[$field]) || empty($data[$field])) {
-      Response::error("Missing required field: $field");
+      Response::error("Missing required field: $field", 400);
     }
   }
 
@@ -88,13 +88,29 @@ try {
     Response::error('Email already registered', 409);
   }
 
+  // Get user information
+  $bio = isset($data['bio']) ? trim($data['bio']) : null;
+  $display_name = isset($data['display_name']) ? trim($data['display_name']) : null;
+  $allow_dm = isset($data['allow_dm']) ? (bool)$data['allow_dm'] : true;
+
+  if (empty($display_name)) {
+    Response::error('Display name is required', 400);
+  }
+
+  if (strlen($display_name) > 100) {
+    Response::error('Display name must be less than 100 characters', 400);
+  }
+
   // Create user
   $result = $auth->createUser(
     $data['email'],
     $data['password'],
     1, // Default role_id for students
     $data['institution_id'],
-    $grade
+    $grade,
+    $display_name,
+    $bio,
+    $allow_dm
   );
 
   if (!$result) {

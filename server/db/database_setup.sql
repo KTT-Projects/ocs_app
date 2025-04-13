@@ -11,6 +11,31 @@ SET
 -- Use existing database
 USE on294_ocs;
 
+-- Drop existing tables if they exist
+DROP TABLE IF EXISTS notifications,
+post_attachments,
+comments,
+direct_messages,
+chat_group_members,
+group_messages,
+event_participants,
+volunteer_participants,
+answers,
+tutor_sessions,
+user_skills,
+user_profiles,
+posts,
+events,
+volunteer_opportunities,
+questions,
+tutors,
+chat_groups,
+users,
+board_categories,
+skills,
+roles,
+educational_institutions;
+
 -- Educational institutions table
 CREATE TABLE
   educational_institutions (
@@ -38,7 +63,10 @@ CREATE TABLE
     password_hash VARCHAR(255) NOT NULL,
     role_id INT NOT NULL,
     institution_id INT NOT NULL,
-    grade TINYINT CHECK (grade BETWEEN 7 AND 14 OR grade = 99), -- 99 represents OB
+    grade TINYINT CHECK (
+      grade BETWEEN 7 AND 14
+      OR grade = 99
+    ), -- 99 represents OB
     is_verified BOOLEAN DEFAULT FALSE,
     verification_otp VARCHAR(6),
     otp_expires_at TIMESTAMP,

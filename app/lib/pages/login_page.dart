@@ -7,7 +7,12 @@ import 'signup_page.dart';
 import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final ApiClient apiClient;
+
+  const LoginPage({
+    super.key,
+    required this.apiClient,
+  });
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -15,7 +20,6 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _apiClient = ApiClient();
   bool _isLoading = false;
   String? _errorMessage;
   bool _showOtpField = false;
@@ -74,15 +78,14 @@ class _LoginPageState extends State<LoginPage> {
       Map<String, dynamic> response;
       if (_showOtpField) {
         // Verify OTP
-        response = await _apiClient.verifyEmail(
+        response = await widget.apiClient.verifyEmail(
           context: context,
           email: _emailController.text,
           otp: _otpController.text,
         );
 
         if (mounted && response['status'] == 'success') {
-          if (response['token'] != null && response['name'] != null) {
-            // TODO: Store token securely
+          if (response['token'] != null) {
             _showMessage(response['message'] ?? l10n.emailVerifiedSuccess, seconds: 4);
             setState(() {
               _showOtpField = false;
@@ -92,7 +95,10 @@ class _LoginPageState extends State<LoginPage> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => HomePage(userName: response['name']),
+                builder: (context) => HomePage(
+                  token: response['token'],
+                  apiClient: widget.apiClient,
+                ),
               ),
             );
           } else {
@@ -101,7 +107,7 @@ class _LoginPageState extends State<LoginPage> {
         }
       } else {
         // Normal login attempt
-        response = await _apiClient.login(
+        response = await widget.apiClient.login(
           context: context,
           email: _emailController.text,
           password: _passwordController.text,
@@ -122,13 +128,14 @@ class _LoginPageState extends State<LoginPage> {
             });
             _showMessage(l10n.verifyEmail, seconds: 8);
           } else if (response['status'] == 'success' && response['token'] != null) {
-            final String userName = response['name'] ?? 'User';
             _showMessage(l10n.loginSuccessful, seconds: 4);
-            // TODO: Store token securely
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => HomePage(userName: userName),
+                builder: (context) => HomePage(
+                  token: response['token'],
+                  apiClient: widget.apiClient,
+                ),
               ),
             );
           }
@@ -379,7 +386,9 @@ class _LoginPageState extends State<LoginPage> {
                                         onPressed: () {
                                           Navigator.push(
                                             context,
-                                            MaterialPageRoute(builder: (context) => const SignupPage()),
+                                            MaterialPageRoute(
+                                              builder: (context) => SignupPage(apiClient: widget.apiClient),
+                                            ),
                                           );
                                         },
                                         child: Text(

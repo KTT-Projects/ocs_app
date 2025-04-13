@@ -213,6 +213,130 @@
   },
   "logout": "ログアウト",
   "@logout": {
-    "description": "ログアウトボタンのテキスト"
+    "description": "Text for logout button"
+  },
+  "failedToLoadProfile": "プロフィールの読み込みに失敗しました",
+  "@failedToLoadProfile": {
+    "description": "Error message when loading user profile fails"
+  },
+  "setupProfile": "プロフィール設定",
+  "@setupProfile": {
+    "description": "Title for profile setup screen"
+  },
+  "setupProfileSubtitle": "あなたについて教えてください",
+  "@setupProfileSubtitle": {
+    "description": "Subtitle for profile setup screen"
+  },
+  "displayName": "表示名",
+  "@displayName": {
+    "description": "Label for display name input field"
+  },
+  "bio": "自己紹介",
+  "@bio": {
+    "description": "Label for bio input field"
+  },
+  "allowDirectMessages": "ダイレクトメッセージを許可",
+  "@allowDirectMessages": {
+    "description": "Label for direct messages toggle"
+  },
+  "saveProfile": "プロフィールを保存",
+  "@saveProfile": {
+    "description": "Text for save profile button"
+  },
+  "profileSetupFailed": "プロフィールの設定に失敗しました",
+  "@profileSetupFailed": {
+    "description": "Error message when profile setup fails"
+  },
+  "displayNameRequired": "表示名は必須です",
+  "@displayNameRequired": {
+    "description": "Error message when display name is empty"
+  },
+  "displayNameTooLong": "表示名は100文字以内にしてください",
+  "@displayNameTooLong": {
+    "description": "Error message when display name is too long"
+  },
+  "communityFeatures": "コミュニティ機能",
+  "@communityFeatures": {
+    "description": "Title for the community features section"
+  },
+  "communityHub": "大崎上島コミュニティハブ",
+  "@communityHub": {
+    "description": "Subtitle for the community hub"
+  },
+  "eventsFeature": "イベント",
+  "@eventsFeature": {
+    "description": "Title for events feature"
+  },
+  "eventsDescription": "地域のイベントや活動を見つける",
+  "@eventsDescription": {
+    "description": "Description for events feature"
+  },
+  "groupsFeature": "グループ",
+  "@groupsFeature": {
+    "description": "Title for groups feature"
+  },
+  "groupsDescription": "コミュニティグループや討論に参加",
+  "@groupsDescription": {
+    "description": "Description for groups feature"
+  },
+  "businessFeature": "地域ビジネス",
+  "@businessFeature": {
+    "description": "Title for local business feature"
+  },
+  "businessDescription": "地域のビジネスを応援",
+  "@businessDescription": {
+    "description": "Description for local business feature"
+  },
+  "volunteerFeature": "ボランティア",
+  "@volunteerFeature": {
+    "description": "Title for volunteer feature"
+  },
+  "volunteerDescription": "ボランティア活動の機会を探す",
+  "@volunteerDescription": {
+    "description": "Description for volunteer feature"
+  },
+  "localNews": "地域ニュース・更新情報",
+  "@localNews": {
+    "description": "Title for the local news section"
+  },
+  "settings": "設定",
+  "@settings": {
+    "description": "Text for settings menu item"
+  },
+  "notifications": "通知",
+  "@notifications": {
+    "description": "Text for notifications button"
+  },
+  "profile": "プロフィール",
+  "@profile": {
+    "description": "Text for profile button"
+  },
+  "retry": "再試行",
+  "@retry": {
+    "description": "Text for retry button"
+  },
+  "newCommunityCenter": "新コミュニティセンター開設",
+  "@newCommunityCenter": {
+    "description": "Title for community center news"
+  },
+  "communityCenterDesc": "来週、新しいコミュニティセンターが様々な施設とともにオープンします。",
+  "@communityCenterDesc": {
+    "description": "Description for community center opening"
+  },
+  "beachCleanup": "ビーチクリーン活動",
+  "@beachCleanup": {
+    "description": "Title for beach cleanup event"
+  },
+  "beachCleanupDesc": "毎月のビーチクリーン活動に参加しましょう。",
+  "@beachCleanupDesc": {
+    "description": "Description for beach cleanup event"
+  },
+  "summerFestival": "夏祭り企画会議",
+  "@summerFestival": {
+    "description": "Title for summer festival planning"
+  },
+  "summerFestivalDesc": "今年の夏祭りの企画会議を開催します。",
+  "@summerFestivalDesc": {
+    "description": "Description for summer festival planning"
   }
 }
