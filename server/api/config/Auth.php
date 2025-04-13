@@ -89,7 +89,7 @@ class Auth
     return false;
   }
 
-  public function createUser($email, $password, $role_id, $institution_id, $grade = null)
+  public function createUser($email, $password, $role_id, $institution_id, $grade, $display_name, $bio = null, $allow_dm = true)
   {
     try {
       // Generate 6-digit OTP
@@ -104,6 +104,8 @@ class Auth
 
       $stmt = $this->conn->prepare($query);
 
+      $this->conn->beginTransaction();
+      
       if ($stmt->execute([
         $email,
         $password_hash,
@@ -113,11 +115,25 @@ class Auth
         $otp,
         $otp_expires
       ])) {
+        $user_id = $this->conn->lastInsertId();
+        
+        // Create user profile
+        if ($display_name) {
+          $profile_query = "INSERT INTO user_profiles (user_id, display_name, bio, allow_dm) VALUES (?, ?, ?, ?)";
+          $profile_stmt = $this->conn->prepare($profile_query);
+          if (!$profile_stmt->execute([$user_id, $display_name, $bio, $allow_dm])) {
+            $this->conn->rollBack();
+            return false;
+          }
+        }
+
+        $this->conn->commit();
         return [
-          'user_id' => $this->conn->lastInsertId(),
+          'user_id' => $user_id,
           'verification_otp' => $otp
         ];
       }
+      $this->conn->rollBack();
       return false;
     } catch (PDOException $e) {
       error_log("Database error in createUser: " . $e->getMessage());

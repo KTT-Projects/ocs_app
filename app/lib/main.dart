@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'services/api_client.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -6,12 +7,17 @@ import 'package:ocs_app/pages/main_page.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-void main() async {
-  // Ensure that Flutter is initialized before calling Firebase.initializeApp()
+Future<void> main() async {
+  // Ensure that Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  // runApp(const MyApp());
-  initializeDateFormatting('ja').then((_) => runApp(const MyApp()));
+  // Initialize localizations
+  await Future.wait([
+    initializeDateFormatting('en'),
+    initializeDateFormatting('ja'),
+  ]);
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -22,8 +28,9 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
+    const appTitle = 'Osakikamijima Community Site';
     return MaterialApp(
-      title: '大崎上島コミュニティーサイト',
+      title: appTitle,
       debugShowCheckedModeBanner: false,
 
       // Localization support

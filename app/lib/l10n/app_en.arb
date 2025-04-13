@@ -94,5 +94,249 @@
   "pleaseSelectGrade": "Please select your grade",
   "@pleaseSelectGrade": {
     "description": "Error message for grade selection"
+  },
+  "verifyEmail": "Please verify your email address",
+  "@verifyEmail": {
+    "description": "Message shown when email verification is needed"
+  },
+  "enterOtp": "Enter 6-digit verification code",
+  "@enterOtp": {
+    "description": "Hint text for OTP input field"
+  },
+  "verify": "Verify",
+  "@verify": {
+    "description": "Text for verify button"
+  },
+  "backToLogin": "Back to Login",
+  "@backToLogin": {
+    "description": "Text for back to login button"
+  },
+  "verifyEmailTitle": "Verify Your Email",
+  "@verifyEmailTitle": {
+    "description": "Title of email verification dialog"
+  },
+  "verificationCodeSent": "A verification code has been sent to {email}",
+  "@verificationCodeSent": {
+    "description": "Message shown when verification code is sent",
+    "placeholders": {
+      "email": {}
+    }
+  },
+  "enterVerificationCode": "Please enter the 6-digit code to verify your account:",
+  "@enterVerificationCode": {
+    "description": "Instructions for entering verification code"
+  },
+  "enterSixDigitCode": "Enter 6-digit code",
+  "@enterSixDigitCode": {
+    "description": "Hint text for verification code input"
+  },
+  "later": "Later",
+  "@later": {
+    "description": "Text for later/skip button"
+  },
+  "invalidVerificationCode": "Please enter a valid 6-digit code",
+  "@invalidVerificationCode": {
+    "description": "Error message for invalid verification code"
+  },
+  "emailVerifiedSuccess": "Email verified successfully!",
+  "@emailVerifiedSuccess": {
+    "description": "Success message when email is verified"
+  },
+  "passwordHelper": "Must be at least 8 characters",
+  "@passwordHelper": {
+    "description": "Helper text for password field"
+  },
+  "registrationFailed": "Registration failed",
+  "@registrationFailed": {
+    "description": "Error message when registration fails"
+  },
+  "verificationFailed": "Verification failed",
+  "@verificationFailed": {
+    "description": "Error message when email verification fails"
+  },
+  "loginFailed": "Login failed",
+  "@loginFailed": {
+    "description": "Error message when login fails"
+  },
+  "loginSuccessful": "Login successful",
+  "@loginSuccessful": {
+    "description": "Success message when login is successful"
+  },
+  "failedToLoadInstitutions": "Failed to load institutions",
+  "@failedToLoadInstitutions": {
+    "description": "Error message when loading institutions fails"
+  },
+  "errorDetailsText": "Details:\n{errorType} at {errorFile}:{errorLine}\n\nStack trace:\n{stackTrace}",
+  "@errorDetailsText": {
+    "description": "Format for detailed error information",
+    "placeholders": {
+      "errorType": {},
+      "errorFile": {},
+      "errorLine": {},
+      "stackTrace": {}
+    }
+  },
+  "unknownErrorType": "Unknown error type",
+  "@unknownErrorType": {
+    "description": "Text for unknown error type"
+  },
+  "unknownFile": "unknown file",
+  "@unknownFile": {
+    "description": "Text for unknown file location"
+  },
+  "unknownLine": "unknown line",
+  "@unknownLine": {
+    "description": "Text for unknown line number"
+  },
+  "noStackTrace": "No stack trace available",
+  "@noStackTrace": {
+    "description": "Text when no stack trace is available"
+  },
+  "invalidCredentials": "Invalid email or password",
+  "@invalidCredentials": {
+    "description": "Error message when login credentials are invalid"
+  },
+  "backToRegistration": "Back to Registration",
+  "@backToRegistration": {
+    "description": "Text for back to registration button"
+  },
+  "invalidOrExpiredOtp": "Invalid or expired verification code. Please request a new code.",
+  "@invalidOrExpiredOtp": {
+    "description": "Error message shown when OTP is invalid or expired"
+  },
+  "welcomeUser": "Welcome, {name}!",
+  "@welcomeUser": {
+    "description": "Welcome message on home page with user's name",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "logout": "Logout",
+  "@logout": {
+    "description": "Text for logout button"
+  },
+  "failedToLoadProfile": "Failed to load profile",
+  "@failedToLoadProfile": {
+    "description": "Error message when loading user profile fails"
+  },
+  "setupProfile": "Setup Profile",
+  "@setupProfile": {
+    "description": "Title for profile setup screen"
+  },
+  "setupProfileSubtitle": "Tell us about yourself",
+  "@setupProfileSubtitle": {
+    "description": "Subtitle for profile setup screen"
+  },
+  "displayName": "Display Name",
+  "@displayName": {
+    "description": "Label for display name input field"
+  },
+  "bio": "Bio",
+  "@bio": {
+    "description": "Label for bio input field"
+  },
+  "allowDirectMessages": "Allow Direct Messages",
+  "@allowDirectMessages": {
+    "description": "Label for direct messages toggle"
+  },
+  "saveProfile": "Save Profile",
+  "@saveProfile": {
+    "description": "Text for save profile button"
+  },
+  "profileSetupFailed": "Failed to setup profile",
+  "@profileSetupFailed": {
+    "description": "Error message when profile setup fails"
+  },
+  "displayNameRequired": "Display name is required",
+  "@displayNameRequired": {
+    "description": "Error message when display name is empty"
+  },
+  "displayNameTooLong": "Display name must be less than 100 characters",
+  "@displayNameTooLong": {
+    "description": "Error message when display name is too long"
+  },
+  "communityFeatures": "Community Features",
+  "@communityFeatures": {
+    "description": "Title for the community features section"
+  },
+  "communityHub": "Osakikamijima Community Hub",
+  "@communityHub": {
+    "description": "Subtitle for the community hub"
+  },
+  "eventsFeature": "Events",
+  "@eventsFeature": {
+    "description": "Title for events feature"
+  },
+  "eventsDescription": "Discover local events and activities",
+  "@eventsDescription": {
+    "description": "Description for events feature"
+  },
+  "groupsFeature": "Groups",
+  "@groupsFeature": {
+    "description": "Title for groups feature"
+  },
+  "groupsDescription": "Join community groups and discussions",
+  "@groupsDescription": {
+    "description": "Description for groups feature"
+  },
+  "businessFeature": "Local Business",
+  "@businessFeature": {
+    "description": "Title for local business feature"
+  },
+  "businessDescription": "Support local businesses",
+  "@businessDescription": {
+    "description": "Description for local business feature"
+  },
+  "volunteerFeature": "Volunteer",
+  "@volunteerFeature": {
+    "description": "Title for volunteer feature"
+  },
+  "volunteerDescription": "Find volunteering opportunities",
+  "@volunteerDescription": {
+    "description": "Description for volunteer feature"
+  },
+  "localNews": "Local News & Updates",
+  "@localNews": {
+    "description": "Title for the local news section"
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Text for settings menu item"
+  },
+  "notifications": "Notifications",
+  "@notifications": {
+    "description": "Text for notifications button"
+  },
+  "profile": "Profile",
+  "@profile": {
+    "description": "Text for profile button"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Text for retry button"
+  },
+  "newCommunityCenter": "New Community Center Opening",
+  "@newCommunityCenter": {
+    "description": "Title for community center news"
+  },
+  "communityCenterDesc": "The new community center will open next week with various facilities.",
+  "@communityCenterDesc": {
+    "description": "Description for community center opening"
+  },
+  "beachCleanup": "Beach Cleanup Event",
+  "@beachCleanup": {
+    "description": "Title for beach cleanup event"
+  },
+  "beachCleanupDesc": "Join us for the monthly beach cleanup activity.",
+  "@beachCleanupDesc": {
+    "description": "Description for beach cleanup event"
+  },
+  "summerFestival": "Summer Festival Planning",
+  "@summerFestival": {
+    "description": "Title for summer festival planning"
+  },
+  "summerFestivalDesc": "Planning meeting for this year's summer festival.",
+  "@summerFestivalDesc": {
+    "description": "Description for summer festival planning"
   }
 }

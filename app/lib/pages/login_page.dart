@@ -4,9 +4,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../services/api_client.dart';
 import 'signup_page.dart';
+import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final ApiClient apiClient;
+
+  const LoginPage({
+    super.key,
+    required this.apiClient,
+  });
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -14,7 +20,6 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _apiClient = ApiClient();
   bool _isLoading = false;
   String? _errorMessage;
   bool _showOtpField = false;
@@ -50,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
     if (_showOtpField) {
       // Only validate OTP in verification mode
       if (_otpController.text.length != 6) {
-        setState(() => _errorMessage = 'Please enter all 6 digits');
+        setState(() => _errorMessage = l10n.invalidVerificationCode);
         return;
       }
     } else {
@@ -59,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
       if (_passwordController.text.isEmpty) {
-        setState(() => _errorMessage = 'Password is required');
+        setState(() => _errorMessage = l10n.passwordRequirements);
         return;
       }
     }
@@ -73,29 +78,37 @@ class _LoginPageState extends State<LoginPage> {
       Map<String, dynamic> response;
       if (_showOtpField) {
         // Verify OTP
-        response = await _apiClient.verifyEmail(
+        response = await widget.apiClient.verifyEmail(
+          context: context,
           email: _emailController.text,
           otp: _otpController.text,
         );
 
         if (mounted && response['status'] == 'success') {
           if (response['token'] != null) {
-            // TODO: Store token securely
-            _showMessage(response['message'] ?? 'Email verified successfully', seconds: 4);
+            _showMessage(response['message'] ?? l10n.emailVerifiedSuccess, seconds: 4);
             setState(() {
               _showOtpField = false;
               _errorMessage = null;
               _otpController.clear();
             });
-            // TODO: Navigate to home page
-            // Navigator.pushReplacement(...);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomePage(
+                  token: response['token'],
+                  apiClient: widget.apiClient,
+                ),
+              ),
+            );
           } else {
-            setState(() => _errorMessage = 'Invalid verification response');
+            setState(() => _errorMessage = l10n.verificationFailed);
           }
         }
       } else {
         // Normal login attempt
-        response = await _apiClient.login(
+        response = await widget.apiClient.login(
+          context: context,
           email: _emailController.text,
           password: _passwordController.text,
         );
@@ -113,11 +126,18 @@ class _LoginPageState extends State<LoginPage> {
             Future.delayed(Duration(milliseconds: 100), () {
               FocusScope.of(context).requestFocus(FocusNode());
             });
-            _showMessage(response['message'] ?? 'Please check your email for the verification code', seconds: 8);
+            _showMessage(l10n.verifyEmail, seconds: 8);
           } else if (response['status'] == 'success' && response['token'] != null) {
-            _showMessage('Login successful', seconds: 4);
-            // TODO: Store token and navigate to home page
-            // Navigator.pushReplacement(...);
+            _showMessage(l10n.loginSuccessful, seconds: 4);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomePage(
+                  token: response['token'],
+                  apiClient: widget.apiClient,
+                ),
+              ),
+            );
           }
         }
       }
@@ -208,7 +228,7 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  _showOtpField ? 'Please verify your email address' : l10n.signInToContinue,
+                                  _showOtpField ? l10n.verifyEmail : l10n.signInToContinue,
                                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                         color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
                                       ),
@@ -216,7 +236,7 @@ class _LoginPageState extends State<LoginPage> {
                                 if (_errorMessage != null) ...[
                                   const SizedBox(height: 16),
                                   Text(
-                                    _errorMessage!,
+                                    l10n.errorMessage(_errorMessage!),
                                     style: TextStyle(
                                       color: Theme.of(context).colorScheme.error,
                                     ),
@@ -288,7 +308,7 @@ class _LoginPageState extends State<LoginPage> {
                                       LengthLimitingTextInputFormatter(6),
                                     ],
                                     decoration: InputDecoration(
-                                      hintText: 'Enter 6-digit verification code',
+                                      hintText: l10n.enterOtp,
                                       counterText: '', // Hide character counter
                                       prefixIcon: Icon(
                                         Icons.security_outlined,
@@ -331,7 +351,7 @@ class _LoginPageState extends State<LoginPage> {
                                             ),
                                           )
                                         : Text(
-                                            _showOtpField ? 'Verify' : l10n.signIn,
+                                            _showOtpField ? l10n.verify : l10n.signIn,
                                             style: const TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold,
@@ -344,7 +364,7 @@ class _LoginPageState extends State<LoginPage> {
                                   TextButton(
                                     onPressed: _resetForm,
                                     child: Text(
-                                      'Back to Login',
+                                      l10n.backToLogin,
                                       style: TextStyle(
                                         color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
                                       ),
@@ -366,7 +386,9 @@ class _LoginPageState extends State<LoginPage> {
                                         onPressed: () {
                                           Navigator.push(
                                             context,
-                                            MaterialPageRoute(builder: (context) => const SignupPage()),
+                                            MaterialPageRoute(
+                                              builder: (context) => SignupPage(apiClient: widget.apiClient),
+                                            ),
                                           );
                                         },
                                         child: Text(
