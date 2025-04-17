@@ -338,5 +338,45 @@
   "summerFestivalDesc": "Planning meeting for this year's summer festival.",
   "@summerFestivalDesc": {
     "description": "Description for summer festival planning"
+  },
+  "resetPasswordTitle": "Reset Password",
+  "@resetPasswordTitle": {
+    "description": "Title for reset password screen"
+  },
+  "resetPasswordSubtitle": "Enter your email to receive reset instructions",
+  "@resetPasswordSubtitle": {
+    "description": "Subtitle for reset password screen"
+  },
+  "resetPasswordSent": "Password reset instructions sent to your email",
+  "@resetPasswordSent": {
+    "description": "Success message when reset email is sent"
+  },
+  "resetPasswordFailed": "Failed to reset password",
+  "@resetPasswordFailed": {
+    "description": "Error message when password reset fails"
+  },
+  "newPassword": "New Password",
+  "@newPassword": {
+    "description": "Label for new password input field"
+  },
+  "confirmPassword": "Confirm Password",
+  "@confirmPassword": {
+    "description": "Label for confirm password input field"
+  },
+  "passwordsDoNotMatch": "Passwords do not match",
+  "@passwordsDoNotMatch": {
+    "description": "Error message when passwords do not match"
+  },
+  "resetPasswordButton": "Reset Password",
+  "@resetPasswordButton": {
+    "description": "Text for reset password button"
+  },
+  "requestPasswordReset": "Send Reset Link",
+  "@requestPasswordReset": {
+    "description": "Text for request password reset button"
+  },
+  "resetPasswordSuccess": "Password has been reset successfully",
+  "@resetPasswordSuccess": {
+    "description": "Success message when password is reset"
   }
 }

@@ -78,6 +78,13 @@ class Security
     return preg_match('/^[A-Za-z0-9._-]+$/', $student_id);
   }
 
+  public static function generateToken($length = 32)
+  {
+    // Generate a secure random token
+    $token = bin2hex(random_bytes($length / 2));
+    return $token;
+  }
+
   public function getClientIp()
   {
     // Get IP address considering proxies

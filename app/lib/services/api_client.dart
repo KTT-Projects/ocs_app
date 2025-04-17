@@ -210,4 +210,62 @@ class ApiClient {
     final data = json.decode(response.body);
     return List<Map<String, dynamic>>.from(data['data'] ?? []);
   }
+
+  Future<void> requestPasswordReset({
+    required BuildContext context,
+    required String email,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/forgot_password.php'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'email': email}),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode != 200) {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.resetPasswordFailed));
+      }
+
+      if (data['status'] != 'success') {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.resetPasswordFailed));
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('${l10n.resetPasswordFailed}: ${e.toString()}');
+    }
+  }
+
+  Future<void> resetPassword({
+    required BuildContext context,
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/reset_password.php'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'email': email,
+          'code': code,
+          'new_password': newPassword,
+        }),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode != 200) {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.resetPasswordFailed));
+      }
+
+      if (data['status'] != 'success') {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.resetPasswordFailed));
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('${l10n.resetPasswordFailed}: ${e.toString()}');
+    }
+  }
 }
