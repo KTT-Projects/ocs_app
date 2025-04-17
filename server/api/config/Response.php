@@ -5,7 +5,24 @@ class Response
   {
     header('Content-Type: application/json; charset=utf-8');
     http_response_code($status);
-    echo json_encode($data);
+    $json_output = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE); // Added flags for better UTF-8 handling
+
+    // Check for JSON encoding errors
+    if ($json_output === false) {
+      // Log the error internally
+      error_log('JSON Encode Error: ' . json_last_error_msg());
+
+      // Send a generic JSON error response
+      http_response_code(500); // Internal Server Error
+      echo json_encode([
+        'status' => 'error',
+        'message' => 'Internal server error: Failed to encode JSON response.',
+        'json_error_code' => json_last_error(),
+        'json_error_message' => json_last_error_msg()
+      ]);
+    } else {
+      echo $json_output;
+    }
     exit();
   }
 
