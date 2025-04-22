@@ -44,8 +44,6 @@ class MyApp extends StatelessWidget {
         Locale('en'),
         Locale('ja'),
       ],
-      locale: const Locale('ja'), // Set Japanese as default
-
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF04143A),

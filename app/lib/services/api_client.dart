@@ -217,10 +217,17 @@ class ApiClient {
   }) async {
     final l10n = AppLocalizations.of(context)!;
     try {
+      // Get current locale and extract language code
+      final locale = Localizations.localeOf(context);
+      final lang = locale.languageCode;
+
       final response = await http.post(
         Uri.parse('$baseUrl/forgot_password.php'),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({'email': email}),
+        body: json.encode({
+          'email': email,
+          'lang': lang,
+        }),
       );
 
       final data = json.decode(response.body);

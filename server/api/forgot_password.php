@@ -61,24 +61,11 @@ try {
     $stmt->bindParam(':email', $email);
     $stmt->execute();
 
-    // Send bilingual reset email (using HTML format)
-    $emailBodyEn = "Your password reset code is: <strong>$resetCode</strong><br><br>" .
-                   "This code will expire in 1 hour.<br><br>" .
-                   "If you did not request this password reset, please ignore this email.<br><br>" .
-                   "Best regards,<br>OCS Team";
+    // Get language preference from request, default to 'en'
+    $lang = isset($data->lang) && $data->lang === 'ja' ? 'ja' : 'en';
 
-    $emailBodyJa = "パスワードリセット用の認証コード：<strong>$resetCode</strong><br><br>" .
-                   "このコードは1時間後に期限切れとなります。<br><br>" .
-                   "このパスワードリセットをリクエストしていない場合は、このメールを無視してください。<br><br>" .
-                   "よろしくお願いいたします。<br>OCSチーム";
-
-    if (Mailer::sendBilingual(
-        $email,
-        "Password Reset Code",
-        "パスワードリセット認証コード",
-        $emailBodyEn,
-        $emailBodyJa
-    )) {
+    $mailer = new Mailer();
+    if ($mailer->sendPasswordResetEmail($email, $resetCode, $lang)) {
         Response::success('Password reset instructions sent to your email');
     } else {
         Response::error('Failed to send reset email');

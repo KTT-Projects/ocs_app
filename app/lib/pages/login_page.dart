@@ -325,6 +325,60 @@ class _LoginPageState extends State<LoginPage> {
                                     ),
                                     style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
                                   ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    l10n.checkSpamJunk,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  TextButton.icon(
+                                    onPressed: _isLoading ? null : () async {
+                                      setState(() => _isLoading = true);
+                                      try {
+                                        await widget.apiClient.register(
+                                          context: context,
+                                          email: _emailController.text,
+                                          password: _passwordController.text,
+                                          institutionId: int.parse(_userId ?? '0'),
+                                          grade: 0,
+                                          displayName: '',
+                                          bio: '',
+                                          allowDm: true,
+                                        );
+                                        if (mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text('${l10n.verificationCodeSent}'.replaceAll('{email}', _emailController.text))),
+                                          );
+                                        }
+                                      } catch (e) {
+                                        if (mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text(e.toString()),
+                                              backgroundColor: Theme.of(context).colorScheme.error,
+                                            ),
+                                          );
+                                        }
+                                      } finally {
+                                        setState(() => _isLoading = false);
+                                      }
+                                    },
+                                    icon: Icon(
+                                      Icons.refresh,
+                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                      size: 16,
+                                    ),
+                                    label: Text(
+                                      l10n.resendOtp,
+                                      style: TextStyle(
+                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                      ),
+                                    ),
+                                  ),
                                 ],
                                 const SizedBox(height: 24),
                                 SizedBox(

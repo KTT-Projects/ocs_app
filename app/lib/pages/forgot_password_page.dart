@@ -163,7 +163,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   padding: EdgeInsets.all(isSmallScreen ? 16.0 : 24.0),
                   child: Container(
                     width: isSmallScreen ? maxWidth - 32 : 400,
-                    constraints: const BoxConstraints(maxHeight: 500),
+                    constraints: const BoxConstraints(maxHeight: 600),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.background.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(24),
@@ -271,6 +271,56 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                     ),
                                     style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
                                   ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    l10n.checkSpamJunk,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  if (!_showPasswordFields) ...[
+                                    const SizedBox(height: 8),
+                                    TextButton.icon(
+                                      onPressed: _isLoading ? null : () async {
+                                        setState(() => _isLoading = true);
+                                        try {
+                                          await widget.apiClient.requestPasswordReset(
+                                            context: context,
+                                            email: _email,
+                                          );
+                                          if (mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text(l10n.resetPasswordSent)),
+                                            );
+                                          }
+                                        } catch (e) {
+                                          if (mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text(e.toString()),
+                                                backgroundColor: Theme.of(context).colorScheme.error,
+                                              ),
+                                            );
+                                          }
+                                        } finally {
+                                          setState(() => _isLoading = false);
+                                        }
+                                      },
+                                      icon: Icon(
+                                        Icons.refresh,
+                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                        size: 16,
+                                      ),
+                                      label: Text(
+                                        l10n.resendOtp,
+                                        style: TextStyle(
+                                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ],
                                 if (_showPasswordFields) ...[
                                   const SizedBox(height: 16), // Add spacing before password fields

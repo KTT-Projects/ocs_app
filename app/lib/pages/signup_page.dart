@@ -177,8 +177,22 @@ class _SignupPageState extends State<SignupPage> {
           });
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(l10n.verifyEmail),
-              duration: Duration(seconds: 8),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l10n.verifyEmail),
+                  const SizedBox(height: 4),
+                  Text(
+                    l10n.checkSpamJunk,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                    ),
+                  ),
+                ],
+              ),
+              duration: Duration(seconds: 12),
             ),
           );
         }
@@ -367,29 +381,27 @@ class _SignupPageState extends State<SignupPage> {
                                     child: Column(
                                       children: [
                                         DropdownButtonFormField<int>(
+                                          isExpanded: true,
                                           value: _selectedInstitutionId,
                                           items: _institutions.map((institution) {
                                             return DropdownMenuItem(
                                               value: int.parse(institution['id'].toString()),
                                               child: Text(
-                                                (institution['name'] as String)
-                                                    .split('/')[Localizations.localeOf(context).languageCode == 'ja' ? 1 : 0]
-                                                    .trim(),
+                                                (institution['name'] as String).split('/')[Localizations.localeOf(context).languageCode == 'ja' ? 1 : 0].trim(),
                                                 style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             );
                                           }).toList(),
                                           onChanged: (value) {
                                             setState(() => _selectedInstitutionId = value);
                                           },
-                                          decoration: InputDecoration(
-                                            hintText: l10n.selectInstitution,
-                                            prefixIcon: Icon(
-                                              Icons.school_outlined,
+                                          decoration: const InputDecoration(),
+                                          hint: Text(
+                                            l10n.selectInstitution,
+                                            style: TextStyle(
                                               color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
                                             ),
-                                            hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
-                                            errorStyle: TextStyle(color: Theme.of(context).colorScheme.error),
                                           ),
                                           dropdownColor: Theme.of(context).colorScheme.primary.withOpacity(0.9),
                                           icon: Icon(
@@ -421,14 +433,12 @@ class _SignupPageState extends State<SignupPage> {
                                           onChanged: (value) {
                                             setState(() => _selectedGrade = value);
                                           },
-                                          decoration: InputDecoration(
-                                            hintText: l10n.grade,
-                                            prefixIcon: Icon(
-                                              Icons.grade_outlined,
+                                          decoration: const InputDecoration(),
+                                          hint: Text(
+                                            l10n.grade,
+                                            style: TextStyle(
                                               color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
                                             ),
-                                            hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
-                                            errorStyle: TextStyle(color: Theme.of(context).colorScheme.error),
                                           ),
                                           dropdownColor: Theme.of(context).colorScheme.primary.withOpacity(0.9),
                                           icon: Icon(
@@ -461,11 +471,15 @@ class _SignupPageState extends State<SignupPage> {
                                     ),
                                     style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
                                     validator: (value) {
+                                      final l10n = AppLocalizations.of(context)!;
                                       if (value?.isEmpty ?? true) {
                                         return l10n.invalidEmail;
                                       }
                                       if (!value!.contains('@')) {
                                         return l10n.invalidEmail;
+                                      }
+                                      if (!value.endsWith('@gmail.com')) {
+                                        return l10n.onlyGoogleEmailAllowed;
                                       }
                                       return null;
                                     },
@@ -524,6 +538,62 @@ class _SignupPageState extends State<SignupPage> {
                                       ),
                                     ),
                                     style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    l10n.checkSpamJunk,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  TextButton.icon(
+                                    onPressed: () async {
+                                      setState(() => _isLoading = true);
+                                      try {
+                                        await widget.apiClient.register(
+                                          context: context,
+                                          email: _emailController.text,
+                                          password: _passwordController.text,
+                                          institutionId: _selectedInstitutionId!,
+                                          grade: _selectedGrade!,
+                                          displayName: _nameController.text,
+                                          bio: _bioController.text,
+                                          allowDm: _allowDm,
+                                        );
+                                        if (mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text('${l10n.verificationCodeSent}'.replaceAll('{email}', _emailController.text)),
+                                            ),
+                                          );
+                                        }
+                                      } catch (e) {
+                                        if (mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text(e.toString()),
+                                              backgroundColor: Theme.of(context).colorScheme.error,
+                                            ),
+                                          );
+                                        }
+                                      } finally {
+                                        setState(() => _isLoading = false);
+                                      }
+                                    },
+                                    icon: Icon(
+                                      Icons.refresh,
+                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                      size: 16,
+                                    ),
+                                    label: Text(
+                                      l10n.resendOtp,
+                                      style: TextStyle(
+                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                      ),
+                                    ),
                                   ),
                                 ],
                                 const SizedBox(height: 24),
