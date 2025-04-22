@@ -1,12 +1,15 @@
 <?php
 class Mailer
 {
+    // NOTE: Using PHP's mail() function can lead to deliverability issues, especially with strict providers like iCloud or Gmail.
+    // It's highly recommended to use a library like PHPMailer with an SMTP server (e.g., SendGrid, Mailgun, AWS SES, Gmail SMTP)
+    // for reliable email sending in production environments. This requires server configuration (SPF, DKIM records).
     public static function send($to, $subject, $body)
     {
         // Email headers
         $headers = [
             'MIME-Version: 1.0',
-            'Content-type: text/plain; charset=UTF-8',
+            'Content-type: text/html; charset=UTF-8', // Changed to HTML
             'From: OCS System <no-reply@ocs.kttprojects.com>',
             'Reply-To: no-reply@ocs.kttprojects.com',
             'X-Mailer: PHP/' . phpversion()
@@ -39,10 +42,16 @@ class Mailer
     public static function sendBilingual($to, $subjectEn, $subjectJa, $bodyEn, $bodyJa)
     {
         $subject = "$subjectEn / $subjectJa";
-        $body = "English:\n\n$bodyEn\n\n\n日本語:\n\n$bodyJa";
+        // Combine bodies using HTML
+        $body = "<p><strong>English:</strong></p>" .
+                "<p>" . $bodyEn . "</p>" . // Body already contains HTML tags
+                "<br><hr><br>" .
+                "<p><strong>日本語:</strong></p>" .
+                "<p>" . $bodyJa . "</p>"; // Body already contains HTML tags
         return self::send($to, $subject, $body);
     }
 
+    // Note: This function is currently unused as the body is generated directly in forgot_password.php
     public static function getPasswordResetEmail($resetLink)
     {
         $bodyEn = "Hello,\n\n" .

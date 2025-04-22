@@ -121,8 +121,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _errorMessage = e.toString());
-        _showMessage(e.toString(), isError: true);
+        // TODO: Log the actual error e for debugging
+        setState(() => _errorMessage = l10n.errorOccurred); // Use generic localized error
+        _showMessage(_errorMessage!, isError: true); // Show the generic error in snackbar too
       }
     } finally {
       if (mounted) {
@@ -206,10 +207,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                 if (_errorMessage != null) ...[
                                   const SizedBox(height: 16),
                                   Text(
-                                    l10n.errorMessage(_errorMessage!),
+                                    _errorMessage!, // Display error message directly
                                     style: TextStyle(
                                       color: Theme.of(context).colorScheme.error,
+                                      fontWeight: FontWeight.bold, // Make error more prominent
                                     ),
+                                    textAlign: TextAlign.center, // Center align error
                                   ),
                                 ],
                                 const SizedBox(height: 32),
@@ -270,6 +273,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                   ),
                                 ],
                                 if (_showPasswordFields) ...[
+                                  const SizedBox(height: 16), // Add spacing before password fields
                                   TextFormField(
                                     controller: _passwordController,
                                     obscureText: true,

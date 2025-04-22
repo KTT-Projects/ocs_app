@@ -371,12 +371,16 @@
   "@resetPasswordButton": {
     "description": "Text for reset password button"
   },
-  "requestPasswordReset": "Send Reset Link",
+  "requestPasswordReset": "Send Verification Code",
   "@requestPasswordReset": {
-    "description": "Text for request password reset button"
+    "description": "Text for request password reset button (sends a code)"
   },
   "resetPasswordSuccess": "Password has been reset successfully",
   "@resetPasswordSuccess": {
     "description": "Success message when password is reset"
+  },
+  "errorOccurred": "An unexpected error occurred. Please try again.",
+  "@errorOccurred": {
+    "description": "Generic error message shown when an unknown error happens"
   }
 }

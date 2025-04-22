@@ -64,9 +64,9 @@ try {
 
     // Update password and clear reset token
     $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-    $query = 'UPDATE users SET password = :password, reset_token = NULL, reset_token_expiry = NULL WHERE email = :email AND reset_token = :code';
+    $query = 'UPDATE users SET password_hash = :password_hash, reset_token = NULL, reset_token_expiry = NULL WHERE email = :email AND reset_token = :code'; // Use password_hash
     $stmt = $db->prepare($query);
-    $stmt->bindParam(':password', $hashedPassword);
+    $stmt->bindParam(':password_hash', $hashedPassword); // Bind to password_hash
     $stmt->bindParam(':email', $email);
     $stmt->bindParam(':code', $code);
     $stmt->execute();

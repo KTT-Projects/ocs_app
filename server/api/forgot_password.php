@@ -61,16 +61,16 @@ try {
     $stmt->bindParam(':email', $email);
     $stmt->execute();
 
-    // Send bilingual reset email
-    $emailBodyEn = "Your password reset code is: $resetCode\n\n" .
-                   "This code will expire in 1 hour.\n\n" .
-                   "If you did not request this password reset, please ignore this email.\n\n" .
-                   "Best regards,\nOCS Team";
+    // Send bilingual reset email (using HTML format)
+    $emailBodyEn = "Your password reset code is: <strong>$resetCode</strong><br><br>" .
+                   "This code will expire in 1 hour.<br><br>" .
+                   "If you did not request this password reset, please ignore this email.<br><br>" .
+                   "Best regards,<br>OCS Team";
 
-    $emailBodyJa = "パスワードリセット用の認証コード：$resetCode\n\n" .
-                   "このコードは1時間後に期限切れとなります。\n\n" .
-                   "このパスワードリセットをリクエストしていない場合は、このメールを無視してください。\n\n" .
-                   "よろしくお願いいたします。\nOCSチーム";
+    $emailBodyJa = "パスワードリセット用の認証コード：<strong>$resetCode</strong><br><br>" .
+                   "このコードは1時間後に期限切れとなります。<br><br>" .
+                   "このパスワードリセットをリクエストしていない場合は、このメールを無視してください。<br><br>" .
+                   "よろしくお願いいたします。<br>OCSチーム";
 
     if (Mailer::sendBilingual(
         $email,

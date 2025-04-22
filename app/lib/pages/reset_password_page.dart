@@ -6,12 +6,14 @@ import 'login_page.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   final ApiClient apiClient;
-  final String token;
+  final String email; // Changed from token
+  final String code;  // Added code
 
   const ResetPasswordPage({
     super.key,
     required this.apiClient,
-    required this.token,
+    required this.email, // Changed from token
+    required this.code,  // Added code
   });
 
   @override
@@ -60,7 +62,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     try {
       await widget.apiClient.resetPassword(
         context: context,
-        token: widget.token,
+        email: widget.email, // Pass email
+        code: widget.code,   // Pass code
         newPassword: _passwordController.text,
       );
 
@@ -76,8 +79,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _errorMessage = e.toString());
-        _showMessage(e.toString(), isError: true);
+        // TODO: Log the actual error e for debugging
+        setState(() => _errorMessage = l10n.errorOccurred); // Use generic localized error
+        _showMessage(_errorMessage!, isError: true); // Show the generic error in snackbar too
       }
     } finally {
       if (mounted) {
@@ -154,10 +158,12 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                                 if (_errorMessage != null) ...[
                                   const SizedBox(height: 16),
                                   Text(
-                                    l10n.errorMessage(_errorMessage!),
+                                    _errorMessage!, // Display error message directly (consistent with forgot_password_page)
                                     style: TextStyle(
                                       color: Theme.of(context).colorScheme.error,
+                                      fontWeight: FontWeight.bold,
                                     ),
+                                    textAlign: TextAlign.center,
                                   ),
                                 ],
                                 const SizedBox(height: 32),
