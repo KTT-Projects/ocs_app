@@ -73,6 +73,8 @@ CREATE TABLE
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    reset_token VARCHAR(64) NULL,
+    reset_token_expiry DATETIME NULL,
     FOREIGN KEY (role_id) REFERENCES roles (id),
     FOREIGN KEY (institution_id) REFERENCES educational_institutions (id)
   );

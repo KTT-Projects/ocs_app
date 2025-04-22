@@ -1,4 +1,16 @@
 {
+    "onlyGoogleEmailAllowed": "Only Gmail accounts are supported at this time",
+    "@onlyGoogleEmailAllowed": {
+        "description": "Error message shown when non-Gmail email is entered"
+    },
+    "checkSpamJunk": "Please check your spam/junk folder if you don't see the email in your inbox",
+    "@checkSpamJunk": {
+        "description": "Helper text to check spam folder for verification email"
+    },
+    "resendOtp": "Resend Code",
+    "@resendOtp": {
+        "description": "Button text to resend verification code"
+    },
   "@@locale": "en",
   "appTitle": "Osakikamijima Community Site",
   "@appTitle": {
@@ -338,5 +350,49 @@
   "summerFestivalDesc": "Planning meeting for this year's summer festival.",
   "@summerFestivalDesc": {
     "description": "Description for summer festival planning"
+  },
+  "resetPasswordTitle": "Reset Password",
+  "@resetPasswordTitle": {
+    "description": "Title for reset password screen"
+  },
+  "resetPasswordSubtitle": "Enter your email to receive reset instructions",
+  "@resetPasswordSubtitle": {
+    "description": "Subtitle for reset password screen"
+  },
+  "resetPasswordSent": "Password reset instructions sent to your email",
+  "@resetPasswordSent": {
+    "description": "Success message when reset email is sent"
+  },
+  "resetPasswordFailed": "Failed to reset password",
+  "@resetPasswordFailed": {
+    "description": "Error message when password reset fails"
+  },
+  "newPassword": "New Password",
+  "@newPassword": {
+    "description": "Label for new password input field"
+  },
+  "confirmPassword": "Confirm Password",
+  "@confirmPassword": {
+    "description": "Label for confirm password input field"
+  },
+  "passwordsDoNotMatch": "Passwords do not match",
+  "@passwordsDoNotMatch": {
+    "description": "Error message when passwords do not match"
+  },
+  "resetPasswordButton": "Reset Password",
+  "@resetPasswordButton": {
+    "description": "Text for reset password button"
+  },
+  "requestPasswordReset": "Send Verification Code",
+  "@requestPasswordReset": {
+    "description": "Text for request password reset button (sends a code)"
+  },
+  "resetPasswordSuccess": "Password has been reset successfully",
+  "@resetPasswordSuccess": {
+    "description": "Success message when password is reset"
+  },
+  "errorOccurred": "An unexpected error occurred. Please try again.",
+  "@errorOccurred": {
+    "description": "Generic error message shown when an unknown error happens"
   }
 }
