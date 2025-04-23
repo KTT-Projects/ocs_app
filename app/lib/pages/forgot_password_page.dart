@@ -1,6 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import '../providers/language_provider.dart';
+import '../widgets/language_toggle.dart';
 import '../services/api_client.dart';
 import 'login_page.dart';
 
@@ -152,6 +155,17 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               ),
             ),
           ),
+          // Language toggle
+          Positioned(
+            top: 16,
+            right: 16,
+            child: Consumer<LanguageProvider>(
+              builder: (context, languageProvider, _) => LanguageToggle(
+                currentLanguage: languageProvider.currentLanguage,
+                onLanguageChanged: (lang) => languageProvider.setLanguage(lang),
+              ),
+            ),
+          ),
           // Responsive layout
           LayoutBuilder(
             builder: (context, constraints) {
@@ -160,7 +174,12 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
               return Center(
                 child: SingleChildScrollView(
-                  padding: EdgeInsets.all(isSmallScreen ? 16.0 : 24.0),
+                  padding: EdgeInsets.fromLTRB(
+                    isSmallScreen ? 16.0 : 24.0,
+                    56.0, // Added extra top padding for language toggle
+                    isSmallScreen ? 16.0 : 24.0,
+                    isSmallScreen ? 16.0 : 24.0,
+                  ),
                   child: Container(
                     width: isSmallScreen ? maxWidth - 32 : 400,
                     constraints: const BoxConstraints(maxHeight: 600),

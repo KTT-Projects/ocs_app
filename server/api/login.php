@@ -54,9 +54,18 @@ if (isset($result['status'])) {
     require_once 'config/Mailer.php';
     $mailer = new Mailer();
 
+    // Get language from Accept-Language header (default to 'en' if not set)
+    $lang = 'en';
+    if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+      $lang = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
+      if (!in_array($lang, ['en', 'ja'])) {
+        $lang = 'en';
+      }
+    }
+
     // Send verification email with OTP
     $verificationOtp = $auth->getUserByEmail($data['email'])['verification_otp'];
-    if ($mailer->sendVerificationEmail($data['email'], $verificationOtp)) {
+    if ($mailer->sendVerificationEmail($data['email'], $verificationOtp, $lang)) {
       Response::json([
         'status' => 'needs_verification',
         'message' => 'Please enter the verification code sent to your email',
