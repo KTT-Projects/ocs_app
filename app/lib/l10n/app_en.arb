@@ -394,5 +394,9 @@
   "errorOccurred": "An unexpected error occurred. Please try again.",
   "@errorOccurred": {
     "description": "Generic error message shown when an unknown error happens"
+  },
+  "feed": "Feed",
+  "@feed": {
+    "description": "Title for the feed section"
   }
 }
