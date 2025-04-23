@@ -117,9 +117,18 @@ try {
     Response::error('Failed to create user account');
   }
 
+  // Get language from Accept-Language header (default to 'en' if not set)
+  $lang = 'en';
+  if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+    $lang = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
+    if (!in_array($lang, ['en', 'ja'])) {
+      $lang = 'en';
+    }
+  }
+
   // Send verification email with OTP
   try {
-    $emailSent = $mailer->sendVerificationEmail($data['email'], $result['verification_otp']);
+    $emailSent = $mailer->sendVerificationEmail($data['email'], $result['verification_otp'], $lang);
 
     if (!$emailSent) {
       error_log("Failed to send verification email to: " . $data['email']);

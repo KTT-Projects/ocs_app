@@ -65,7 +65,10 @@ class ApiClient {
     final l10n = AppLocalizations.of(context)!;
     final response = await http.post(
       Uri.parse('$baseUrl/register.php'),
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept-Language': Localizations.localeOf(context).languageCode,
+      },
       body: json.encode({
         'email': email,
         'password': password,
@@ -108,7 +111,10 @@ class ApiClient {
       final l10n = AppLocalizations.of(context)!;
       final response = await http.post(
         Uri.parse('$baseUrl/verify.php'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+        'Content-Type': 'application/json',
+        'Accept-Language': Localizations.localeOf(context).languageCode,
+      },
         body: json.encode({
           'email': email,
           'otp': otp,
@@ -147,7 +153,10 @@ class ApiClient {
       final l10n = AppLocalizations.of(context)!;
       final response = await http.post(
         Uri.parse('$baseUrl/login.php'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+        'Content-Type': 'application/json',
+        'Accept-Language': Localizations.localeOf(context).languageCode,
+      },
         body: json.encode({
           'email': email,
           'password': password,
