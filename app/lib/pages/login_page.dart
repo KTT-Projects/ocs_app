@@ -129,16 +129,20 @@ class _LoginPageState extends State<LoginPage> {
             });
             _showMessage(l10n.verifyEmail, seconds: 8);
           } else if (response['status'] == 'success' && response['token'] != null) {
+            final token = response['token'];
+            await widget.apiClient.setToken(token);
             _showMessage(l10n.loginSuccessful, seconds: 4);
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => HomePage(
-                  token: response['token'],
-                  apiClient: widget.apiClient,
+            if (mounted) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HomePage(
+                    token: token,
+                    apiClient: widget.apiClient,
+                  ),
                 ),
-              ),
-            );
+              );
+            }
           }
         }
       }
@@ -336,37 +340,39 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                                   const SizedBox(height: 8),
                                   TextButton.icon(
-                                    onPressed: _isLoading ? null : () async {
-                                      setState(() => _isLoading = true);
-                                      try {
-                                        await widget.apiClient.register(
-                                          context: context,
-                                          email: _emailController.text,
-                                          password: _passwordController.text,
-                                          institutionId: int.parse(_userId ?? '0'),
-                                          grade: 0,
-                                          displayName: '',
-                                          bio: '',
-                                          allowDm: true,
-                                        );
-                                        if (mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(content: Text('${l10n.verificationCodeSent}'.replaceAll('{email}', _emailController.text))),
-                                          );
-                                        }
-                                      } catch (e) {
-                                        if (mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text(e.toString()),
-                                              backgroundColor: Theme.of(context).colorScheme.error,
-                                            ),
-                                          );
-                                        }
-                                      } finally {
-                                        setState(() => _isLoading = false);
-                                      }
-                                    },
+                                    onPressed: _isLoading
+                                        ? null
+                                        : () async {
+                                            setState(() => _isLoading = true);
+                                            try {
+                                              await widget.apiClient.register(
+                                                context: context,
+                                                email: _emailController.text,
+                                                password: _passwordController.text,
+                                                institutionId: int.parse(_userId ?? '0'),
+                                                grade: 0,
+                                                displayName: '',
+                                                bio: '',
+                                                allowDm: true,
+                                              );
+                                              if (mounted) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(content: Text('${l10n.verificationCodeSent}'.replaceAll('{email}', _emailController.text))),
+                                                );
+                                              }
+                                            } catch (e) {
+                                              if (mounted) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(e.toString()),
+                                                    backgroundColor: Theme.of(context).colorScheme.error,
+                                                  ),
+                                                );
+                                              }
+                                            } finally {
+                                              setState(() => _isLoading = false);
+                                            }
+                                          },
                                     icon: Icon(
                                       Icons.refresh,
                                       color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),

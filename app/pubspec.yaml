@@ -17,7 +17,7 @@ dependencies:
   google_fonts: ^6.2.1
   intl: ^0.19.0
   http: ^1.2.1
-  animated_notch_bottom_bar: ^1.0.3
+  shared_preferences: ^2.2.2
   circle_nav_bar: ^2.2.0
 
 dev_dependencies:

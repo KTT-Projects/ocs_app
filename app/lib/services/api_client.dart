@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'auth_service.dart';
 
 class ApiException implements Exception {
   final String message;
@@ -14,13 +15,26 @@ class ApiException implements Exception {
 class ApiClient {
   static const String baseUrl = 'https://ocs.kttprojects.com/api';
   String? _token;
+  final _authService = AuthService();
 
-  void setToken(String? token) {
-    _token = token;
+  String? get token => _token;
+
+  Future<void> initialize() async {
+    _token = await _authService.getToken();
   }
 
-  void clearToken() {
+  Future<void> setToken(String? token) async {
+    _token = token;
+    if (token != null) {
+      await _authService.saveToken(token);
+    } else {
+      await _authService.clearToken();
+    }
+  }
+
+  Future<void> clearToken() async {
     _token = null;
+    await _authService.clearToken();
   }
 
   String _mapServerError(BuildContext context, String serverMessage) {
