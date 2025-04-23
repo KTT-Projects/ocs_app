@@ -1,7 +1,10 @@
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+
+import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../services/api_client.dart';
 import 'login_page.dart';
-import 'package:flutter/material.dart';
+import 'package:circle_nav_bar/circle_nav_bar.dart';
 
 class HomePage extends StatefulWidget {
   final String token;
@@ -25,18 +28,11 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
   final List<Widget> pages = [
-    const Center(child: Text('Home')),
-    const Center(child: Text('Search')),
-    const Center(child: Text('Notifications')),
-    const Center(child: Text('Profile')),
-    const Center(child: Text('Settings')),
+    const Center(child: Text('Feed')),
+    const Center(child: Text('Events')),
+    const Center(child: Text('Volunteer')),
+    const Center(child: Text('Study')),
   ];
-
-  void navBar(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
 
   @override
   void didChangeDependencies() {
@@ -79,39 +75,64 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
       ),
       body: pages[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: 'Notifications',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
+      extendBody: true,
+      bottomNavigationBar: CircleNavBar(
+        activeIcons: [
+          Icon(Icons.feed, color: Colors.white, size: 28),
+          Icon(Icons.event_note, color: Colors.white, size: 28),
+          Icon(Icons.volunteer_activism, color: Colors.white, size: 28),
+          Icon(Icons.school, color: Colors.white, size: 28),
         ],
-        currentIndex: _currentIndex,
-        onTap: navBar,
-        type: BottomNavigationBarType.fixed,
-        unselectedIconTheme: const IconThemeData(size: 24, color: Colors.grey),
-        selectedIconTheme: const IconThemeData(size: 30, color: Colors.blue),
+        inactiveIcons: [
+          Column(children: [
+            Icon(Icons.feed_outlined, color: Colors.blue, size: 28),
+            Text(l10n.feed, style: TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.w500))
+          ]),
+          Icon(Icons.event_note_outlined, color: Colors.blue, size: 28),
+          Icon(Icons.volunteer_activism_outlined, color: Colors.blue, size: 28),
+          Icon(Icons.school_outlined, color: Colors.blue, size: 28),
+        ],
+        color: Colors.white,
+        height: 60,
+        circleWidth: 60,
+        padding: EdgeInsets.only(left: 16, right: 16, bottom: 20),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.white,
+            Colors.white.withValues(alpha: 0.8),
+          ],
+        ),
+        activeIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        cornerRadius: const BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+          bottomRight: Radius.circular(30),
+          bottomLeft: Radius.circular(30),
+        ),
+        shadowColor: Colors.black.withValues(alpha: 0.4),
+        elevation: 10,
+        circleGradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.blue.withValues(alpha: 0.8),
+            Colors.blue.withValues(alpha: 0.8),
+          ],
+        ),
+        circleShadowColor: Colors.blue.withValues(alpha: 0.8),
       ),
     );
   }
