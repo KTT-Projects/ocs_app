@@ -22,6 +22,21 @@ class _HomePageState extends State<HomePage> {
   String? _error;
   Map<String, dynamic>? _profile;
   bool _initialized = false;
+  int _currentIndex = 0;
+
+  final List<Widget> pages = [
+    const Center(child: Text('Home')),
+    const Center(child: Text('Search')),
+    const Center(child: Text('Notifications')),
+    const Center(child: Text('Profile')),
+    const Center(child: Text('Settings')),
+  ];
+
+  void navBar(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -68,9 +83,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Home'),
       ),
-      body: const Center(
-        child: Text('Empty Page'),
-      ),
+      body: pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(
@@ -94,6 +107,11 @@ class _HomePageState extends State<HomePage> {
             label: 'Settings',
           ),
         ],
+        currentIndex: _currentIndex,
+        onTap: navBar,
+        type: BottomNavigationBarType.fixed,
+        unselectedIconTheme: const IconThemeData(size: 24, color: Colors.grey),
+        selectedIconTheme: const IconThemeData(size: 30, color: Colors.blue),
       ),
     );
   }
