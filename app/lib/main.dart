@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'services/api_client.dart';
 import 'providers/language_provider.dart';
 import 'package:ocs_app/pages/main_page.dart';
+import 'package:ocs_app/pages/login_page.dart'; // Import LoginPage
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -88,7 +89,12 @@ class MyApp extends StatelessWidget {
           onSecondary: Colors.black,
         ),
       ),
-      home: MainPage(apiClient: apiClient),
+      // home: MainPage(apiClient: apiClient), // Remove home
+      initialRoute: '/', // Set initial route
+      routes: { // Define routes
+        '/': (context) => MainPage(apiClient: apiClient),
+        '/login': (context) => LoginPage(apiClient: apiClient),
+      },
         );
       },
     );
