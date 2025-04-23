@@ -11,17 +11,24 @@ Future<void> main() async {
   // Ensure that Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize localizations
+  // Initialize APIs and localizations
+  final apiClient = ApiClient();
   await Future.wait([
+    apiClient.initialize(),
     initializeDateFormatting('en'),
     initializeDateFormatting('ja'),
   ]);
 
-  runApp(const MyApp());
+  runApp(MyApp(apiClient: apiClient));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final ApiClient apiClient;
+  
+  const MyApp({
+    super.key,
+    required this.apiClient,
+  });
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([
@@ -66,7 +73,7 @@ class MyApp extends StatelessWidget {
           onSecondary: Colors.black,
         ),
       ),
-      home: const MainPage(),
+      home: MainPage(apiClient: apiClient),
     );
   }
 }

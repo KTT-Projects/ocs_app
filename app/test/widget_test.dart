@@ -7,24 +7,59 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:ocs_app/main.dart';
+import 'package:ocs_app/services/api_client.dart';
+import 'package:ocs_app/pages/home_page.dart';
+import 'package:ocs_app/pages/login_page.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  group('App Authentication Tests', () {
+    late ApiClient apiClient;
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    setUp(() {
+      apiClient = ApiClient();
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    testWidgets('App starts with login page when no token exists', (WidgetTester tester) async {
+      // Start the app with no token
+      await tester.pumpWidget(MyApp(apiClient: apiClient));
+      await tester.pumpAndSettle(); // Wait for all animations to complete
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+      // Verify that we see the login form
+      expect(find.byType(TextFormField), findsWidgets); // Should find email and password fields
+      expect(find.text('Sign In'), findsOneWidget); // Should find the sign in button
+      expect(find.byType(HomePage), findsNothing); // Should not find the home page
+    });
+
+    testWidgets('App starts with home page when token exists', (WidgetTester tester) async {
+      // Simulate an existing token
+      await apiClient.setToken('test_token');
+      
+      // Start the app
+      await tester.pumpWidget(MyApp(apiClient: apiClient));
+      await tester.pumpAndSettle();
+
+      // Verify that we skip login and go straight to home
+      expect(find.byType(HomePage), findsOneWidget); // Should find the home page
+      expect(find.byType(LoginPage), findsNothing); // Should not find the login page
+    });
+
+    testWidgets('Logout clears token and returns to login page', (WidgetTester tester) async {
+      // Start with a token
+      await apiClient.setToken('test_token');
+      await tester.pumpWidget(MyApp(apiClient: apiClient));
+      await tester.pumpAndSettle();
+
+      // Open drawer and tap logout
+      await tester.dragFrom(const Offset(20, 200), const Offset(300, 200)); // Open drawer
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Logout'));
+      await tester.pumpAndSettle();
+
+      // Verify we're back at login and token is cleared
+      expect(find.byType(LoginPage), findsOneWidget);
+      expect(find.byType(HomePage), findsNothing);
+      expect(apiClient.token, isNull);
+    });
   });
 }
