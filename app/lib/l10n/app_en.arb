@@ -395,6 +395,32 @@
   "@errorOccurred": {
     "description": "Generic error message shown when an unknown error happens"
   },
-  "feedFeature": "Feed",
-  "studyFeature": "Study"
+  "feed": "Feed",
+  "@feed": {
+    "description": "Title for the feed section"
+  },
+  "failedToUpdateProfile": "Failed to update profile settings",
+  "@failedToUpdateProfile": {
+    "description": "Error message when profile update fails"
+  },
+  "role": "Role",
+  "@role": {
+    "description": "Label for user role display"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Text for cancel button"
+  },
+  "gradeInputHint": "Enter a number 1-6 or OB",
+  "@gradeInputHint": {
+    "description": "Hint text for grade input field"
+  },
+  "invalidGrade": "Please enter a number from 1 to 6, or OB",
+  "@invalidGrade": {
+    "description": "Error message when grade input is invalid"
+  },
+  "noName": "No Name",
+  "@noName": {
+    "description": "Text shown when user has no name set"
+  }
 }
