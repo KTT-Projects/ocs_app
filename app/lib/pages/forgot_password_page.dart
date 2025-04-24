@@ -154,15 +154,18 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               ),
             ),
           ),
-          // Language toggle
+          // Language toggle (with Material for interaction)
           Positioned(
-            top: 16,
+            top: Theme.of(context).platform == TargetPlatform.iOS ? MediaQuery.of(context).padding.top + 16 : 16,
             right: 16,
-            child: Consumer<LanguageProvider>(
+            child: Material(
+              color: Colors.transparent,
+              child: Consumer<LanguageProvider>(
               builder: (context, languageProvider, _) => LanguageToggle(
                 currentLanguage: languageProvider.currentLanguage,
                 onLanguageChanged: (lang) => languageProvider.setLanguage(lang),
-              ),
+                ),
+            ),
             ),
           ),
           // Responsive layout
@@ -175,13 +178,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 child: SingleChildScrollView(
                   padding: EdgeInsets.fromLTRB(
                     isSmallScreen ? 16.0 : 24.0,
-                    56.0, // Added extra top padding for language toggle
+                    Theme.of(context).platform == TargetPlatform.iOS ? 90.0 : 56.0, // More top padding for iOS
                     isSmallScreen ? 16.0 : 24.0,
                     isSmallScreen ? 16.0 : 24.0,
                   ),
                   child: Container(
                     width: isSmallScreen ? maxWidth - 32 : 400,
-                    constraints: const BoxConstraints(maxHeight: 600),
+                    constraints: const BoxConstraints(maxWidth: 600, maxHeight: 600),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.background.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(24),
