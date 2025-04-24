@@ -141,26 +141,62 @@ class _ProfilePageState extends State<ProfilePage> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(l10n.profile),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: Consumer<LanguageProvider>(
-              builder: (context, languageProvider, _) => LanguageToggle(
-                currentLanguage: languageProvider.currentLanguage,
-                onLanguageChanged: (lang) => languageProvider.setLanguage(lang),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: IconButton(
+                icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
+                onPressed: () => Navigator.pop(context),
               ),
             ),
           ),
-        ],
+        ),
       ),
       body: Stack(
         children: [
+          // Language toggle
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 16,
+            right: 16,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Consumer<LanguageProvider>(
+                    builder: (context, languageProvider, _) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: LanguageToggle(
+                        currentLanguage: languageProvider.currentLanguage,
+                        onLanguageChanged: (lang) => languageProvider.setLanguage(lang),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
           // Gradient background
           Container(
             decoration: BoxDecoration(

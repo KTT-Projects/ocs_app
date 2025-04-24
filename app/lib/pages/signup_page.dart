@@ -232,18 +232,7 @@ class _SignupPageState extends State<SignupPage> {
               ),
             ),
           ),
-          // Language toggle
-          Positioned(
-            top: 16,
-            right: 16,
-            child: Consumer<LanguageProvider>(
-              builder: (context, languageProvider, _) => LanguageToggle(
-                currentLanguage: languageProvider.currentLanguage,
-                onLanguageChanged: (lang) => languageProvider.setLanguage(lang),
-              ),
-            ),
-          ),
-          // Content
+          // Main content
           LayoutBuilder(
             builder: (context, constraints) {
               final maxWidth = constraints.maxWidth;
@@ -253,12 +242,13 @@ class _SignupPageState extends State<SignupPage> {
                 child: SingleChildScrollView(
                   padding: EdgeInsets.fromLTRB(
                     isSmallScreen ? 16.0 : 24.0,
-                    56.0, // Added extra top padding for language toggle
+                    Theme.of(context).platform == TargetPlatform.iOS ? 120.0 : 56.0, // Increased top padding for iOS
                     isSmallScreen ? 16.0 : 24.0,
                     isSmallScreen ? 16.0 : 24.0,
                   ),
                   child: Container(
                     width: isSmallScreen ? maxWidth - 32 : 400,
+                    constraints: BoxConstraints(maxWidth: 600),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.background.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(24),
@@ -695,6 +685,27 @@ class _SignupPageState extends State<SignupPage> {
                 ),
               );
             },
+          ),
+          // Language toggle - positioned last to ensure highest z-index
+          Positioned(
+            top: Theme.of(context).platform == TargetPlatform.iOS ? MediaQuery.of(context).padding.top + 16 : 16,
+            right: 16,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(45),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                child: Material(
+                  color: Colors.transparent,
+                  elevation: 0, // Removed elevation
+                  child: Consumer<LanguageProvider>(
+                    builder: (context, languageProvider, _) => LanguageToggle(
+                      currentLanguage: languageProvider.currentLanguage,
+                      onLanguageChanged: (lang) => languageProvider.setLanguage(lang),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
