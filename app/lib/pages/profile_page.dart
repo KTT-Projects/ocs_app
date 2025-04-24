@@ -709,6 +709,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         child: TextFormField(
                           controller: controller,
                           autofocus: true,
+                          maxLength: title == l10n.bio ? 500 : title == l10n.displayName ? 50 : null,
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.onPrimary,
                           ),

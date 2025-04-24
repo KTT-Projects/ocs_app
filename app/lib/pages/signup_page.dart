@@ -301,6 +301,7 @@ class _SignupPageState extends State<SignupPage> {
                                 if (!_showOtpField) ...[
                                   TextFormField(
                                     controller: _nameController,
+                                    maxLength: 100,
                                     decoration: InputDecoration(
                                       hintText: l10n.fullName,
                                       prefixIcon: Icon(
@@ -322,6 +323,7 @@ class _SignupPageState extends State<SignupPage> {
                                   TextFormField(
                                     controller: _bioController,
                                     maxLines: 3,
+                                    maxLength: 500,
                                     decoration: InputDecoration(
                                       hintText: l10n.bio,
                                       prefixIcon: Icon(
