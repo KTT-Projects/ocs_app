@@ -5,18 +5,15 @@ require_once 'config/Auth.php';
 
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: GET');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Allow-Methods: GET, PATCH');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, Accept, Accept-Language');
+header('Access-Control-Allow-Credentials: true');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 header('Expires: 0');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
-}
-
-if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-    Response::error('Invalid request method', 405);
 }
 
 // Get authorization header
@@ -44,6 +41,117 @@ try {
     
     if (!$payload || !isset($payload['user_id']) || time() >= $payload['exp']) {
         Response::error('Invalid or expired token', 401);
+    }
+
+    // Create uploads directory if it doesn't exist
+    $uploadDir = __DIR__ . '/../uploads/avatars/';
+    if (!file_exists($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+
+    // Handle POST (web avatar upload) or PATCH (mobile update) request for updating profile settings
+    if ($_SERVER['REQUEST_METHOD'] === 'PATCH' || $_SERVER['REQUEST_METHOD'] === 'POST') {
+        // Check if it's a multipart form data (file upload)
+        if (strpos($_SERVER['CONTENT_TYPE'], 'multipart/form-data') !== false) {
+            if (!isset($_FILES['avatar'])) {
+                Response::error('No avatar file provided', 400);
+            }
+
+            $file = $_FILES['avatar'];
+            if ($file['error'] !== UPLOAD_ERR_OK) {
+                Response::error('File upload failed', 400);
+            }
+
+            // Validate file type
+            $allowedTypes = ['image/jpeg', 'image/png'];
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mimeType = finfo_file($finfo, $file['tmp_name']);
+            finfo_close($finfo);
+
+            if (!in_array($mimeType, $allowedTypes)) {
+                Response::error('Invalid file type. Only JPEG and PNG are allowed.', 400);
+            }
+
+            // Generate unique filename
+            $extension = $mimeType === 'image/jpeg' ? 'jpg' : 'png';
+            $filename = uniqid('avatar_') . '.' . $extension;
+            $filepath = $uploadDir . $filename;
+
+            // Move uploaded file
+            if (!move_uploaded_file($file['tmp_name'], $filepath)) {
+                Response::error('Failed to save file', 500);
+            }
+
+            // Get current avatar URL to delete the old file
+            $query_get_old = "SELECT avatar_url FROM user_profiles WHERE user_id = :user_id";
+            $stmt_get_old = $db->prepare($query_get_old);
+            $stmt_get_old->execute(['user_id' => $payload['user_id']]);
+            $old_avatar_url = $stmt_get_old->fetchColumn();
+
+            // Update avatar_url in database
+            $avatarUrl = '/uploads/avatars/' . $filename;
+            $query_update = "UPDATE user_profiles SET avatar_url = :avatar_url WHERE user_id = :user_id";
+            $stmt_update = $db->prepare($query_update);
+            $stmt_update->execute([
+                'avatar_url' => $avatarUrl,
+                'user_id' => $payload['user_id']
+            ]);
+
+            // Delete old avatar file if it exists
+            if ($old_avatar_url && !empty($old_avatar_url)) {
+                $old_filepath = __DIR__ . '/../' . ltrim($old_avatar_url, '/'); // Ensure correct path
+                if (file_exists($old_filepath)) {
+                    unlink($old_filepath);
+                }
+            }
+
+            Response::json([
+                'status' => 'success',
+                'avatar_url' => $avatarUrl
+            ]);
+            exit;
+        }
+
+        // Handle regular profile updates
+        $data = json_decode(file_get_contents('php://input'), true);
+        
+        $profileUpdateFields = [];
+        $userUpdateFields = [];
+        $profileParams = ['user_id' => $payload['user_id']];
+        $userParams = ['user_id' => $payload['user_id']];
+
+        if (isset($data['allow_dm'])) {
+            $profileUpdateFields[] = "allow_dm = :allow_dm";
+            $profileParams['allow_dm'] = $data['allow_dm'] ? 1 : 0;
+        }
+        if (isset($data['display_name'])) {
+            $profileUpdateFields[] = "display_name = :display_name";
+            $profileParams['display_name'] = $data['display_name'];
+        }
+        if (isset($data['bio'])) {
+            $profileUpdateFields[] = "bio = :bio";
+            $profileParams['bio'] = $data['bio'];
+        }
+        if (isset($data['grade'])) {
+            $userUpdateFields[] = "grade = :grade";
+            $userParams['grade'] = $data['grade'];
+        }
+        if (isset($data['institution_id'])) {
+            $userUpdateFields[] = "institution_id = :institution_id";
+            $userParams['institution_id'] = $data['institution_id'];
+        }
+
+        if (!empty($profileUpdateFields)) {
+            $query = "UPDATE user_profiles SET " . implode(", ", $profileUpdateFields) . " WHERE user_id = :user_id";
+            $stmt = $db->prepare($query);
+            $stmt->execute($profileParams);
+        }
+
+        if (!empty($userUpdateFields)) {
+            $query = "UPDATE users SET " . implode(", ", $userUpdateFields) . " WHERE id = :user_id";
+            $stmt = $db->prepare($query);
+            $stmt->execute($userParams);
+        }
     }
 
     // Get user data

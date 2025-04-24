@@ -5,6 +5,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../services/api_client.dart';
 import 'login_page.dart';
 import 'package:circle_nav_bar/circle_nav_bar.dart';
+import 'profile_page.dart';
 
 class HomePage extends StatefulWidget {
   final String token;
@@ -79,6 +80,21 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.account_circle),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfilePage(
+                    apiClient: widget.apiClient,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: pages[_currentIndex],
       extendBody: true,
