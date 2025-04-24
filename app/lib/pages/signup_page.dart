@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import '../providers/language_provider.dart';
 import '../widgets/language_toggle.dart';
 import '../services/api_client.dart';
-import 'login_page.dart';
 import 'home_page.dart';
 
 class SignupPage extends StatefulWidget {

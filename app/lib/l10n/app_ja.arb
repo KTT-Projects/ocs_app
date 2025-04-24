@@ -101,5 +101,29 @@
   "feed": "掲示板",
   "@feed": {
     "description": "掲示板セクションのタイトル"
+  },
+  "failedToUpdateProfile": "プロフィールの更新に失敗しました",
+  "@failedToUpdateProfile": {
+    "description": "プロフィールの更新に失敗した場合のエラーメッセージ"
+  },
+  "role": "役割",
+  "@role": {
+    "description": "ユーザーの役割表示用のラベル"
+  },
+  "cancel": "キャンセル",
+  "@cancel": {
+    "description": "キャンセルボタンのテキスト"
+  },
+  "gradeInputHint": "1-6の数字またはOBを入力",
+  "@gradeInputHint": {
+    "description": "学年入力欄のヒントテキスト"
+  },
+  "invalidGrade": "1-6の数字またはOBを入力してください",
+  "@invalidGrade": {
+    "description": "学年入力が無効な場合のエラーメッセージ"
+  },
+  "noName": "名前未設定",
+  "@noName": {
+    "description": "名前が設定されていない場合に表示されるテキスト"
   }
 }

@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import '../providers/language_provider.dart';
 import '../widgets/language_toggle.dart';
 import '../services/api_client.dart';
-import 'login_page.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   final ApiClient apiClient;

@@ -5,6 +5,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../services/api_client.dart';
 import 'login_page.dart';
 import 'package:circle_nav_bar/circle_nav_bar.dart';
+import 'profile_page.dart';
 
 class HomePage extends StatefulWidget {
   final String token;
@@ -79,6 +80,21 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.account_circle),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfilePage(
+                    apiClient: widget.apiClient,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: pages[_currentIndex],
       extendBody: true,
@@ -90,10 +106,7 @@ class _HomePageState extends State<HomePage> {
           Icon(Icons.school, color: Colors.white, size: 28),
         ],
         inactiveIcons: [
-          Column(children: [
-            Icon(Icons.feed_outlined, color: Colors.blue, size: 28),
-            Text(l10n.feed, style: TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.w500))
-          ]),
+          Column(children: [Icon(Icons.feed_outlined, color: Colors.blue, size: 28), Text(l10n.feed, style: TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.w500))]),
           Icon(Icons.event_note_outlined, color: Colors.blue, size: 28),
           Icon(Icons.volunteer_activism_outlined, color: Colors.blue, size: 28),
           Icon(Icons.school_outlined, color: Colors.blue, size: 28),
@@ -107,7 +120,7 @@ class _HomePageState extends State<HomePage> {
           end: Alignment.bottomCenter,
           colors: [
             Colors.white,
-            Colors.white.withValues(alpha: 0.8),
+            Colors.white.withOpacity(0.8),
           ],
         ),
         activeIndex: _currentIndex,
@@ -122,17 +135,17 @@ class _HomePageState extends State<HomePage> {
           bottomRight: Radius.circular(30),
           bottomLeft: Radius.circular(30),
         ),
-        shadowColor: Colors.black.withValues(alpha: 0.4),
+        shadowColor: Colors.black.withOpacity(0.4),
         elevation: 10,
         circleGradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.blue.withValues(alpha: 0.8),
-            Colors.blue.withValues(alpha: 0.8),
+            Colors.blue.withOpacity(0.8),
+            Colors.blue.withOpacity(0.8),
           ],
         ),
-        circleShadowColor: Colors.blue.withValues(alpha: 0.8),
+        circleShadowColor: Colors.blue.withOpacity(0.8),
       ),
     );
   }

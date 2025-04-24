@@ -193,7 +193,7 @@ class _LoginPageState extends State<LoginPage> {
           // Language toggle - place after Container but before LayoutBuilder
           Positioned(
             top: 16,
-            right: 16,
+            right: 16 + MediaQuery.of(context).padding.right, // Add padding for iOS status bar/notch
             child: Consumer<LanguageProvider>(
               builder: (context, languageProvider, _) => LanguageToggle(
                 currentLanguage: languageProvider.currentLanguage,

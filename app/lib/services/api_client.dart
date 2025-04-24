@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'dart:io';
 import 'auth_service.dart';
 
 class ApiException implements Exception {
@@ -35,6 +37,12 @@ class ApiClient {
   Future<void> clearToken() async {
     _token = null;
     await _authService.clearToken();
+  }
+
+  Future<void> logout(BuildContext context) async {
+    // Invalidate token on server (optional, depends on backend implementation)
+    // For now, just clear local token
+    await clearToken();
   }
 
   String _mapServerError(BuildContext context, String serverMessage) {
@@ -188,6 +196,88 @@ class ApiClient {
       }
       final l10n = AppLocalizations.of(context)!;
       throw ApiException('${l10n.loginFailed}: ${e.toString()}');
+    }
+  }
+
+  Future<String> uploadAvatar(BuildContext context, String filePath, {List<int>? webBytes, String? webFileName}) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      // Always use POST for avatar uploads to simplify server handling
+      final request = http.MultipartRequest('POST', Uri.parse('$baseUrl/profile.php'))
+        ..headers.addAll({
+          'Authorization': 'Bearer $_token',
+          'Accept': 'application/json',
+          'Accept-Language': Localizations.localeOf(context).languageCode,
+        });
+
+      if (kIsWeb && webBytes != null && webFileName != null) {
+        request.files.add(http.MultipartFile.fromBytes('avatar', webBytes, filename: webFileName));
+      } else {
+        // Read file as bytes for better cross-platform compatibility (iOS/Android)
+        final file = File(filePath);
+        final bytes = await file.readAsBytes();
+        final filename = filePath.split('/').last;
+        request.files.add(http.MultipartFile.fromBytes('avatar', bytes, filename: filename));
+      }
+
+      final response = await request.send();
+      final data = json.decode(await response.stream.bytesToString());
+
+      if (response.statusCode != 200) {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.failedToUpdateProfile));
+      }
+
+      if (data['status'] != 'success' || data['avatar_url'] == null) {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.failedToUpdateProfile));
+      }
+
+      return data['avatar_url'];
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.failedToUpdateProfile);
+    }
+  }
+
+  Future<void> updateProfile(
+    BuildContext context, {
+    bool? allowDm,
+    String? displayName,
+    String? bio,
+    int? grade,
+    int? institutionId,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    
+    try {
+      final response = await http.patch(
+        Uri.parse('$baseUrl/profile.php'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${_token}',
+        },
+        body: json.encode({
+          if (allowDm != null) 'allow_dm': allowDm,
+          if (displayName != null) 'display_name': displayName,
+          if (bio != null) 'bio': bio,
+          if (grade != null) 'grade': grade,
+          if (institutionId != null) 'institution_id': institutionId,
+        }),
+      );
+
+      final data = json.decode(response.body);
+
+      if (response.statusCode != 200) {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.failedToUpdateProfile));
+      }
+
+      if (data['status'] != 'success') {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.failedToUpdateProfile));
+      }
+    } catch (e) {
+      if (e is ApiException) {
+        rethrow;
+      }
+      throw ApiException(l10n.failedToUpdateProfile);
     }
   }
 
