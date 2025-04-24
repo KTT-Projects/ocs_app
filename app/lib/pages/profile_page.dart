@@ -744,6 +744,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                 return l10n.displayNameRequired;
                               } else if (title == l10n.grade) {
                                 return l10n.pleaseSelectGrade;
+                              } else if (title == l10n.bio) {
+                                return null; // Bio can be empty
                               }
                               return l10n.displayNameRequired;
                             }
