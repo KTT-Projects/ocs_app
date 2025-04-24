@@ -165,38 +165,20 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
         ),
-      ),
-      body: Stack(
-        children: [
-          // Language toggle
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 16,
-            right: 16,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-                    ),
-                  ),
-                  child: Consumer<LanguageProvider>(
-                    builder: (context, languageProvider, _) => Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: LanguageToggle(
-                        currentLanguage: languageProvider.currentLanguage,
-                        onLanguageChanged: (lang) => languageProvider.setLanguage(lang),
-                      ),
-                    ),
-                  ),
-                ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0),
+            child: Consumer<LanguageProvider>(
+              builder: (context, languageProvider, _) => LanguageToggle(
+                currentLanguage: languageProvider.currentLanguage,
+                onLanguageChanged: (lang) => languageProvider.setLanguage(lang),
               ),
             ),
           ),
+        ],
+      ),
+      body: Stack(
+        children: [
           // Gradient background
           Container(
             decoration: BoxDecoration(
