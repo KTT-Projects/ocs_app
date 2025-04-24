@@ -92,11 +92,20 @@ class _HomePageState extends State<HomePage> {
         inactiveIcons: [
           Column(children: [
             Icon(Icons.feed_outlined, color: Colors.blue, size: 28),
-            Text(l10n.feed, style: TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.w500))
+            Text(l10n.feedFeature, style: TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.bold))
           ]),
-          Icon(Icons.event_note_outlined, color: Colors.blue, size: 28),
-          Icon(Icons.volunteer_activism_outlined, color: Colors.blue, size: 28),
-          Icon(Icons.school_outlined, color: Colors.blue, size: 28),
+          Column(children: [
+            Icon(Icons.event_note_outlined, color: Colors.blue, size: 28),
+            Text(l10n.eventsFeature, style: TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.bold))
+          ]),
+          Column(children: [
+            Icon(Icons.volunteer_activism_outlined, color: Colors.blue, size: 28),
+            Text(l10n.volunteerFeature, style: TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.bold))
+          ]),
+          Column(children: [
+            Icon(Icons.school_outlined, color: Colors.blue, size: 28),
+            Text(l10n.studyFeature, style: TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.bold))
+          ]),
         ],
         color: Colors.white,
         height: 60,
