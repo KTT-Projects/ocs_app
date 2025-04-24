@@ -22,16 +22,18 @@ event_participants,
 volunteer_participants,
 answers,
 tutor_sessions,
+feed_votes,
+feed_posts,
+feed_members,
 user_skills,
 user_profiles,
-posts,
-events,
-volunteer_opportunities,
 questions,
 tutors,
+events,
+volunteer_opportunities,
+feeds,
 chat_groups,
 users,
-board_categories,
 skills,
 roles,
 educational_institutions;
@@ -116,43 +118,68 @@ CREATE TABLE
     FOREIGN KEY (skill_id) REFERENCES skills (id)
   );
 
--- Bulletin board categories
+-- Feeds table (similar to subreddits)
 CREATE TABLE
-  board_categories (
+  feeds (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(100) NOT NULL,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    display_name VARCHAR(100) NOT NULL,
     description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_by INT NOT NULL,
+    rules TEXT,
+    banner_url VARCHAR(255),
+    icon_url VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES users (id)
   );
 
--- Bulletin board posts
+-- Feed members table (for tracking joined feeds)
 CREATE TABLE
-  posts (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+  feed_members (
+    feed_id INT NOT NULL,
     user_id INT NOT NULL,
-    category_id INT NOT NULL,
-    title VARCHAR(255) NOT NULL,
+    role ENUM ('member', 'moderator', 'admin') DEFAULT 'member',
+    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (feed_id, user_id),
+    FOREIGN KEY (feed_id) REFERENCES feeds (id),
+    FOREIGN KEY (user_id) REFERENCES users (id)
+  );
+
+-- Feed posts table
+CREATE TABLE
+  feed_posts (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    feed_id INT NOT NULL,
+    user_id INT NOT NULL,
+    title VARCHAR(300) NOT NULL,
     content TEXT NOT NULL,
+    media_url VARCHAR(255),
+    media_type ENUM ('image', 'video', 'link', 'none') DEFAULT 'none',
+    upvotes INT DEFAULT 0,
+    downvotes INT DEFAULT 0,
+    score DOUBLE DEFAULT 0,
     is_pinned BOOLEAN DEFAULT FALSE,
     is_locked BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id),
-    FOREIGN KEY (category_id) REFERENCES board_categories (id)
+    FOREIGN KEY (feed_id) REFERENCES feeds (id),
+    FOREIGN KEY (user_id) REFERENCES users (id)
   );
 
--- Post attachments
+-- Feed votes table
 CREATE TABLE
-  post_attachments (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+  feed_votes (
     post_id INT NOT NULL,
-    file_url VARCHAR(255) NOT NULL,
-    file_type VARCHAR(50) NOT NULL,
+    user_id INT NOT NULL,
+    vote_type ENUM ('upvote', 'downvote') NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (post_id) REFERENCES posts (id)
+    PRIMARY KEY (post_id, user_id),
+    FOREIGN KEY (post_id) REFERENCES feed_posts (id),
+    FOREIGN KEY (user_id) REFERENCES users (id)
   );
 
--- Comments
+-- Comments table (modified to work with feed_posts)
 CREATE TABLE
   comments (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -160,9 +187,12 @@ CREATE TABLE
     user_id INT NOT NULL,
     parent_comment_id INT,
     content TEXT NOT NULL,
+    upvotes INT DEFAULT 0,
+    downvotes INT DEFAULT 0,
+    score DOUBLE DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (post_id) REFERENCES posts (id),
+    FOREIGN KEY (post_id) REFERENCES feed_posts (id),
     FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (parent_comment_id) REFERENCES comments (id)
   );
@@ -366,10 +396,34 @@ VALUES
     'Administrator account with full system access'
   );
 
+-- Create Home feed
+INSERT INTO
+  feeds (
+    name,
+    display_name,
+    description,
+    created_by,
+    rules
+  )
+VALUES
+  (
+    'home',
+    'Home',
+    'Your personalized feed showing posts from all your joined feeds',
+    1,
+    'This is your personalized home feed.'
+  );
+
 -- Create indexes for frequently accessed columns
 CREATE INDEX idx_users_email ON users (email);
 
-CREATE INDEX idx_posts_category ON posts (category_id);
+CREATE INDEX idx_feeds_name ON feeds (name);
+
+CREATE INDEX idx_feed_posts_feed ON feed_posts (feed_id);
+
+CREATE INDEX idx_feed_posts_score ON feed_posts (score);
+
+CREATE INDEX idx_comments_post ON comments (post_id);
 
 CREATE INDEX idx_events_date ON events (start_datetime);
 

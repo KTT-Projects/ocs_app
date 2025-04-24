@@ -33,8 +33,18 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
-  <script>
-    window.flutterWebRenderer = "html";
+  <script type="application/javascript">
+    window.addEventListener('load', function () {
+      if (window.flutterConfiguration === undefined) {
+        window.flutterConfiguration = {};
+      }
+      window.flutterConfiguration.renderer = "html";
+      if (window.engineInitializer && window.engineInitializer.initializeEngine) {
+        window.engineInitializer.initializeEngine({
+          renderer: "html"
+        });
+      }
+    });
   </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>

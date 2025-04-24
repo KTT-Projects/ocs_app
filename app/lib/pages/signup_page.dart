@@ -189,7 +189,7 @@ class _SignupPageState extends State<SignupPage> {
                     l10n.checkSpamJunk,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                      color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.8),
                     ),
                   ),
                 ],
@@ -242,7 +242,7 @@ class _SignupPageState extends State<SignupPage> {
                 child: SingleChildScrollView(
                   padding: EdgeInsets.fromLTRB(
                     isSmallScreen ? 16.0 : 24.0,
-                    Theme.of(context).platform == TargetPlatform.iOS ? 120.0 : 56.0, // Increased top padding for iOS
+                    Theme.of(context).platform == TargetPlatform.iOS ? 120.0 : 56.0,
                     isSmallScreen ? 16.0 : 24.0,
                     isSmallScreen ? 16.0 : 24.0,
                   ),
@@ -250,14 +250,14 @@ class _SignupPageState extends State<SignupPage> {
                     width: isSmallScreen ? maxWidth - 32 : 400,
                     constraints: BoxConstraints(maxWidth: 600),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+                      color: Theme.of(context).colorScheme.background.withValues(alpha:0.2),
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
-                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.3),
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withValues(alpha:0.2),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -285,7 +285,7 @@ class _SignupPageState extends State<SignupPage> {
                                 Text(
                                   _showOtpField ? l10n.verifyEmail : l10n.signUpToGetStarted,
                                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.8),
                                       ),
                                 ),
                                 if (_errorMessage != null) ...[
@@ -306,11 +306,11 @@ class _SignupPageState extends State<SignupPage> {
                                       hintText: l10n.fullName,
                                       prefixIcon: Icon(
                                         Icons.person_outline,
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.7),
                                       ),
-                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.7)),
                                       filled: true,
-                                      fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                                      fillColor: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.1),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                         borderSide: BorderSide.none,
@@ -328,11 +328,11 @@ class _SignupPageState extends State<SignupPage> {
                                       hintText: l10n.bio,
                                       prefixIcon: Icon(
                                         Icons.description_outlined,
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.7),
                                       ),
-                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.7)),
                                       filled: true,
-                                      fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                                      fillColor: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.1),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                         borderSide: BorderSide.none,
@@ -352,112 +352,214 @@ class _SignupPageState extends State<SignupPage> {
                                     onChanged: (value) {
                                       setState(() => _allowDm = value);
                                     },
-                                    tileColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                                    tileColor: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.1),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                   ),
                                   const SizedBox(height: 16),
-                                  Theme(
-                                    data: Theme.of(context).copyWith(
-                                      inputDecorationTheme: InputDecorationTheme(
-                                        filled: true,
-                                        fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: BorderSide.none,
-                                        ),
-                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                                      ),
-                                      dropdownMenuTheme: DropdownMenuThemeData(
-                                        menuStyle: MenuStyle(
-                                          shape: MaterialStateProperty.all(
-                                            RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(12),
-                                            ),
-                                          ),
-                                        ),
-                                        inputDecorationTheme: InputDecorationTheme(
-                                          filled: true,
-                                          fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
-                                          border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(12),
-                                            borderSide: BorderSide.none,
-                                          ),
-                                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                                        ),
-                                      ),
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        DropdownButtonFormField<int>(
-                                          isExpanded: true,
-                                          value: _selectedInstitutionId,
-                                          items: _institutions.map((institution) {
-                                            return DropdownMenuItem(
-                                              value: int.parse(institution['id'].toString()),
-                                              child: Text(
-                                                (institution['name'] as String).split('/')[Localizations.localeOf(context).languageCode == 'ja' ? 1 : 0].trim(),
-                                                style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-                                                overflow: TextOverflow.ellipsis,
+                                  TextFormField(
+                                    readOnly: true,
+                                    onTap: () async {
+                                      final selectedId = await showDialog<int>(
+                                        context: context,
+                                        builder: (context) => BackdropFilter(
+                                          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                                          child: Dialog(
+                                            backgroundColor: Colors.transparent,
+                                            child: Container(
+                                              width: 300,
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(context).colorScheme.background.withValues(alpha:0.2),
+                                                borderRadius: BorderRadius.circular(24),
+                                                border: Border.all(
+                                                  color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.3),
+                                                ),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black.withValues(alpha:0.2),
+                                                    blurRadius: 10,
+                                                    offset: const Offset(0, 4),
+                                                  ),
+                                                ],
                                               ),
-                                            );
-                                          }).toList(),
-                                          onChanged: (value) {
-                                            setState(() => _selectedInstitutionId = value);
-                                          },
-                                          decoration: const InputDecoration(),
-                                          hint: Text(
-                                            l10n.selectInstitution,
-                                            style: TextStyle(
-                                              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                            ),
-                                          ),
-                                          dropdownColor: Theme.of(context).colorScheme.primary.withOpacity(0.9),
-                                          icon: Icon(
-                                            Icons.arrow_drop_down,
-                                            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                          ),
-                                          validator: (value) => value == null ? l10n.pleaseSelectInstitution : null,
-                                        ),
-                                        const SizedBox(height: 16),
-                                        DropdownButtonFormField<int>(
-                                          value: _selectedGrade,
-                                          items: [
-                                            for (var i = 7; i <= 14; i++)
-                                              DropdownMenuItem(
-                                                value: i,
-                                                child: Text(
-                                                  'G$i',
-                                                  style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                              child: ClipRRect(
+                                                borderRadius: BorderRadius.circular(24),
+                                                child: BackdropFilter(
+                                                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.all(24),
+                                                    child: Column(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        Text(
+                                                          l10n.selectInstitution,
+                                                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                                                color: Theme.of(context).colorScheme.onPrimary,
+                                                              ),
+                                                        ),
+                                                        const SizedBox(height: 16),
+                                                        Container(
+                                                          constraints: BoxConstraints(
+                                                            maxHeight: MediaQuery.of(context).size.height * 0.5,
+                                                          ),
+                                                          child: SingleChildScrollView(
+                                                            child: Column(
+                                                              children: _institutions.map((institution) {
+                                                                final name = (institution['name'] as String).split('/')[Localizations.localeOf(context).languageCode == 'ja' ? 1 : 0].trim();
+                                                                return ListTile(
+                                                                  title: Text(
+                                                                    name,
+                                                                    style: TextStyle(
+                                                                      color: Theme.of(context).colorScheme.onPrimary,
+                                                                    ),
+                                                                  ),
+                                                                  onTap: () => Navigator.pop(context, int.parse(institution['id'].toString())),
+                                                                );
+                                                              }).toList(),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
-                                            DropdownMenuItem(
-                                              value: 99,
-                                              child: Text(
-                                                'OB',
-                                                style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                      if (selectedId != null) {
+                                        setState(() => _selectedInstitutionId = selectedId);
+                                      }
+                                    },
+                                    decoration: InputDecoration(
+                                      hintText: l10n.selectInstitution,
+                                      prefixIcon: Icon(
+                                        Icons.apartment_outlined,
+                                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.7),
+                                      ),
+                                      suffixIcon: Icon(
+                                        Icons.arrow_drop_down,
+                                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.7),
+                                        size: 24,
+                                      ),
+                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.7)),
+                                      filled: true,
+                                      fillColor: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.1),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                    ),
+                                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                    controller: TextEditingController(
+                                      text: _selectedInstitutionId != null ? (_institutions.firstWhere((i) => int.parse(i['id'].toString()) == _selectedInstitutionId)['name'] as String).split('/')[Localizations.localeOf(context).languageCode == 'ja' ? 1 : 0].trim() : '',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  TextFormField(
+                                    readOnly: true,
+                                    onTap: () async {
+                                      final selectedGrade = await showDialog<int>(
+                                        context: context,
+                                        builder: (context) => BackdropFilter(
+                                          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                                          child: Dialog(
+                                            backgroundColor: Colors.transparent,
+                                            child: Container(
+                                              width: 300,
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(context).colorScheme.background.withValues(alpha:0.2),
+                                                borderRadius: BorderRadius.circular(24),
+                                                border: Border.all(
+                                                  color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.3),
+                                                ),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black.withValues(alpha:0.2),
+                                                    blurRadius: 10,
+                                                    offset: const Offset(0, 4),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: ClipRRect(
+                                                borderRadius: BorderRadius.circular(24),
+                                                child: BackdropFilter(
+                                                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.all(24),
+                                                    child: Column(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        Text(
+                                                          l10n.grade,
+                                                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                                                color: Theme.of(context).colorScheme.onPrimary,
+                                                              ),
+                                                        ),
+                                                        const SizedBox(height: 16),
+                                                        ...List.generate(8, (index) => index + 7).map(
+                                                          (grade) => ListTile(
+                                                            title: Text(
+                                                              'G$grade',
+                                                              style: TextStyle(
+                                                                color: Theme.of(context).colorScheme.onPrimary,
+                                                              ),
+                                                              textAlign: TextAlign.center,
+                                                            ),
+                                                            onTap: () => Navigator.pop(context, grade),
+                                                          ),
+                                                        ),
+                                                        ListTile(
+                                                          title: Text(
+                                                            'OB',
+                                                            style: TextStyle(
+                                                              color: Theme.of(context).colorScheme.onPrimary,
+                                                            ),
+                                                            textAlign: TextAlign.center,
+                                                          ),
+                                                          onTap: () => Navigator.pop(context, 99),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
                                               ),
                                             ),
-                                          ],
-                                          onChanged: (value) {
-                                            setState(() => _selectedGrade = value);
-                                          },
-                                          decoration: const InputDecoration(),
-                                          hint: Text(
-                                            l10n.grade,
-                                            style: TextStyle(
-                                              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                            ),
                                           ),
-                                          dropdownColor: Theme.of(context).colorScheme.primary.withOpacity(0.9),
-                                          icon: Icon(
-                                            Icons.arrow_drop_down,
-                                            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                          ),
-                                          validator: (value) => value == null ? l10n.pleaseSelectGrade : null,
                                         ),
-                                      ],
+                                      );
+                                      if (selectedGrade != null) {
+                                        setState(() => _selectedGrade = selectedGrade);
+                                      }
+                                    },
+                                    decoration: InputDecoration(
+                                      hintText: l10n.grade,
+                                      prefixIcon: Icon(
+                                        Icons.school_outlined,
+                                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.7),
+                                      ),
+                                      suffixIcon: Icon(
+                                        Icons.arrow_drop_down,
+                                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.7),
+                                        size: 24,
+                                      ),
+                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.7)),
+                                      filled: true,
+                                      fillColor: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.1),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                    ),
+                                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                    controller: TextEditingController(
+                                      text: _selectedGrade != null
+                                          ? _selectedGrade == 99
+                                              ? 'OB'
+                                              : 'G${_selectedGrade}'
+                                          : '',
                                     ),
                                   ),
                                 ],
@@ -469,11 +571,11 @@ class _SignupPageState extends State<SignupPage> {
                                       hintText: l10n.email,
                                       prefixIcon: Icon(
                                         Icons.email_outlined,
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.7),
                                       ),
-                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.7)),
                                       filled: true,
-                                      fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                                      fillColor: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.1),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                         borderSide: BorderSide.none,
@@ -502,18 +604,18 @@ class _SignupPageState extends State<SignupPage> {
                                       hintText: l10n.password,
                                       prefixIcon: Icon(
                                         Icons.lock_outline,
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.7),
                                       ),
-                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.7)),
                                       filled: true,
-                                      fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                                      fillColor: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.1),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                         borderSide: BorderSide.none,
                                       ),
                                       helperText: l10n.passwordHelper,
                                       helperStyle: TextStyle(
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.7),
                                       ),
                                     ),
                                     style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
@@ -537,11 +639,11 @@ class _SignupPageState extends State<SignupPage> {
                                       counterText: '', // Hide character counter
                                       prefixIcon: Icon(
                                         Icons.security_outlined,
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.7),
                                       ),
-                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.7)),
                                       filled: true,
-                                      fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                                      fillColor: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.1),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                         borderSide: BorderSide.none,
@@ -554,7 +656,7 @@ class _SignupPageState extends State<SignupPage> {
                                     l10n.checkSpamJunk,
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                      color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.7),
                                       fontSize: 12,
                                     ),
                                   ),
@@ -595,13 +697,13 @@ class _SignupPageState extends State<SignupPage> {
                                     },
                                     icon: Icon(
                                       Icons.refresh,
-                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                      color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.8),
                                       size: 16,
                                     ),
                                     label: Text(
                                       l10n.resendOtp,
                                       style: TextStyle(
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.8),
                                       ),
                                     ),
                                   ),
@@ -647,7 +749,7 @@ class _SignupPageState extends State<SignupPage> {
                                     child: Text(
                                       l10n.backToRegistration,
                                       style: TextStyle(
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.8),
                                       ),
                                     ),
                                   ),
@@ -659,7 +761,7 @@ class _SignupPageState extends State<SignupPage> {
                                       Text(
                                         l10n.alreadyHaveAccount,
                                         style: TextStyle(
-                                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                          color: Theme.of(context).colorScheme.onPrimary.withValues(alpha:0.8),
                                         ),
                                       ),
                                       TextButton(

@@ -222,14 +222,14 @@ class _LoginPageState extends State<LoginPage> {
                     width: isSmallScreen ? maxWidth - 32 : 400,
                     constraints: const BoxConstraints(maxWidth: 600, maxHeight: 500),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+                      color: Theme.of(context).colorScheme.background.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
-                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.3),
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withValues(alpha: 0.2),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -257,7 +257,7 @@ class _LoginPageState extends State<LoginPage> {
                                 Text(
                                   _showOtpField ? l10n.verifyEmail : l10n.signInToContinue,
                                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8),
                                       ),
                                 ),
                                 if (_errorMessage != null) ...[
@@ -277,11 +277,11 @@ class _LoginPageState extends State<LoginPage> {
                                     hintText: l10n.email,
                                     prefixIcon: Icon(
                                       Icons.email_outlined,
-                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                      color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
                                     ),
-                                    hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                    hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7)),
                                     filled: true,
-                                    fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                                    fillColor: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.1),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide.none,
@@ -309,11 +309,11 @@ class _LoginPageState extends State<LoginPage> {
                                       hintText: l10n.password,
                                       prefixIcon: Icon(
                                         Icons.lock_outline,
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
                                       ),
-                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7)),
                                       filled: true,
-                                      fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                                      fillColor: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.1),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                         borderSide: BorderSide.none,
@@ -339,11 +339,11 @@ class _LoginPageState extends State<LoginPage> {
                                       counterText: '', // Hide character counter
                                       prefixIcon: Icon(
                                         Icons.security_outlined,
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
                                       ),
-                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7)),
                                       filled: true,
-                                      fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                                      fillColor: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.1),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                         borderSide: BorderSide.none,
@@ -356,7 +356,7 @@ class _LoginPageState extends State<LoginPage> {
                                     l10n.checkSpamJunk,
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                      color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
                                       fontSize: 12,
                                     ),
                                   ),
@@ -397,13 +397,13 @@ class _LoginPageState extends State<LoginPage> {
                                           },
                                     icon: Icon(
                                       Icons.refresh,
-                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                      color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8),
                                       size: 16,
                                     ),
                                     label: Text(
                                       l10n.resendOtp,
                                       style: TextStyle(
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8),
                                       ),
                                     ),
                                   ),
@@ -449,7 +449,7 @@ class _LoginPageState extends State<LoginPage> {
                                     child: Text(
                                       l10n.backToLogin,
                                       style: TextStyle(
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8),
                                       ),
                                     ),
                                   ),
@@ -462,7 +462,7 @@ class _LoginPageState extends State<LoginPage> {
                                       Text(
                                         l10n.newToApp,
                                         style: TextStyle(
-                                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                          color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8),
                                         ),
                                       ),
                                       TextButton(
@@ -497,7 +497,7 @@ class _LoginPageState extends State<LoginPage> {
                                     child: Text(
                                       l10n.forgotPassword,
                                       style: TextStyle(
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8),
                                       ),
                                     ),
                                   ),

@@ -4,6 +4,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'dart:io';
+import '../models/feed.dart';
+import '../models/feed_post.dart';
 import 'auth_service.dart';
 
 class ApiException implements Exception {
@@ -386,6 +388,202 @@ class ApiClient {
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException('${l10n.resetPasswordFailed}: ${e.toString()}');
+    }
+  }
+
+  Future<List<Feed>> getFeeds(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/feeds.php?action=list'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode != 200) {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+      }
+
+      return (data['data'] as List)
+          .map((feed) => Feed.fromJson(feed))
+          .toList();
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<List<FeedPost>> getFeedPosts(BuildContext context, int feedId, {int page = 1}) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/feeds.php?action=posts&feed_id=$feedId&page=$page'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode != 200) {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+      }
+
+      return (data['data'] as List)
+          .map((post) => FeedPost.fromJson(post))
+          .toList();
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<List<FeedPost>> getHomeFeed(BuildContext context, {int page = 1}) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/feeds.php?action=home&page=$page'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode != 200) {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+      }
+
+      return (data['data'] as List)
+          .map((post) => FeedPost.fromJson(post))
+          .toList();
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<void> joinFeed(BuildContext context, int feedId) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/feeds.php?action=join'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode({
+          'feed_id': feedId,
+        }),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode != 200) {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<int> createFeed(BuildContext context, {
+    required String name,
+    required String displayName,
+    required String description,
+    String? rules,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/feeds.php?action=create'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode({
+          'name': name,
+          'display_name': displayName,
+          'description': description,
+          if (rules != null) 'rules': rules,
+        }),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode != 201) {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+      }
+
+      return data['data']['id'];
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<int> createPost(BuildContext context, {
+    required int feedId,
+    required String title,
+    required String content,
+    String? mediaUrl,
+    String? mediaType,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/feeds.php?action=post'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode({
+          'feed_id': feedId,
+          'title': title,
+          'content': content,
+          if (mediaUrl != null) 'media_url': mediaUrl,
+          if (mediaType != null) 'media_type': mediaType,
+        }),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode != 201) {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+      }
+
+      return data['data']['id'];
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<void> votePost(BuildContext context, {
+    required int postId,
+    required String voteType,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/feeds.php?action=vote'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode({
+          'post_id': postId,
+          'vote_type': voteType,
+        }),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode != 200) {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
     }
   }
 }

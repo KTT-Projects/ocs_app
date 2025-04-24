@@ -262,6 +262,17 @@ class _ProfilePageState extends State<ProfilePage> {
                                                   width: 100,
                                                   height: 100,
                                                   fit: BoxFit.cover,
+                                                  errorBuilder: (context, error, stackTrace) {
+                                                    return Center(
+                                                      child: Text(
+                                                        _profile!['name']?[0] ?? '?',
+                                                        style: TextStyle(
+                                                          fontSize: 32,
+                                                          color: Theme.of(context).colorScheme.onSecondary,
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
                                                 ),
                                               )
                                             : Text(

@@ -1,0 +1,122 @@
+class FeedPost {
+  final int id;
+  final int feedId;
+  final int userId;
+  final String title;
+  final String content;
+  final String? mediaUrl;
+  final String? mediaType;
+  int upvotes;
+  int downvotes;
+  double score;
+  final bool isPinned;
+  final bool isLocked;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final String email;
+  final String displayName;
+  final String? avatarUrl;
+  final int commentCount;
+  final String? feedName;
+  final String? feedDisplayName;
+
+  FeedPost({
+    required this.id,
+    required this.feedId,
+    required this.userId,
+    required this.title,
+    required this.content,
+    this.mediaUrl,
+    this.mediaType,
+    required this.upvotes,
+    required this.downvotes,
+    required this.score,
+    required this.isPinned,
+    required this.isLocked,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.email,
+    required this.displayName,
+    this.avatarUrl,
+    required this.commentCount,
+    this.feedName,
+    this.feedDisplayName,
+  });
+
+  factory FeedPost.fromJson(Map<String, dynamic> json) {
+    return FeedPost(
+      id: json['id'],
+      feedId: json['feed_id'],
+      userId: json['user_id'],
+      title: json['title'],
+      content: json['content'],
+      mediaUrl: json['media_url'] != null 
+          ? (json['media_url'].toString().startsWith('/') 
+              ? 'https://ocs.kttprojects.com${json['media_url']}'
+              : json['media_url'])
+          : null,
+      mediaType: json['media_type'],
+      upvotes: json['upvotes'] ?? 0,
+      downvotes: json['downvotes'] ?? 0,
+      score: (json['score'] ?? 0).toDouble(),
+      isPinned: json['is_pinned'] == 1,
+      isLocked: json['is_locked'] == 1,
+      createdAt: DateTime.parse(json['created_at']),
+      updatedAt: DateTime.parse(json['updated_at']),
+      email: json['email'],
+      displayName: json['display_name'],
+      avatarUrl: json['avatar_url'] != null 
+          ? (json['avatar_url'].toString().startsWith('/') 
+              ? 'https://ocs.kttprojects.com${json['avatar_url']}'
+              : json['avatar_url'])
+          : null,
+      commentCount: json['comment_count'] ?? 0,
+      feedName: json['feed_name'],
+      feedDisplayName: json['feed_display_name'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'feed_id': feedId,
+      'user_id': userId,
+      'title': title,
+      'content': content,
+      'media_url': mediaUrl,
+      'media_type': mediaType,
+      'upvotes': upvotes,
+      'downvotes': downvotes,
+      'score': score,
+      'is_pinned': isPinned ? 1 : 0,
+      'is_locked': isLocked ? 1 : 0,
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
+      'email': email,
+      'display_name': displayName,
+      'avatar_url': avatarUrl,
+      'comment_count': commentCount,
+      'feed_name': feedName,
+      'feed_display_name': feedDisplayName,
+    };
+  }
+
+  String getTimeAgo() {
+    final now = DateTime.now();
+    final difference = now.difference(createdAt);
+
+    if (difference.inDays > 365) {
+      return '${(difference.inDays / 365).floor()}y';
+    } else if (difference.inDays > 30) {
+      return '${(difference.inDays / 30).floor()}mo';
+    } else if (difference.inDays > 0) {
+      return '${difference.inDays}d';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}h';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}m';
+    } else {
+      return 'now';
+    }
+  }
+}

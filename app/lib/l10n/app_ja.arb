@@ -125,5 +125,93 @@
   "noName": "名前未設定",
   "@noName": {
     "description": "名前が設定されていない場合に表示されるテキスト"
+  },
+  "failedToLoadFeeds": "フィードの読み込みに失敗しました",
+  "@failedToLoadFeeds": {
+    "description": "フィードの読み込みに失敗した場合のエラーメッセージ"
+  },
+  "failedToLoadPosts": "投稿の読み込みに失敗しました",
+  "@failedToLoadPosts": {
+    "description": "投稿の読み込みに失敗した場合のエラーメッセージ"
+  },
+  "failedToJoinFeed": "フィードへの参加に失敗しました",
+  "@failedToJoinFeed": {
+    "description": "フィードへの参加に失敗した場合のエラーメッセージ"
+  },
+  "failedToCreateFeed": "フィードの作成に失敗しました",
+  "@failedToCreateFeed": {
+    "description": "フィードの作成に失敗した場合のエラーメッセージ"
+  },
+  "failedToCreatePost": "投稿の作成に失敗しました",
+  "@failedToCreatePost": {
+    "description": "投稿の作成に失敗した場合のエラーメッセージ"
+  },
+  "failedToVote": "投票に失敗しました",
+  "@failedToVote": {
+    "description": "投票に失敗した場合のエラーメッセージ"
+  },
+  "createFeed": "フィードを作成",
+  "@createFeed": {
+    "description": "フィード作成ページのタイトル"
+  },
+  "createPost": "投稿を作成",
+  "@createPost": {
+    "description": "投稿作成ページのタイトル"
+  },
+  "feedId": "フィードID（一意の識別子）",
+  "@feedId": {
+    "description": "フィードIDの入力欄のラベル"
+  },
+  "feedDisplayName": "表示名",
+  "@feedDisplayName": {
+    "description": "フィードの表示名の入力欄のラベル"
+  },
+  "feedDescription": "説明",
+  "@feedDescription": {
+    "description": "フィードの説明の入力欄のラベル"
+  },
+  "feedRules": "ルール（任意）",
+  "@feedRules": {
+    "description": "フィードのルールの入力欄のラベル"
+  },
+  "feedIdRequired": "フィードIDは必須です",
+  "@feedIdRequired": {
+    "description": "フィードIDが空の場合のエラーメッセージ"
+  },
+  "feedIdInvalid": "小文字、数字、アンダースコアのみ使用可能です",
+  "@feedIdInvalid": {
+    "description": "フィードIDに無効な文字が含まれている場合のエラーメッセージ"
+  },
+  "displayNameRequired": "表示名は必須です",
+  "@displayNameRequired": {
+    "description": "表示名が空の場合のエラーメッセージ"
+  },
+  "descriptionRequired": "説明は必須です",
+  "@descriptionRequired": {
+    "description": "説明が空の場合のエラーメッセージ"
+  },
+  "titleRequired": "タイトルは必須です",
+  "@titleRequired": {
+    "description": "タイトルが空の場合のエラーメッセージ"
+  },
+  "contentRequired": "内容は必須です",
+  "@contentRequired": {
+    "description": "内容が空の場合のエラーメッセージ"
+  },
+  "addImage": "画像を追加",
+  "@addImage": {
+    "description": "画像追加ボタンのテキスト"
+  },
+  "feedIdHelperText": "小文字、数字、アンダースコアのみ使用可能",
+  "@feedIdHelperText": {
+    "description": "フィードID入力欄のヘルパーテキスト"
+  },
+  "postTitle": "タイトル",
+  "@postTitle": {
+    "description": "投稿のタイトル入力欄のラベル"
+  },
+  "writePost": "投稿を書く...",
+  "@writePost": {
+    "description": "投稿の内容入力欄のプレースホルダーテキスト"
   }
 }
