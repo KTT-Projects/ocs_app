@@ -422,5 +422,7 @@
   "noName": "No Name",
   "@noName": {
     "description": "Text shown when user has no name set"
-  }
+  },
+  "feedFeature": "Feed",
+  "studyFeature": "Study"
 }

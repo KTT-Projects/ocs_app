@@ -4,8 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../services/api_client.dart';
 import 'login_page.dart';
-import 'package:circle_nav_bar/circle_nav_bar.dart';
+import '../widgets/circle_nav_bar.dart';
 import 'profile_page.dart';
+import 'feed_page.dart';
+import 'events_page.dart';
+import 'volunteer_page.dart';
+import 'study_page.dart';
 
 class HomePage extends StatefulWidget {
   final String token;
@@ -27,13 +31,6 @@ class _HomePageState extends State<HomePage> {
   Map<String, dynamic>? _profile;
   bool _initialized = false;
   int _currentIndex = 0;
-
-  final List<Widget> pages = [
-    const Center(child: Text('Feed')),
-    const Center(child: Text('Events')),
-    const Center(child: Text('Volunteer')),
-    const Center(child: Text('Study')),
-  ];
 
   @override
   void didChangeDependencies() {
@@ -76,26 +73,15 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> pages = [
+      FeedPage(),
+      EventsPage(),
+      VolunteerPage(),
+      StudyPage(),
+      ProfilePage(apiClient: widget.apiClient),
+    ];
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.account_circle),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProfilePage(
-                    apiClient: widget.apiClient,
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
       body: pages[_currentIndex],
       extendBody: true,
       bottomNavigationBar: CircleNavBar(
@@ -104,6 +90,7 @@ class _HomePageState extends State<HomePage> {
           Icon(Icons.event_note, color: Colors.white, size: 28),
           Icon(Icons.volunteer_activism, color: Colors.white, size: 28),
           Icon(Icons.school, color: Colors.white, size: 28),
+          Icon(Icons.account_circle, color: Colors.white, size: 28),
         ],
         inactiveIcons: [
           Column(children: [
@@ -121,6 +108,10 @@ class _HomePageState extends State<HomePage> {
           Column(children: [
             Icon(Icons.school_outlined, color: Colors.blue, size: 28),
             Text(l10n.studyFeature, style: TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.bold))
+          ]),
+          Column(children: [
+            Icon(Icons.account_circle, color: Colors.blue, size: 28),
+            Text(l10n.profile, style: TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.bold))
           ]),
         ],
         color: Colors.white,
@@ -141,12 +132,7 @@ class _HomePageState extends State<HomePage> {
             _currentIndex = index;
           });
         },
-        cornerRadius: const BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
-          bottomRight: Radius.circular(30),
-          bottomLeft: Radius.circular(30),
-        ),
+        cornerRadius: const BorderRadius.all(Radius.circular(30)),
         shadowColor: Colors.black.withValues(alpha: 0.4),
         elevation: 10,
         circleGradient: LinearGradient(
