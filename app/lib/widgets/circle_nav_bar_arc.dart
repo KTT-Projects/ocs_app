@@ -5,8 +5,8 @@ class CircleNavBar extends StatefulWidget {
   const CircleNavBar({
     required this.activeIndex,
     this.onTap,
-    this.tabCurve = Curves.easeOutCirc,
-    this.iconCurve = Curves.easeOutCubic,
+    this.tabCurve = Curves.linearToEaseOut,
+    this.iconCurve = Curves.linear,
     this.tabDurationMillSec = 500,
     this.iconDurationMillSec = 150,
     required this.activeIcons,
@@ -112,7 +112,7 @@ class _CircleNavBarState extends State<CircleNavBar>
               color: widget.color,
               circleColor: widget.circleColor ?? widget.color,
               xOffsetPercent: tabAc.value,
-              cornerRadius: widget.cornerRadius,
+              boxRadius: widget.cornerRadius,
               shadowColor: widget.shadowColor,
               circleShadowColor: widget.circleShadowColor ?? widget.shadowColor,
               elevation: widget.elevation,
@@ -189,7 +189,7 @@ class _CircleBottomPainter extends CustomPainter {
     required this.color,
     required this.circleColor,
     required this.xOffsetPercent,
-    required this.cornerRadius,
+    required this.boxRadius,
     required this.shadowColor,
     required this.circleShadowColor,
     required this.elevation,
@@ -201,7 +201,7 @@ class _CircleBottomPainter extends CustomPainter {
   final Color circleColor;
   final double iconWidth;
   final double xOffsetPercent;
-  final BorderRadius cornerRadius;
+  final BorderRadius boxRadius;
   final Color shadowColor;
   final Color circleShadowColor;
   final double elevation;
@@ -209,134 +209,89 @@ class _CircleBottomPainter extends CustomPainter {
   final Gradient? circleGradient;
 
   static double getR(double circleWidth) {
-    return circleWidth / 2 * 1.2;
+    return circleWidth / 2 * 1.1;
   }
 
   static double convertRadiusToSigma(double radius) {
     return radius * 0.57735 + 0.5;
   }
 
-  static Rect _getGradientRect(Size size, {bool isCircle = false, Offset? center, double scale = 1.0}) {
-    if (isCircle && center != null) {
-      return Rect.fromCircle(
-        center: center,
-        radius: math.max(size.width, size.height) * scale / 2,
-      );
-    }
-    final width = size.width * scale;
-    final height = size.height * scale;
-    return Rect.fromCenter(
-      center: Offset(size.width / 2, size.height / 2),
-      width: width,
-      height: height,
-    );
-  }
-
   @override
   void paint(Canvas canvas, Size size) {
-    Paint paint = Paint();
-    Paint? circlePaint;
-    if (color != circleColor || circleGradient != null) {
-      circlePaint = Paint()..color = circleColor;
-    }
-
     final w = size.width;
     final h = size.height;
+    final centerY = h / 2;
+    final r = getR(iconWidth);
     final x = xOffsetPercent * w;
-    final radius = getR(iconWidth);
+    final radius = r * 1.1;
 
-    final double tl = math.max(cornerRadius.topLeft.x, cornerRadius.topLeft.y);
-    final double tr = math.max(cornerRadius.topRight.x, cornerRadius.topRight.y);
-    final double br = math.max(cornerRadius.bottomRight.x, cornerRadius.bottomRight.y);
-    final double bl = math.max(cornerRadius.bottomLeft.x, cornerRadius.bottomLeft.y);
-
-    final maxRadius = math.max(math.max(tl, tr), math.max(bl, br));
-
-    final path = Path()
-      ..moveTo(0, tl)
-      ..arcTo(
-        Rect.fromLTWH(0, 0, tl * 2, tl * 2),
-        math.pi,
-        math.pi / 2,
-        false
-      )
-      ..lineTo(w - tr, 0)
-      ..arcTo(
-        Rect.fromLTWH(w - tr * 2, 0, tr * 2, tr * 2),
-        -math.pi / 2,
-        math.pi / 2,
-        false
-      )
-      ..lineTo(w, h - br)
-      ..arcTo(
-        Rect.fromLTWH(w - br * 2, h - br * 2, br * 2, br * 2),
-        0,
-        math.pi / 2,
-        false
-      )
-      ..lineTo(bl, h)
-      ..arcTo(
-        Rect.fromLTWH(0, h - bl * 2, bl * 2, bl * 2),
-        math.pi / 2,
-        math.pi / 2,
-        false
-      )
+    final backgroundPath = Path()
+      ..moveTo(0, boxRadius.topLeft.y)
+      ..quadraticBezierTo(0, 0, boxRadius.topLeft.x, 0)
+      ..lineTo(w - boxRadius.topRight.x, 0)
+      ..quadraticBezierTo(w, 0, w, boxRadius.topRight.y)
+      ..lineTo(w, h - boxRadius.bottomRight.y)
+      ..quadraticBezierTo(w, h, w - boxRadius.bottomRight.x, h)
+      ..lineTo(boxRadius.bottomLeft.x, h)
+      ..quadraticBezierTo(0, h, 0, h - boxRadius.bottomLeft.y)
       ..close();
 
-    final centerY = h/2;
-    path.addOval(
+    backgroundPath.addOval(
       Rect.fromCircle(
         center: Offset(x, centerY),
-        radius: radius * 1.1,
+        radius: radius,
       ),
     );
     
-    path.fillType = PathFillType.evenOdd;
+    backgroundPath.fillType = PathFillType.evenOdd;
 
-    paint.color = color;
-
-    if (gradient != null) {
-      paint.shader = gradient!.createShader(_getGradientRect(size));
+    // 影の描画
+    if (elevation > 0) {
+      canvas.drawPath(
+        backgroundPath,
+        Paint()
+          ..color = shadowColor
+          ..maskFilter = MaskFilter.blur(
+              BlurStyle.normal, convertRadiusToSigma(elevation))
+      );
     }
 
+    // 背景を描画
+    final backgroundPaint = Paint()..color = color;
+    if (gradient != null) {
+      backgroundPaint.shader = gradient!.createShader(
+        Rect.fromLTWH(0, 0, w, h)
+      );
+    }
+    canvas.drawPath(backgroundPath, backgroundPaint);
+
+    // 円形部分を描画
+    final circlePaint = Paint()..color = circleColor;
     if (circleGradient != null) {
-      final circleCenter = Offset(x, h / 2);
-      circlePaint?.shader = circleGradient!.createShader(
-        _getGradientRect(Size(radius * 2, radius * 2), isCircle: true, center: circleCenter)
+      circlePaint.shader = circleGradient!.createShader(
+        Rect.fromCircle(
+          center: Offset(x, centerY),
+          radius: r,
+        ),
       );
     }
 
     if (elevation > 0) {
-      canvas.drawPath(
-        path,
+      canvas.drawCircle(
+        Offset(x, centerY),
+       r,
         Paint()
-          ..color = shadowColor.withOpacity(0.5)
+          ..color = circleShadowColor
           ..maskFilter = MaskFilter.blur(
               BlurStyle.normal, convertRadiusToSigma(elevation))
       );
-
-      final circleShadowPath = Path()
-        ..addOval(Rect.fromCircle(
-          center: Offset(x, h / 2),
-          radius: radius * 1.1,
-        ));
-      canvas.drawPath(
-        circleShadowPath,
-        Paint()
-          ..color = circleShadowColor.withOpacity(0.3)
-          ..maskFilter = MaskFilter.blur(
-              BlurStyle.normal, convertRadiusToSigma(elevation * 1.2))
-      );
     }
 
-    canvas.drawPath(path, paint);
-
-    final circleFillPath = Path()
-      ..addOval(Rect.fromCircle(
-        center: Offset(x, h / 2),
-        radius: radius,
-      ));
-    canvas.drawPath(circleFillPath, circlePaint ?? paint);
+    canvas.drawCircle(
+      Offset(x, centerY),
+     r,
+      circlePaint,
+    );
   }
 
   @override
@@ -345,13 +300,10 @@ class _CircleBottomPainter extends CustomPainter {
     oldDelegate.circleColor != circleColor ||
     oldDelegate.iconWidth != iconWidth ||
     oldDelegate.xOffsetPercent != xOffsetPercent ||
-    oldDelegate.cornerRadius != cornerRadius ||
+    oldDelegate.boxRadius != boxRadius ||
     oldDelegate.shadowColor != shadowColor ||
     oldDelegate.circleShadowColor != circleShadowColor ||
     oldDelegate.elevation != elevation ||
     oldDelegate.gradient != gradient ||
     oldDelegate.circleGradient != circleGradient;
-
-  @override
-  bool shouldRebuildSemantics(covariant CustomPainter oldDelegate) => false;
 }

@@ -116,7 +116,7 @@ class _HomePageState extends State<HomePage> {
         ],
         color: Colors.white,
         height: 60,
-        circleWidth: 60,
+        circleWidth: 40,
         padding: EdgeInsets.only(left: 16, right: 16, bottom: 20),
         gradient: LinearGradient(
           begin: Alignment.topCenter,
