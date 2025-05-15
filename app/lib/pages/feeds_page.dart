@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'dart:async';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../models/feed.dart';
+import '../models/feed_post.dart';
 import '../services/api_client.dart';
+import '../widgets/feed_list_item.dart';
+import '../widgets/post_list_item.dart';
+import '../widgets/glassmorphic_ui.dart';
+import '../widgets/discover_feed_section.dart';
+import '../widgets/sort_menu_dialog.dart';
+import '../widgets/feed_selection_dialog.dart';
+import '../widgets/feed_menu_dialog.dart';
+import '../widgets/reorder_feeds_dialog.dart';
 import 'create_feed_page.dart';
-import 'feed_posts_page.dart';
+import 'create_post_page.dart';
 
 class FeedsPage extends StatefulWidget {
   final ApiClient apiClient;
@@ -22,22 +32,48 @@ class _FeedsPageState extends State<FeedsPage> {
   bool _isLoading = true;
   String? _error;
   List<Feed>? _feeds;
+  List<FeedPost>? _posts;
+  bool _didLoadFeeds = false;
+  Timer? _refreshTimer;
+  String _sortBy = 'latest'; // 'latest' or 'popular'
+  Feed? _selectedFeed; // Currently selected feed, null means home feed
+
+  String _discoverSort = 'population';
+  String _discoverSearch = '';
 
   @override
   void initState() {
     super.initState();
-    _loadFeeds();
+    _startPeriodicRefresh();
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startPeriodicRefresh() {
+    // Refresh every 5 seconds
+    _refreshTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      _loadFeeds();
+      _loadPosts();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didLoadFeeds) {
+      _didLoadFeeds = true;
+      _loadFeeds();
+      _loadPosts();
+    }
   }
 
   Future<void> _loadFeeds() async {
     try {
-      setState(() {
-        _isLoading = true;
-        _error = null;
-      });
-
       final feeds = await widget.apiClient.getFeeds(context);
-
       if (mounted) {
         setState(() {
           _feeds = feeds;
@@ -54,75 +90,297 @@ class _FeedsPageState extends State<FeedsPage> {
     }
   }
 
+  Future<void> _loadPosts() async {
+    try {
+      final posts = _selectedFeed == null
+          ? _sortBy == 'discover'
+              ? await widget.apiClient.getDiscoverFeed(context)
+              : await widget.apiClient.getFollowingFeed(context)
+          : await widget.apiClient.getFeedPosts(context, _selectedFeed!.id);
+      if (mounted) {
+        setState(() {
+          _posts = posts;
+        });
+      }
+    } catch (e) {
+      print('Failed to load posts: $e');
+    }
+  }
+
+  Future<void> _vote(FeedPost post, String voteType) async {
+    try {
+      await widget.apiClient.votePost(
+        context,
+        postId: post.id,
+        voteType: voteType,
+      );
+
+      setState(() {
+        if (voteType == 'upvote') {
+          post.upvotes += 1;
+        } else {
+          post.downvotes += 1;
+        }
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  void _onNewPostPressed(List<Feed> joinedFeeds) async {
+    if (_selectedFeed != null) {
+      final resultId = await Navigator.push<int>(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CreatePostPage(
+            apiClient: widget.apiClient,
+            feed: _selectedFeed!,
+          ),
+        ),
+      );
+      if (resultId != null && mounted) {
+        _loadPosts();
+      }
+    } else {
+      // Show glassmorphic feed selection dialog for the Home tab
+      final feed = await GlassmorphicUI.showDialog<Feed>(
+        context: context,
+        width: 360,
+        child: FeedSelectionDialog(
+          feeds: joinedFeeds,
+          onFeedSelected: (feed) => Navigator.pop(context, feed),
+        ),
+      );
+      if (feed != null && mounted) {
+        final resultId = await Navigator.push<int>(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CreatePostPage(
+              apiClient: widget.apiClient,
+              feed: feed,
+            ),
+          ),
+        );
+        if (resultId != null && mounted) {
+          _loadPosts();
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final joinedFeeds = _feeds?.where((feed) => feed.isMember).toList() ?? [];
+    final availableFeeds = _feeds?.where((feed) => !feed.isMember).toList() ?? [];
 
     return Scaffold(
       extendBodyBehindAppBar: true,
+      extendBody: true,
       appBar: AppBar(
+        toolbarHeight: 48,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text(
-          l10n.feed,
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onPrimary,
-          ),
-        ),
-        leading: Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-            ),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: IconButton(
-                icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ),
-          ),
-        ),
-        actions: [
-          Container(
-            margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-              ),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: IconButton(
-                  icon: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary),
-                  onPressed: () async {
-                    final feedId = await Navigator.push<int>(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CreateFeedPage(
-                          apiClient: widget.apiClient,
-                        ),
-                      ),
-                    );
-                    if (feedId != null && mounted) {
-                      _loadFeeds();
-                    }
-                  },
+        titleSpacing: 0,
+        title: Container(
+          height: 42,
+          margin: const EdgeInsets.only(top: 4),
+          child: Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: 2 + (joinedFeeds.length),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        return GlassmorphicUI.buildTab(
+                          context: context,
+                          icon: Icons.explore,
+                          label: 'Discover',
+                          selected: _selectedFeed == null && _sortBy == 'discover',
+                          onTap: () {
+                            setState(() {
+                              _selectedFeed = null;
+                              _sortBy = 'discover';
+                              _discoverSort = 'population';
+                              _discoverSearch = '';
+                            });
+                          },
+                        );
+                      } else if (index == 1) {
+                        return GlassmorphicUI.buildTab(
+                          context: context,
+                          icon: Icons.home,
+                          label: 'Home',
+                          selected: _selectedFeed == null && _sortBy != 'discover',
+                          onTap: () {
+                            setState(() {
+                              _selectedFeed = null;
+                              _sortBy = 'latest';
+                            });
+                            _loadPosts();
+                          },
+                        );
+                      } else {
+                        final feed = joinedFeeds[index - 2];
+                        return GlassmorphicUI.buildTab(
+                          context: context,
+                          iconWidget: feed.iconUrl != null
+                              ? ClipOval(
+                                  child: Image.network(
+                                    feed.iconUrl!,
+                                    width: 20,
+                                    height: 20,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              : null,
+                          label: feed.displayName,
+                          selected: _selectedFeed?.id == feed.id,
+                          onTap: () {
+                            setState(() {
+                              _selectedFeed = feed;
+                              _sortBy = 'latest';
+                            });
+                            _loadPosts();
+                          },
+                        );
+                      }
+                    },
+                  ),
                 ),
               ),
-            ),
+              // Sort button
+              if (!(_sortBy == 'discover' && _selectedFeed == null))
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                    ),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                      child: IconButton(
+                        iconSize: 20,
+                        icon: Icon(
+                          Icons.sort,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                        onPressed: () async {
+                          final String? selected = await GlassmorphicUI.showDialog<String>(
+                            context: context,
+                            width: 320,
+                            child: SortMenuDialog(
+                              currentSort: _sortBy,
+                              onSortChanged: (value) => Navigator.pop(context, value),
+                            ),
+                          );
+                          if (selected != null) {
+                            setState(() {
+                              _sortBy = selected;
+                            });
+                            _loadPosts();
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              // Three-dot menu button
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: IconButton(
+                      iconSize: 20,
+                      icon: Icon(
+                        Icons.more_vert,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
+                      onPressed: () async {
+                        await GlassmorphicUI.showDialog<void>(
+                          context: context,
+                          width: 240,
+                          child: FeedMenuDialog(
+                            onCreateFeed: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => CreateFeedPage(apiClient: widget.apiClient),
+                                ),
+                              );
+                              _loadFeeds();
+                              _loadPosts();
+                            },
+                            onReorderFeeds: () async {
+                              final joinedFeeds = _feeds?.where((feed) => feed.isMember).toList() ?? [];
+                              await GlassmorphicUI.showDialog<void>(
+                                context: context,
+                                width: 360,
+                                child: ReorderFeedsDialog(
+                                  feeds: joinedFeeds,
+                                  onReorder: (reorderedFeeds) async {
+                                    try {
+                                      final feedOrders = reorderedFeeds.asMap().entries.map((entry) {
+                                        return {
+                                          'feed_id': entry.value.id,
+                                          'order': entry.key,
+                                        };
+                                      }).toList();
+
+                                      await widget.apiClient.reorderFeeds(
+                                        context,
+                                        feedOrders: feedOrders,
+                                      );
+                                      _loadFeeds();
+                                    } catch (e) {
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(e.toString()),
+                                            backgroundColor: Theme.of(context).colorScheme.error,
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
       body: Stack(
         children: [
@@ -173,131 +431,139 @@ class _FeedsPageState extends State<FeedsPage> {
               ),
             )
           else if (_feeds != null)
-            ListView.builder(
-              padding: EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top + AppBar().preferredSize.height + 8,
-                bottom: 8,
-                left: 8,
-                right: 8,
-              ),
-              itemCount: _feeds!.length,
-              itemBuilder: (context, index) {
-                final feed = _feeds![index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => FeedPostsPage(
-                                apiClient: widget.apiClient,
-                                feed: feed,
+            Stack(
+              children: [
+                if (_sortBy == 'discover' && _selectedFeed == null)
+                  Padding(
+                    padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).padding.top + 56,
+                    ),
+                    child: DiscoverFeedSection(
+                      feeds: availableFeeds,
+                      searchQuery: _discoverSearch,
+                      sortBy: _discoverSort,
+                      onSearchChanged: (value) {
+                        setState(() {
+                          _discoverSearch = value;
+                        });
+                      },
+                      onSortChanged: (value) {
+                        setState(() {
+                          _discoverSort = value;
+                        });
+                      },
+                      onJoinFeed: (feed) async {
+                        try {
+                          await widget.apiClient.joinFeed(context, feed.id);
+                          if (mounted) {
+                            _loadFeeds();
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(e.toString()),
+                                backgroundColor: Theme.of(context).colorScheme.error,
                               ),
+                            );
+                          }
+                        }
+                      },
+                    ),
+                  )
+                else
+                  Padding(
+                    padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).padding.top + 56,
+                      bottom: MediaQuery.of(context).padding.bottom + 24,
+                      left: 8,
+                      right: 8,
+                    ),
+                    child: ListView(
+                      children: [
+                        if (_posts != null && _posts!.isNotEmpty) ...[
+                          ...(() {
+                            final filtered = _posts!.where((post) {
+                              if (_sortBy == 'latest') {
+                                return true;
+                              } else {
+                                // Popular: posts with score > 0
+                                return post.score > 0;
+                              }
+                            }).toList();
+                            filtered.sort((a, b) {
+                              if (_sortBy == 'latest') {
+                                return b.createdAt.compareTo(a.createdAt);
+                              } else if (_sortBy == 'popular') {
+                                return b.score.compareTo(a.score);
+                              }
+                              return 0;
+                            });
+                            return filtered.map((post) => PostListItem(
+                                  post: post,
+                                  onVote: _vote,
+                                ));
+                          })(),
+                        ],
+                        if (availableFeeds.isNotEmpty) ...[
+                          const SizedBox(height: 24),
+                          Text(
+                            'Discover more feeds',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
-                          );
-                        },
-                        borderRadius: BorderRadius.circular(16),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 24,
-                                    backgroundColor: Theme.of(context).colorScheme.secondary,
-                                    child: feed.iconUrl != null
-                                        ? ClipOval(
-                                            child: Image.network(
-                                              feed.iconUrl!,
-                                              width: 48,
-                                              height: 48,
-                                              fit: BoxFit.cover,
-                                            ),
-                                          )
-                                        : Text(
-                                            feed.displayName[0],
-                                            style: TextStyle(
-                                              fontSize: 24,
-                                              color: Theme.of(context).colorScheme.onSecondary,
-                                            ),
-                                          ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          feed.displayName,
-                                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                                color: Theme.of(context).colorScheme.onPrimary,
-                                              ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              Icons.people,
-                                              size: 16,
-                                              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              feed.memberCount.toString(),
-                                              style: TextStyle(
-                                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                              ),
-                                            ),
-                                            const SizedBox(width: 16),
-                                            Icon(
-                                              Icons.article,
-                                              size: 16,
-                                              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              feed.postCount.toString(),
-                                              style: TextStyle(
-                                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              if (feed.description.isNotEmpty) ...[
-                                const SizedBox(height: 16),
-                                Text(
-                                  feed.description,
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimary,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ],
                           ),
-                        ),
-                      ),
+                          const SizedBox(height: 8),
+                          ...availableFeeds.map((feed) => FeedListItem(
+                                feed: feed,
+                                onJoin: () async {
+                                  try {
+                                    await widget.apiClient.joinFeed(context, feed.id);
+                                    if (mounted) {
+                                      _loadFeeds();
+                                    }
+                                  } catch (e) {
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(e.toString()),
+                                          backgroundColor: Theme.of(context).colorScheme.error,
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                              )),
+                        ],
+                      ],
                     ),
                   ),
-                );
-              },
+                // Glassmorphic floating button
+                if (_selectedFeed != null || (_sortBy != 'discover' && _selectedFeed == null))
+                  GlassmorphicUI.buildFloatingButton(
+                    context: context,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.add_comment,
+                          size: 20,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          _selectedFeed != null ? 'New post' : 'New post to...',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    onTap: () => _onNewPostPressed(joinedFeeds),
+                  ),
+              ],
             ),
         ],
       ),

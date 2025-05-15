@@ -6,6 +6,7 @@ import '../services/api_client.dart';
 import 'login_page.dart';
 import 'package:circle_nav_bar/circle_nav_bar.dart';
 import 'profile_page.dart';
+import 'feeds_page.dart';
 
 class HomePage extends StatefulWidget {
   final String token;
@@ -27,13 +28,6 @@ class _HomePageState extends State<HomePage> {
   Map<String, dynamic>? _profile;
   bool _initialized = false;
   int _currentIndex = 0;
-
-  final List<Widget> pages = [
-    const Center(child: Text('Feed')),
-    const Center(child: Text('Events')),
-    const Center(child: Text('Volunteer')),
-    const Center(child: Text('Study')),
-  ];
 
   @override
   void didChangeDependencies() {
@@ -77,25 +71,17 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    
+    // Define pages with actual components
+    final List<Widget> pages = [
+      FeedsPage(apiClient: widget.apiClient),
+      const Center(child: Text('Events')),
+      const Center(child: Text('Volunteer')),
+      const Center(child: Text('Study')),
+      ProfilePage(apiClient: widget.apiClient),
+    ];
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.account_circle),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProfilePage(
-                    apiClient: widget.apiClient,
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
       body: pages[_currentIndex],
       extendBody: true,
       bottomNavigationBar: CircleNavBar(
@@ -104,12 +90,14 @@ class _HomePageState extends State<HomePage> {
           Icon(Icons.event_note, color: Colors.white, size: 28),
           Icon(Icons.volunteer_activism, color: Colors.white, size: 28),
           Icon(Icons.school, color: Colors.white, size: 28),
+          Icon(Icons.account_circle, color: Colors.white, size: 28),
         ],
         inactiveIcons: [
           Column(children: [Icon(Icons.feed_outlined, color: Colors.blue, size: 28), Text(l10n.feed, style: TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.w500))]),
           Icon(Icons.event_note_outlined, color: Colors.blue, size: 28),
           Icon(Icons.volunteer_activism_outlined, color: Colors.blue, size: 28),
           Icon(Icons.school_outlined, color: Colors.blue, size: 28),
+          Icon(Icons.account_circle_outlined, color: Colors.blue, size: 28),
         ],
         color: Colors.white,
         height: 60,

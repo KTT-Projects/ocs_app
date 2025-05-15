@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'dart:async';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../models/feed.dart';
 import '../models/feed_post.dart';
@@ -24,11 +25,36 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
   bool _isLoading = true;
   String? _error;
   List<FeedPost>? _posts;
+  bool _didLoadPosts = false;
+
+  Timer? _refreshTimer;
 
   @override
   void initState() {
     super.initState();
-    _loadPosts();
+    _startPeriodicRefresh();
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startPeriodicRefresh() {
+    // Refresh every 5 seconds
+    _refreshTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      _loadPosts();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didLoadPosts) {
+      _didLoadPosts = true;
+      _loadPosts();
+    }
   }
 
   Future<void> _loadPosts() async {
@@ -105,15 +131,6 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
                         width: 32,
                         height: 32,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Text(
-                            widget.feed.displayName[0],
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Theme.of(context).colorScheme.onSecondary,
-                            ),
-                          );
-                        },
                       ),
                     )
                   : Text(
@@ -248,14 +265,24 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
               itemCount: _posts!.length,
               itemBuilder: (context, index) {
                 final post = _posts![index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  color: Theme.of(context).colorScheme.background.withOpacity(0.2),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(24),
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                       child: Padding(
@@ -275,17 +302,6 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
                                             width: 32,
                                             height: 32,
                                             fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) {
-                                              return Center(
-                                                child: Text(
-                                                  post.displayName[0],
-                                                  style: TextStyle(
-                                                    fontSize: 16,
-                                                    color: Theme.of(context).colorScheme.onSecondary,
-                                                  ),
-                                                ),
-                                              );
-                                            },
                                           ),
                                         )
                                       : Text(
@@ -344,31 +360,6 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
                                 child: Image.network(
                                   post.mediaUrl!,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      padding: const EdgeInsets.all(16),
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(context).colorScheme.error.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.error_outline,
-                                            color: Theme.of(context).colorScheme.error,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            'Failed to load image',
-                                            style: TextStyle(
-                                              color: Theme.of(context).colorScheme.error,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
                                 ),
                               ),
                             ],

@@ -16,7 +16,7 @@ class ApiException implements Exception {
   String toString() => message;
 }
 
-class ApiClient {
+class ApiClient extends ChangeNotifier {
   static const String baseUrl = 'https://ocs.kttprojects.com/api';
   String? _token;
   final _authService = AuthService();
@@ -27,18 +27,20 @@ class ApiClient {
     _token = await _authService.getToken();
   }
 
-  Future<void> setToken(String? token) async {
-    _token = token;
-    if (token != null) {
-      await _authService.saveToken(token);
+  Future<void> setToken(String? newToken) async {
+    _token = newToken;
+    if (newToken != null) {
+      await _authService.saveToken(newToken);
     } else {
       await _authService.clearToken();
     }
+    notifyListeners();
   }
 
   Future<void> clearToken() async {
     _token = null;
     await _authService.clearToken();
+    notifyListeners();
   }
 
   Future<void> logout(BuildContext context) async {
@@ -57,9 +59,20 @@ class ApiClient {
         return l10n.invalidCredentials;
       case 'Invalid or expired OTP. Please request a new code.':
         return l10n.invalidOrExpiredOtp;
+      case 'Invalid or expired token':
+        clearToken(); // Clear token immediately
+        return serverMessage;
       default:
         return serverMessage;
     }
+  }
+
+  Future<void> _handleUnauthorizedResponse(BuildContext context, Map<String, dynamic> data) async {
+    final message = data['message'] ?? 'Unauthorized';
+    if (message == 'Invalid or expired token') {
+      await clearToken();
+    }
+    throw ApiException(message);
   }
 
   Future<Map<String, dynamic>> register({
@@ -122,9 +135,9 @@ class ApiClient {
       final response = await http.post(
         Uri.parse('$baseUrl/verify.php'),
         headers: {
-        'Content-Type': 'application/json',
-        'Accept-Language': Localizations.localeOf(context).languageCode,
-      },
+          'Content-Type': 'application/json',
+          'Accept-Language': Localizations.localeOf(context).languageCode,
+        },
         body: json.encode({
           'email': email,
           'otp': otp,
@@ -133,7 +146,9 @@ class ApiClient {
 
       final data = json.decode(response.body);
 
-      if (response.statusCode != 200) {
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
         final errorMessage = _mapServerError(context, data['message'] ?? l10n.verificationFailed);
         throw ApiException(errorMessage);
       }
@@ -164,9 +179,9 @@ class ApiClient {
       final response = await http.post(
         Uri.parse('$baseUrl/login.php'),
         headers: {
-        'Content-Type': 'application/json',
-        'Accept-Language': Localizations.localeOf(context).languageCode,
-      },
+          'Content-Type': 'application/json',
+          'Accept-Language': Localizations.localeOf(context).languageCode,
+        },
         body: json.encode({
           'email': email,
           'password': password,
@@ -225,7 +240,9 @@ class ApiClient {
       final response = await request.send();
       final data = json.decode(await response.stream.bytesToString());
 
-      if (response.statusCode != 200) {
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
         throw ApiException(_mapServerError(context, data['message'] ?? l10n.failedToUpdateProfile));
       }
 
@@ -249,7 +266,7 @@ class ApiClient {
     int? institutionId,
   }) async {
     final l10n = AppLocalizations.of(context)!;
-    
+
     try {
       final response = await http.patch(
         Uri.parse('$baseUrl/profile.php'),
@@ -268,7 +285,9 @@ class ApiClient {
 
       final data = json.decode(response.body);
 
-      if (response.statusCode != 200) {
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
         throw ApiException(_mapServerError(context, data['message'] ?? l10n.failedToUpdateProfile));
       }
 
@@ -285,7 +304,7 @@ class ApiClient {
 
   Future<Map<String, dynamic>> getProfile(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
-    
+
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/profile.php'),
@@ -297,11 +316,17 @@ class ApiClient {
 
       final data = json.decode(response.body);
 
-      if (response.statusCode != 200) {
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
         throw ApiException(_mapServerError(context, data['message'] ?? l10n.failedToLoadProfile));
       }
 
       if (data['status'] != 'success') {
+        // Also check for token issues in status response
+        if (data['message'] == 'Invalid or expired token') {
+          await _handleUnauthorizedResponse(context, data);
+        }
         throw ApiException(_mapServerError(context, data['message'] ?? l10n.failedToLoadProfile));
       }
 
@@ -398,17 +423,18 @@ class ApiClient {
         Uri.parse('$baseUrl/feeds.php?action=list'),
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
         },
       );
 
       final data = json.decode(response.body);
-      if (response.statusCode != 200) {
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
         throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
       }
 
-      return (data['data'] as List)
-          .map((feed) => Feed.fromJson(feed))
-          .toList();
+      return (data['data'] as List).map((feed) => Feed.fromJson(feed)).toList();
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException(l10n.errorOccurred);
@@ -427,24 +453,24 @@ class ApiClient {
       );
 
       final data = json.decode(response.body);
-      if (response.statusCode != 200) {
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
         throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
       }
 
-      return (data['data'] as List)
-          .map((post) => FeedPost.fromJson(post))
-          .toList();
+      return (data['data'] as List).map((post) => FeedPost.fromJson(post)).toList();
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException(l10n.errorOccurred);
     }
   }
 
-  Future<List<FeedPost>> getHomeFeed(BuildContext context, {int page = 1}) async {
+  Future<List<FeedPost>> getFollowingFeed(BuildContext context, {int page = 1}) async {
     final l10n = AppLocalizations.of(context)!;
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/feeds.php?action=home&page=$page'),
+        Uri.parse('$baseUrl/feeds.php?action=following&page=$page'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
@@ -452,13 +478,38 @@ class ApiClient {
       );
 
       final data = json.decode(response.body);
-      if (response.statusCode != 200) {
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
         throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
       }
 
-      return (data['data'] as List)
-          .map((post) => FeedPost.fromJson(post))
-          .toList();
+      return (data['data'] as List).map((post) => FeedPost.fromJson(post)).toList();
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<List<FeedPost>> getDiscoverFeed(BuildContext context, {int page = 1}) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/feeds.php?action=discover&page=$page'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+      }
+
+      return (data['data'] as List).map((post) => FeedPost.fromJson(post)).toList();
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException(l10n.errorOccurred);
@@ -480,7 +531,9 @@ class ApiClient {
       );
 
       final data = json.decode(response.body);
-      if (response.statusCode != 200) {
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
         throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
       }
     } catch (e) {
@@ -489,7 +542,8 @@ class ApiClient {
     }
   }
 
-  Future<int> createFeed(BuildContext context, {
+  Future<int> createFeed(
+    BuildContext context, {
     required String name,
     required String displayName,
     required String description,
@@ -512,7 +566,9 @@ class ApiClient {
       );
 
       final data = json.decode(response.body);
-      if (response.statusCode != 201) {
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 201) {
         throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
       }
 
@@ -523,7 +579,8 @@ class ApiClient {
     }
   }
 
-  Future<int> createPost(BuildContext context, {
+  Future<int> createPost(
+    BuildContext context, {
     required int feedId,
     required String title,
     required String content,
@@ -548,7 +605,9 @@ class ApiClient {
       );
 
       final data = json.decode(response.body);
-      if (response.statusCode != 201) {
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 201) {
         throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
       }
 
@@ -559,7 +618,37 @@ class ApiClient {
     }
   }
 
-  Future<void> votePost(BuildContext context, {
+  Future<void> reorderFeeds(
+    BuildContext context, {
+    required List<Map<String, dynamic>> feedOrders,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/feeds.php?action=reorder'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode({
+          'feed_orders': feedOrders,
+        }),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<void> votePost(
+    BuildContext context, {
     required int postId,
     required String voteType,
   }) async {

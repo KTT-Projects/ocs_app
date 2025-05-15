@@ -3,9 +3,6 @@ import 'dart:ui';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../models/feed.dart';
 import '../services/api_client.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:io';
 
 class CreatePostPage extends StatefulWidget {
   final ApiClient apiClient;
@@ -26,31 +23,15 @@ class _CreatePostPageState extends State<CreatePostPage> {
   final _contentController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
-  String? _mediaPath;
-  String? _mediaUrl;
-  final _imagePicker = ImagePicker();
 
-  Future<void> _pickImage() async {
-    try {
-      final XFile? image = await _imagePicker.pickImage(source: ImageSource.gallery);
-      if (image != null && mounted) {
-        setState(() {
-          _mediaPath = image.path;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    }
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _contentController.dispose();
+    super.dispose();
   }
 
-  Future<void> _submitPost() async {
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
     try {
@@ -58,30 +39,11 @@ class _CreatePostPageState extends State<CreatePostPage> {
         _isLoading = true;
       });
 
-      // Upload media if selected
-      if (_mediaPath != null) {
-        if (kIsWeb) {
-          final file = File(_mediaPath!);
-          final bytes = await file.readAsBytes();
-          final fileName = _mediaPath!.split('/').last;
-          _mediaUrl = await widget.apiClient.uploadAvatar(
-            context,
-            '',
-            webBytes: bytes,
-            webFileName: fileName,
-          );
-        } else {
-          _mediaUrl = await widget.apiClient.uploadAvatar(context, _mediaPath!);
-        }
-      }
-
       final postId = await widget.apiClient.createPost(
         context,
         feedId: widget.feed.id,
         title: _titleController.text,
         content: _contentController.text,
-        mediaUrl: _mediaUrl,
-        mediaType: _mediaUrl != null ? 'image' : null,
       );
 
       if (mounted) {
@@ -95,21 +57,11 @@ class _CreatePostPageState extends State<CreatePostPage> {
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
-      }
-    } finally {
-      if (mounted) {
         setState(() {
           _isLoading = false;
         });
       }
     }
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _contentController.dispose();
-    super.dispose();
   }
 
   @override
@@ -122,7 +74,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
-          l10n.createPost,
+          'New post in ${widget.feed.displayName}',
           style: TextStyle(
             color: Theme.of(context).colorScheme.onPrimary,
           ),
@@ -147,28 +99,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
             ),
           ),
         ),
-        actions: [
-          Container(
-            margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-              ),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: IconButton(
-                  icon: Icon(Icons.check, color: Theme.of(context).colorScheme.onPrimary),
-                  onPressed: _isLoading ? null : _submitPost,
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
       body: Stack(
         children: [
@@ -189,156 +119,139 @@ class _CreatePostPageState extends State<CreatePostPage> {
               padding: const EdgeInsets.all(16),
               child: Form(
                 key: _formKey,
-                child: Column(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-                        ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              children: [
-                                TextFormField(
-                                  controller: _titleController,
-                                  style: TextStyle(
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              controller: _titleController,
+                              decoration: InputDecoration(
+                                hintText: 'Title',
+                                hintStyle: TextStyle(
+                                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.5),
+                                ),
+                                filled: true,
+                                fillColor: Theme.of(context).colorScheme.background.withOpacity(0.1),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
                                     color: Theme.of(context).colorScheme.onPrimary,
                                   ),
-                                  decoration: InputDecoration(
-                                    hintText: l10n.postTitle,
-                                    hintStyle: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimary
-                                          .withOpacity(0.5),
-                                    ),
-                                    border: InputBorder.none,
-                                  ),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return l10n.titleRequired;
-                                    }
-                                    return null;
-                                  },
                                 ),
-                                Divider(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onPrimary
-                                      .withOpacity(0.2),
-                                ),
-                                TextFormField(
-                                  controller: _contentController,
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimary,
-                                  ),
-                                  decoration: InputDecoration(
-                                    hintText: l10n.writePost,
-                                    hintStyle: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimary
-                                          .withOpacity(0.5),
-                                    ),
-                                    border: InputBorder.none,
-                                  ),
-                                  maxLines: 10,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return l10n.contentRequired;
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ],
+                              ),
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter a title';
+                                }
+                                return null;
+                              },
                             ),
-                          ),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _contentController,
+                              decoration: InputDecoration(
+                                hintText: 'Write your post...',
+                                hintStyle: TextStyle(
+                                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.5),
+                                ),
+                                filled: true,
+                                fillColor: Theme.of(context).colorScheme.background.withOpacity(0.1),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.onPrimary,
+                                  ),
+                                ),
+                              ),
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                              maxLines: 5,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter some content';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 24),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: _isLoading ? null : _submit,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Theme.of(context).colorScheme.secondary,
+                                  foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: _isLoading
+                                    ? SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor: AlwaysStoppedAnimation<Color>(
+                                            Theme.of(context).colorScheme.onSecondary,
+                                          ),
+                                        ),
+                                      )
+                                    : const Text('Post'),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    if (_mediaPath != null)
-                      Stack(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimary
-                                    .withOpacity(0.3),
-                              ),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: Image.file(
-                                File(_mediaPath!),
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            top: 8,
-                            right: 8,
-                            child: IconButton(
-                              icon: const Icon(Icons.close),
-                              onPressed: () {
-                                setState(() {
-                                  _mediaPath = null;
-                                });
-                              },
-                              style: IconButton.styleFrom(
-                                backgroundColor: Theme.of(context)
-                                    .colorScheme
-                                    .background
-                                    .withOpacity(0.5),
-                                foregroundColor:
-                                    Theme.of(context).colorScheme.onPrimary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                    else
-                      OutlinedButton.icon(
-                        icon: const Icon(Icons.image),
-                        label: Text(l10n.addImage),
-                        onPressed: _pickImage,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                          side: BorderSide(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onPrimary
-                                .withOpacity(0.3),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          if (_isLoading)
-            Container(
-              color: Colors.black.withOpacity(0.5),
-              child: Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Theme.of(context).colorScheme.onPrimary,
                   ),
                 ),
               ),
             ),
+          ),
         ],
       ),
     );

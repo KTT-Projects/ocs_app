@@ -7,6 +7,10 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io';
 import '../providers/language_provider.dart';
 import '../widgets/language_toggle.dart';
+import '../widgets/glassmorphic_ui.dart';
+import '../widgets/grade_selection_dialog.dart';
+import '../widgets/institution_selection_dialog.dart';
+import '../widgets/text_field_dialog.dart';
 import '../services/api_client.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -141,42 +145,6 @@ class _ProfilePageState extends State<ProfilePage> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-            ),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: IconButton(
-                icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ),
-          ),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12.0),
-            child: Consumer<LanguageProvider>(
-              builder: (context, languageProvider, _) => LanguageToggle(
-                currentLanguage: languageProvider.currentLanguage,
-                onLanguageChanged: (lang) => languageProvider.setLanguage(lang),
-              ),
-            ),
-          ),
-        ],
-      ),
       body: Stack(
         children: [
           // Gradient background
@@ -262,17 +230,6 @@ class _ProfilePageState extends State<ProfilePage> {
                                                   width: 100,
                                                   height: 100,
                                                   fit: BoxFit.cover,
-                                                  errorBuilder: (context, error, stackTrace) {
-                                                    return Center(
-                                                      child: Text(
-                                                        _profile!['name']?[0] ?? '?',
-                                                        style: TextStyle(
-                                                          fontSize: 32,
-                                                          color: Theme.of(context).colorScheme.onSecondary,
-                                                        ),
-                                                      ),
-                                                    );
-                                                  },
                                                 ),
                                               )
                                             : Text(
@@ -503,73 +460,12 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _selectGrade() async {
     final l10n = AppLocalizations.of(context)!;
-    final selectedGrade = await showDialog<int>(
+    final selectedGrade = await GlassmorphicUI.showDialog<int>(
       context: context,
-      builder: (context) => BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-        child: Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            width: 300, // Fixed width for dialog
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        l10n.grade,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
-                      ),
-                      const SizedBox(height: 16),
-                      ...List.generate(8, (index) => index + 7).map(
-                        (grade) => ListTile(
-                          title: Text(
-                            'G$grade',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          onTap: () => Navigator.pop(context, grade),
-                        ),
-                      ),
-                      ListTile(
-                        title: Text(
-                          'OB',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        onTap: () => Navigator.pop(context, 99),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
+      width: 320,
+      child: GradeSelectionDialog(
+        title: l10n.grade,
+        onGradeSelected: (grade) => Navigator.pop(context, grade),
       ),
     );
 
@@ -597,73 +493,14 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<String?> _selectInstitution() async {
     final l10n = AppLocalizations.of(context)!;
-    return showDialog<String>(
+    return GlassmorphicUI.showDialog<String>(
       context: context,
-      builder: (context) => BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-        child: Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            width: 300, // Fixed width for dialog
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        l10n.selectInstitution,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
-                      ),
-                      const SizedBox(height: 16),
-                      Container(
-                        constraints: BoxConstraints(
-                          maxHeight: MediaQuery.of(context).size.height * 0.5,
-                        ),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: _institutions?.map((institution) {
-                                  final name = _getLocalizedInstitutionName(institution['name']);
-                                  return ListTile(
-                                    title: Text(
-                                      name,
-                                      style: TextStyle(
-                                        color: Theme.of(context).colorScheme.onPrimary,
-                                      ),
-                                    ),
-                                    onTap: () => Navigator.pop(context, institution['id'].toString()),
-                                  );
-                                }).toList() ??
-                                [],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
+      width: 320,
+      child: InstitutionSelectionDialog(
+        title: l10n.selectInstitution,
+        institutions: _institutions ?? [],
+        onInstitutionSelected: (id) => Navigator.pop(context, id),
+        getLocalizedName: _getLocalizedInstitutionName,
       ),
     );
   }
@@ -677,144 +514,40 @@ class _ProfilePageState extends State<ProfilePage> {
     final controller = TextEditingController(text: initialValue);
     final formKey = GlobalKey<FormState>();
 
-    await showDialog(
+    await GlassmorphicUI.showDialog(
       context: context,
-      builder: (context) => BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-        child: Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            width: 300, // Fixed width for dialog
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        title,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
-                      ),
-                      const SizedBox(height: 16),
-                      Form(
-                        key: formKey,
-                        child: TextFormField(
-                          controller: controller,
-                          autofocus: true,
-                          maxLength: title == l10n.bio ? 500 : title == l10n.displayName ? 50 : null,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              ),
-                            ),
-                            helperText: title == l10n.grade ? l10n.gradeInputHint : null,
-                            helperStyle: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                            ),
-                          ),
-                          maxLines: title == l10n.bio ? 3 : 1,
-                          textInputAction: title == l10n.bio ? TextInputAction.newline : TextInputAction.done,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              if (title == l10n.displayName) {
-                                return l10n.displayNameRequired;
-                              } else if (title == l10n.grade) {
-                                return l10n.pleaseSelectGrade;
-                              } else if (title == l10n.bio) {
-                                return null; // Bio can be empty
-                              }
-                              return l10n.displayNameRequired;
-                            }
-                            if (title == l10n.grade && value.toUpperCase() != 'OB') {
-                              final grade = int.tryParse(value);
-                              if (grade == null || grade < 1 || grade > 6) {
-                                return l10n.invalidGrade;
-                              }
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: Text(
-                              l10n.cancel,
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).colorScheme.secondary,
-                              foregroundColor: Theme.of(context).colorScheme.onSecondary,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            onPressed: () async {
-                              if (formKey.currentState!.validate()) {
-                                String value = controller.text;
-                                if (title == l10n.grade && value.toUpperCase() == 'OB') {
-                                  value = '99';
-                                }
-                                Navigator.pop(context);
-                                await onSave(value);
-                              }
-                            },
-                            child: Text(l10n.saveProfile),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
+      width: 320,
+      child: TextFieldDialog(
+        title: title,
+        initialValue: initialValue,
+        maxLength: title == l10n.bio ? 500 : title == l10n.displayName ? 50 : null,
+        maxLines: title == l10n.bio ? 3 : 1,
+        helperText: title == l10n.grade ? l10n.gradeInputHint : null,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            if (title == l10n.displayName) {
+              return l10n.displayNameRequired;
+            } else if (title == l10n.grade) {
+              return l10n.pleaseSelectGrade;
+            } else if (title == l10n.bio) {
+              return null; // Bio can be empty
+            }
+            return l10n.displayNameRequired;
+          }
+          if (title == l10n.grade && value.toUpperCase() != 'OB') {
+            final grade = int.tryParse(value);
+            if (grade == null || grade < 1 || grade > 6) {
+              return l10n.invalidGrade;
+            }
+          }
+          return null;
+        },
+        onSave: (value) async {
+          if (title == l10n.grade && value.toUpperCase() == 'OB') {
+            value = '99';
+          }
+          await onSave(value);
+        },
       ),
     );
   }

@@ -50,11 +50,7 @@ class FeedPost {
       userId: json['user_id'],
       title: json['title'],
       content: json['content'],
-      mediaUrl: json['media_url'] != null 
-          ? (json['media_url'].toString().startsWith('/') 
-              ? 'https://ocs.kttprojects.com${json['media_url']}'
-              : json['media_url'])
-          : null,
+      mediaUrl: json['media_url'],
       mediaType: json['media_type'],
       upvotes: json['upvotes'] ?? 0,
       downvotes: json['downvotes'] ?? 0,
@@ -65,11 +61,7 @@ class FeedPost {
       updatedAt: DateTime.parse(json['updated_at']),
       email: json['email'],
       displayName: json['display_name'],
-      avatarUrl: json['avatar_url'] != null 
-          ? (json['avatar_url'].toString().startsWith('/') 
-              ? 'https://ocs.kttprojects.com${json['avatar_url']}'
-              : json['avatar_url'])
-          : null,
+      avatarUrl: json['avatar_url'],
       commentCount: json['comment_count'] ?? 0,
       feedName: json['feed_name'],
       feedDisplayName: json['feed_display_name'],

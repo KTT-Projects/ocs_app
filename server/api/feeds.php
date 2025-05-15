@@ -1,4 +1,13 @@
 <?php
+// CORS headers
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
 require_once 'config/Database.php';
 require_once 'config/Auth.php';
 require_once 'config/Response.php';
@@ -22,7 +31,7 @@ class FeedController {
             // Get authorization header
             $headers = getallheaders();
             if (!isset($headers['Authorization']) && !($method === 'GET' && $action === 'list')) {
-                Response::json(401, 'Authorization header is required');
+                Response::error('Authorization header is required', 401);
                 return;
             }
 
@@ -31,7 +40,7 @@ class FeedController {
                 $token = str_replace('Bearer ', '', $headers['Authorization']);
                 $decoded = $this->validateJWT($token);
                 if (!$decoded) {
-                    Response::json(401, 'Invalid or expired token');
+                    Response::error('Invalid or expired token', 401);
                     return;
                 }
                 $userId = $decoded['user_id'];
@@ -56,36 +65,89 @@ class FeedController {
                         $this->createPost($userId);
                     } else if ($action === 'vote') {
                         $this->vote($userId);
+                    } else if ($action === 'reorder') {
+                        $this->reorderFeeds($userId);
                     }
                     break;
                 default:
-                    Response::json(405, 'Method not allowed');
+                    Response::error('Method not allowed', 405);
             }
         } catch (Exception $e) {
-            Response::json(500, $e->getMessage());
+            Response::error($e->getMessage(), 500);
         }
     }
 
     private function getFeeds() {
+        // Get user ID from token if available
+        $headers = getallheaders();
+        $userId = null;
+        if (isset($headers['Authorization'])) {
+            $token = str_replace('Bearer ', '', $headers['Authorization']);
+            $decoded = $this->validateJWT($token);
+            if ($decoded) {
+                $userId = $decoded['user_id'];
+            }
+        }
+
+        // Modified query to include display_order
         $query = "SELECT f.*, 
-                  COUNT(DISTINCT fm.user_id) as member_count,
-                  COUNT(DISTINCT fp.id) as post_count 
+                  COUNT(DISTINCT fm1.user_id) as member_count,
+                  COUNT(DISTINCT fp.id) as post_count,
+                  IF(fm2.user_id IS NOT NULL, 1, 0) as is_member,
+                  COALESCE(fm2.display_order, 0) as display_order
                   FROM feeds f 
-                  LEFT JOIN feed_members fm ON f.id = fm.feed_id 
+                  LEFT JOIN feed_members fm1 ON f.id = fm1.feed_id 
                   LEFT JOIN feed_posts fp ON f.id = fp.feed_id 
+                  LEFT JOIN feed_members fm2 ON f.id = fm2.feed_id AND fm2.user_id = :user_id
                   GROUP BY f.id 
-                  ORDER BY member_count DESC";
+                  ORDER BY fm2.display_order ASC, member_count DESC";
         
         $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
         $stmt->execute();
         $feeds = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        Response::json(200, 'Feeds retrieved successfully', $feeds);
+        Response::success($feeds, 'Feeds retrieved successfully');
+    }
+
+    private function reorderFeeds($userId) {
+        $data = json_decode(file_get_contents('php://input'), true);
+        
+        if (!isset($data['feed_orders']) || !is_array($data['feed_orders'])) {
+            Response::error('Feed orders array is required', 400);
+            return;
+        }
+
+        $this->conn->beginTransaction();
+
+        try {
+            foreach ($data['feed_orders'] as $feedOrder) {
+                if (!isset($feedOrder['feed_id']) || !isset($feedOrder['order'])) {
+                    throw new Exception('Feed ID and order are required for each feed');
+                }
+
+                $query = "UPDATE feed_members 
+                         SET display_order = :order 
+                         WHERE feed_id = :feed_id AND user_id = :user_id";
+                
+                $stmt = $this->conn->prepare($query);
+                $stmt->bindParam(':order', $feedOrder['order'], PDO::PARAM_INT);
+                $stmt->bindParam(':feed_id', $feedOrder['feed_id'], PDO::PARAM_INT);
+                $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+                $stmt->execute();
+            }
+
+            $this->conn->commit();
+            Response::success(null, 'Feed order updated successfully');
+        } catch (Exception $e) {
+            $this->conn->rollBack();
+            throw $e;
+        }
     }
 
     private function getFeedPosts() {
         if (!isset($_GET['feed_id'])) {
-            Response::json(400, 'Feed ID is required');
+            Response::error('Feed ID is required', 400);
             return;
         }
 
@@ -113,7 +175,7 @@ class FeedController {
         $stmt->execute();
         $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        Response::json(200, 'Posts retrieved successfully', $posts);
+        Response::success($posts, 'Posts retrieved successfully');
     }
 
     private function getHomeFeed($userId) {
@@ -144,14 +206,14 @@ class FeedController {
         $stmt->execute();
         $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        Response::json(200, 'Home feed retrieved successfully', $posts);
+        Response::success($posts, 'Home feed retrieved successfully');
     }
 
     private function createFeed($userId) {
         $data = json_decode(file_get_contents('php://input'), true);
         
         if (!isset($data['name']) || !isset($data['display_name']) || !isset($data['description'])) {
-            Response::json(400, 'Name, display name and description are required');
+            Response::error('Name, display name and description are required', 400);
             return;
         }
 
@@ -183,7 +245,7 @@ class FeedController {
             $stmt->execute();
 
             $this->conn->commit();
-            Response::json(201, 'Feed created successfully', ['id' => $feedId]);
+            Response::success(['id' => $feedId], 'Feed created successfully');
         } catch (Exception $e) {
             $this->conn->rollBack();
             throw $e;
@@ -194,27 +256,39 @@ class FeedController {
         $data = json_decode(file_get_contents('php://input'), true);
         
         if (!isset($data['feed_id'])) {
-            Response::json(400, 'Feed ID is required');
+            Response::error('Feed ID is required', 400);
             return;
         }
 
-        $query = "INSERT INTO feed_members (feed_id, user_id) 
-                 VALUES (:feed_id, :user_id)
+        // Get current max display_order for user
+        $query = "SELECT COALESCE(MAX(display_order), 0) as max_order 
+                 FROM feed_members 
+                 WHERE user_id = :user_id";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':user_id', $userId);
+        $stmt->execute();
+        $maxOrder = $stmt->fetch(PDO::FETCH_ASSOC)['max_order'];
+
+        $query = "INSERT INTO feed_members (feed_id, user_id, display_order) 
+                 VALUES (:feed_id, :user_id, :display_order)
                  ON DUPLICATE KEY UPDATE role = 'member'";
         
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':feed_id', $data['feed_id']);
         $stmt->bindParam(':user_id', $userId);
+        $displayOrder = $maxOrder + 1;
+        $stmt->bindParam(':display_order', $displayOrder);
         $stmt->execute();
 
-        Response::json(200, 'Joined feed successfully');
+        Response::success(null, 'Joined feed successfully');
     }
 
     private function createPost($userId) {
         $data = json_decode(file_get_contents('php://input'), true);
         
         if (!isset($data['feed_id']) || !isset($data['title']) || !isset($data['content'])) {
-            Response::json(400, 'Feed ID, title and content are required');
+            Response::error('Feed ID, title and content are required', 400);
             return;
         }
 
@@ -228,7 +302,7 @@ class FeedController {
         $stmt->execute();
         
         if ($stmt->fetchColumn() == 0) {
-            Response::json(403, 'You must be a member of this feed to post');
+            Response::error('You must be a member of this feed to post', 403);
             return;
         }
 
@@ -245,19 +319,19 @@ class FeedController {
         $stmt->execute();
 
         $postId = $this->conn->lastInsertId();
-        Response::json(201, 'Post created successfully', ['id' => $postId]);
+        Response::success(['id' => $postId], 'Post created successfully');
     }
 
     private function vote($userId) {
         $data = json_decode(file_get_contents('php://input'), true);
         
         if (!isset($data['post_id']) || !isset($data['vote_type'])) {
-            Response::json(400, 'Post ID and vote type are required');
+            Response::error('Post ID and vote type are required', 400);
             return;
         }
 
         if (!in_array($data['vote_type'], ['upvote', 'downvote'])) {
-            Response::json(400, 'Invalid vote type');
+            Response::error('Invalid vote type', 400);
             return;
         }
 
@@ -302,7 +376,7 @@ class FeedController {
             $stmt->execute();
 
             $this->conn->commit();
-            Response::json(200, 'Vote recorded successfully');
+            Response::success(null, 'Vote recorded successfully');
         } catch (Exception $e) {
             $this->conn->rollBack();
             throw $e;
