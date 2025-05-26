@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class FeedPage extends StatefulWidget {
-  const FeedPage({super.key});
+class FeedsPage extends StatefulWidget {
+  const FeedsPage({super.key});
 
   @override
-  State<FeedPage> createState() => _FeedPageState();
+  State<FeedsPage> createState() => _FeedsPageState();
 }
 
-class _FeedPageState extends State<FeedPage> {
+class _FeedsPageState extends State<FeedsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;

@@ -6,7 +6,7 @@ import '../services/api_client.dart';
 import 'login_page.dart';
 import '../widgets/circle_nav_bar.dart';
 import 'profile_page.dart';
-import 'feed_page.dart';
+import 'feeds_page.dart';
 import 'events_page.dart';
 import 'volunteer_page.dart';
 import 'study_page.dart';
@@ -74,7 +74,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
-      FeedPage(),
+      FeedsPage(),
       EventsPage(),
       VolunteerPage(),
       StudyPage(),
