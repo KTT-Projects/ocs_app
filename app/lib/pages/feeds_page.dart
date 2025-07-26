@@ -96,7 +96,7 @@ class _FeedsPageState extends State<FeedsPage> {
       final posts = _selectedFeed == null
           ? _sortBy == 'discover'
               ? await widget.apiClient.getDiscoverFeed(context)
-              : await widget.apiClient.getFollowingFeed(context)
+              : await widget.apiClient.getHomeFeed(context)
           : await widget.apiClient.getFeedPosts(context, _selectedFeed!.id);
       if (mounted) {
         setState(() {

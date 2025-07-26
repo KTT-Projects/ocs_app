@@ -445,7 +445,7 @@ class ApiClient extends ChangeNotifier {
     final l10n = AppLocalizations.of(context)!;
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/feeds.php?action=following'),
+        Uri.parse('$baseUrl/feeds.php?action=joined'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
@@ -491,11 +491,11 @@ class ApiClient extends ChangeNotifier {
     }
   }
 
-  Future<List<FeedPost>> getFollowingFeed(BuildContext context, {int page = 1}) async {
+  Future<List<FeedPost>> getHomeFeed(BuildContext context, {int page = 1}) async {
     final l10n = AppLocalizations.of(context)!;
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/feeds.php?action=following&page=$page'),
+        Uri.parse('$baseUrl/feeds.php?action=home&page=$page'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
