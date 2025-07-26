@@ -73,11 +73,10 @@ class _FeedsPageState extends State<FeedsPage> {
 
   Future<void> _loadFeeds() async {
     try {
-      final joinedFeeds = await widget.apiClient.getJoinedFeeds(context);
-      final nonJoinedFeeds = await widget.apiClient.getFeeds(context);
+      final allFeeds = await widget.apiClient.getFeeds(context);
       if (mounted) {
         setState(() {
-          _feeds = [...joinedFeeds, ...nonJoinedFeeds];
+          _feeds = allFeeds;
           _isLoading = false;
         });
       }
@@ -96,7 +95,7 @@ class _FeedsPageState extends State<FeedsPage> {
       final posts = _selectedFeed == null
           ? _sortBy == 'discover'
               ? await widget.apiClient.getDiscoverFeed(context)
-              : await widget.apiClient.getFollowingFeed(context)
+              : await widget.apiClient.getHomeFeed(context)
           : await widget.apiClient.getFeedPosts(context, _selectedFeed!.id);
       if (mounted) {
         setState(() {
