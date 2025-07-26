@@ -33,13 +33,8 @@ class FeedController
     try {
       // Get authorization header
       $headers = getallheaders();
-      if (!isset($headers['Authorization']) && !($method === 'GET' && $action === 'list')) {
-        Response::error('Authorization header is required', 401);
-        return;
-      }
-
-      // Verify JWT for all requests except GET feeds
-      if (!($method === 'GET' && $action === 'list')) {
+      $userId = null;
+      if (isset($headers['Authorization'])) {
         $token = str_replace('Bearer ', '', $headers['Authorization']);
         $decoded = $this->validateJWT($token);
         if (!$decoded) {
@@ -47,14 +42,17 @@ class FeedController
           return;
         }
         $userId = $decoded['user_id'];
+      } elseif (!($method === 'GET' && $action === 'list')) {
+        Response::error('Authorization header is required', 401);
+        return;
       }
 
       switch ($method) {
         case 'GET':
           if ($action === 'list') {
-            $this->getFeeds();
-          } else if ($action === 'following') {
-            $this->getFollowingFeeds($userId);
+            $this->getFeeds($userId);
+          } else if ($action === 'joined') {
+            $this->getJoinedFeeds($userId);
           } else if ($action === 'posts') {
             $this->getFeedPosts();
           } else if ($action === 'home') {
@@ -82,35 +80,47 @@ class FeedController
     }
   }
 
-  private function getFeeds()
+  private function getFeeds($userId = null)
   {
     // Get sort option from query (default: population)
     $sort = isset($_GET['sort']) ? $_GET['sort'] : 'population';
 
-    // Fetch non-joined feeds only, sorted by selected option
-    $query = "SELECT f.*, 
+    // Fetch feeds with membership information
+    $query = "SELECT f.*,
                   COUNT(DISTINCT fm1.user_id) as member_count,
-                  COUNT(DISTINCT fp.id) as post_count
-                  FROM feeds f 
-                  LEFT JOIN feed_members fm1 ON f.id = fm1.feed_id 
-                  LEFT JOIN feed_posts fp ON f.id = fp.feed_id 
-                  GROUP BY f.id";
+                  COUNT(DISTINCT fp.id) as post_count";
+    if ($userId !== null) {
+      $query .= ", IF(fm2.user_id IS NULL, 0, 1) as is_member";
+    } else {
+      $query .= ", 0 as is_member";
+    }
+    $query .= " FROM feeds f
+                  LEFT JOIN feed_members fm1 ON f.id = fm1.feed_id
+                  LEFT JOIN feed_posts fp ON f.id = fp.feed_id";
+    if ($userId !== null) {
+      $query .= " LEFT JOIN feed_members fm2 ON f.id = fm2.feed_id AND fm2.user_id = :user_id";
+    }
+    $query .= " GROUP BY f.id";
     if ($sort === 'activity') {
       $query .= " ORDER BY MAX(fp.created_at) DESC";
     } else {
       $query .= " ORDER BY member_count DESC";
     }
     $stmt = $this->conn->prepare($query);
+    if ($userId !== null) {
+      $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+    }
     $stmt->execute();
     $feeds = [];
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $feed) {
-      $feed['is_member'] = 0;
-      $feeds[] = $feed;
+      if ($userId === null || $feed['is_member'] == 0) {
+        $feeds[] = $feed;
+      }
     }
-    Response::success($feeds, 'Non-joined feeds retrieved successfully');
+    Response::success($feeds, 'Feeds retrieved successfully');
   }
 
-  private function getFollowingFeeds($userId)
+  private function getJoinedFeeds($userId)
   {
     // Get feed_order from users table
     $feedOrderQuery = "SELECT feed_order FROM users WHERE id = :user_id";
