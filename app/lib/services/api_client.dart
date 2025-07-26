@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/widgets.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import 'dart:io';
 import '../models/feed.dart';
 import '../models/feed_post.dart';
@@ -441,6 +441,31 @@ class ApiClient extends ChangeNotifier {
     }
   }
 
+  Future<List<Feed>> getJoinedFeeds(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/feeds.php?action=following'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+      }
+
+      return (data['data'] as List).map((feed) => Feed.fromJson(feed)).toList();
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
   Future<List<FeedPost>> getFeedPosts(BuildContext context, int feedId, {int page = 1}) async {
     final l10n = AppLocalizations.of(context)!;
     try {
@@ -620,7 +645,7 @@ class ApiClient extends ChangeNotifier {
 
   Future<void> reorderFeeds(
     BuildContext context, {
-    required List<Map<String, dynamic>> feedOrders,
+    required List<int> feedOrder,
   }) async {
     final l10n = AppLocalizations.of(context)!;
     try {
@@ -631,7 +656,7 @@ class ApiClient extends ChangeNotifier {
           'Authorization': 'Bearer $_token',
         },
         body: json.encode({
-          'feed_orders': feedOrders,
+          'feed_order': feedOrder,
         }),
       );
 

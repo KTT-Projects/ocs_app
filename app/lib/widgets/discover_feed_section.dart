@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import '../l10n/app_localizations.dart';
 import '../models/feed.dart';
 import 'feed_list_item.dart';
 
@@ -23,6 +24,7 @@ class DiscoverFeedSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Stack(
       children: [
         Container(
@@ -49,13 +51,13 @@ class DiscoverFeedSection extends StatelessWidget {
                     filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                     child: TextField(
                       decoration: InputDecoration(
-                        hintText: 'Search feeds...',
+                        hintText: l10n.searchFeeds,
                         prefixIcon: Icon(
                           Icons.search,
-                          color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
+                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
                         ),
                         hintStyle: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
+                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
                         ),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -104,7 +106,7 @@ class DiscoverFeedSection extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'Population',
+                                    l10n.population,
                                     style: TextStyle(
                                       color: sortBy == 'population'
                                           ? Theme.of(context).colorScheme.onSecondary
@@ -149,7 +151,7 @@ class DiscoverFeedSection extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'Latest Activity',
+                                    l10n.latestActivity,
                                     style: TextStyle(
                                       color: sortBy == 'activity'
                                           ? Theme.of(context).colorScheme.onSecondary
@@ -184,7 +186,7 @@ class DiscoverFeedSection extends StatelessWidget {
                     if (filteredFeeds.isEmpty) {
                       return Center(
                         child: Text(
-                          'No feeds found.',
+                          l10n.noFeedsFound,
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.onPrimary,
                           ),

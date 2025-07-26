@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import '../models/feed.dart';
 import '../services/api_client.dart';
 
 class CreatePostPage extends StatefulWidget {
   final ApiClient apiClient;
   final Feed feed;
+  final String? initialTitle;
+  final String? initialContent;
 
   const CreatePostPage({
     super.key,
     required this.apiClient,
     required this.feed,
+    this.initialTitle,
+    this.initialContent,
   });
 
   @override
@@ -23,6 +27,13 @@ class _CreatePostPageState extends State<CreatePostPage> {
   final _contentController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController.text = widget.initialTitle ?? '';
+    _contentController.text = widget.initialContent ?? '';
+  }
 
   @override
   void dispose() {
@@ -93,7 +104,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: IconButton(
-                icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onPrimary),
+                icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
                 onPressed: () => Navigator.pop(context),
               ),
             ),
@@ -208,7 +219,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.onPrimary,
                               ),
-                              maxLines: 5,
+                              maxLines: 10,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Please enter some content';

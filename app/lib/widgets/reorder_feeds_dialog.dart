@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../models/feed.dart';
 
 class ReorderFeedsDialog extends StatefulWidget {
@@ -26,13 +27,14 @@ class _ReorderFeedsDialogState extends State<ReorderFeedsDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
           child: Text(
-            'Reorder feeds',
+            l10n.reorderFeeds,
             style: TextStyle(
               color: Theme.of(context).colorScheme.onPrimary,
               fontSize: 18,
@@ -108,7 +110,7 @@ class _ReorderFeedsDialogState extends State<ReorderFeedsDialog> {
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: Text(
-                  'Cancel',
+                  l10n.cancel,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),
@@ -121,7 +123,7 @@ class _ReorderFeedsDialogState extends State<ReorderFeedsDialog> {
                   widget.onReorder(_feeds);
                 },
                 child: Text(
-                  'Save',
+                  l10n.save,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.secondary,
                     fontWeight: FontWeight.bold,

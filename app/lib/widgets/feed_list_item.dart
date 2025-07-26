@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import '../l10n/app_localizations.dart';
 import '../models/feed.dart';
 
 class FeedListItem extends StatelessWidget {
@@ -16,6 +17,7 @@ class FeedListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -119,7 +121,7 @@ class FeedListItem extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          'Join',
+                          l10n.join,
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.onSecondary,
                             fontWeight: FontWeight.bold,

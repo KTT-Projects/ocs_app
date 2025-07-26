@@ -510,5 +510,88 @@
   "writePost": "Write your post...",
   "@writePost": {
     "description": "Placeholder text for post content input field"
+  },
+  "newPostIn": "New post in {feedName}",
+  "@newPostIn": {
+    "description": "Title for new post dialog with feed name",
+    "placeholders": {
+      "feedName": {}
+    }
+  },
+  "openInFullPage": "Open in full page",
+  "@openInFullPage": {
+    "description": "Tooltip for button to open post editor in full page"
+  },
+  "post": "Post",
+  "@post": {
+    "description": "Button text to submit a post"
+  },
+  "discover": "Discover",
+  "@discover": {
+    "description": "Title for the discover tab"
+  },
+  "home": "Home",
+  "@home": {
+    "description": "Title for the home tab"
+  },
+  "sortBy": "Sort by",
+  "@sortBy": {
+    "description": "Title for the sort menu"
+  },
+  "latest": "Latest",
+  "@latest": {
+    "description": "Sort by latest option"
+  },
+  "popular": "Popular",
+  "@popular": {
+    "description": "Sort by popular option"
+  },
+  "feedOptions": "Feed options",
+  "@feedOptions": {
+    "description": "Title for the feed options menu"
+  },
+  "createNewFeed": "Create new feed",
+  "@createNewFeed": {
+    "description": "Button to create a new feed"
+  },
+  "reorderFeeds": "Reorder feeds",
+  "@reorderFeeds": {
+    "description": "Button to reorder feeds"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save button"
+  },
+  "searchFeeds": "Search feeds...",
+  "@searchFeeds": {
+    "description": "Placeholder for search feeds input"
+  },
+  "population": "Population",
+  "@population": {
+    "description": "Sort by population option"
+  },
+  "latestActivity": "Latest Activity",
+  "@latestActivity": {
+    "description": "Sort by latest activity option"
+  },
+  "noFeedsFound": "No feeds found.",
+  "@noFeedsFound": {
+    "description": "Message when no feeds are found"
+  },
+  "join": "Join",
+  "@join": {
+    "description": "Button to join a feed"
+  },
+  "discoverMoreFeeds": "Discover more feeds",
+  "@discoverMoreFeeds": {
+    "description": "Title for the discover more feeds section"
+  },
+  "newPost": "New post",
+  "@newPost": {
+    "description": "Button to create a new post"
+  },
+  "newPostTo": "New post to...",
+  "@newPostTo": {
+    "description": "Button to create a new post to a specific feed"
   }
 }

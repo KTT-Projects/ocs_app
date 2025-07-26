@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../providers/language_provider.dart';
 import '../widgets/language_toggle.dart';
@@ -161,11 +161,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             child: Material(
               color: Colors.transparent,
               child: Consumer<LanguageProvider>(
-              builder: (context, languageProvider, _) => LanguageToggle(
-                currentLanguage: languageProvider.currentLanguage,
-                onLanguageChanged: (lang) => languageProvider.setLanguage(lang),
+                builder: (context, languageProvider, _) => LanguageToggle(
+                  currentLanguage: languageProvider.currentLanguage,
+                  onLanguageChanged: (lang) => languageProvider.setLanguage(lang),
                 ),
-            ),
+              ),
             ),
           ),
           // Responsive layout
@@ -304,31 +304,33 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                   if (!_showPasswordFields) ...[
                                     const SizedBox(height: 8),
                                     TextButton.icon(
-                                      onPressed: _isLoading ? null : () async {
-                                        setState(() => _isLoading = true);
-                                        try {
-                                          await widget.apiClient.requestPasswordReset(
-                                            context: context,
-                                            email: _email,
-                                          );
-                                          if (mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(content: Text(l10n.resetPasswordSent)),
-                                            );
-                                          }
-                                        } catch (e) {
-                                          if (mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(
-                                                content: Text(e.toString()),
-                                                backgroundColor: Theme.of(context).colorScheme.error,
-                                              ),
-                                            );
-                                          }
-                                        } finally {
-                                          setState(() => _isLoading = false);
-                                        }
-                                      },
+                                      onPressed: _isLoading
+                                          ? null
+                                          : () async {
+                                              setState(() => _isLoading = true);
+                                              try {
+                                                await widget.apiClient.requestPasswordReset(
+                                                  context: context,
+                                                  email: _email,
+                                                );
+                                                if (mounted) {
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    SnackBar(content: Text(l10n.resetPasswordSent)),
+                                                  );
+                                                }
+                                              } catch (e) {
+                                                if (mounted) {
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(e.toString()),
+                                                      backgroundColor: Theme.of(context).colorScheme.error,
+                                                    ),
+                                                  );
+                                                }
+                                              } finally {
+                                                setState(() => _isLoading = false);
+                                              }
+                                            },
                                       icon: Icon(
                                         Icons.refresh,
                                         color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
@@ -363,8 +365,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                       ),
                                     ),
                                     style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-                                    validator: (value) =>
-                                        (value?.length ?? 0) < 8 ? l10n.passwordRequirements : null,
+                                    validator: (value) => (value?.length ?? 0) < 8 ? l10n.passwordRequirements : null,
                                   ),
                                   const SizedBox(height: 16),
                                   TextFormField(
@@ -433,7 +434,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                 ),
                                 const SizedBox(height: 16),
                                 TextButton(
-                                    onPressed: () => Navigator.pop(context),
+                                  onPressed: () => Navigator.pop(context),
                                   child: Text(
                                     l10n.backToLogin,
                                     style: TextStyle(

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'dart:async';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import '../models/feed.dart';
 import '../models/feed_post.dart';
 import '../services/api_client.dart';
-import 'create_post_page.dart';
+import '../widgets/create_post_dialog.dart';
 
 class FeedPostsPage extends StatefulWidget {
   final ApiClient apiClient;
@@ -187,13 +187,11 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
                 child: IconButton(
                   icon: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary),
                   onPressed: () async {
-                    final postId = await Navigator.push<int>(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CreatePostPage(
-                          apiClient: widget.apiClient,
-                          feed: widget.feed,
-                        ),
+                    final postId = await showDialog<int>(
+                      context: context,
+                      builder: (context) => CreatePostDialog(
+                        apiClient: widget.apiClient,
+                        feed: widget.feed,
                       ),
                     );
                     if (postId != null && mounted) {

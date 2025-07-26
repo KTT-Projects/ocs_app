@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 
 class FeedMenuItem extends StatelessWidget {
   final IconData icon;
@@ -56,6 +57,7 @@ class FeedMenuDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,7 +65,7 @@ class FeedMenuDialog extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
           child: Text(
-            'Feed options',
+            l10n.feedOptions,
             style: TextStyle(
               color: Theme.of(context).colorScheme.onPrimary,
               fontSize: 18,
@@ -72,7 +74,7 @@ class FeedMenuDialog extends StatelessWidget {
         ),
         FeedMenuItem(
           icon: Icons.add,
-          label: 'Create new feed',
+          label: l10n.createNewFeed,
           onTap: () {
             Navigator.pop(context);
             onCreateFeed();
@@ -80,7 +82,7 @@ class FeedMenuDialog extends StatelessWidget {
         ),
         FeedMenuItem(
           icon: Icons.reorder,
-          label: 'Reorder feeds',
+          label: l10n.reorderFeeds,
           onTap: () {
             Navigator.pop(context);
             onReorderFeeds();

@@ -77,6 +77,7 @@ CREATE TABLE
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     reset_token VARCHAR(64) NULL,
     reset_token_expiry DATETIME NULL,
+    feed_order TEXT,
     FOREIGN KEY (role_id) REFERENCES roles (id),
     FOREIGN KEY (institution_id) REFERENCES educational_institutions (id)
   );
@@ -394,24 +395,6 @@ VALUES
   (
     'admin',
     'Administrator account with full system access'
-  );
-
--- Create Home feed
-INSERT INTO
-  feeds (
-    name,
-    display_name,
-    description,
-    created_by,
-    rules
-  )
-VALUES
-  (
-    'home',
-    'Home',
-    'Your personalized feed showing posts from all your joined feeds',
-    1,
-    'This is your personalized home feed.'
   );
 
 -- Create indexes for frequently accessed columns

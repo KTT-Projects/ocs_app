@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import '../services/api_client.dart';
 
 class CreateFeedPage extends StatefulWidget {
@@ -17,7 +17,6 @@ class CreateFeedPage extends StatefulWidget {
 
 class _CreateFeedPageState extends State<CreateFeedPage> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
   final _displayNameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _rulesController = TextEditingController();
@@ -25,7 +24,6 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
 
   @override
   void dispose() {
-    _nameController.dispose();
     _displayNameController.dispose();
     _descriptionController.dispose();
     _rulesController.dispose();
@@ -42,7 +40,7 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
 
       final feedId = await widget.apiClient.createFeed(
         context,
-        name: _nameController.text.toLowerCase().replaceAll(' ', '_'),
+        name: _displayNameController.text,
         displayName: _displayNameController.text,
         description: _descriptionController.text,
         rules: _rulesController.text.isNotEmpty ? _rulesController.text : null,
@@ -165,52 +163,6 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
                             child: Column(
                               children: [
                                 TextFormField(
-                                  controller: _nameController,
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimary,
-                                  ),
-                                  decoration: InputDecoration(
-                                    labelText: l10n.feedId,
-                                    labelStyle: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimary
-                                          .withOpacity(0.7),
-                                    ),
-                                    helperText: l10n.feedIdHelperText,
-                                    helperStyle: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimary
-                                          .withOpacity(0.5),
-                                    ),
-                                    enabledBorder: UnderlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimary
-                                            .withOpacity(0.3),
-                                      ),
-                                    ),
-                                    focusedBorder: UnderlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color:
-                                            Theme.of(context).colorScheme.onPrimary,
-                                      ),
-                                    ),
-                                  ),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return l10n.feedIdRequired;
-                                    }
-                                    if (!RegExp(r'^[a-z0-9_]+$').hasMatch(value)) {
-                                      return l10n.feedIdInvalid;
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 16),
-                                TextFormField(
                                   controller: _displayNameController,
                                   style: TextStyle(
                                     color: Theme.of(context).colorScheme.onPrimary,
@@ -218,23 +170,16 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
                                   decoration: InputDecoration(
                                     labelText: l10n.feedDisplayName,
                                     labelStyle: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimary
-                                          .withOpacity(0.7),
+                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
                                     ),
                                     enabledBorder: UnderlineInputBorder(
                                       borderSide: BorderSide(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimary
-                                            .withOpacity(0.3),
+                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
                                       ),
                                     ),
                                     focusedBorder: UnderlineInputBorder(
                                       borderSide: BorderSide(
-                                        color:
-                                            Theme.of(context).colorScheme.onPrimary,
+                                        color: Theme.of(context).colorScheme.onPrimary,
                                       ),
                                     ),
                                   ),
@@ -254,23 +199,16 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
                                   decoration: InputDecoration(
                                     labelText: l10n.feedDescription,
                                     labelStyle: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimary
-                                          .withOpacity(0.7),
+                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
                                     ),
                                     enabledBorder: UnderlineInputBorder(
                                       borderSide: BorderSide(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimary
-                                            .withOpacity(0.3),
+                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
                                       ),
                                     ),
                                     focusedBorder: UnderlineInputBorder(
                                       borderSide: BorderSide(
-                                        color:
-                                            Theme.of(context).colorScheme.onPrimary,
+                                        color: Theme.of(context).colorScheme.onPrimary,
                                       ),
                                     ),
                                   ),
@@ -291,23 +229,16 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
                                   decoration: InputDecoration(
                                     labelText: l10n.feedRules,
                                     labelStyle: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimary
-                                          .withOpacity(0.7),
+                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
                                     ),
                                     enabledBorder: UnderlineInputBorder(
                                       borderSide: BorderSide(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimary
-                                            .withOpacity(0.3),
+                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
                                       ),
                                     ),
                                     focusedBorder: UnderlineInputBorder(
                                       borderSide: BorderSide(
-                                        color:
-                                            Theme.of(context).colorScheme.onPrimary,
+                                        color: Theme.of(context).colorScheme.onPrimary,
                                       ),
                                     ),
                                   ),

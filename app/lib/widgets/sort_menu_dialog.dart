@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 
 class SortMenuItem extends StatelessWidget {
   final String value;
@@ -72,6 +73,7 @@ class SortMenuDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,7 +81,7 @@ class SortMenuDialog extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
           child: Text(
-            'Sort by',
+            l10n.sortBy,
             style: TextStyle(
               color: Theme.of(context).colorScheme.onPrimary,
               fontSize: 18,
@@ -88,14 +90,14 @@ class SortMenuDialog extends StatelessWidget {
         ),
         SortMenuItem(
           value: 'latest',
-          label: 'Latest',
+          label: l10n.latest,
           icon: Icons.access_time,
           selected: currentSort == 'latest',
           onTap: () => onSortChanged('latest'),
         ),
         SortMenuItem(
           value: 'popular',
-          label: 'Popular',
+          label: l10n.popular,
           icon: Icons.trending_up,
           selected: currentSort == 'popular',
           onTap: () => onSortChanged('popular'),

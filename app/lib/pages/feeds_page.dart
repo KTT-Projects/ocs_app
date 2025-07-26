@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'dart:async';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import '../models/feed.dart';
 import '../models/feed_post.dart';
 import '../services/api_client.dart';
@@ -14,7 +14,7 @@ import '../widgets/feed_selection_dialog.dart';
 import '../widgets/feed_menu_dialog.dart';
 import '../widgets/reorder_feeds_dialog.dart';
 import 'create_feed_page.dart';
-import 'create_post_page.dart';
+import '../widgets/create_post_dialog.dart';
 
 class FeedsPage extends StatefulWidget {
   final ApiClient apiClient;
@@ -73,10 +73,11 @@ class _FeedsPageState extends State<FeedsPage> {
 
   Future<void> _loadFeeds() async {
     try {
-      final feeds = await widget.apiClient.getFeeds(context);
+      final joinedFeeds = await widget.apiClient.getJoinedFeeds(context);
+      final nonJoinedFeeds = await widget.apiClient.getFeeds(context);
       if (mounted) {
         setState(() {
-          _feeds = feeds;
+          _feeds = [...joinedFeeds, ...nonJoinedFeeds];
           _isLoading = false;
         });
       }
@@ -136,13 +137,11 @@ class _FeedsPageState extends State<FeedsPage> {
 
   void _onNewPostPressed(List<Feed> joinedFeeds) async {
     if (_selectedFeed != null) {
-      final resultId = await Navigator.push<int>(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CreatePostPage(
-            apiClient: widget.apiClient,
-            feed: _selectedFeed!,
-          ),
+      final resultId = await showDialog<int>(
+        context: context,
+        builder: (context) => CreatePostDialog(
+          apiClient: widget.apiClient,
+          feed: _selectedFeed!,
         ),
       );
       if (resultId != null && mounted) {
@@ -159,13 +158,11 @@ class _FeedsPageState extends State<FeedsPage> {
         ),
       );
       if (feed != null && mounted) {
-        final resultId = await Navigator.push<int>(
-          context,
-          MaterialPageRoute(
-            builder: (context) => CreatePostPage(
-              apiClient: widget.apiClient,
-              feed: feed,
-            ),
+        final resultId = await showDialog<int>(
+          context: context,
+          builder: (context) => CreatePostDialog(
+            apiClient: widget.apiClient,
+            feed: feed,
           ),
         );
         if (resultId != null && mounted) {
@@ -206,7 +203,7 @@ class _FeedsPageState extends State<FeedsPage> {
                         return GlassmorphicUI.buildTab(
                           context: context,
                           icon: Icons.explore,
-                          label: 'Discover',
+                          label: l10n.discover,
                           selected: _selectedFeed == null && _sortBy == 'discover',
                           onTap: () {
                             setState(() {
@@ -221,7 +218,7 @@ class _FeedsPageState extends State<FeedsPage> {
                         return GlassmorphicUI.buildTab(
                           context: context,
                           icon: Icons.home,
-                          label: 'Home',
+                          label: l10n.home,
                           selected: _selectedFeed == null && _sortBy != 'discover',
                           onTap: () {
                             setState(() {
@@ -345,16 +342,10 @@ class _FeedsPageState extends State<FeedsPage> {
                                   feeds: joinedFeeds,
                                   onReorder: (reorderedFeeds) async {
                                     try {
-                                      final feedOrders = reorderedFeeds.asMap().entries.map((entry) {
-                                        return {
-                                          'feed_id': entry.value.id,
-                                          'order': entry.key,
-                                        };
-                                      }).toList();
-
+                                      final feedOrder = reorderedFeeds.map((feed) => feed.id).toList();
                                       await widget.apiClient.reorderFeeds(
                                         context,
-                                        feedOrders: feedOrders,
+                                        feedOrder: feedOrder,
                                       );
                                       _loadFeeds();
                                     } catch (e) {
@@ -508,7 +499,7 @@ class _FeedsPageState extends State<FeedsPage> {
                         if (availableFeeds.isNotEmpty) ...[
                           const SizedBox(height: 24),
                           Text(
-                            'Discover more feeds',
+                            l10n.discoverMoreFeeds,
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.onPrimary,
                               fontSize: 18,
@@ -554,7 +545,7 @@ class _FeedsPageState extends State<FeedsPage> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          _selectedFeed != null ? 'New post' : 'New post to...',
+                          _selectedFeed != null ? l10n.newPost : l10n.newPostTo,
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.onPrimary,
                           ),

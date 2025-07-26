@@ -213,5 +213,88 @@
   "writePost": "投稿を書く...",
   "@writePost": {
     "description": "投稿の内容入力欄のプレースホルダーテキスト"
+  },
+  "newPostIn": "{feedName}に新規投稿",
+  "@newPostIn": {
+    "description": "投稿作成ダイアログのタイトル（フィード名付き）",
+    "placeholders": {
+      "feedName": {}
+    }
+  },
+  "openInFullPage": "全画面で開く",
+  "@openInFullPage": {
+    "description": "投稿エディタを全画面で開くボタンのツールチップ"
+  },
+  "post": "投稿",
+  "@post": {
+    "description": "投稿を送信するボタンのテキスト"
+  },
+  "discover": "発見",
+  "@discover": {
+    "description": "「発見」タブのタイトル"
+  },
+  "home": "ホーム",
+  "@home": {
+    "description": "「ホーム」タブのタイトル"
+  },
+  "sortBy": "並び替え",
+  "@sortBy": {
+    "description": "並び替えメニューのタイトル"
+  },
+  "latest": "最新",
+  "@latest": {
+    "description": "最新で並び替え"
+  },
+  "popular": "人気",
+  "@popular": {
+    "description": "人気で並び替え"
+  },
+  "feedOptions": "フィードオプション",
+  "@feedOptions": {
+    "description": "フィードオプションメニューのタイトル"
+  },
+  "createNewFeed": "新しいフィードを作成",
+  "@createNewFeed": {
+    "description": "新しいフィードを作成するボタン"
+  },
+  "reorderFeeds": "フィードを並び替え",
+  "@reorderFeeds": {
+    "description": "フィードを並び替えるボタン"
+  },
+  "save": "保存",
+  "@save": {
+    "description": "保存ボタン"
+  },
+  "searchFeeds": "フィードを検索...",
+  "@searchFeeds": {
+    "description": "フィード検索のプレースホルダー"
+  },
+  "population": "人口",
+  "@population": {
+    "description": "人口で並び替え"
+  },
+  "latestActivity": "最新のアクティビティ",
+  "@latestActivity": {
+    "description": "最新のアクティビティで並び替え"
+  },
+  "noFeedsFound": "フィードが見つかりません。",
+  "@noFeedsFound": {
+    "description": "フィードが見つからない場合のメッセージ"
+  },
+  "join": "参加",
+  "@join": {
+    "description": "フィードに参加するボタン"
+  },
+  "discoverMoreFeeds": "もっとフィードを発見",
+  "@discoverMoreFeeds": {
+    "description": "もっとフィードを発見するためのセクションタイトル"
+  },
+  "newPost": "新しい投稿",
+  "@newPost": {
+    "description": "新しい投稿を作成するボタン"
+  },
+  "newPostTo": "投稿先...",
+  "@newPostTo": {
+    "description": "特定のフィードに新しい投稿を作成するボタン"
   }
 }
