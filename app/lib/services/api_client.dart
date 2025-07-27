@@ -341,7 +341,9 @@ class ApiClient extends ChangeNotifier {
 
   Future<List<Map<String, dynamic>>> getInstitutions(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
-    final response = await http.get(Uri.parse('$baseUrl/institutions.php'));
+    final response = await http.get(
+      Uri.parse('$baseUrl/institutions.php'),
+    );
 
     if (response.statusCode != 200) {
       throw ApiException(l10n.failedToLoadInstitutions);
