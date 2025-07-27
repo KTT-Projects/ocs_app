@@ -172,11 +172,9 @@ class _SignupPageState extends State<SignupPage> {
 
         if (mounted && response['status'] == 'success') {
           if (response['token'] != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(l10n.emailVerifiedSuccess),
-                backgroundColor: Colors.green,
-              ),
+            GlassmorphicUI.showGlassSnackBar(
+              context,
+              l10n.emailVerifiedSuccess,
             );
             Navigator.pushReplacement(
               context,
@@ -213,35 +211,19 @@ class _SignupPageState extends State<SignupPage> {
           Future.delayed(Duration(milliseconds: 100), () {
             FocusScope.of(context).requestFocus(FocusNode());
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l10n.verifyEmail),
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n.checkSpamJunk,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
-                    ),
-                  ),
-                ],
-              ),
-              duration: Duration(seconds: 12),
-            ),
+          GlassmorphicUI.showGlassSnackBar(
+            context,
+            '${l10n.verifyEmail}\n${l10n.checkSpamJunk}',
+            seconds: 12,
           );
         }
       }
     } catch (e) {
       setState(() => _errorMessage = e.toString());
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
+      GlassmorphicUI.showGlassSnackBar(
+        context,
+        e.toString(),
+        isError: true,
       );
     } finally {
       setState(() => _isLoading = false);
@@ -565,19 +547,17 @@ class _SignupPageState extends State<SignupPage> {
                                           allowDm: _allowDm,
                                         );
                                         if (mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text('${l10n.verificationCodeSent}'.replaceAll('{email}', _emailController.text)),
-                                            ),
+                                          GlassmorphicUI.showGlassSnackBar(
+                                            context,
+                                            '${l10n.verificationCodeSent}'.replaceAll('{email}', _emailController.text),
                                           );
                                         }
                                       } catch (e) {
                                         if (mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text(e.toString()),
-                                              backgroundColor: Theme.of(context).colorScheme.error,
-                                            ),
+                                          GlassmorphicUI.showGlassSnackBar(
+                                            context,
+                                            e.toString(),
+                                            isError: true,
                                           );
                                         }
                                       } finally {

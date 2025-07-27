@@ -655,7 +655,7 @@ class ApiClient extends ChangeNotifier {
       final data = json.decode(response.body);
       if (response.statusCode == 401) {
         await _handleUnauthorizedResponse(context, data);
-      } else if (response.statusCode != 201) {
+      } else if (response.statusCode != 200 && response.statusCode != 201) {
         throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
       }
 
@@ -694,7 +694,7 @@ class ApiClient extends ChangeNotifier {
       final data = json.decode(response.body);
       if (response.statusCode == 401) {
         await _handleUnauthorizedResponse(context, data);
-      } else if (response.statusCode != 201) {
+      } else if (response.statusCode != 200 && response.statusCode != 201) {
         throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
       }
 

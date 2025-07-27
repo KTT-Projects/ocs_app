@@ -8,6 +8,7 @@ import 'dart:io';
 import '../providers/language_provider.dart';
 import '../widgets/language_toggle.dart';
 import '../services/api_client.dart';
+import '../widgets/glassmorphic_ui.dart';
 
 class ProfilePage extends StatefulWidget {
   final ApiClient apiClient;
@@ -57,11 +58,10 @@ class _ProfilePageState extends State<ProfilePage> {
             final exists = await file.exists();
             if (!exists) {
               if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Selected file does not exist: ${image.path}'),
-                    backgroundColor: Theme.of(context).colorScheme.error,
-                  ),
+                GlassmorphicUI.showGlassSnackBar(
+                  context,
+                  'Selected file does not exist: ${image.path}',
+                  isError: true,
                 );
               }
               return;
@@ -69,11 +69,10 @@ class _ProfilePageState extends State<ProfilePage> {
             avatarUrl = await widget.apiClient.uploadAvatar(context, image.path);
           } catch (e) {
             if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Failed to upload avatar. Please try again or check file permissions.'),
-                  backgroundColor: Theme.of(context).colorScheme.error,
-                ),
+              GlassmorphicUI.showGlassSnackBar(
+                context,
+                'Failed to upload avatar. Please try again or check file permissions.',
+                isError: true,
               );
             }
             return;
@@ -90,11 +89,10 @@ class _ProfilePageState extends State<ProfilePage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        GlassmorphicUI.showGlassSnackBar(
+          context,
+          e.toString(),
+          isError: true,
         );
       }
     } finally {
@@ -342,11 +340,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                       }
                                     } catch (e) {
                                       if (mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text(e.toString()),
-                                            backgroundColor: Theme.of(context).colorScheme.error,
-                                          ),
+                                        GlassmorphicUI.showGlassSnackBar(
+                                          context,
+                                          e.toString(),
+                                          isError: true,
                                         );
                                       }
                                     }
@@ -387,11 +384,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                       }
                                     } catch (e) {
                                       if (mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text(e.toString()),
-                                            backgroundColor: Theme.of(context).colorScheme.error,
-                                          ),
+                                        GlassmorphicUI.showGlassSnackBar(
+                                          context,
+                                          e.toString(),
+                                          isError: true,
                                         );
                                       }
                                     }
@@ -566,11 +562,10 @@ class _ProfilePageState extends State<ProfilePage> {
         });
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(e.toString()),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
+          GlassmorphicUI.showGlassSnackBar(
+            context,
+            e.toString(),
+            isError: true,
           );
         }
       }

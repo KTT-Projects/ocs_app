@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../services/api_client.dart';
 import 'login_page.dart';
+import '../widgets/glassmorphic_ui.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   final ApiClient apiClient;
@@ -37,13 +38,11 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
   void _showMessage(String message, {bool isError = false, int seconds = 4}) {
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: Duration(seconds: seconds),
-          backgroundColor:
-              isError ? Theme.of(context).colorScheme.error : Colors.green,
-        ),
+      GlassmorphicUI.showGlassSnackBar(
+        context,
+        message,
+        isError: isError,
+        seconds: seconds,
       );
     }
   }
