@@ -21,6 +21,12 @@ class ApiClient extends ChangeNotifier {
   String? _token;
   final _authService = AuthService();
 
+  Uri _buildUri(String path) {
+    final ts = DateTime.now().millisecondsSinceEpoch;
+    final sep = path.contains('?') ? '&' : '?';
+    return Uri.parse('$baseUrl/$path${sep}t=$ts');
+  }
+
   String? get token => _token;
 
   Future<void> initialize() async {
@@ -307,9 +313,8 @@ class ApiClient extends ChangeNotifier {
 
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/profile.php'),
+        _buildUri('profile.php'),
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': 'Bearer ${_token}',
         },
       );
@@ -341,7 +346,9 @@ class ApiClient extends ChangeNotifier {
 
   Future<List<Map<String, dynamic>>> getInstitutions(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
-    final response = await http.get(Uri.parse('$baseUrl/institutions.php'));
+    final response = await http.get(
+      _buildUri('institutions.php'),
+    );
 
     if (response.statusCode != 200) {
       throw ApiException(l10n.failedToLoadInstitutions);
@@ -420,9 +427,8 @@ class ApiClient extends ChangeNotifier {
     final l10n = AppLocalizations.of(context)!;
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/feeds.php?action=list'),
+        _buildUri('feeds.php?action=list'),
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
         },
       );
@@ -445,9 +451,8 @@ class ApiClient extends ChangeNotifier {
     final l10n = AppLocalizations.of(context)!;
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/feeds.php?action=joined'),
+        _buildUri('feeds.php?action=joined'),
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
         },
       );
@@ -470,9 +475,8 @@ class ApiClient extends ChangeNotifier {
     final l10n = AppLocalizations.of(context)!;
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/feeds.php?action=posts&feed_id=$feedId&page=$page'),
+        _buildUri('feeds.php?action=posts&feed_id=$feedId&page=$page'),
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
         },
       );
@@ -495,9 +499,8 @@ class ApiClient extends ChangeNotifier {
     final l10n = AppLocalizations.of(context)!;
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/feeds.php?action=home&page=$page'),
+        _buildUri('feeds.php?action=home&page=$page'),
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
         },
       );
@@ -520,9 +523,8 @@ class ApiClient extends ChangeNotifier {
     final l10n = AppLocalizations.of(context)!;
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/feeds.php?action=discover&page=$page'),
+        _buildUri('feeds.php?action=discover&page=$page'),
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
         },
       );
