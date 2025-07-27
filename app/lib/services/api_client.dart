@@ -273,6 +273,8 @@ class ApiClient extends ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${_token}',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
         },
         body: json.encode({
           if (allowDm != null) 'allow_dm': allowDm,
@@ -311,6 +313,8 @@ class ApiClient extends ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${_token}',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
         },
       );
 
@@ -341,7 +345,13 @@ class ApiClient extends ChangeNotifier {
 
   Future<List<Map<String, dynamic>>> getInstitutions(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
-    final response = await http.get(Uri.parse('$baseUrl/institutions.php'));
+    final response = await http.get(
+      Uri.parse('$baseUrl/institutions.php'),
+      headers: const {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+      },
+    );
 
     if (response.statusCode != 200) {
       throw ApiException(l10n.failedToLoadInstitutions);
@@ -424,6 +434,8 @@ class ApiClient extends ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
         },
       );
 
@@ -449,6 +461,8 @@ class ApiClient extends ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
         },
       );
 
@@ -474,6 +488,8 @@ class ApiClient extends ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
         },
       );
 
@@ -499,6 +515,8 @@ class ApiClient extends ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
         },
       );
 
@@ -524,6 +542,8 @@ class ApiClient extends ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
         },
       );
 
