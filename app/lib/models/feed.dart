@@ -1,3 +1,5 @@
+const String _hostUrl = 'https://ocs.kttprojects.com';
+
 class Feed {
   final int id;
   final String name;
@@ -30,6 +32,16 @@ class Feed {
   });
 
   factory Feed.fromJson(Map<String, dynamic> json) {
+    String? banner = json['banner_url'];
+    String? icon = json['icon_url'];
+
+    if (banner != null && banner.startsWith('/')) {
+      banner = '$_hostUrl$banner';
+    }
+    if (icon != null && icon.startsWith('/')) {
+      icon = '$_hostUrl$icon';
+    }
+
     return Feed(
       id: int.parse(json['id']),
       name: json['name'],
@@ -37,8 +49,8 @@ class Feed {
       description: json['description'],
       createdBy: int.parse(json['created_by']),
       rules: json['rules'],
-      bannerUrl: json['banner_url'],
-      iconUrl: json['icon_url'],
+      bannerUrl: banner,
+      iconUrl: icon,
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
       memberCount: int.parse(json['member_count'] ?? '0'),
