@@ -14,6 +14,7 @@ import '../widgets/feed_selection_dialog.dart';
 import '../widgets/feed_menu_dialog.dart';
 import '../widgets/reorder_feeds_dialog.dart';
 import 'create_feed_page.dart';
+import 'feed_settings_page.dart';
 import '../widgets/create_post_dialog.dart';
 import '../widgets/user_selection_dialog.dart';
 import '../widgets/confirm_dialog.dart';
@@ -110,6 +111,9 @@ class _FeedsPageState extends State<FeedsPage> {
         }
         setState(() {
           _feeds = feedMap.values.toList();
+          if (_selectedFeed != null) {
+            _selectedFeed = feedMap[_selectedFeed!.id] ?? _selectedFeed;
+          }
           _isLoading = false;
         });
       }
@@ -145,14 +149,21 @@ class _FeedsPageState extends State<FeedsPage> {
         if (_feeds == null || feedMap.length != _feeds!.length) {
           setState(() {
             _feeds = feedMap.values.toList();
+            if (_selectedFeed != null) {
+              _selectedFeed = feedMap[_selectedFeed!.id] ?? _selectedFeed;
+            }
           });
         } else {
-          // Only update membership status to avoid unnecessary rebuilds
           bool changed = false;
           final List<Feed> updated = [];
           for (final feed in feedMap.values) {
             final existing = _feeds!.firstWhere((f) => f.id == feed.id);
-            if (existing.isMember != feed.isMember) {
+            if (existing.isMember != feed.isMember ||
+                existing.displayName != feed.displayName ||
+                existing.description != feed.description ||
+                existing.rules != feed.rules ||
+                existing.iconUrl != feed.iconUrl ||
+                existing.role != feed.role) {
               changed = true;
               updated.add(feed);
             } else {
@@ -162,6 +173,12 @@ class _FeedsPageState extends State<FeedsPage> {
           if (changed) {
             setState(() {
               _feeds = updated;
+              if (_selectedFeed != null) {
+                final updatedSelected =
+                    updated.firstWhere((f) => f.id == _selectedFeed!.id,
+                        orElse: () => _selectedFeed!);
+                _selectedFeed = updatedSelected;
+              }
             });
           }
         }
@@ -548,6 +565,24 @@ class _FeedsPageState extends State<FeedsPage> {
                                 ),
                               );
                             },
+                            onFeedSettings: _selectedFeed != null &&
+                                    _selectedFeed!.role == 'admin'
+                                ? () async {
+                                    final changed = await Navigator.push<bool>(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => FeedSettingsPage(
+                                          apiClient: widget.apiClient,
+                                          feed: _selectedFeed!,
+                                        ),
+                                      ),
+                                    );
+                                    if (changed == true && mounted) {
+                                      _loadFeeds();
+                                      _loadPosts();
+                                    }
+                                  }
+                                : null,
                             onLeaveFeed: _selectedFeed != null && _selectedFeed!.isMember
                                 ? _leaveSelectedFeed
                                 : null,

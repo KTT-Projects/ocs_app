@@ -14,6 +14,7 @@ class Feed {
   final int memberCount;
   final int postCount;
   final bool isMember;
+  final String? role;
 
   Feed({
     required this.id,
@@ -29,6 +30,7 @@ class Feed {
     required this.memberCount,
     required this.postCount,
     this.isMember = false,
+    this.role,
   });
 
   factory Feed.fromJson(Map<String, dynamic> json) {
@@ -58,6 +60,7 @@ class Feed {
       isMember: json['is_member'] == '1' ||
           json['is_member'] == 1 ||
           json['is_member'] == true,
+      role: json['member_role'] ?? json['role'],
     );
   }
 
@@ -76,6 +79,7 @@ class Feed {
       'member_count': memberCount,
       'post_count': postCount,
       'is_member': isMember,
+      'role': role,
     };
   }
 
@@ -93,6 +97,7 @@ class Feed {
     int? memberCount,
     int? postCount,
     bool? isMember,
+    String? role,
   }) {
     return Feed(
       id: id ?? this.id,
@@ -108,6 +113,7 @@ class Feed {
       memberCount: memberCount ?? this.memberCount,
       postCount: postCount ?? this.postCount,
       isMember: isMember ?? this.isMember,
+      role: role ?? this.role,
     );
   }
 }
