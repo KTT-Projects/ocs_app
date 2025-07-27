@@ -43,7 +43,9 @@ class Feed {
       updatedAt: DateTime.parse(json['updated_at']),
       memberCount: int.parse(json['member_count'] ?? '0'),
       postCount: int.parse(json['post_count'] ?? '0'),
-      isMember: json['is_member'] == '1' || json['is_member'] == true,
+      isMember: json['is_member'] == '1' ||
+          json['is_member'] == 1 ||
+          json['is_member'] == true,
     );
   }
 
