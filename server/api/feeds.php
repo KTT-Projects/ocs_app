@@ -90,16 +90,13 @@ class FeedController
                   COUNT(DISTINCT fm1.user_id) as member_count,
                   COUNT(DISTINCT fp.id) as post_count";
     if ($userId !== null) {
-      $query .= ", IF(fm2.user_id IS NULL, 0, 1) as is_member";
+      $query .= ", EXISTS(SELECT 1 FROM feed_members fm2 WHERE fm2.feed_id = f.id AND fm2.user_id = :user_id) as is_member";
     } else {
       $query .= ", 0 as is_member";
     }
     $query .= " FROM feeds f
                   LEFT JOIN feed_members fm1 ON f.id = fm1.feed_id
                   LEFT JOIN feed_posts fp ON f.id = fp.feed_id";
-    if ($userId !== null) {
-      $query .= " LEFT JOIN feed_members fm2 ON f.id = fm2.feed_id AND fm2.user_id = :user_id";
-    }
     $query .= " GROUP BY f.id";
     if ($sort === 'activity') {
       $query .= " ORDER BY MAX(fp.created_at) DESC";
@@ -135,15 +132,17 @@ class FeedController
     $validFeedIds = [];
     if (!empty($orderedFeedIds)) {
       $inClause = implode(',', array_map('intval', $orderedFeedIds));
-      $query = "SELECT f.*, 
+      $query = "SELECT f.*,
                   COUNT(DISTINCT fm1.user_id) as member_count,
                   COUNT(DISTINCT fp.id) as post_count
-                  FROM feeds f 
-                  LEFT JOIN feed_members fm1 ON f.id = fm1.feed_id 
-                  LEFT JOIN feed_posts fp ON f.id = fp.feed_id 
+                  FROM feeds f
+                  JOIN feed_members fm2 ON f.id = fm2.feed_id AND fm2.user_id = :user_id
+                  LEFT JOIN feed_members fm1 ON f.id = fm1.feed_id
+                  LEFT JOIN feed_posts fp ON f.id = fp.feed_id
                   WHERE f.id IN ($inClause)
                   GROUP BY f.id";
       $stmt = $this->conn->prepare($query);
+      $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
       $stmt->execute();
       $feedsMap = [];
       foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $feed) {

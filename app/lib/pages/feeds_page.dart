@@ -75,8 +75,15 @@ class _FeedsPageState extends State<FeedsPage> {
     try {
       final allFeeds = await widget.apiClient.getFeeds(context);
       if (mounted) {
+        final Map<int, Feed> feedMap = {};
+        for (final feed in joinedFeeds) {
+          feedMap[feed.id] = feed;
+        }
+        for (final feed in nonJoinedFeeds) {
+          feedMap.putIfAbsent(feed.id, () => feed);
+        }
         setState(() {
-          _feeds = allFeeds;
+          _feeds = feedMap.values.toList();
           _isLoading = false;
         });
       }
