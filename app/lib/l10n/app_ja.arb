@@ -313,6 +313,10 @@
   "@newPostTo": {
     "description": "特定のフィードに新しい投稿を作成するボタン"
   },
+  "chooseFeed": "フィードを選択",
+  "@chooseFeed": {
+    "description": "フィード選択ダイアログのタイトル"
+  },
   "feedCreatedSuccess": "フィードが作成されました",
   "@feedCreatedSuccess": {
     "description": "フィードが正常に作成されたときのメッセージ"

@@ -474,6 +474,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newPostTo => 'New post to...';
 
   @override
+  String get chooseFeed => "Choose a feed";
+
+  @override
   String get feedCreatedSuccess => 'Feed created successfully';
 
   @override
