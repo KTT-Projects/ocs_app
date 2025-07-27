@@ -15,6 +15,7 @@ import '../widgets/feed_menu_dialog.dart';
 import '../widgets/reorder_feeds_dialog.dart';
 import 'create_feed_page.dart';
 import '../widgets/create_post_dialog.dart';
+import '../widgets/user_selection_dialog.dart';
 
 class FeedsPage extends StatefulWidget {
   final ApiClient apiClient;
@@ -249,6 +250,59 @@ class _FeedsPageState extends State<FeedsPage> {
     }
   }
 
+  Future<void> _leaveSelectedFeed() async {
+    if (_selectedFeed == null) return;
+    int? newAdminId;
+    List<Map<String, dynamic>>? members;
+    while (true) {
+      try {
+        await widget.apiClient.leaveFeed(
+          context,
+          _selectedFeed!.id,
+          newAdminId: newAdminId,
+        );
+        if (!mounted) return;
+        setState(() {
+          _selectedFeed = null;
+        });
+        _loadFeeds();
+        _loadPosts();
+        break;
+      } catch (e) {
+        final msg = e.toString();
+        if (msg.contains('New admin ID required')) {
+          members ??= await widget.apiClient.getFeedMembers(
+            context,
+            _selectedFeed!.id,
+          );
+          final selected = await GlassmorphicUI.showDialog<Map<String, dynamic>>(
+            context: context,
+            width: 320,
+            child: UserSelectionDialog(
+              title: AppLocalizations.of(context)!.selectNewAdmin,
+              users: members!,
+              onUserSelected: (user) => Navigator.pop(context, user),
+            ),
+          );
+          if (selected == null) {
+            break;
+          }
+          newAdminId = selected['id'] as int?;
+          continue;
+        } else {
+          if (mounted) {
+            GlassmorphicUI.showGlassSnackBar(
+              context,
+              msg,
+              isError: true,
+            );
+          }
+          break;
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -441,6 +495,9 @@ class _FeedsPageState extends State<FeedsPage> {
                                 ),
                               );
                             },
+                            onLeaveFeed: _selectedFeed != null && _selectedFeed!.isMember
+                                ? _leaveSelectedFeed
+                                : null,
                           ),
                         );
                       },

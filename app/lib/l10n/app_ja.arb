@@ -261,6 +261,14 @@
   "@reorderFeeds": {
     "description": "フィードを並び替えるボタン"
   },
+  "leaveFeed": "フィードを離脱",
+  "@leaveFeed": {
+    "description": "現在選択中のフィードを離脱するボタン"
+  },
+  "selectNewAdmin": "新しい管理者を選択",
+  "@selectNewAdmin": {
+    "description": "管理者を譲渡する相手を選択するダイアログのタイトル"
+  },
   "save": "保存",
   "@save": {
     "description": "保存ボタン"

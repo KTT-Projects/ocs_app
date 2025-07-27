@@ -558,6 +558,14 @@
   "@reorderFeeds": {
     "description": "Button to reorder feeds"
   },
+  "leaveFeed": "Leave feed",
+  "@leaveFeed": {
+    "description": "Button to leave the currently selected feed"
+  },
+  "selectNewAdmin": "Select new admin",
+  "@selectNewAdmin": {
+    "description": "Dialog title when choosing a new admin"
+  },
   "save": "Save",
   "@save": {
     "description": "Save button"
