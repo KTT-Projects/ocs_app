@@ -355,7 +355,11 @@ class ApiClient extends ChangeNotifier {
         );
       }
 
-      return data['icon_url'];
+      String url = data['icon_url'];
+      if (url.startsWith('/')) {
+        url = 'https://ocs.kttprojects.com' + url;
+      }
+      return url;
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException(l10n.errorOccurred);
