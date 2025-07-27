@@ -639,7 +639,9 @@ class _FeedsPageState extends State<FeedsPage> {
                             setState(() {
                               final index = _feeds!.indexWhere((f) => f.id == feed.id);
                               if (index != -1) {
-                                _feeds![index] = _feeds![index].copyWith(isMember: true);
+                                final updated = _feeds![index].copyWith(isMember: true);
+                                _feeds!.removeAt(index);
+                                _feeds!.insert(0, updated);
                               }
                             });
                             _refreshJoinedFeeds();
@@ -710,7 +712,9 @@ class _FeedsPageState extends State<FeedsPage> {
                                       setState(() {
                                         final index = _feeds!.indexWhere((f) => f.id == feed.id);
                                         if (index != -1) {
-                                          _feeds![index] = _feeds![index].copyWith(isMember: true);
+                                          final updated = _feeds![index].copyWith(isMember: true);
+                                          _feeds!.removeAt(index);
+                                          _feeds!.insert(0, updated);
                                         }
                                       });
                                       _refreshJoinedFeeds();
