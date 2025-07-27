@@ -434,6 +434,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reorderFeeds => 'Reorder feeds';
 
   @override
+  String get leaveFeed => 'Leave feed';
+
+  @override
+  String get selectNewAdmin => 'Select new admin';
+
+  @override
+  String get confirmDeleteFeed =>
+      'No other members remain. Leaving will delete this feed. Continue?';
+
+  @override
+  String get ok => 'OK';
+
+  @override
   String get save => 'Save';
 
   @override

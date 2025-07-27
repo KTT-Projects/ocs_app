@@ -672,6 +672,43 @@ class ApiClient extends ChangeNotifier {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getFeedMembers(
+    BuildContext context,
+    int feedId,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.get(
+        _buildUri('feeds.php?action=members&feed_id=$feedId'),
+        headers: {
+          'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+
+      final list = List<Map<String, dynamic>>.from(data['data'] ?? []);
+      for (final item in list) {
+        if (item['id'] != null) {
+          item['id'] = int.tryParse(item['id'].toString()) ?? item['id'];
+        }
+      }
+      return list;
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
   Future<List<FeedPost>> getDiscoverFeed(
     BuildContext context, {
     int page = 1,
@@ -715,6 +752,40 @@ class ApiClient extends ChangeNotifier {
           'Authorization': 'Bearer $_token',
         },
         body: json.encode({'feed_id': feedId}),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<void> leaveFeed(
+    BuildContext context,
+    int feedId, {
+    int? newAdminId,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final body = {'feed_id': feedId};
+      if (newAdminId != null) {
+        body['new_admin_id'] = newAdminId;
+      }
+      final response = await http.post(
+        Uri.parse('$baseUrl/feeds.php?action=leave'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode(body),
       );
 
       final data = json.decode(response.body);
