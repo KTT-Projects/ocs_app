@@ -73,8 +73,7 @@ class _FeedsPageState extends State<FeedsPage> {
 
   Future<void> _loadFeeds() async {
     try {
-      final joinedFeeds = await widget.apiClient.getJoinedFeeds(context);
-      final nonJoinedFeeds = await widget.apiClient.getFeeds(context);
+      final allFeeds = await widget.apiClient.getFeeds(context);
       if (mounted) {
         final Map<int, Feed> feedMap = {};
         for (final feed in joinedFeeds) {
