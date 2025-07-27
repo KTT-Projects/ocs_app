@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io';
+import 'dart:convert';
 import '../l10n/app_localizations.dart';
 import '../services/api_client.dart';
 
@@ -21,6 +25,49 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
   final _descriptionController = TextEditingController();
   final _rulesController = TextEditingController();
   bool _isLoading = false;
+  bool _isUploadingIcon = false;
+  final _imagePicker = ImagePicker();
+  String? _iconUrl;
+  String? _iconFilePath;
+  List<int>? _iconBytes;
+  String? _iconFileName;
+
+  Future<void> _pickIcon() async {
+    try {
+      final XFile? image = await _imagePicker.pickImage(source: ImageSource.gallery);
+      if (image != null && mounted) {
+        setState(() {
+          _isUploadingIcon = true;
+        });
+
+        if (kIsWeb) {
+          _iconBytes = await image.readAsBytes();
+          _iconFileName = image.name.isNotEmpty ? image.name : 'icon.png';
+          _iconUrl = 'data:${image.mimeType};base64,${base64Encode(_iconBytes!)}';
+        } else {
+          _iconFilePath = image.path;
+          _iconUrl = image.path;
+        }
+
+        setState(() {});
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUploadingIcon = false;
+        });
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -45,6 +92,16 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
         description: _descriptionController.text,
         rules: _rulesController.text.isNotEmpty ? _rulesController.text : null,
       );
+
+      if (_iconFilePath != null || _iconBytes != null) {
+        await widget.apiClient.uploadFeedIcon(
+          context,
+          feedId,
+          filePath: _iconFilePath,
+          webBytes: _iconBytes,
+          webFileName: _iconFileName,
+        );
+      }
 
       if (mounted) {
         Navigator.pop(context, feedId);
@@ -148,7 +205,7 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
                   children: [
                     Container(
                       constraints: BoxConstraints(
-                        minHeight: MediaQuery.of(context).size.height * 0.8,
+                        minHeight: MediaQuery.of(context).size.height * 0.9,
                       ),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.background.withOpacity(0.2),
@@ -165,9 +222,45 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
                             padding: const EdgeInsets.all(16),
                             child: Column(
                               children: [
+                                GestureDetector(
+                                  onTap: _isUploadingIcon ? null : _pickIcon,
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 40,
+                                        backgroundColor: Theme.of(context).colorScheme.secondary,
+                                        child: _iconUrl != null
+                                            ? ClipOval(
+                                                child: kIsWeb
+                                                    ? Image.network(
+                                                        _iconUrl!,
+                                                        width: 80,
+                                                        height: 80,
+                                                        fit: BoxFit.cover,
+                                                      )
+                                                    : Image.file(
+                                                        File(_iconUrl!),
+                                                        width: 80,
+                                                        height: 80,
+                                                        fit: BoxFit.cover,
+                                                      ),
+                                              )
+                                            : Icon(
+                                                Icons.camera_alt,
+                                                color: Theme.of(context).colorScheme.onSecondary,
+                                              ),
+                                      ),
+                                      if (_isUploadingIcon)
+                                        const CircularProgressIndicator(),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
                                 TextFormField(
                                   controller: _displayNameController,
                                   maxLength: 30,
+                                  maxLengthEnforcement: MaxLengthEnforcement.enforced,
                                   style: TextStyle(
                                     color: Theme.of(context).colorScheme.onPrimary,
                                   ),
@@ -201,6 +294,7 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
                                 TextFormField(
                                   controller: _descriptionController,
                                   maxLength: 1000,
+                                  maxLengthEnforcement: MaxLengthEnforcement.enforced,
                                   style: TextStyle(
                                     color: Theme.of(context).colorScheme.onPrimary,
                                   ),
@@ -235,6 +329,7 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
                                 TextFormField(
                                   controller: _rulesController,
                                   maxLength: 1000,
+                                  maxLengthEnforcement: MaxLengthEnforcement.enforced,
                                   style: TextStyle(
                                     color: Theme.of(context).colorScheme.onPrimary,
                                   ),

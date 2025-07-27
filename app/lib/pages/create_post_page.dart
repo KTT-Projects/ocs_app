@@ -132,7 +132,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                 key: _formKey,
                 child: Container(
                   constraints: BoxConstraints(
-                    minHeight: MediaQuery.of(context).size.height * 0.8,
+                    minHeight: MediaQuery.of(context).size.height * 0.9,
                   ),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.background.withOpacity(0.2),
@@ -159,6 +159,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                             TextFormField(
                               controller: _titleController,
                               maxLength: 300,
+                              maxLengthEnforcement: MaxLengthEnforcement.enforced,
                               decoration: InputDecoration(
                                 hintText: 'Title',
                                 hintStyle: TextStyle(
@@ -200,6 +201,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                             TextFormField(
                               controller: _contentController,
                               maxLength: 5000,
+                              maxLengthEnforcement: MaxLengthEnforcement.enforced,
                               decoration: InputDecoration(
                                 hintText: 'Write your post...',
                                 hintStyle: TextStyle(

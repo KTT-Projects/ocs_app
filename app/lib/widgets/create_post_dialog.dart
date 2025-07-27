@@ -147,6 +147,7 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
                           TextFormField(
                             controller: _titleController,
                             maxLength: 300,
+                            maxLengthEnforcement: MaxLengthEnforcement.enforced,
                             decoration: InputDecoration(
                               hintText: l10n.postTitle,
                               hintStyle: TextStyle(
@@ -188,6 +189,7 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
                           TextFormField(
                             controller: _contentController,
                             maxLength: 5000,
+                            maxLengthEnforcement: MaxLengthEnforcement.enforced,
                             decoration: InputDecoration(
                               hintText: l10n.writePost,
                               hintStyle: TextStyle(
