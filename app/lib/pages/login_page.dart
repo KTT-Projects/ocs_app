@@ -7,7 +7,6 @@ import '../providers/language_provider.dart';
 import '../widgets/language_toggle.dart';
 import '../services/api_client.dart';
 import 'signup_page.dart';
-import 'home_page.dart';
 import 'forgot_password_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -96,14 +95,12 @@ class _LoginPageState extends State<LoginPage> {
               _errorMessage = null;
               _otpController.clear();
             });
-            Navigator.pushReplacement(
+            final token = response['token'];
+            await widget.apiClient.setToken(token);
+            Navigator.pushNamedAndRemoveUntil(
               context,
-              MaterialPageRoute(
-                builder: (context) => HomePage(
-                  token: response['token'],
-                  apiClient: widget.apiClient,
-                ),
-              ),
+              '/',
+              (route) => false,
             );
           } else {
             setState(() => _errorMessage = l10n.verificationFailed);
@@ -136,14 +133,10 @@ class _LoginPageState extends State<LoginPage> {
             await widget.apiClient.setToken(token);
             _showMessage(l10n.loginSuccessful, seconds: 4);
             if (mounted) {
-              Navigator.pushReplacement(
+              Navigator.pushNamedAndRemoveUntil(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => HomePage(
-                    token: token,
-                    apiClient: widget.apiClient,
-                  ),
-                ),
+                '/',
+                (route) => false,
               );
             }
           }
