@@ -317,7 +317,6 @@ class ApiClient extends ChangeNotifier {
       final response = await http.get(
         _buildUri('profile.php'),
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': 'Bearer ${_token}',
           'Cache-Control': 'no-cache',
           'Pragma': 'no-cache',
@@ -434,7 +433,6 @@ class ApiClient extends ChangeNotifier {
       final response = await http.get(
         _buildUri('feeds.php?action=list'),
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
           'Cache-Control': 'no-cache',
           'Pragma': 'no-cache',
@@ -461,7 +459,6 @@ class ApiClient extends ChangeNotifier {
       final response = await http.get(
         _buildUri('feeds.php?action=joined'),
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
           'Cache-Control': 'no-cache',
           'Pragma': 'no-cache',
@@ -488,7 +485,6 @@ class ApiClient extends ChangeNotifier {
       final response = await http.get(
         _buildUri('feeds.php?action=posts&feed_id=$feedId&page=$page'),
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
           'Cache-Control': 'no-cache',
           'Pragma': 'no-cache',
@@ -515,7 +511,6 @@ class ApiClient extends ChangeNotifier {
       final response = await http.get(
         _buildUri('feeds.php?action=home&page=$page'),
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
           'Cache-Control': 'no-cache',
           'Pragma': 'no-cache',
@@ -542,7 +537,6 @@ class ApiClient extends ChangeNotifier {
       final response = await http.get(
         _buildUri('feeds.php?action=discover&page=$page'),
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
           'Cache-Control': 'no-cache',
           'Pragma': 'no-cache',
