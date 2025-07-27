@@ -5,6 +5,7 @@ import '../l10n/app_localizations.dart';
 import '../models/feed.dart';
 import '../services/api_client.dart';
 import '../pages/create_post_page.dart';
+import 'glassmorphic_ui.dart';
 
 class CreatePostDialog extends StatefulWidget {
   final ApiClient apiClient;
@@ -53,11 +54,10 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        GlassmorphicUI.showGlassSnackBar(
+          context,
+          e.toString(),
+          isError: true,
         );
         setState(() {
           _isLoading = false;

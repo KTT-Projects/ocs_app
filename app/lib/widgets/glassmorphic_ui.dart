@@ -144,4 +144,48 @@ class GlassmorphicUI {
       ),
     );
   }
+
+  static void showGlassSnackBar(
+    BuildContext context,
+    String message, {
+    bool isError = false,
+    int seconds = 4,
+  }) {
+    final bgColor = isError
+        ? Theme.of(context).colorScheme.errorContainer.withOpacity(0.4)
+        : Theme.of(context).colorScheme.background.withOpacity(0.3);
+    final borderColor = isError
+        ? Theme.of(context).colorScheme.onErrorContainer.withOpacity(0.3)
+        : Theme.of(context).colorScheme.onPrimary.withOpacity(0.3);
+    final textColor = isError
+        ? Theme.of(context).colorScheme.onErrorContainer
+        : Theme.of(context).colorScheme.onPrimary;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: Duration(seconds: seconds),
+        backgroundColor: Colors.transparent,
+        behavior: SnackBarBehavior.floating,
+        elevation: 0,
+        content: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: bgColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: borderColor),
+              ),
+              child: Text(
+                message,
+                style: TextStyle(color: textColor),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
