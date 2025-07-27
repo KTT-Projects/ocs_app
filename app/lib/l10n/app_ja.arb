@@ -345,6 +345,10 @@
   "@feedUpdatedSuccess": {
     "description": "フィード設定を保存したときの成功メッセージ"
   },
+  "failedToLoadFeedMembers": "メンバーの読み込みに失敗しました",
+  "@failedToLoadFeedMembers": {
+    "description": "フィードメンバーの取得に失敗したときのエラーメッセージ"
+  },
   "currentAdmin": "現在の管理者",
   "@currentAdmin": {
     "description": "現在のフィード管理者のラベル"

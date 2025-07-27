@@ -31,6 +31,7 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
   bool _isLoading = false;
   List<Map<String, dynamic>>? _members;
   Map<String, dynamic>? _selectedAdmin;
+  bool _isMembersLoading = false;
   bool _isUploadingIcon = false;
   final _imagePicker = ImagePicker();
   String? _iconUrl;
@@ -85,6 +86,11 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
   }
 
   Future<void> _loadMembers() async {
+    if (_isMembersLoading) return;
+    final l10n = AppLocalizations.of(context)!;
+    setState(() {
+      _isMembersLoading = true;
+    });
     try {
       final members = await widget.apiClient.getFeedMembers(
         context,
@@ -94,12 +100,27 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
         setState(() {
           _members = members;
           final current = members.firstWhere(
-              (m) => m['role'] == 'admin',
-              orElse: () => {});
+            (m) => m['role'] == 'admin',
+            orElse: () => {},
+          );
           _selectedAdmin = current.isNotEmpty ? current : null;
         });
       }
-    } catch (_) {}
+    } catch (_) {
+      if (mounted) {
+        GlassmorphicUI.showGlassSnackBar(
+          context,
+          l10n.failedToLoadFeedMembers,
+          isError: true,
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isMembersLoading = false;
+        });
+      }
+    }
   }
 
 
@@ -166,6 +187,11 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+
+    if (_members == null && !_isMembersLoading) {
+      // Trigger loading of feed members when page is first built
+      _loadMembers();
+    }
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -398,38 +424,52 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
                                   },
                                 ),
                                 const SizedBox(height: 16),
-                                DropdownButtonFormField<Map<String, dynamic>>(
-                                  isExpanded: true,
-                                  value: _selectedAdmin,
-                                  items: (_members ?? [])
-                                      .map(
-                                        (m) => DropdownMenuItem(
-                                          value: m,
-                                          child: Text(m['display_name'] ?? ''),
+                                Stack(
+                                  alignment: Alignment.centerRight,
+                                  children: [
+                                    DropdownButtonFormField<Map<String, dynamic>>(
+                                      isExpanded: true,
+                                      value: _selectedAdmin,
+                                      items: (_members ?? [])
+                                          .map(
+                                            (m) => DropdownMenuItem(
+                                              value: m,
+                                              child: Text(m['display_name'] ?? ''),
+                                            ),
+                                          )
+                                          .toList(),
+                                      onChanged: (v) {
+                                        setState(() {
+                                          _selectedAdmin = v;
+                                        });
+                                      },
+                                      decoration: InputDecoration(
+                                        labelText: l10n.currentAdmin,
+                                        labelStyle: TextStyle(
+                                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
                                         ),
-                                      )
-                                      .toList(),
-                                  onChanged: (v) {
-                                    setState(() {
-                                      _selectedAdmin = v;
-                                    });
-                                  },
-                                  decoration: InputDecoration(
-                                    labelText: l10n.currentAdmin,
-                                    labelStyle: TextStyle(
-                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                    ),
-                                    enabledBorder: UnderlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                                        enabledBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                                          ),
+                                        ),
+                                        focusedBorder: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Theme.of(context).colorScheme.onPrimary,
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                    focusedBorder: UnderlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: Theme.of(context).colorScheme.onPrimary,
+                                    if (_isMembersLoading)
+                                      const Padding(
+                                        padding: EdgeInsets.only(right: 8),
+                                        child: SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(strokeWidth: 2),
+                                        ),
                                       ),
-                                    ),
-                                  ),
+                                  ],
                                 ),
                               ],
                             ),

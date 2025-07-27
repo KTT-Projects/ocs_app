@@ -499,6 +499,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get feedUpdatedSuccess => 'Feed updated successfully';
 
   @override
+  String get failedToLoadFeedMembers => 'Failed to load feed members';
+
+  @override
   String get currentAdmin => 'Current admin';
 
   @override

@@ -485,6 +485,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get feedUpdatedSuccess => 'フィードが更新されました';
 
   @override
+  String get failedToLoadFeedMembers => 'メンバーの読み込みに失敗しました';
+
+  @override
   String get currentAdmin => '現在の管理者';
 
   @override

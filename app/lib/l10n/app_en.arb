@@ -642,6 +642,10 @@
   "@feedUpdatedSuccess": {
     "description": "Success message when feed settings are saved"
   },
+  "failedToLoadFeedMembers": "Failed to load feed members",
+  "@failedToLoadFeedMembers": {
+    "description": "Error message when loading feed members fails"
+  },
   "currentAdmin": "Current admin",
   "@currentAdmin": {
     "description": "Label for current feed admin"
