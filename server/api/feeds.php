@@ -408,7 +408,7 @@ class FeedController
       $feedOrderStmt->execute();
       $feedOrderRaw = $feedOrderStmt->fetch(PDO::FETCH_ASSOC)['feed_order'];
       $orderedFeedIds = $feedOrderRaw ? json_decode($feedOrderRaw, true) : [];
-      $orderedFeedIds[] = intval($feedId);
+      array_unshift($orderedFeedIds, intval($feedId));
       $updateOrderQuery = "UPDATE users SET feed_order = :feed_order WHERE id = :user_id";
       $updateOrderStmt = $this->conn->prepare($updateOrderQuery);
       $updateOrderStmt->bindParam(':feed_order', json_encode($orderedFeedIds));
@@ -451,7 +451,7 @@ class FeedController
     $feedOrderRaw = $feedOrderStmt->fetch(PDO::FETCH_ASSOC)['feed_order'];
     $orderedFeedIds = $feedOrderRaw ? array_map('intval', json_decode($feedOrderRaw, true)) : [];
     if (!in_array($feedId, $orderedFeedIds)) {
-      $orderedFeedIds[] = $feedId;
+      array_unshift($orderedFeedIds, $feedId);
       $updateOrderQuery = "UPDATE users SET feed_order = :feed_order WHERE id = :user_id";
       $updateOrderStmt = $this->conn->prepare($updateOrderQuery);
       $updateOrderStmt->bindParam(':feed_order', json_encode($orderedFeedIds));
