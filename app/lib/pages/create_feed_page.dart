@@ -7,6 +7,7 @@ import 'dart:io';
 import 'dart:convert';
 import '../l10n/app_localizations.dart';
 import '../services/api_client.dart';
+import '../widgets/glassmorphic_ui.dart';
 
 class CreateFeedPage extends StatefulWidget {
   final ApiClient apiClient;
@@ -54,11 +55,10 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        GlassmorphicUI.showGlassSnackBar(
+          context,
+          e.toString(),
+          isError: true,
         );
       }
     } finally {
@@ -109,11 +109,10 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        GlassmorphicUI.showGlassSnackBar(
+          context,
+          e.toString(),
+          isError: true,
         );
       }
     } finally {
