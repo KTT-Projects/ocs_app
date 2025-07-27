@@ -194,6 +194,7 @@ class DiscoverFeedSection extends StatelessWidget {
                       );
                     }
                     return ListView.builder(
+                      padding: EdgeInsets.zero,
                       itemCount: filteredFeeds.length,
                       itemBuilder: (context, index) {
                         return FeedListItem(
