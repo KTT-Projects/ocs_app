@@ -29,6 +29,7 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _otpController = TextEditingController();
+  String? _savedPassword;
 
   @override
   void dispose() {
@@ -94,6 +95,7 @@ class _LoginPageState extends State<LoginPage> {
               _showOtpField = false;
               _errorMessage = null;
               _otpController.clear();
+              _savedPassword = null;
             });
             final token = response['token'];
             await widget.apiClient.setToken(token);
@@ -116,6 +118,7 @@ class _LoginPageState extends State<LoginPage> {
               _showOtpField = true;
               _emailController.text = _emailController.text.trim();
               _userId = response['user_id'].toString();
+              _savedPassword = _passwordController.text;
               _passwordController.clear(); // Clear password for security
             });
 
@@ -152,6 +155,7 @@ class _LoginPageState extends State<LoginPage> {
       _userId = null;
       _otpController.clear();
       _errorMessage = null;
+      _savedPassword = null;
     });
   }
 
@@ -422,27 +426,18 @@ class _LoginPageState extends State<LoginPage> {
                                         : () async {
                                             setState(() => _isLoading = true);
                                             try {
-                                              await widget.apiClient.register(
+                                              if (_savedPassword == null) return;
+                                              await widget.apiClient.login(
                                                 context: context,
                                                 email: _emailController.text,
-                                                password:
-                                                    _passwordController.text,
-                                                institutionId: int.parse(
-                                                  _userId ?? '0',
-                                                ),
-                                                grade: 0,
-                                                displayName: '',
-                                                bio: '',
-                                                allowDm: true,
+                                                password: _savedPassword!,
                                               );
                                               if (mounted) {
                                                 GlassmorphicUI.showGlassSnackBar(
                                                   context,
-                                                  '${l10n.verificationCodeSent}'
-                                                      .replaceAll(
-                                                        '{email}',
-                                                        _emailController.text,
-                                                      ),
+                                                  l10n.verificationCodeSent(
+                                                    _emailController.text,
+                                                  ),
                                                 );
                                               }
                                             } catch (e) {

@@ -35,6 +35,7 @@ class _SignupPageState extends State<SignupPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _otpController = TextEditingController();
+  String? _savedPassword;
   bool _allowDm = true;
 
   int? _selectedInstitutionId;
@@ -115,6 +116,7 @@ class _SignupPageState extends State<SignupPage> {
       _showOtpField = false;
       _otpController.clear();
       _errorMessage = null;
+      _savedPassword = null;
     });
   }
 
@@ -185,6 +187,7 @@ class _SignupPageState extends State<SignupPage> {
                 ),
               ),
             );
+            _savedPassword = null;
           } else {
             setState(() => _errorMessage = l10n.verificationFailed);
           }
@@ -205,6 +208,7 @@ class _SignupPageState extends State<SignupPage> {
           setState(() {
             _showOtpField = true;
             _emailController.text = _emailController.text.trim();
+            _savedPassword = _passwordController.text;
             _passwordController.clear();
           });
 
@@ -534,22 +538,20 @@ class _SignupPageState extends State<SignupPage> {
                                   const SizedBox(height: 8),
                                   TextButton.icon(
                                     onPressed: () async {
+                                      if (_savedPassword == null) return;
                                       setState(() => _isLoading = true);
                                       try {
-                                        await widget.apiClient.register(
+                                        await widget.apiClient.login(
                                           context: context,
                                           email: _emailController.text,
-                                          password: _passwordController.text,
-                                          institutionId: _selectedInstitutionId!,
-                                          grade: _selectedGrade!,
-                                          displayName: _nameController.text,
-                                          bio: _bioController.text,
-                                          allowDm: _allowDm,
+                                          password: _savedPassword!,
                                         );
                                         if (mounted) {
                                           GlassmorphicUI.showGlassSnackBar(
                                             context,
-                                            '${l10n.verificationCodeSent}'.replaceAll('{email}', _emailController.text),
+                                            l10n.verificationCodeSent(
+                                              _emailController.text,
+                                            ),
                                           );
                                         }
                                       } catch (e) {
