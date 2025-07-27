@@ -68,15 +68,39 @@ try {
         Response::error('Invalid file type. Only JPEG and PNG are allowed.', 400);
       }
 
-      // Generate unique filename
+      // Generate unique filename and prepare path
       $extension = $mimeType === 'image/jpeg' ? 'jpg' : 'png';
       $filename = uniqid('avatar_') . '.' . $extension;
       $filepath = $uploadDir . $filename;
 
-      // Move uploaded file
-      if (!move_uploaded_file($file['tmp_name'], $filepath)) {
-        Response::error('Failed to save file', 500);
+      // Resize to max 256x256 without stretching
+      list($width, $height) = getimagesize($file['tmp_name']);
+      $maxSize = 256;
+      $scale = min($maxSize / $width, $maxSize / $height, 1);
+      $newWidth = (int)($width * $scale);
+      $newHeight = (int)($height * $scale);
+
+      if ($mimeType === 'image/jpeg') {
+        $src = imagecreatefromjpeg($file['tmp_name']);
+      } else {
+        $src = imagecreatefrompng($file['tmp_name']);
       }
+
+      $dst = imagecreatetruecolor($newWidth, $newHeight);
+      if ($mimeType === 'image/png') {
+        imagealphablending($dst, false);
+        imagesavealpha($dst, true);
+      }
+      imagecopyresampled($dst, $src, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
+      if ($mimeType === 'image/jpeg') {
+        imagejpeg($dst, $filepath, 90);
+      } else {
+        imagepng($dst, $filepath);
+      }
+
+      imagedestroy($src);
+      imagedestroy($dst);
 
       // Get current avatar URL to delete the old file
       $query_get_old = "SELECT avatar_url FROM user_profiles WHERE user_id = :user_id";
