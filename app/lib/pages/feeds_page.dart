@@ -14,6 +14,7 @@ import '../widgets/feed_selection_dialog.dart';
 import '../widgets/feed_menu_dialog.dart';
 import '../widgets/reorder_feeds_dialog.dart';
 import 'create_feed_page.dart';
+import 'feed_settings_page.dart';
 import '../widgets/create_post_dialog.dart';
 import '../widgets/user_selection_dialog.dart';
 import '../widgets/confirm_dialog.dart';
@@ -548,6 +549,24 @@ class _FeedsPageState extends State<FeedsPage> {
                                 ),
                               );
                             },
+                            onFeedSettings: _selectedFeed != null &&
+                                    _selectedFeed!.role == 'admin'
+                                ? () async {
+                                    final changed = await Navigator.push<bool>(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => FeedSettingsPage(
+                                          apiClient: widget.apiClient,
+                                          feed: _selectedFeed!,
+                                        ),
+                                      ),
+                                    );
+                                    if (changed == true && mounted) {
+                                      _loadFeeds();
+                                      _loadPosts();
+                                    }
+                                  }
+                                : null,
                             onLeaveFeed: _selectedFeed != null && _selectedFeed!.isMember
                                 ? _leaveSelectedFeed
                                 : null,
