@@ -279,6 +279,8 @@ class ApiClient extends ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${_token}',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
         },
         body: json.encode({
           if (allowDm != null) 'allow_dm': allowDm,
@@ -317,6 +319,8 @@ class ApiClient extends ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${_token}',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
         },
       );
 
@@ -432,6 +436,8 @@ class ApiClient extends ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
         },
       );
 
@@ -457,6 +463,8 @@ class ApiClient extends ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
         },
       );
 
@@ -482,6 +490,8 @@ class ApiClient extends ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
         },
       );
 
@@ -507,6 +517,8 @@ class ApiClient extends ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
         },
       );
 
@@ -532,6 +544,8 @@ class ApiClient extends ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
         },
       );
 
