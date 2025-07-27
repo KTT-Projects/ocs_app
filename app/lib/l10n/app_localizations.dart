@@ -1016,6 +1016,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rules must be less than 1000 characters'**
   String get rulesTooLong;
+
+  /// Title for feed settings page
+  ///
+  /// In en, this message translates to:
+  /// **'Feed settings'**
+  String get feedSettings;
+
+  /// Success message when feed settings are saved
+  ///
+  /// In en, this message translates to:
+  /// **'Feed updated successfully'**
+  String get feedUpdatedSuccess;
+
+  /// Error message when loading feed members fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load feed members'**
+  String get failedToLoadFeedMembers;
+
+  /// Label for current feed admin
+  ///
+  /// In en, this message translates to:
+  /// **'Current admin'**
+  String get currentAdmin;
+
+  /// Button label to change selection
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get change;
 }
 
 class _AppLocalizationsDelegate

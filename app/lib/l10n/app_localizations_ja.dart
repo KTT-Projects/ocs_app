@@ -477,4 +477,19 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get rulesTooLong => 'ルールは1000文字以内にしてください';
+
+  @override
+  String get feedSettings => 'フィード設定';
+
+  @override
+  String get feedUpdatedSuccess => 'フィードが更新されました';
+
+  @override
+  String get failedToLoadFeedMembers => 'メンバーの読み込みに失敗しました';
+
+  @override
+  String get currentAdmin => '現在の管理者';
+
+  @override
+  String get change => '変更';
 }

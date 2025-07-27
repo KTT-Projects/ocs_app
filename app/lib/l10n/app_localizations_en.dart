@@ -491,4 +491,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rulesTooLong => 'Rules must be less than 1000 characters';
+
+  @override
+  String get feedSettings => 'Feed settings';
+
+  @override
+  String get feedUpdatedSuccess => 'Feed updated successfully';
+
+  @override
+  String get failedToLoadFeedMembers => 'Failed to load feed members';
+
+  @override
+  String get currentAdmin => 'Current admin';
+
+  @override
+  String get change => 'Change';
 }
