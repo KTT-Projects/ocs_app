@@ -277,9 +277,11 @@ class _FeedsPageState extends State<FeedsPage> {
             context,
             _selectedFeed!.id,
           );
-          myId ??= (await widget.apiClient.getProfile(context))['id'] as int;
-          final selectable =
-              members!.where((m) => m['id'] != myId).toList();
+          myId ??= int.parse(
+              (await widget.apiClient.getProfile(context))['id'].toString());
+          final selectable = members!
+              .where((m) => int.parse(m['id'].toString()) != myId)
+              .toList();
           if (selectable.isEmpty) {
             final confirmed = await GlassmorphicUI.showDialog<bool>(
               context: context,
@@ -310,7 +312,7 @@ class _FeedsPageState extends State<FeedsPage> {
           if (selected == null) {
             break;
           }
-          newAdminId = selected['id'] as int?;
+          newAdminId = int.tryParse(selected['id'].toString());
           continue;
         } else {
           if (mounted) {

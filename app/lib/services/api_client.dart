@@ -696,7 +696,13 @@ class ApiClient extends ChangeNotifier {
         );
       }
 
-      return List<Map<String, dynamic>>.from(data['data'] ?? []);
+      final list = List<Map<String, dynamic>>.from(data['data'] ?? []);
+      for (final item in list) {
+        if (item['id'] != null) {
+          item['id'] = int.tryParse(item['id'].toString()) ?? item['id'];
+        }
+      }
+      return list;
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException(l10n.errorOccurred);
