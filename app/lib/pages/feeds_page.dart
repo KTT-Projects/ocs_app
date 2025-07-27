@@ -75,6 +75,8 @@ class _FeedsPageState extends State<FeedsPage> {
     try {
       final allFeeds = await widget.apiClient.getFeeds(context);
       if (mounted) {
+        final joinedFeeds = allFeeds.where((feed) => feed.isMember).toList();
+        final nonJoinedFeeds = allFeeds.where((feed) => !feed.isMember).toList();
         final Map<int, Feed> feedMap = {};
         for (final feed in joinedFeeds) {
           feedMap[feed.id] = feed;
