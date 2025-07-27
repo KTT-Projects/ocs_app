@@ -470,7 +470,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get contentTooLong => 'Content must be less than 5000 characters';
 
   @override
-  String get descriptionTooLong => 'Description must be less than 1000 characters';
+  String get descriptionTooLong =>
+      'Description must be less than 1000 characters';
 
   @override
   String get rulesTooLong => 'Rules must be less than 1000 characters';

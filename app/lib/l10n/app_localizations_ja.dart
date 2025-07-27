@@ -206,7 +206,6 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get displayNameTooLong => '表示名は30文字以内にしてください';
 
-
   @override
   String get communityFeatures => 'コミュニティ機能';
 
