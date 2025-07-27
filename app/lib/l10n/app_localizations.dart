@@ -903,6 +903,30 @@ abstract class AppLocalizations {
   /// **'Reorder feeds'**
   String get reorderFeeds;
 
+  /// Button to leave the selected feed
+  ///
+  /// In en, this message translates to:
+  /// **'Leave feed'**
+  String get leaveFeed;
+
+  /// Dialog title when selecting a new admin
+  ///
+  /// In en, this message translates to:
+  /// **'Select new admin'**
+  String get selectNewAdmin;
+
+  /// Confirmation message shown when the last admin leaves a feed
+  ///
+  /// In en, this message translates to:
+  /// **'No other members remain. Leaving will delete this feed. Continue?'**
+  String get confirmDeleteFeed;
+
+  /// Generic OK button label
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
   /// Save button
   ///
   /// In en, this message translates to:
