@@ -71,6 +71,8 @@ class FeedController
             $this->vote($userId);
           } else if ($action === 'reorder') {
             $this->reorderFeeds($userId);
+          } else if ($action === 'icon') {
+            $this->uploadIcon($userId);
           }
           break;
         default:
@@ -187,6 +189,92 @@ class FeedController
     $updateOrderStmt->execute();
 
     Response::success(null, 'Feed order updated successfully');
+  }
+
+  private function uploadIcon($userId)
+  {
+    if (!isset($_GET['feed_id'])) {
+      Response::error('Feed ID is required', 400);
+      return;
+    }
+
+    $feedId = intval($_GET['feed_id']);
+
+    // Check that the user is an admin or moderator of the feed
+    $query = "SELECT role FROM feed_members WHERE feed_id = :feed_id AND user_id = :user_id";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
+    $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+    $stmt->execute();
+    $role = $stmt->fetchColumn();
+    if (!$role || !in_array($role, ['admin', 'moderator'])) {
+      Response::error('Insufficient permissions', 403);
+      return;
+    }
+
+    if (!isset($_FILES['icon'])) {
+      Response::error('No icon file provided', 400);
+      return;
+    }
+
+    $file = $_FILES['icon'];
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+      Response::error('File upload failed', 400);
+      return;
+    }
+
+    // Validate file type
+    $allowedTypes = ['image/jpeg', 'image/png'];
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mimeType = finfo_file($finfo, $file['tmp_name']);
+    finfo_close($finfo);
+
+    if (!in_array($mimeType, $allowedTypes)) {
+      Response::error('Invalid file type. Only JPEG and PNG are allowed.', 400);
+      return;
+    }
+
+    // Prepare uploads directory
+    $uploadDir = __DIR__ . '/../uploads/feed_icons/';
+    if (!file_exists($uploadDir)) {
+      mkdir($uploadDir, 0755, true);
+    }
+
+    $extension = $mimeType === 'image/jpeg' ? 'jpg' : 'png';
+    $filename = uniqid('feed_icon_') . '.' . $extension;
+    $filepath = $uploadDir . $filename;
+
+    if (!move_uploaded_file($file['tmp_name'], $filepath)) {
+      Response::error('Failed to save file', 500);
+      return;
+    }
+
+    // Fetch current icon URL to remove old file
+    $query = "SELECT icon_url FROM feeds WHERE id = :feed_id";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
+    $stmt->execute();
+    $oldIconUrl = $stmt->fetchColumn();
+
+    // Update database
+    $iconUrl = '/uploads/feed_icons/' . $filename;
+    $query = "UPDATE feeds SET icon_url = :icon_url WHERE id = :feed_id";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':icon_url', $iconUrl);
+    $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
+    $stmt->execute();
+
+    if ($oldIconUrl) {
+      $oldPath = __DIR__ . '/../' . ltrim($oldIconUrl, '/');
+      if (file_exists($oldPath)) {
+        unlink($oldPath);
+      }
+    }
+
+    Response::json([
+      'status' => 'success',
+      'icon_url' => $iconUrl
+    ]);
   }
 
   private function getFeedPosts()

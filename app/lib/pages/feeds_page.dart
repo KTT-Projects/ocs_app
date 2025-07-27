@@ -203,11 +203,10 @@ class _FeedsPageState extends State<FeedsPage> {
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        GlassmorphicUI.showGlassSnackBar(
+          context,
+          e.toString(),
+          isError: true,
         );
       }
     }
@@ -410,12 +409,6 @@ class _FeedsPageState extends State<FeedsPage> {
                                 ),
                               );
                               if (feedId != null && mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(AppLocalizations.of(context)!.feedCreatedSuccess),
-                                    backgroundColor: Colors.green,
-                                  ),
-                                );
                                 _loadFeeds();
                                 _loadPosts();
                               }
@@ -437,11 +430,10 @@ class _FeedsPageState extends State<FeedsPage> {
                                       _loadFeeds();
                                     } catch (e) {
                                       if (mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text(e.toString()),
-                                            backgroundColor: Theme.of(context).colorScheme.error,
-                                          ),
+                                        GlassmorphicUI.showGlassSnackBar(
+                                          context,
+                                          e.toString(),
+                                          isError: true,
                                         );
                                       }
                                     }
@@ -544,11 +536,10 @@ class _FeedsPageState extends State<FeedsPage> {
                           }
                         } catch (e) {
                           if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(e.toString()),
-                                backgroundColor: Theme.of(context).colorScheme.error,
-                              ),
+                            GlassmorphicUI.showGlassSnackBar(
+                              context,
+                              e.toString(),
+                              isError: true,
                             );
                           }
                         }
@@ -616,11 +607,10 @@ class _FeedsPageState extends State<FeedsPage> {
                                     }
                                   } catch (e) {
                                     if (mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text(e.toString()),
-                                          backgroundColor: Theme.of(context).colorScheme.error,
-                                        ),
+                                      GlassmorphicUI.showGlassSnackBar(
+                                        context,
+                                        e.toString(),
+                                        isError: true,
                                       );
                                     }
                                   }

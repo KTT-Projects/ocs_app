@@ -73,7 +73,10 @@ class ApiClient extends ChangeNotifier {
     }
   }
 
-  Future<void> _handleUnauthorizedResponse(BuildContext context, Map<String, dynamic> data) async {
+  Future<void> _handleUnauthorizedResponse(
+    BuildContext context,
+    Map<String, dynamic> data,
+  ) async {
     final message = data['message'] ?? 'Unauthorized';
     if (message == 'Invalid or expired token') {
       await clearToken();
@@ -111,12 +114,16 @@ class ApiClient extends ChangeNotifier {
 
     final data = json.decode(response.body);
     if (response.statusCode != 200) {
-      final errorMessage = _mapServerError(context, data['message'] ?? l10n.registrationFailed);
+      final errorMessage = _mapServerError(
+        context,
+        data['message'] ?? l10n.registrationFailed,
+      );
       final errorDetails = data['error_details'];
 
       String fullError = errorMessage;
       if (errorDetails != null) {
-        fullError += '\n\n' +
+        fullError +=
+            '\n\n' +
             l10n.errorDetailsText(
               errorDetails['error_type'] ?? l10n.unknownErrorType,
               errorDetails['error_file'] ?? l10n.unknownFile,
@@ -144,10 +151,7 @@ class ApiClient extends ChangeNotifier {
           'Content-Type': 'application/json',
           'Accept-Language': Localizations.localeOf(context).languageCode,
         },
-        body: json.encode({
-          'email': email,
-          'otp': otp,
-        }),
+        body: json.encode({'email': email, 'otp': otp}),
       );
 
       final data = json.decode(response.body);
@@ -155,12 +159,18 @@ class ApiClient extends ChangeNotifier {
       if (response.statusCode == 401) {
         await _handleUnauthorizedResponse(context, data);
       } else if (response.statusCode != 200) {
-        final errorMessage = _mapServerError(context, data['message'] ?? l10n.verificationFailed);
+        final errorMessage = _mapServerError(
+          context,
+          data['message'] ?? l10n.verificationFailed,
+        );
         throw ApiException(errorMessage);
       }
 
       if (data['status'] != 'success' || data['token'] == null) {
-        final errorMessage = _mapServerError(context, data['message'] ?? l10n.verificationFailed);
+        final errorMessage = _mapServerError(
+          context,
+          data['message'] ?? l10n.verificationFailed,
+        );
         throw ApiException(errorMessage);
       }
 
@@ -198,7 +208,10 @@ class ApiClient extends ChangeNotifier {
       final data = json.decode(response.body);
 
       if (response.statusCode != 200) {
-        final errorMessage = _mapServerError(context, data['message'] ?? l10n.loginFailed);
+        final errorMessage = _mapServerError(
+          context,
+          data['message'] ?? l10n.loginFailed,
+        );
         throw ApiException(errorMessage);
       }
 
@@ -208,7 +221,10 @@ class ApiClient extends ChangeNotifier {
       }
 
       if (data['status'] != 'success') {
-        final errorMessage = _mapServerError(context, data['message'] ?? l10n.loginFailed);
+        final errorMessage = _mapServerError(
+          context,
+          data['message'] ?? l10n.loginFailed,
+        );
         throw ApiException(errorMessage);
       }
 
@@ -222,25 +238,39 @@ class ApiClient extends ChangeNotifier {
     }
   }
 
-  Future<String> uploadAvatar(BuildContext context, String filePath, {List<int>? webBytes, String? webFileName}) async {
+  Future<String> uploadAvatar(
+    BuildContext context,
+    String filePath, {
+    List<int>? webBytes,
+    String? webFileName,
+  }) async {
     final l10n = AppLocalizations.of(context)!;
     try {
       // Always use POST for avatar uploads to simplify server handling
-      final request = http.MultipartRequest('POST', Uri.parse('$baseUrl/profile.php'))
-        ..headers.addAll({
-          'Authorization': 'Bearer $_token',
-          'Accept': 'application/json',
-          'Accept-Language': Localizations.localeOf(context).languageCode,
-        });
+      final request =
+          http.MultipartRequest('POST', Uri.parse('$baseUrl/profile.php'))
+            ..headers.addAll({
+              'Authorization': 'Bearer $_token',
+              'Accept': 'application/json',
+              'Accept-Language': Localizations.localeOf(context).languageCode,
+            });
 
       if (kIsWeb && webBytes != null && webFileName != null) {
-        request.files.add(http.MultipartFile.fromBytes('avatar', webBytes, filename: webFileName));
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'avatar',
+            webBytes,
+            filename: webFileName,
+          ),
+        );
       } else {
         // Read file as bytes for better cross-platform compatibility (iOS/Android)
         final file = File(filePath);
         final bytes = await file.readAsBytes();
         final filename = filePath.split('/').last;
-        request.files.add(http.MultipartFile.fromBytes('avatar', bytes, filename: filename));
+        request.files.add(
+          http.MultipartFile.fromBytes('avatar', bytes, filename: filename),
+        );
       }
 
       final response = await request.send();
@@ -249,11 +279,21 @@ class ApiClient extends ChangeNotifier {
       if (response.statusCode == 401) {
         await _handleUnauthorizedResponse(context, data);
       } else if (response.statusCode != 200) {
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.failedToUpdateProfile));
+        throw ApiException(
+          _mapServerError(
+            context,
+            data['message'] ?? l10n.failedToUpdateProfile,
+          ),
+        );
       }
 
       if (data['status'] != 'success' || data['avatar_url'] == null) {
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.failedToUpdateProfile));
+        throw ApiException(
+          _mapServerError(
+            context,
+            data['message'] ?? l10n.failedToUpdateProfile,
+          ),
+        );
       }
 
       return data['avatar_url'];
@@ -263,28 +303,37 @@ class ApiClient extends ChangeNotifier {
     }
   }
 
-  Future<String> uploadFeedIcon(BuildContext context, int feedId,
-      {String? filePath, List<int>? webBytes, String? webFileName}) async {
+  Future<String> uploadFeedIcon(
+    BuildContext context,
+    int feedId, {
+    String? filePath,
+    List<int>? webBytes,
+    String? webFileName,
+  }) async {
     final l10n = AppLocalizations.of(context)!;
     try {
-      final request = http.MultipartRequest(
-        'POST',
-        Uri.parse('$baseUrl/feeds.php?action=icon&feed_id=$feedId'),
-      )..headers.addAll({
-          'Authorization': 'Bearer $_token',
-          'Accept': 'application/json',
-          'Accept-Language': Localizations.localeOf(context).languageCode,
-        });
+      final request =
+          http.MultipartRequest(
+              'POST',
+              Uri.parse('$baseUrl/feeds.php?action=icon&feed_id=$feedId'),
+            )
+            ..headers.addAll({
+              'Authorization': 'Bearer $_token',
+              'Accept': 'application/json',
+              'Accept-Language': Localizations.localeOf(context).languageCode,
+            });
 
       if (kIsWeb && webBytes != null && webFileName != null) {
         request.files.add(
-            http.MultipartFile.fromBytes('icon', webBytes, filename: webFileName));
+          http.MultipartFile.fromBytes('icon', webBytes, filename: webFileName),
+        );
       } else if (filePath != null) {
         final file = File(filePath);
         final bytes = await file.readAsBytes();
         final filename = filePath.split('/').last;
         request.files.add(
-            http.MultipartFile.fromBytes('icon', bytes, filename: filename));
+          http.MultipartFile.fromBytes('icon', bytes, filename: filename),
+        );
       } else {
         throw ApiException(l10n.errorOccurred);
       }
@@ -295,11 +344,15 @@ class ApiClient extends ChangeNotifier {
       if (response.statusCode == 401) {
         await _handleUnauthorizedResponse(context, data);
       } else if (response.statusCode != 200) {
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
       }
 
       if (data['status'] != 'success' || data['icon_url'] == null) {
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
       }
 
       return data['icon_url'];
@@ -342,11 +395,21 @@ class ApiClient extends ChangeNotifier {
       if (response.statusCode == 401) {
         await _handleUnauthorizedResponse(context, data);
       } else if (response.statusCode != 200) {
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.failedToUpdateProfile));
+        throw ApiException(
+          _mapServerError(
+            context,
+            data['message'] ?? l10n.failedToUpdateProfile,
+          ),
+        );
       }
 
       if (data['status'] != 'success') {
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.failedToUpdateProfile));
+        throw ApiException(
+          _mapServerError(
+            context,
+            data['message'] ?? l10n.failedToUpdateProfile,
+          ),
+        );
       }
     } catch (e) {
       if (e is ApiException) {
@@ -374,7 +437,9 @@ class ApiClient extends ChangeNotifier {
       if (response.statusCode == 401) {
         await _handleUnauthorizedResponse(context, data);
       } else if (response.statusCode != 200) {
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.failedToLoadProfile));
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.failedToLoadProfile),
+        );
       }
 
       if (data['status'] != 'success') {
@@ -382,7 +447,9 @@ class ApiClient extends ChangeNotifier {
         if (data['message'] == 'Invalid or expired token') {
           await _handleUnauthorizedResponse(context, data);
         }
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.failedToLoadProfile));
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.failedToLoadProfile),
+        );
       }
 
       return data['profile'];
@@ -394,11 +461,11 @@ class ApiClient extends ChangeNotifier {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getInstitutions(BuildContext context) async {
+  Future<List<Map<String, dynamic>>> getInstitutions(
+    BuildContext context,
+  ) async {
     final l10n = AppLocalizations.of(context)!;
-    final response = await http.get(
-      _buildUri('institutions.php'),
-    );
+    final response = await http.get(_buildUri('institutions.php'));
 
     if (response.statusCode != 200) {
       throw ApiException(l10n.failedToLoadInstitutions);
@@ -421,19 +488,20 @@ class ApiClient extends ChangeNotifier {
       final response = await http.post(
         Uri.parse('$baseUrl/forgot_password.php'),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'email': email,
-          'lang': lang,
-        }),
+        body: json.encode({'email': email, 'lang': lang}),
       );
 
       final data = json.decode(response.body);
       if (response.statusCode != 200) {
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.resetPasswordFailed));
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.resetPasswordFailed),
+        );
       }
 
       if (data['status'] != 'success') {
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.resetPasswordFailed));
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.resetPasswordFailed),
+        );
       }
     } catch (e) {
       if (e is ApiException) rethrow;
@@ -461,11 +529,15 @@ class ApiClient extends ChangeNotifier {
 
       final data = json.decode(response.body);
       if (response.statusCode != 200) {
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.resetPasswordFailed));
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.resetPasswordFailed),
+        );
       }
 
       if (data['status'] != 'success') {
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.resetPasswordFailed));
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.resetPasswordFailed),
+        );
       }
     } catch (e) {
       if (e is ApiException) rethrow;
@@ -489,7 +561,9 @@ class ApiClient extends ChangeNotifier {
       if (response.statusCode == 401) {
         await _handleUnauthorizedResponse(context, data);
       } else if (response.statusCode != 200) {
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
       }
 
       return (data['data'] as List).map((feed) => Feed.fromJson(feed)).toList();
@@ -515,7 +589,9 @@ class ApiClient extends ChangeNotifier {
       if (response.statusCode == 401) {
         await _handleUnauthorizedResponse(context, data);
       } else if (response.statusCode != 200) {
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
       }
 
       return (data['data'] as List).map((feed) => Feed.fromJson(feed)).toList();
@@ -525,7 +601,11 @@ class ApiClient extends ChangeNotifier {
     }
   }
 
-  Future<List<FeedPost>> getFeedPosts(BuildContext context, int feedId, {int page = 1}) async {
+  Future<List<FeedPost>> getFeedPosts(
+    BuildContext context,
+    int feedId, {
+    int page = 1,
+  }) async {
     final l10n = AppLocalizations.of(context)!;
     try {
       final response = await http.get(
@@ -541,17 +621,24 @@ class ApiClient extends ChangeNotifier {
       if (response.statusCode == 401) {
         await _handleUnauthorizedResponse(context, data);
       } else if (response.statusCode != 200) {
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
       }
 
-      return (data['data'] as List).map((post) => FeedPost.fromJson(post)).toList();
+      return (data['data'] as List)
+          .map((post) => FeedPost.fromJson(post))
+          .toList();
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException(l10n.errorOccurred);
     }
   }
 
-  Future<List<FeedPost>> getHomeFeed(BuildContext context, {int page = 1}) async {
+  Future<List<FeedPost>> getHomeFeed(
+    BuildContext context, {
+    int page = 1,
+  }) async {
     final l10n = AppLocalizations.of(context)!;
     try {
       final response = await http.get(
@@ -567,17 +654,24 @@ class ApiClient extends ChangeNotifier {
       if (response.statusCode == 401) {
         await _handleUnauthorizedResponse(context, data);
       } else if (response.statusCode != 200) {
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
       }
 
-      return (data['data'] as List).map((post) => FeedPost.fromJson(post)).toList();
+      return (data['data'] as List)
+          .map((post) => FeedPost.fromJson(post))
+          .toList();
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException(l10n.errorOccurred);
     }
   }
 
-  Future<List<FeedPost>> getDiscoverFeed(BuildContext context, {int page = 1}) async {
+  Future<List<FeedPost>> getDiscoverFeed(
+    BuildContext context, {
+    int page = 1,
+  }) async {
     final l10n = AppLocalizations.of(context)!;
     try {
       final response = await http.get(
@@ -593,10 +687,14 @@ class ApiClient extends ChangeNotifier {
       if (response.statusCode == 401) {
         await _handleUnauthorizedResponse(context, data);
       } else if (response.statusCode != 200) {
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
       }
 
-      return (data['data'] as List).map((post) => FeedPost.fromJson(post)).toList();
+      return (data['data'] as List)
+          .map((post) => FeedPost.fromJson(post))
+          .toList();
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException(l10n.errorOccurred);
@@ -612,16 +710,16 @@ class ApiClient extends ChangeNotifier {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
         },
-        body: json.encode({
-          'feed_id': feedId,
-        }),
+        body: json.encode({'feed_id': feedId}),
       );
 
       final data = json.decode(response.body);
       if (response.statusCode == 401) {
         await _handleUnauthorizedResponse(context, data);
       } else if (response.statusCode != 200) {
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
       }
     } catch (e) {
       if (e is ApiException) rethrow;
@@ -655,11 +753,13 @@ class ApiClient extends ChangeNotifier {
       final data = json.decode(response.body);
       if (response.statusCode == 401) {
         await _handleUnauthorizedResponse(context, data);
-      } else if (response.statusCode != 201) {
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+      } else if (response.statusCode != 200 && response.statusCode != 201) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
       }
 
-      return data['data']['id'];
+      return int.parse(data['data']['id'].toString());
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException(l10n.errorOccurred);
@@ -694,11 +794,13 @@ class ApiClient extends ChangeNotifier {
       final data = json.decode(response.body);
       if (response.statusCode == 401) {
         await _handleUnauthorizedResponse(context, data);
-      } else if (response.statusCode != 201) {
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+      } else if (response.statusCode != 200 && response.statusCode != 201) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
       }
 
-      return data['data']['id'];
+      return int.parse(data['data']['id'].toString());
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException(l10n.errorOccurred);
@@ -717,16 +819,16 @@ class ApiClient extends ChangeNotifier {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
         },
-        body: json.encode({
-          'feed_order': feedOrder,
-        }),
+        body: json.encode({'feed_order': feedOrder}),
       );
 
       final data = json.decode(response.body);
       if (response.statusCode == 401) {
         await _handleUnauthorizedResponse(context, data);
       } else if (response.statusCode != 200) {
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
       }
     } catch (e) {
       if (e is ApiException) rethrow;
@@ -747,15 +849,14 @@ class ApiClient extends ChangeNotifier {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_token',
         },
-        body: json.encode({
-          'post_id': postId,
-          'vote_type': voteType,
-        }),
+        body: json.encode({'post_id': postId, 'vote_type': voteType}),
       );
 
       final data = json.decode(response.body);
       if (response.statusCode != 200) {
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
       }
     } catch (e) {
       if (e is ApiException) rethrow;
