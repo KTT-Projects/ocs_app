@@ -841,6 +841,51 @@ class ApiClient extends ChangeNotifier {
     }
   }
 
+  Future<void> updateFeed(
+    BuildContext context,
+    int feedId, {
+    String? displayName,
+    String? description,
+    String? rules,
+    int? adminId,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.patch(
+        Uri.parse('$baseUrl/feeds.php?action=update'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode({
+          'feed_id': feedId,
+          if (displayName != null) 'display_name': displayName,
+          if (description != null) 'description': description,
+          'rules': rules,
+          if (adminId != null) 'admin_id': adminId,
+        }),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+
+      if (data['status'] != 'success') {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
   Future<int> createPost(
     BuildContext context, {
     required int feedId,
