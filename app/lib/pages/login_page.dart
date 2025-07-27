@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../providers/language_provider.dart';
 import '../widgets/language_toggle.dart';
 import '../services/api_client.dart';
+import '../widgets/glassmorphic_ui.dart';
 import 'signup_page.dart';
 import 'forgot_password_page.dart';
 
@@ -42,13 +43,11 @@ class _LoginPageState extends State<LoginPage> {
 
   void _showMessage(String message, {bool isError = false, int seconds = 4}) {
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: Duration(seconds: seconds),
-          backgroundColor:
-              isError ? Theme.of(context).colorScheme.error : Colors.green,
-        ),
+      GlassmorphicUI.showGlassSnackBar(
+        context,
+        message,
+        isError: isError,
+        seconds: seconds,
       );
     }
   }
@@ -132,7 +131,6 @@ class _LoginPageState extends State<LoginPage> {
           } else if (response['status'] == 'success' && response['token'] != null) {
             final token = response['token'];
             await widget.apiClient.setToken(token);
-            _showMessage(l10n.loginSuccessful, seconds: 4);
             if (mounted) {
               Navigator.pushNamedAndRemoveUntil(
                 context,
@@ -372,17 +370,17 @@ class _LoginPageState extends State<LoginPage> {
                                                 allowDm: true,
                                               );
                                               if (mounted) {
-                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                  SnackBar(content: Text('${l10n.verificationCodeSent}'.replaceAll('{email}', _emailController.text))),
+                                                GlassmorphicUI.showGlassSnackBar(
+                                                  context,
+                                                  '${l10n.verificationCodeSent}'.replaceAll('{email}', _emailController.text),
                                                 );
                                               }
                                             } catch (e) {
                                               if (mounted) {
-                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(e.toString()),
-                                                    backgroundColor: Theme.of(context).colorScheme.error,
-                                                  ),
+                                                GlassmorphicUI.showGlassSnackBar(
+                                                  context,
+                                                  e.toString(),
+                                                  isError: true,
                                                 );
                                               }
                                             } finally {

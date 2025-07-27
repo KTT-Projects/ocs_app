@@ -6,6 +6,7 @@ import '../models/feed.dart';
 import '../models/feed_post.dart';
 import '../services/api_client.dart';
 import '../widgets/create_post_dialog.dart';
+import '../widgets/glassmorphic_ui.dart';
 
 class FeedPostsPage extends StatefulWidget {
   final ApiClient apiClient;
@@ -100,11 +101,10 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        GlassmorphicUI.showGlassSnackBar(
+          context,
+          e.toString(),
+          isError: true,
         );
       }
     }
