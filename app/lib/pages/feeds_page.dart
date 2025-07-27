@@ -73,10 +73,17 @@ class _FeedsPageState extends State<FeedsPage> {
 
   Future<void> _loadFeeds() async {
     try {
-      final allFeeds = await widget.apiClient.getFeeds(context);
+      // Fetch non-joined feeds and joined feeds separately. The joined feeds
+      // endpoint returns them in the user’s preferred order, so we need to
+      // combine the two results manually.
+      final results = await Future.wait([
+        widget.apiClient.getFeeds(context),
+        widget.apiClient.getJoinedFeeds(context),
+      ]);
       if (mounted) {
-        final joinedFeeds = allFeeds.where((feed) => feed.isMember).toList();
-        final nonJoinedFeeds = allFeeds.where((feed) => !feed.isMember).toList();
+        final nonJoinedFeeds = results[0];
+        final joinedFeeds = results[1];
+
         final Map<int, Feed> feedMap = {};
         for (final feed in joinedFeeds) {
           feedMap[feed.id] = feed;
