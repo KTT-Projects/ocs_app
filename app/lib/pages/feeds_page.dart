@@ -15,7 +15,7 @@ import '../widgets/feed_menu_dialog.dart';
 import '../widgets/reorder_feeds_dialog.dart';
 import 'create_feed_page.dart';
 import '../widgets/create_post_dialog.dart';
-import '../widgets/text_field_dialog.dart';
+import '../widgets/user_selection_dialog.dart';
 
 class FeedsPage extends StatefulWidget {
   final ApiClient apiClient;
@@ -252,13 +252,14 @@ class _FeedsPageState extends State<FeedsPage> {
 
   Future<void> _leaveSelectedFeed() async {
     if (_selectedFeed == null) return;
-    String? newAdminId;
+    int? newAdminId;
+    List<Map<String, dynamic>>? members;
     while (true) {
       try {
         await widget.apiClient.leaveFeed(
           context,
           _selectedFeed!.id,
-          newAdminId: newAdminId != null ? int.tryParse(newAdminId!) : null,
+          newAdminId: newAdminId,
         );
         if (!mounted) return;
         setState(() {
@@ -270,20 +271,23 @@ class _FeedsPageState extends State<FeedsPage> {
       } catch (e) {
         final msg = e.toString();
         if (msg.contains('New admin ID required')) {
-          final input = await GlassmorphicUI.showDialog<String>(
+          members ??= await widget.apiClient.getFeedMembers(
+            context,
+            _selectedFeed!.id,
+          );
+          final selected = await GlassmorphicUI.showDialog<Map<String, dynamic>>(
             context: context,
             width: 320,
-            child: TextFieldDialog(
-              title: AppLocalizations.of(context)!.leaveFeed,
-              initialValue: '',
-              helperText: 'New admin user id',
-              onSave: (value) => Navigator.pop(context, value),
+            child: UserSelectionDialog(
+              title: AppLocalizations.of(context)!.selectNewAdmin,
+              users: members!,
+              onUserSelected: (user) => Navigator.pop(context, user),
             ),
           );
-          if (input == null) {
+          if (selected == null) {
             break;
           }
-          newAdminId = input;
+          newAdminId = selected['id'] as int?;
           continue;
         } else {
           if (mounted) {

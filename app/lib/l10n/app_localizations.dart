@@ -909,6 +909,12 @@ abstract class AppLocalizations {
   /// **'Leave feed'**
   String get leaveFeed;
 
+  /// Dialog title when selecting a new admin
+  ///
+  /// In en, this message translates to:
+  /// **'Select new admin'**
+  String get selectNewAdmin;
+
   /// Save button
   ///
   /// In en, this message translates to:

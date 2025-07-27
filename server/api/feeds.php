@@ -58,6 +58,8 @@ class FeedController
             $this->getFeedPosts();
           } else if ($action === 'home') {
             $this->getHomeFeed($userId);
+          } else if ($action === 'members') {
+            $this->getFeedMembers();
           }
           break;
         case 'POST':
@@ -311,6 +313,29 @@ class FeedController
     $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     Response::success($posts, 'Posts retrieved successfully');
+  }
+
+  private function getFeedMembers()
+  {
+    if (!isset($_GET['feed_id'])) {
+      Response::error('Feed ID is required', 400);
+      return;
+    }
+
+    $feedId = intval($_GET['feed_id']);
+
+    $query = "SELECT u.id, up.display_name, up.avatar_url, fm.role
+                FROM feed_members fm
+                JOIN users u ON fm.user_id = u.id
+                JOIN user_profiles up ON u.id = up.user_id
+                WHERE fm.feed_id = :feed_id";
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
+    $stmt->execute();
+    $members = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    Response::success($members, 'Members retrieved successfully');
   }
 
   private function getHomeFeed($userId)
