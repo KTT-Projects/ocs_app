@@ -125,7 +125,7 @@ class FeedController
     $feedOrderStmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
     $feedOrderStmt->execute();
     $feedOrderRaw = $feedOrderStmt->fetch(PDO::FETCH_ASSOC)['feed_order'];
-    $orderedFeedIds = $feedOrderRaw ? json_decode($feedOrderRaw, true) : [];
+    $orderedFeedIds = $feedOrderRaw ? array_map('intval', json_decode($feedOrderRaw, true)) : [];
 
     // Fetch only joined feeds by iterating feed_order
     $joinedFeeds = [];
@@ -180,7 +180,8 @@ class FeedController
     // Update feed_order in users table
     $updateOrderQuery = "UPDATE users SET feed_order = :feed_order WHERE id = :user_id";
     $updateOrderStmt = $this->conn->prepare($updateOrderQuery);
-    $updateOrderStmt->bindParam(':feed_order', json_encode($data['feed_order']));
+    $feedOrder = array_map('intval', $data['feed_order']);
+    $updateOrderStmt->bindParam(':feed_order', json_encode($feedOrder));
     $updateOrderStmt->bindParam(':user_id', $userId);
     $updateOrderStmt->execute();
 
@@ -342,12 +343,14 @@ class FeedController
       return;
     }
 
+    $feedId = intval($data['feed_id']);
+
     // Add to feed_members if not already present
-    $query = "INSERT INTO feed_members (feed_id, user_id, role) 
+    $query = "INSERT INTO feed_members (feed_id, user_id, role)
                  VALUES (:feed_id, :user_id, 'member')
                  ON DUPLICATE KEY UPDATE role = 'member'";
     $stmt = $this->conn->prepare($query);
-    $stmt->bindParam(':feed_id', $data['feed_id']);
+    $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
     $stmt->bindParam(':user_id', $userId);
     $stmt->execute();
 
@@ -357,9 +360,9 @@ class FeedController
     $feedOrderStmt->bindParam(':user_id', $userId);
     $feedOrderStmt->execute();
     $feedOrderRaw = $feedOrderStmt->fetch(PDO::FETCH_ASSOC)['feed_order'];
-    $orderedFeedIds = $feedOrderRaw ? json_decode($feedOrderRaw, true) : [];
-    if (!in_array($data['feed_id'], $orderedFeedIds)) {
-      $orderedFeedIds[] = $data['feed_id'];
+    $orderedFeedIds = $feedOrderRaw ? array_map('intval', json_decode($feedOrderRaw, true)) : [];
+    if (!in_array($feedId, $orderedFeedIds)) {
+      $orderedFeedIds[] = $feedId;
       $updateOrderQuery = "UPDATE users SET feed_order = :feed_order WHERE id = :user_id";
       $updateOrderStmt = $this->conn->prepare($updateOrderQuery);
       $updateOrderStmt->bindParam(':feed_order', json_encode($orderedFeedIds));

@@ -66,4 +66,36 @@ class Feed {
       'is_member': isMember,
     };
   }
+
+  Feed copyWith({
+    int? id,
+    String? name,
+    String? displayName,
+    String? description,
+    int? createdBy,
+    String? rules,
+    String? bannerUrl,
+    String? iconUrl,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    int? memberCount,
+    int? postCount,
+    bool? isMember,
+  }) {
+    return Feed(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      displayName: displayName ?? this.displayName,
+      description: description ?? this.description,
+      createdBy: createdBy ?? this.createdBy,
+      rules: rules ?? this.rules,
+      bannerUrl: bannerUrl ?? this.bannerUrl,
+      iconUrl: iconUrl ?? this.iconUrl,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      memberCount: memberCount ?? this.memberCount,
+      postCount: postCount ?? this.postCount,
+      isMember: isMember ?? this.isMember,
+    );
+  }
 }

@@ -479,7 +479,13 @@ class _FeedsPageState extends State<FeedsPage> {
                         try {
                           await widget.apiClient.joinFeed(context, feed.id);
                           if (mounted) {
-                            _loadFeeds();
+                            setState(() {
+                              final index = _feeds!.indexWhere((f) => f.id == feed.id);
+                              if (index != -1) {
+                                _feeds![index] = _feeds![index].copyWith(isMember: true);
+                              }
+                            });
+                            _refreshJoinedFeeds();
                           }
                         } catch (e) {
                           if (mounted) {
@@ -545,7 +551,13 @@ class _FeedsPageState extends State<FeedsPage> {
                                   try {
                                     await widget.apiClient.joinFeed(context, feed.id);
                                     if (mounted) {
-                                      _loadFeeds();
+                                      setState(() {
+                                        final index = _feeds!.indexWhere((f) => f.id == feed.id);
+                                        if (index != -1) {
+                                          _feeds![index] = _feeds![index].copyWith(isMember: true);
+                                        }
+                                      });
+                                      _refreshJoinedFeeds();
                                     }
                                   } catch (e) {
                                     if (mounted) {
