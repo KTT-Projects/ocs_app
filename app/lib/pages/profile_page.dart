@@ -408,9 +408,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                                   onPressed: () async {
                                     await widget.apiClient.logout(context);
-                                    if (mounted) {
-                                      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
-                                    }
+                                    // MainPage listens for token changes and automatically
+                                    // displays the login screen, so no navigation is needed here.
                                   },
                                 ),
                               ],
