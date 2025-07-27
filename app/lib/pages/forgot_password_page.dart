@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../providers/language_provider.dart';
 import '../widgets/language_toggle.dart';
 import '../services/api_client.dart';
+import '../widgets/glassmorphic_ui.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   final ApiClient apiClient;
@@ -42,13 +43,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   void _showMessage(String message, {bool isError = false, int seconds = 4}) {
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: Duration(seconds: seconds),
-          backgroundColor:
-              isError ? Theme.of(context).colorScheme.error : Colors.green,
-        ),
+      GlassmorphicUI.showGlassSnackBar(
+        context,
+        message,
+        isError: isError,
+        seconds: seconds,
       );
     }
   }
@@ -315,17 +314,17 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                                   email: _email,
                                                 );
                                                 if (mounted) {
-                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                    SnackBar(content: Text(l10n.resetPasswordSent)),
+                                                  GlassmorphicUI.showGlassSnackBar(
+                                                    context,
+                                                    l10n.resetPasswordSent,
                                                   );
                                                 }
                                               } catch (e) {
                                                 if (mounted) {
-                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                    SnackBar(
-                                                      content: Text(e.toString()),
-                                                      backgroundColor: Theme.of(context).colorScheme.error,
-                                                    ),
+                                                  GlassmorphicUI.showGlassSnackBar(
+                                                    context,
+                                                    e.toString(),
+                                                    isError: true,
                                                   );
                                                 }
                                               } finally {

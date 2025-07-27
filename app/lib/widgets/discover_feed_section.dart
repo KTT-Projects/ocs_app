@@ -39,10 +39,14 @@ class DiscoverFeedSection extends StatelessWidget {
               // Search field
               Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.background.withValues(alpha: 0.2),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.background.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.3),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onPrimary.withOpacity(0.3),
                   ),
                 ),
                 child: ClipRRect(
@@ -54,13 +58,20 @@ class DiscoverFeedSection extends StatelessWidget {
                         hintText: l10n.searchFeeds,
                         prefixIcon: Icon(
                           Icons.search,
-                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onPrimary.withOpacity(0.7),
                         ),
                         hintStyle: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onPrimary.withOpacity(0.7),
                         ),
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
                       ),
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onPrimary,
@@ -80,10 +91,14 @@ class DiscoverFeedSection extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: sortBy == 'population'
                             ? Theme.of(context).colorScheme.secondary
-                            : Theme.of(context).colorScheme.background.withValues(alpha: 0.2),
+                            : Theme.of(
+                                context,
+                              ).colorScheme.background.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.3),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onPrimary.withOpacity(0.3),
                         ),
                       ),
                       child: ClipRRect(
@@ -94,23 +109,34 @@ class DiscoverFeedSection extends StatelessWidget {
                             onTap: () => onSortChanged('population'),
                             borderRadius: BorderRadius.circular(20),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
                               child: Row(
                                 children: [
                                   Icon(
                                     Icons.people,
                                     size: 16,
                                     color: sortBy == 'population'
-                                        ? Theme.of(context).colorScheme.onSecondary
-                                        : Theme.of(context).colorScheme.onPrimary,
+                                        ? Theme.of(
+                                            context,
+                                          ).colorScheme.onSecondary
+                                        : Theme.of(
+                                            context,
+                                          ).colorScheme.onPrimary,
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
                                     l10n.population,
                                     style: TextStyle(
                                       color: sortBy == 'population'
-                                          ? Theme.of(context).colorScheme.onSecondary
-                                          : Theme.of(context).colorScheme.onPrimary,
+                                          ? Theme.of(
+                                              context,
+                                            ).colorScheme.onSecondary
+                                          : Theme.of(
+                                              context,
+                                            ).colorScheme.onPrimary,
                                     ),
                                   ),
                                 ],
@@ -125,10 +151,14 @@ class DiscoverFeedSection extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: sortBy == 'activity'
                             ? Theme.of(context).colorScheme.secondary
-                            : Theme.of(context).colorScheme.background.withValues(alpha: 0.2),
+                            : Theme.of(
+                                context,
+                              ).colorScheme.background.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.3),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onPrimary.withOpacity(0.3),
                         ),
                       ),
                       child: ClipRRect(
@@ -139,23 +169,34 @@ class DiscoverFeedSection extends StatelessWidget {
                             onTap: () => onSortChanged('activity'),
                             borderRadius: BorderRadius.circular(20),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
                               child: Row(
                                 children: [
                                   Icon(
                                     Icons.flash_on,
                                     size: 16,
                                     color: sortBy == 'activity'
-                                        ? Theme.of(context).colorScheme.onSecondary
-                                        : Theme.of(context).colorScheme.onPrimary,
+                                        ? Theme.of(
+                                            context,
+                                          ).colorScheme.onSecondary
+                                        : Theme.of(
+                                            context,
+                                          ).colorScheme.onPrimary,
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
                                     l10n.latestActivity,
                                     style: TextStyle(
                                       color: sortBy == 'activity'
-                                          ? Theme.of(context).colorScheme.onSecondary
-                                          : Theme.of(context).colorScheme.onPrimary,
+                                          ? Theme.of(
+                                              context,
+                                            ).colorScheme.onSecondary
+                                          : Theme.of(
+                                              context,
+                                            ).colorScheme.onPrimary,
                                     ),
                                   ),
                                 ],
@@ -173,15 +214,26 @@ class DiscoverFeedSection extends StatelessWidget {
                   builder: (context) {
                     var filteredFeeds = feeds;
                     if (searchQuery.isNotEmpty) {
-                      filteredFeeds = feeds.where((feed) =>
-                        feed.displayName.toLowerCase().contains(searchQuery.toLowerCase()) ||
-                        feed.description.toLowerCase().contains(searchQuery.toLowerCase())
-                      ).toList();
+                      filteredFeeds = feeds
+                          .where(
+                            (feed) =>
+                                feed.displayName.toLowerCase().contains(
+                                  searchQuery.toLowerCase(),
+                                ) ||
+                                feed.description.toLowerCase().contains(
+                                  searchQuery.toLowerCase(),
+                                ),
+                          )
+                          .toList();
                     }
                     if (sortBy == 'population') {
-                      filteredFeeds.sort((a, b) => b.memberCount.compareTo(a.memberCount));
+                      filteredFeeds.sort(
+                        (a, b) => b.memberCount.compareTo(a.memberCount),
+                      );
                     } else {
-                      filteredFeeds.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+                      filteredFeeds.sort(
+                        (a, b) => b.updatedAt.compareTo(a.updatedAt),
+                      );
                     }
                     if (filteredFeeds.isEmpty) {
                       return Center(
