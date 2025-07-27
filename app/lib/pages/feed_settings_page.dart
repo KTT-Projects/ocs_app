@@ -82,7 +82,6 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
         TextEditingController(text: widget.feed.description);
     _rulesController = TextEditingController(text: widget.feed.rules ?? '');
     _iconUrl = widget.feed.iconUrl;
-    _loadMembers();
   }
 
   Future<void> _loadMembers() async {
