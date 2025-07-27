@@ -314,7 +314,8 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
                                       ),
                                     ),
                                   ),
-                                  maxLines: 3,
+                                  minLines: 3,
+                                  maxLines: 5,
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
                                       return l10n.descriptionRequired;
@@ -349,7 +350,8 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
                                       ),
                                     ),
                                   ),
-                                  maxLines: 5,
+                                  minLines: 5,
+                                  maxLines: 10,
                                   validator: (value) {
                                     if (value != null && value.length > 1000) {
                                       return l10n.rulesTooLong;
