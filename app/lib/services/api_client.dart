@@ -263,6 +263,52 @@ class ApiClient extends ChangeNotifier {
     }
   }
 
+  Future<String> uploadFeedIcon(BuildContext context, int feedId,
+      {String? filePath, List<int>? webBytes, String? webFileName}) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/feeds.php?action=icon&feed_id=$feedId'),
+      )..headers.addAll({
+          'Authorization': 'Bearer $_token',
+          'Accept': 'application/json',
+          'Accept-Language': Localizations.localeOf(context).languageCode,
+        });
+
+      if (kIsWeb && webBytes != null && webFileName != null) {
+        request.files.add(
+            http.MultipartFile.fromBytes('icon', webBytes, filename: webFileName));
+      } else if (filePath != null) {
+        final file = File(filePath);
+        final bytes = await file.readAsBytes();
+        final filename = filePath.split('/').last;
+        request.files.add(
+            http.MultipartFile.fromBytes('icon', bytes, filename: filename));
+      } else {
+        throw ApiException(l10n.errorOccurred);
+      }
+
+      final response = await request.send();
+      final data = json.decode(await response.stream.bytesToString());
+
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+      }
+
+      if (data['status'] != 'success' || data['icon_url'] == null) {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+      }
+
+      return data['icon_url'];
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
   Future<void> updateProfile(
     BuildContext context, {
     bool? allowDm,

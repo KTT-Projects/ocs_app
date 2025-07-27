@@ -204,7 +204,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get displayNameRequired => '表示名は必須です';
 
   @override
-  String get displayNameTooLong => '表示名は100文字以内にしてください';
+  String get displayNameTooLong => '表示名は30文字以内にしてください';
+
 
   @override
   String get communityFeatures => 'コミュニティ機能';
@@ -447,4 +448,19 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get newPostTo => '投稿先...';
+
+  @override
+  String get feedCreatedSuccess => 'フィードが作成されました';
+
+  @override
+  String get titleTooLong => 'タイトルは300文字以内で入力してください';
+
+  @override
+  String get contentTooLong => '内容は5000文字以内で入力してください';
+
+  @override
+  String get descriptionTooLong => '説明は1000文字以内にしてください';
+
+  @override
+  String get rulesTooLong => 'ルールは1000文字以内にしてください';
 }

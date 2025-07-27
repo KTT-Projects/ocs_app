@@ -474,7 +474,7 @@ abstract class AppLocalizations {
   /// Error message when display name is too long
   ///
   /// In en, this message translates to:
-  /// **'Display name must be less than 100 characters'**
+  /// **'Display name must be less than 30 characters'**
   String get displayNameTooLong;
 
   /// Title for the community features section
@@ -956,6 +956,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New post to...'**
   String get newPostTo;
+
+  /// Success message when a feed is created
+  ///
+  /// In en, this message translates to:
+  /// **'Feed created successfully'**
+  String get feedCreatedSuccess;
+
+  /// Error message when post title is too long
+  ///
+  /// In en, this message translates to:
+  /// **'Title must be less than 300 characters'**
+  String get titleTooLong;
+
+  /// Error message when post content is too long
+  ///
+  /// In en, this message translates to:
+  /// **'Content must be less than 5000 characters'**
+  String get contentTooLong;
+
+  /// Error message when feed description is too long
+  ///
+  /// In en, this message translates to:
+  /// **'Description must be less than 1000 characters'**
+  String get descriptionTooLong;
+
+  /// Error message when feed rules are too long
+  ///
+  /// In en, this message translates to:
+  /// **'Rules must be less than 1000 characters'**
+  String get rulesTooLong;
 }
 
 class _AppLocalizationsDelegate

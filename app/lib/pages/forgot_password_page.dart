@@ -46,7 +46,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         SnackBar(
           content: Text(message),
           duration: Duration(seconds: seconds),
-          backgroundColor: isError ? Theme.of(context).colorScheme.error : null,
+          backgroundColor:
+              isError ? Theme.of(context).colorScheme.error : Colors.green,
         ),
       );
     }

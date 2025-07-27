@@ -41,7 +41,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         SnackBar(
           content: Text(message),
           duration: Duration(seconds: seconds),
-          backgroundColor: isError ? Theme.of(context).colorScheme.error : null,
+          backgroundColor:
+              isError ? Theme.of(context).colorScheme.error : Colors.green,
         ),
       );
     }

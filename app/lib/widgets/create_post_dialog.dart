@@ -146,6 +146,8 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
                         children: [
                           TextFormField(
                             controller: _titleController,
+                            maxLength: 300,
+                            maxLengthEnforcement: MaxLengthEnforcement.enforced,
                             decoration: InputDecoration(
                               hintText: l10n.postTitle,
                               hintStyle: TextStyle(
@@ -177,12 +179,17 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
                               if (value == null || value.isEmpty) {
                                 return l10n.titleRequired;
                               }
+                              if (value.length > 300) {
+                                return l10n.titleTooLong;
+                              }
                               return null;
                             },
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
                             controller: _contentController,
+                            maxLength: 5000,
+                            maxLengthEnforcement: MaxLengthEnforcement.enforced,
                             decoration: InputDecoration(
                               hintText: l10n.writePost,
                               hintStyle: TextStyle(
@@ -214,6 +221,9 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return l10n.contentRequired;
+                              }
+                              if (value.length > 5000) {
+                                return l10n.contentTooLong;
                               }
                               return null;
                             },

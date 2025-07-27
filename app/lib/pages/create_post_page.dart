@@ -131,6 +131,9 @@ class _CreatePostPageState extends State<CreatePostPage> {
               child: Form(
                 key: _formKey,
                 child: Container(
+                  constraints: BoxConstraints(
+                    minHeight: MediaQuery.of(context).size.height * 0.9,
+                  ),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.background.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(24),
@@ -155,6 +158,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
                           children: [
                             TextFormField(
                               controller: _titleController,
+                              maxLength: 300,
+                              maxLengthEnforcement: MaxLengthEnforcement.enforced,
                               decoration: InputDecoration(
                                 hintText: 'Title',
                                 hintStyle: TextStyle(
@@ -186,12 +191,17 @@ class _CreatePostPageState extends State<CreatePostPage> {
                                 if (value == null || value.isEmpty) {
                                   return 'Please enter a title';
                                 }
+                                if (value.length > 300) {
+                                  return AppLocalizations.of(context)!.titleTooLong;
+                                }
                                 return null;
                               },
                             ),
                             const SizedBox(height: 16),
                             TextFormField(
                               controller: _contentController,
+                              maxLength: 5000,
+                              maxLengthEnforcement: MaxLengthEnforcement.enforced,
                               decoration: InputDecoration(
                                 hintText: 'Write your post...',
                                 hintStyle: TextStyle(
@@ -223,6 +233,9 @@ class _CreatePostPageState extends State<CreatePostPage> {
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Please enter some content';
+                                }
+                                if (value.length > 5000) {
+                                  return AppLocalizations.of(context)!.contentTooLong;
                                 }
                                 return null;
                               },
