@@ -212,20 +212,7 @@ class DiscoverFeedSection extends StatelessWidget {
               Expanded(
                 child: Builder(
                   builder: (context) {
-                    var filteredFeeds = feeds;
-                    if (searchQuery.isNotEmpty) {
-                      filteredFeeds = feeds
-                          .where(
-                            (feed) =>
-                                feed.displayName.toLowerCase().contains(
-                                  searchQuery.toLowerCase(),
-                                ) ||
-                                feed.description.toLowerCase().contains(
-                                  searchQuery.toLowerCase(),
-                                ),
-                          )
-                          .toList();
-                    }
+                    List<Feed> filteredFeeds = List.from(feeds);
                     if (sortBy == 'population') {
                       filteredFeeds.sort(
                         (a, b) => b.memberCount.compareTo(a.memberCount),
@@ -234,6 +221,20 @@ class DiscoverFeedSection extends StatelessWidget {
                       filteredFeeds.sort(
                         (a, b) => b.updatedAt.compareTo(a.updatedAt),
                       );
+                    }
+
+                    if (searchQuery.isNotEmpty) {
+                      final query = searchQuery.toLowerCase();
+                      final titleMatches = filteredFeeds
+                          .where((feed) =>
+                              feed.displayName.toLowerCase().contains(query))
+                          .toList();
+                      final descriptionMatches = filteredFeeds
+                          .where((feed) =>
+                              !titleMatches.contains(feed) &&
+                              feed.description.toLowerCase().contains(query))
+                          .toList();
+                      filteredFeeds = [...titleMatches, ...descriptionMatches];
                     }
                     if (filteredFeeds.isEmpty) {
                       return Center(
