@@ -357,6 +357,33 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
                                     return null;
                                   },
                                 ),
+                                const SizedBox(height: 24),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: _isLoading ? null : _submitFeed,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                                      foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    child: _isLoading
+                                        ? SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor: AlwaysStoppedAnimation<Color>(
+                                                Theme.of(context).colorScheme.onSecondary,
+                                              ),
+                                            ),
+                                          )
+                                        : Text(l10n.createFeed),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
