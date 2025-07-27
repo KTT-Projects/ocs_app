@@ -8,6 +8,7 @@ import '../l10n/app_localizations.dart';
 import '../models/feed.dart';
 import '../services/api_client.dart';
 import '../widgets/glassmorphic_ui.dart';
+import '../widgets/user_selection_dialog.dart';
 
 class FeedSettingsPage extends StatefulWidget {
   final ApiClient apiClient;
@@ -119,6 +120,25 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
           _isMembersLoading = false;
         });
       }
+    }
+  }
+
+  Future<void> _selectAdmin() async {
+    if (_members == null || _members!.isEmpty) return;
+    final l10n = AppLocalizations.of(context)!;
+    final selected = await GlassmorphicUI.showDialog<Map<String, dynamic>>(
+      context: context,
+      width: 320,
+      child: UserSelectionDialog(
+        title: l10n.selectNewAdmin,
+        users: _members!,
+        onUserSelected: (user) => Navigator.pop(context, user),
+      ),
+    );
+    if (selected != null && mounted) {
+      setState(() {
+        _selectedAdmin = selected;
+      });
     }
   }
 
@@ -423,52 +443,46 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
                                   },
                                 ),
                                 const SizedBox(height: 16),
-                                Stack(
-                                  alignment: Alignment.centerRight,
-                                  children: [
-                                    DropdownButtonFormField<Map<String, dynamic>>(
-                                      isExpanded: true,
-                                      value: _selectedAdmin,
-                                      items: (_members ?? [])
-                                          .map(
-                                            (m) => DropdownMenuItem(
-                                              value: m,
-                                              child: Text(m['display_name'] ?? ''),
+                                TextFormField(
+                                  readOnly: true,
+                                  onTap: _selectAdmin,
+                                  controller: TextEditingController(
+                                    text: _selectedAdmin != null
+                                        ? _selectedAdmin!['display_name'] ?? ''
+                                        : '',
+                                  ),
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onPrimary,
+                                  ),
+                                  decoration: InputDecoration(
+                                    labelText: l10n.currentAdmin,
+                                    labelStyle: TextStyle(
+                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                    ),
+                                    suffixIcon: _isMembersLoading
+                                        ? const Padding(
+                                            padding: EdgeInsets.only(right: 8),
+                                            child: SizedBox(
+                                              width: 16,
+                                              height: 16,
+                                              child: CircularProgressIndicator(strokeWidth: 2),
                                             ),
                                           )
-                                          .toList(),
-                                      onChanged: (v) {
-                                        setState(() {
-                                          _selectedAdmin = v;
-                                        });
-                                      },
-                                      decoration: InputDecoration(
-                                        labelText: l10n.currentAdmin,
-                                        labelStyle: TextStyle(
-                                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                        ),
-                                        enabledBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                                        : Icon(
+                                            Icons.arrow_drop_down,
+                                            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
                                           ),
-                                        ),
-                                        focusedBorder: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Theme.of(context).colorScheme.onPrimary,
-                                          ),
-                                        ),
+                                    enabledBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
                                       ),
                                     ),
-                                    if (_isMembersLoading)
-                                      const Padding(
-                                        padding: EdgeInsets.only(right: 8),
-                                        child: SizedBox(
-                                          width: 16,
-                                          height: 16,
-                                          child: CircularProgressIndicator(strokeWidth: 2),
-                                        ),
+                                    focusedBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Theme.of(context).colorScheme.onPrimary,
                                       ),
-                                  ],
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
