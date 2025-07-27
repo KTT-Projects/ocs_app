@@ -610,6 +610,10 @@
   "@newPostTo": {
     "description": "Button to create a new post to a specific feed"
   },
+  "chooseFeed": "Choose a feed",
+  "@chooseFeed": {
+    "description": "Title for feed selection dialog"
+  },
   "feedCreatedSuccess": "Feed created successfully",
   "@feedCreatedSuccess": {
     "description": "Success message when a feed is created"

@@ -461,6 +461,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get newPostTo => '投稿先...';
 
   @override
+  String get chooseFeed => 'フィードを選択';
+
+  @override
   String get feedCreatedSuccess => 'フィードが作成されました';
 
   @override
