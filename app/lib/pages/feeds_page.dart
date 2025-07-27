@@ -37,6 +37,7 @@ class _FeedsPageState extends State<FeedsPage> {
   Timer? _refreshTimer;
   String _sortBy = 'latest'; // 'latest' or 'popular'
   Feed? _selectedFeed; // Currently selected feed, null means home feed
+  String? _currentToken;
 
   String _discoverSort = 'population';
   String _discoverSearch = '';
@@ -44,11 +45,14 @@ class _FeedsPageState extends State<FeedsPage> {
   @override
   void initState() {
     super.initState();
+    _currentToken = widget.apiClient.token;
+    widget.apiClient.addListener(_onApiClientChanged);
     _startPeriodicRefresh();
   }
 
   @override
   void dispose() {
+    widget.apiClient.removeListener(_onApiClientChanged);
     _refreshTimer?.cancel();
     super.dispose();
   }
@@ -59,6 +63,17 @@ class _FeedsPageState extends State<FeedsPage> {
       _refreshJoinedFeeds();
       _loadPosts();
     });
+  }
+
+  void _onApiClientChanged() {
+    if (widget.apiClient.token != _currentToken) {
+      _currentToken = widget.apiClient.token;
+      _didLoadFeeds = false;
+      _feeds = null;
+      _selectedFeed = null;
+      _loadFeeds();
+      _loadPosts();
+    }
   }
 
   @override
@@ -108,15 +123,46 @@ class _FeedsPageState extends State<FeedsPage> {
 
   Future<void> _refreshJoinedFeeds() async {
     try {
-      final joinedFeeds = await widget.apiClient.getJoinedFeeds(context);
-      if (mounted && _feeds != null) {
-        final Map<int, Feed> feedMap = {for (var f in _feeds!) f.id: f};
+      final results = await Future.wait([
+        widget.apiClient.getFeeds(context),
+        widget.apiClient.getJoinedFeeds(context),
+      ]);
+
+      if (mounted) {
+        final nonJoinedFeeds = results[0];
+        final joinedFeeds = results[1];
+
+        final Map<int, Feed> feedMap = {};
         for (final feed in joinedFeeds) {
           feedMap[feed.id] = feed;
         }
-        setState(() {
-          _feeds = feedMap.values.toList();
-        });
+        for (final feed in nonJoinedFeeds) {
+          feedMap.putIfAbsent(feed.id, () => feed);
+        }
+
+        if (_feeds == null || feedMap.length != _feeds!.length) {
+          setState(() {
+            _feeds = feedMap.values.toList();
+          });
+        } else {
+          // Only update membership status to avoid unnecessary rebuilds
+          bool changed = false;
+          final List<Feed> updated = [];
+          for (final feed in feedMap.values) {
+            final existing = _feeds!.firstWhere((f) => f.id == feed.id);
+            if (existing.isMember != feed.isMember) {
+              changed = true;
+              updated.add(feed);
+            } else {
+              updated.add(existing);
+            }
+          }
+          if (changed) {
+            setState(() {
+              _feeds = updated;
+            });
+          }
+        }
       }
     } catch (_) {
       // Ignore refresh errors
@@ -214,6 +260,7 @@ class _FeedsPageState extends State<FeedsPage> {
       extendBodyBehindAppBar: true,
       extendBody: true,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         toolbarHeight: 48,
         backgroundColor: Colors.transparent,
         elevation: 0,
