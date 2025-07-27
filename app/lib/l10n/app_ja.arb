@@ -62,7 +62,7 @@
   "saveProfile": "更新",
   "profileSetupFailed": "プロフィールの設定に失敗しました",
   "displayNameRequired": "表示名は必須です",
-  "displayNameTooLong": "表示名は100文字以内にしてください",
+  "displayNameTooLong": "表示名は30文字以内にしてください",
   "communityFeatures": "コミュニティ機能",
   "communityHub": "大崎上島コミュニティハブ",
   "eventsFeature": "イベント",
@@ -296,5 +296,25 @@
   "newPostTo": "投稿先...",
   "@newPostTo": {
     "description": "特定のフィードに新しい投稿を作成するボタン"
+  },
+  "feedCreatedSuccess": "フィードが作成されました",
+  "@feedCreatedSuccess": {
+    "description": "フィードが正常に作成されたときのメッセージ"
+  },
+  "titleTooLong": "タイトルは300文字以内で入力してください",
+  "@titleTooLong": {
+    "description": "投稿タイトルが長すぎるときのエラーメッセージ"
+  },
+  "contentTooLong": "内容は5000文字以内で入力してください",
+  "@contentTooLong": {
+    "description": "投稿内容が長すぎるときのエラーメッセージ"
+  },
+  "descriptionTooLong": "説明は1000文字以内にしてください",
+  "@descriptionTooLong": {
+    "description": "フィードの説明が長すぎるときのエラーメッセージ"
+  },
+  "rulesTooLong": "ルールは1000文字以内にしてください",
+  "@rulesTooLong": {
+    "description": "フィードのルールが長すぎるときのエラーメッセージ"
   }
 }

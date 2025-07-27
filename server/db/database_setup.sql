@@ -124,7 +124,7 @@ CREATE TABLE
   feeds (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL UNIQUE,
-    display_name VARCHAR(100) NOT NULL,
+    display_name VARCHAR(30) NOT NULL,
     description TEXT,
     created_by INT NOT NULL,
     rules TEXT,

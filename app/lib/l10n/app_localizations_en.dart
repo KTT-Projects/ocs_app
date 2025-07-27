@@ -209,7 +209,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get displayNameTooLong =>
-      'Display name must be less than 100 characters';
+      'Display name must be less than 30 characters';
 
   @override
   String get communityFeatures => 'Community Features';
@@ -459,4 +459,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get newPostTo => 'New post to...';
+
+  @override
+  String get feedCreatedSuccess => 'Feed created successfully';
+
+  @override
+  String get titleTooLong => 'Title must be less than 300 characters';
+
+  @override
+  String get contentTooLong => 'Content must be less than 5000 characters';
+
+  @override
+  String get descriptionTooLong => 'Description must be less than 1000 characters';
+
+  @override
+  String get rulesTooLong => 'Rules must be less than 1000 characters';
 }

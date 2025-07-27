@@ -403,14 +403,22 @@ class _FeedsPageState extends State<FeedsPage> {
                           width: 240,
                           child: FeedMenuDialog(
                             onCreateFeed: () async {
-                              await Navigator.push(
+                              final feedId = await Navigator.push<int>(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => CreateFeedPage(apiClient: widget.apiClient),
                                 ),
                               );
-                              _loadFeeds();
-                              _loadPosts();
+                              if (feedId != null && mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(AppLocalizations.of(context)!.feedCreatedSuccess),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                                _loadFeeds();
+                                _loadPosts();
+                              }
                             },
                             onReorderFeeds: () async {
                               final joinedFeeds = _feeds?.where((feed) => feed.isMember).toList() ?? [];

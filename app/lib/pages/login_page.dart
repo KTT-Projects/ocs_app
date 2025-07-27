@@ -46,7 +46,8 @@ class _LoginPageState extends State<LoginPage> {
         SnackBar(
           content: Text(message),
           duration: Duration(seconds: seconds),
-          backgroundColor: isError ? Theme.of(context).colorScheme.error : null,
+          backgroundColor:
+              isError ? Theme.of(context).colorScheme.error : Colors.green,
         ),
       );
     }
