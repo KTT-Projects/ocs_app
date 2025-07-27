@@ -111,6 +111,9 @@ class _FeedsPageState extends State<FeedsPage> {
         }
         setState(() {
           _feeds = feedMap.values.toList();
+          if (_selectedFeed != null) {
+            _selectedFeed = feedMap[_selectedFeed!.id] ?? _selectedFeed;
+          }
           _isLoading = false;
         });
       }
@@ -146,6 +149,9 @@ class _FeedsPageState extends State<FeedsPage> {
         if (_feeds == null || feedMap.length != _feeds!.length) {
           setState(() {
             _feeds = feedMap.values.toList();
+            if (_selectedFeed != null) {
+              _selectedFeed = feedMap[_selectedFeed!.id] ?? _selectedFeed;
+            }
           });
         } else {
           bool changed = false;
@@ -167,6 +173,12 @@ class _FeedsPageState extends State<FeedsPage> {
           if (changed) {
             setState(() {
               _feeds = updated;
+              if (_selectedFeed != null) {
+                final updatedSelected =
+                    updated.firstWhere((f) => f.id == _selectedFeed!.id,
+                        orElse: () => _selectedFeed!);
+                _selectedFeed = updatedSelected;
+              }
             });
           }
         }

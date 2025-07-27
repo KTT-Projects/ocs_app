@@ -399,6 +399,7 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
                                 ),
                                 const SizedBox(height: 16),
                                 DropdownButtonFormField<Map<String, dynamic>>(
+                                  isExpanded: true,
                                   value: _selectedAdmin,
                                   items: (_members ?? [])
                                       .map(
