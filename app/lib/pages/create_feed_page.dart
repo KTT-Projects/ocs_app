@@ -147,6 +147,9 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
                 child: Column(
                   children: [
                     Container(
+                      constraints: BoxConstraints(
+                        minHeight: MediaQuery.of(context).size.height * 0.8,
+                      ),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.background.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(16),
@@ -164,6 +167,7 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
                               children: [
                                 TextFormField(
                                   controller: _displayNameController,
+                                  maxLength: 30,
                                   style: TextStyle(
                                     color: Theme.of(context).colorScheme.onPrimary,
                                   ),
@@ -187,12 +191,16 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
                                     if (value == null || value.isEmpty) {
                                       return l10n.displayNameRequired;
                                     }
+                                    if (value.length > 30) {
+                                      return l10n.displayNameTooLong;
+                                    }
                                     return null;
                                   },
                                 ),
                                 const SizedBox(height: 16),
                                 TextFormField(
                                   controller: _descriptionController,
+                                  maxLength: 1000,
                                   style: TextStyle(
                                     color: Theme.of(context).colorScheme.onPrimary,
                                   ),
@@ -217,12 +225,16 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
                                     if (value == null || value.isEmpty) {
                                       return l10n.descriptionRequired;
                                     }
+                                    if (value.length > 1000) {
+                                      return l10n.descriptionTooLong;
+                                    }
                                     return null;
                                   },
                                 ),
                                 const SizedBox(height: 16),
                                 TextFormField(
                                   controller: _rulesController,
+                                  maxLength: 1000,
                                   style: TextStyle(
                                     color: Theme.of(context).colorScheme.onPrimary,
                                   ),
@@ -243,6 +255,12 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
                                     ),
                                   ),
                                   maxLines: 5,
+                                  validator: (value) {
+                                    if (value != null && value.length > 1000) {
+                                      return l10n.rulesTooLong;
+                                    }
+                                    return null;
+                                  },
                                 ),
                               ],
                             ),

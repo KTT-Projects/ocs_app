@@ -263,7 +263,7 @@
   "@displayNameRequired": {
     "description": "Error message when display name is empty"
   },
-  "displayNameTooLong": "Display name must be less than 100 characters",
+  "displayNameTooLong": "Display name must be less than 30 characters",
   "@displayNameTooLong": {
     "description": "Error message when display name is too long"
   },
@@ -593,5 +593,25 @@
   "newPostTo": "New post to...",
   "@newPostTo": {
     "description": "Button to create a new post to a specific feed"
+  },
+  "feedCreatedSuccess": "Feed created successfully",
+  "@feedCreatedSuccess": {
+    "description": "Success message when a feed is created"
+  },
+  "titleTooLong": "Title must be less than 300 characters",
+  "@titleTooLong": {
+    "description": "Error message when post title is too long"
+  },
+  "contentTooLong": "Content must be less than 5000 characters",
+  "@contentTooLong": {
+    "description": "Error message when post content is too long"
+  },
+  "descriptionTooLong": "Description must be less than 1000 characters",
+  "@descriptionTooLong": {
+    "description": "Error message when feed description is too long"
+  },
+  "rulesTooLong": "Rules must be less than 1000 characters",
+  "@rulesTooLong": {
+    "description": "Error message when feed rules are too long"
   }
 }
