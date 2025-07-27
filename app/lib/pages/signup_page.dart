@@ -549,7 +549,9 @@ class _SignupPageState extends State<SignupPage> {
                                         if (mounted) {
                                           GlassmorphicUI.showGlassSnackBar(
                                             context,
-                                            '${l10n.verificationCodeSent}'.replaceAll('{email}', _emailController.text),
+                                            l10n.verificationCodeSent(
+                                              _emailController.text,
+                                            ),
                                           );
                                         }
                                       } catch (e) {

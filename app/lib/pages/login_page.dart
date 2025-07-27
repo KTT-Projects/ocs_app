@@ -435,11 +435,9 @@ class _LoginPageState extends State<LoginPage> {
                                               if (mounted) {
                                                 GlassmorphicUI.showGlassSnackBar(
                                                   context,
-                                                  '${l10n.verificationCodeSent}'
-                                                      .replaceAll(
-                                                        '{email}',
-                                                        _emailController.text,
-                                                      ),
+                                                  l10n.verificationCodeSent(
+                                                    _emailController.text,
+                                                  ),
                                                 );
                                               }
                                             } catch (e) {
