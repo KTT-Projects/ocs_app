@@ -903,19 +903,19 @@ abstract class AppLocalizations {
   /// **'Reorder feeds'**
   String get reorderFeeds;
 
-  /// Button to leave the selected feed
+  /// Button to leave the currently selected feed
   ///
   /// In en, this message translates to:
   /// **'Leave feed'**
   String get leaveFeed;
 
-  /// Dialog title when selecting a new admin
+  /// Dialog title when choosing a new admin
   ///
   /// In en, this message translates to:
   /// **'Select new admin'**
   String get selectNewAdmin;
 
-  /// Confirmation message shown when the last admin leaves a feed
+  /// Confirmation message shown to the last admin before deleting a feed
   ///
   /// In en, this message translates to:
   /// **'No other members remain. Leaving will delete this feed. Continue?'**
