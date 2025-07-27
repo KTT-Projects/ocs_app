@@ -434,6 +434,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reorderFeeds => 'Reorder feeds';
 
   @override
+  String get leaveFeed => 'Leave feed';
+
+  @override
   String get save => 'Save';
 
   @override

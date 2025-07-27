@@ -261,6 +261,10 @@
   "@reorderFeeds": {
     "description": "フィードを並び替えるボタン"
   },
+  "leaveFeed": "フィードを離脱",
+  "@leaveFeed": {
+    "description": "現在選択中のフィードを離脱するボタン"
+  },
   "save": "保存",
   "@save": {
     "description": "保存ボタン"
