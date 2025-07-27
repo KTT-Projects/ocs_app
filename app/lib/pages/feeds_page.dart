@@ -123,15 +123,46 @@ class _FeedsPageState extends State<FeedsPage> {
 
   Future<void> _refreshJoinedFeeds() async {
     try {
-      final joinedFeeds = await widget.apiClient.getJoinedFeeds(context);
-      if (mounted && _feeds != null) {
-        final Map<int, Feed> feedMap = {for (var f in _feeds!) f.id: f};
+      final results = await Future.wait([
+        widget.apiClient.getFeeds(context),
+        widget.apiClient.getJoinedFeeds(context),
+      ]);
+
+      if (mounted) {
+        final nonJoinedFeeds = results[0];
+        final joinedFeeds = results[1];
+
+        final Map<int, Feed> feedMap = {};
         for (final feed in joinedFeeds) {
           feedMap[feed.id] = feed;
         }
-        setState(() {
-          _feeds = feedMap.values.toList();
-        });
+        for (final feed in nonJoinedFeeds) {
+          feedMap.putIfAbsent(feed.id, () => feed);
+        }
+
+        if (_feeds == null || feedMap.length != _feeds!.length) {
+          setState(() {
+            _feeds = feedMap.values.toList();
+          });
+        } else {
+          // Only update membership status to avoid unnecessary rebuilds
+          bool changed = false;
+          final List<Feed> updated = [];
+          for (final feed in feedMap.values) {
+            final existing = _feeds!.firstWhere((f) => f.id == feed.id);
+            if (existing.isMember != feed.isMember) {
+              changed = true;
+              updated.add(feed);
+            } else {
+              updated.add(existing);
+            }
+          }
+          if (changed) {
+            setState(() {
+              _feeds = updated;
+            });
+          }
+        }
       }
     } catch (_) {
       // Ignore refresh errors
