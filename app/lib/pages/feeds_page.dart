@@ -37,6 +37,7 @@ class _FeedsPageState extends State<FeedsPage> {
   Timer? _refreshTimer;
   String _sortBy = 'latest'; // 'latest' or 'popular'
   Feed? _selectedFeed; // Currently selected feed, null means home feed
+  String? _currentToken;
 
   String _discoverSort = 'population';
   String _discoverSearch = '';
@@ -44,11 +45,14 @@ class _FeedsPageState extends State<FeedsPage> {
   @override
   void initState() {
     super.initState();
+    _currentToken = widget.apiClient.token;
+    widget.apiClient.addListener(_onApiClientChanged);
     _startPeriodicRefresh();
   }
 
   @override
   void dispose() {
+    widget.apiClient.removeListener(_onApiClientChanged);
     _refreshTimer?.cancel();
     super.dispose();
   }
@@ -59,6 +63,17 @@ class _FeedsPageState extends State<FeedsPage> {
       _refreshJoinedFeeds();
       _loadPosts();
     });
+  }
+
+  void _onApiClientChanged() {
+    if (widget.apiClient.token != _currentToken) {
+      _currentToken = widget.apiClient.token;
+      _didLoadFeeds = false;
+      _feeds = null;
+      _selectedFeed = null;
+      _loadFeeds();
+      _loadPosts();
+    }
   }
 
   @override
@@ -214,6 +229,7 @@ class _FeedsPageState extends State<FeedsPage> {
       extendBodyBehindAppBar: true,
       extendBody: true,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         toolbarHeight: 48,
         backgroundColor: Colors.transparent,
         elevation: 0,
