@@ -514,28 +514,39 @@ class FeedController
     }
 
     if ($role === 'admin') {
-      if (!isset($data['new_admin_id'])) {
-        Response::error('New admin ID required', 400);
-        return;
-      }
-      $newAdminId = intval($data['new_admin_id']);
-
-      // Ensure new admin is a member
-      $query = "SELECT COUNT(*) FROM feed_members WHERE feed_id = :feed_id AND user_id = :new_user_id";
+      $query = "SELECT COUNT(*) FROM feed_members WHERE feed_id = :feed_id";
       $stmt = $this->conn->prepare($query);
       $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
-      $stmt->bindParam(':new_user_id', $newAdminId, PDO::PARAM_INT);
       $stmt->execute();
-      if ($stmt->fetchColumn() == 0) {
-        Response::error('New admin must be a member of the feed', 400);
-        return;
-      }
+      $memberCount = (int)$stmt->fetchColumn();
 
-      $query = "UPDATE feed_members SET role = 'admin' WHERE feed_id = :feed_id AND user_id = :new_admin_id";
-      $stmt = $this->conn->prepare($query);
-      $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
-      $stmt->bindParam(':new_admin_id', $newAdminId, PDO::PARAM_INT);
-      $stmt->execute();
+      if ($memberCount > 1) {
+        if (!isset($data['new_admin_id'])) {
+          Response::error('New admin ID required', 400);
+          return;
+        }
+        $newAdminId = intval($data['new_admin_id']);
+
+        // Ensure new admin is a member
+        $query = "SELECT COUNT(*) FROM feed_members WHERE feed_id = :feed_id AND user_id = :new_user_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
+        $stmt->bindParam(':new_user_id', $newAdminId, PDO::PARAM_INT);
+        $stmt->execute();
+        if ($stmt->fetchColumn() == 0) {
+          Response::error('New admin must be a member of the feed', 400);
+          return;
+        }
+
+        $query = "UPDATE feed_members SET role = 'admin' WHERE feed_id = :feed_id AND user_id = :new_admin_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
+        $stmt->bindParam(':new_admin_id', $newAdminId, PDO::PARAM_INT);
+        $stmt->execute();
+      } else {
+        // Last admin leaving - delete the feed entirely
+        $this->deleteFeed($feedId);
+      }
     }
 
     // Remove from feed_members
@@ -563,6 +574,39 @@ class FeedController
     }
 
     Response::success(null, 'Left feed successfully');
+  }
+
+  private function deleteFeed($feedId)
+  {
+    // Remove all related data and the feed itself
+    $this->conn->beginTransaction();
+    try {
+      $query = "SELECT id FROM feed_posts WHERE feed_id = :feed_id";
+      $stmt = $this->conn->prepare($query);
+      $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
+      $stmt->execute();
+      $postIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+      if (!empty($postIds)) {
+        $in = implode(',', array_map('intval', $postIds));
+        $this->conn->exec("DELETE FROM feed_votes WHERE post_id IN ($in)");
+        $this->conn->exec("DELETE FROM comments WHERE post_id IN ($in)");
+        $this->conn->exec("DELETE FROM feed_posts WHERE id IN ($in)");
+      }
+
+      $stmt = $this->conn->prepare("DELETE FROM feed_members WHERE feed_id = :feed_id");
+      $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
+      $stmt->execute();
+
+      $stmt = $this->conn->prepare("DELETE FROM feeds WHERE id = :feed_id");
+      $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
+      $stmt->execute();
+
+      $this->conn->commit();
+    } catch (Exception $e) {
+      $this->conn->rollBack();
+      throw $e;
+    }
   }
 
   private function createPost($userId)

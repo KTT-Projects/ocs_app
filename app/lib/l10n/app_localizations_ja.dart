@@ -428,6 +428,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get selectNewAdmin => '新しい管理者を選択';
 
   @override
+  String get confirmDeleteFeed =>
+      '他にメンバーがいないため、離脱するとこのフィードは削除されます。続行しますか？';
+
+  @override
+  String get ok => 'OK';
+
+  @override
   String get save => '保存';
 
   @override

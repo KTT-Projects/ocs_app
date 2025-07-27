@@ -915,6 +915,18 @@ abstract class AppLocalizations {
   /// **'Select new admin'**
   String get selectNewAdmin;
 
+  /// Confirmation message shown when the last admin leaves a feed
+  ///
+  /// In en, this message translates to:
+  /// **'No other members remain. Leaving will delete this feed. Continue?'**
+  String get confirmDeleteFeed;
+
+  /// Generic OK button label
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
   /// Save button
   ///
   /// In en, this message translates to:

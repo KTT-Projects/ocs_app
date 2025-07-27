@@ -566,6 +566,14 @@
   "@selectNewAdmin": {
     "description": "Dialog title when choosing a new admin"
   },
+  "confirmDeleteFeed": "No other members remain. Leaving will delete this feed. Continue?",
+  "@confirmDeleteFeed": {
+    "description": "Confirmation message shown to the last admin before deleting a feed"
+  },
+  "ok": "OK",
+  "@ok": {
+    "description": "Generic OK button label"
+  },
   "save": "Save",
   "@save": {
     "description": "Save button"

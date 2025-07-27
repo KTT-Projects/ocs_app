@@ -269,6 +269,14 @@
   "@selectNewAdmin": {
     "description": "管理者を譲渡する相手を選択するダイアログのタイトル"
   },
+  "confirmDeleteFeed": "他にメンバーがいないため、離脱するとこのフィードは削除されます。続行しますか？",
+  "@confirmDeleteFeed": {
+    "description": "最後の管理者がフィードを離脱するときの確認メッセージ"
+  },
+  "ok": "OK",
+  "@ok": {
+    "description": "OKボタンのラベル"
+  },
   "save": "保存",
   "@save": {
     "description": "保存ボタン"

@@ -16,6 +16,7 @@ import '../widgets/reorder_feeds_dialog.dart';
 import 'create_feed_page.dart';
 import '../widgets/create_post_dialog.dart';
 import '../widgets/user_selection_dialog.dart';
+import '../widgets/confirm_dialog.dart';
 
 class FeedsPage extends StatefulWidget {
   final ApiClient apiClient;
@@ -254,6 +255,7 @@ class _FeedsPageState extends State<FeedsPage> {
     if (_selectedFeed == null) return;
     int? newAdminId;
     List<Map<String, dynamic>>? members;
+    int? myId;
     while (true) {
       try {
         await widget.apiClient.leaveFeed(
@@ -275,12 +277,33 @@ class _FeedsPageState extends State<FeedsPage> {
             context,
             _selectedFeed!.id,
           );
+          myId ??= (await widget.apiClient.getProfile(context))['id'] as int;
+          final selectable =
+              members!.where((m) => m['id'] != myId).toList();
+          if (selectable.isEmpty) {
+            final confirmed = await GlassmorphicUI.showDialog<bool>(
+              context: context,
+              width: 320,
+              child: ConfirmDialog(
+                message:
+                    AppLocalizations.of(context)!.confirmDeleteFeed,
+                confirmLabel: AppLocalizations.of(context)!.ok,
+              ),
+            );
+            if (confirmed != true) {
+              break;
+            }
+            // try again without new admin id (will delete feed)
+            newAdminId = null;
+            continue;
+          }
+
           final selected = await GlassmorphicUI.showDialog<Map<String, dynamic>>(
             context: context,
             width: 320,
             child: UserSelectionDialog(
               title: AppLocalizations.of(context)!.selectNewAdmin,
-              users: members!,
+              users: selectable,
               onUserSelected: (user) => Navigator.pop(context, user),
             ),
           );
