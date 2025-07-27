@@ -56,7 +56,7 @@ class _FeedsPageState extends State<FeedsPage> {
   void _startPeriodicRefresh() {
     // Refresh every 5 seconds
     _refreshTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      _loadFeeds();
+      _refreshJoinedFeeds();
       _loadPosts();
     });
   }
@@ -94,6 +94,23 @@ class _FeedsPageState extends State<FeedsPage> {
           _isLoading = false;
         });
       }
+    }
+  }
+
+  Future<void> _refreshJoinedFeeds() async {
+    try {
+      final joinedFeeds = await widget.apiClient.getJoinedFeeds(context);
+      if (mounted && _feeds != null) {
+        final Map<int, Feed> feedMap = {for (var f in _feeds!) f.id: f};
+        for (final feed in joinedFeeds) {
+          feedMap[feed.id] = feed;
+        }
+        setState(() {
+          _feeds = feedMap.values.toList();
+        });
+      }
+    } catch (_) {
+      // Ignore refresh errors
     }
   }
 
