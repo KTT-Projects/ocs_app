@@ -256,6 +256,34 @@ class _FeedsPageState extends State<FeedsPage> {
     int? newAdminId;
     List<Map<String, dynamic>>? members;
     int? myId;
+    // Pre-check if this user is the last remaining member. In this case
+    // leaving will delete the feed on the server without any additional
+    // confirmation, so show a confirmation dialog beforehand.
+    try {
+      members = await widget.apiClient.getFeedMembers(
+        context,
+        _selectedFeed!.id,
+      );
+      myId = int.parse(
+          (await widget.apiClient.getProfile(context))['id'].toString());
+      if (members.length == 1 &&
+          int.parse(members[0]['id'].toString()) == myId &&
+          (members[0]['role'] == 'admin')) {
+        final confirmed = await GlassmorphicUI.showDialog<bool>(
+          context: context,
+          width: 320,
+          child: ConfirmDialog(
+            message: AppLocalizations.of(context)!.confirmDeleteFeed,
+            confirmLabel: AppLocalizations.of(context)!.ok,
+          ),
+        );
+        if (confirmed != true) {
+          return;
+        }
+      }
+    } catch (_) {
+      // Ignore failures and proceed with the normal flow
+    }
     while (true) {
       try {
         await widget.apiClient.leaveFeed(
