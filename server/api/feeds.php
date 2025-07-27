@@ -268,7 +268,7 @@ class FeedController
 
     // Update database
     $iconUrl = '/uploads/feed_icons/' . $filename;
-    $query = "UPDATE feeds SET icon_url = :icon_url WHERE id = :feed_id";
+    $query = "UPDATE feeds SET icon_url = :icon_url, updated_at = NOW() WHERE id = :feed_id";
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':icon_url', $iconUrl);
     $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
@@ -659,6 +659,7 @@ class FeedController
     }
 
     if (!empty($fields)) {
+      $fields[] = 'updated_at = NOW()';
       $query = 'UPDATE feeds SET ' . implode(', ', $fields) . ' WHERE id = :feed_id';
       $stmt = $this->conn->prepare($query);
       foreach ($params as $k => $v) {
@@ -691,6 +692,10 @@ class FeedController
       $stmt = $this->conn->prepare("UPDATE feed_members SET role = 'member' WHERE feed_id = :feed_id AND user_id = :uid");
       $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
       $stmt->bindParam(':uid', $userId, PDO::PARAM_INT);
+      $stmt->execute();
+
+      $stmt = $this->conn->prepare('UPDATE feeds SET updated_at = NOW() WHERE id = :feed_id');
+      $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
       $stmt->execute();
     }
 

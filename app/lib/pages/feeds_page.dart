@@ -148,12 +148,16 @@ class _FeedsPageState extends State<FeedsPage> {
             _feeds = feedMap.values.toList();
           });
         } else {
-          // Only update membership status to avoid unnecessary rebuilds
           bool changed = false;
           final List<Feed> updated = [];
           for (final feed in feedMap.values) {
             final existing = _feeds!.firstWhere((f) => f.id == feed.id);
-            if (existing.isMember != feed.isMember) {
+            if (existing.isMember != feed.isMember ||
+                existing.displayName != feed.displayName ||
+                existing.description != feed.description ||
+                existing.rules != feed.rules ||
+                existing.iconUrl != feed.iconUrl ||
+                existing.role != feed.role) {
               changed = true;
               updated.add(feed);
             } else {

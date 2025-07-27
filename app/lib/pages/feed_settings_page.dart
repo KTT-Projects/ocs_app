@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io';
+import 'dart:convert';
 import 'dart:ui';
 import '../l10n/app_localizations.dart';
 import '../models/feed.dart';
 import '../services/api_client.dart';
 import '../widgets/glassmorphic_ui.dart';
-import '../widgets/user_selection_dialog.dart';
 
 class FeedSettingsPage extends StatefulWidget {
   final ApiClient apiClient;
@@ -28,7 +31,47 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
   bool _isLoading = false;
   List<Map<String, dynamic>>? _members;
   Map<String, dynamic>? _selectedAdmin;
+  bool _isUploadingIcon = false;
+  final _imagePicker = ImagePicker();
+  String? _iconUrl;
+  String? _iconFilePath;
+  List<int>? _iconBytes;
+  String? _iconFileName;
 
+  Future<void> _pickIcon() async {
+    try {
+      final XFile? image = await _imagePicker.pickImage(source: ImageSource.gallery);
+      if (image != null && mounted) {
+        setState(() {
+          _isUploadingIcon = true;
+        });
+
+        if (kIsWeb) {
+          _iconBytes = await image.readAsBytes();
+          _iconFileName = image.name.isNotEmpty ? image.name : 'icon.png';
+          _iconUrl = 'data:${image.mimeType};base64,${base64Encode(_iconBytes!)}';
+        } else {
+          _iconFilePath = image.path;
+          _iconUrl = image.path;
+        }
+
+        setState(() {
+          _isUploadingIcon = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isUploadingIcon = false;
+        });
+        GlassmorphicUI.showGlassSnackBar(
+          context,
+          e.toString(),
+          isError: true,
+        );
+      }
+    }
+  }
   @override
   void initState() {
     super.initState();
@@ -37,6 +80,7 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
     _descriptionController =
         TextEditingController(text: widget.feed.description);
     _rulesController = TextEditingController(text: widget.feed.rules ?? '');
+    _iconUrl = widget.feed.iconUrl;
     _loadMembers();
   }
 
@@ -50,7 +94,7 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
         setState(() {
           _members = members;
           final current = members.firstWhere(
-              (m) => int.parse(m['id'].toString()) == widget.feed.createdBy,
+              (m) => m['role'] == 'admin',
               orElse: () => {});
           _selectedAdmin = current.isNotEmpty ? current : null;
         });
@@ -58,25 +102,6 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
     } catch (_) {}
   }
 
-  Future<void> _selectAdmin() async {
-    final l10n = AppLocalizations.of(context)!;
-    final members = _members ??
-        await widget.apiClient.getFeedMembers(context, widget.feed.id);
-    final selected = await GlassmorphicUI.showDialog<Map<String, dynamic>>(
-      context: context,
-      width: 320,
-      child: UserSelectionDialog(
-        title: l10n.selectNewAdmin,
-        users: members,
-        onUserSelected: (u) => Navigator.pop(context, u),
-      ),
-    );
-    if (selected != null && mounted) {
-      setState(() {
-        _selectedAdmin = selected;
-      });
-    }
-  }
 
   Future<void> _saveSettings() async {
     if (!_formKey.currentState!.validate()) return;
@@ -94,6 +119,18 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
             ? int.parse(_selectedAdmin!['id'].toString())
             : null,
       );
+      if (_iconFilePath != null || _iconBytes != null) {
+        _iconUrl = await widget.apiClient.uploadFeedIcon(
+          context,
+          widget.feed.id,
+          filePath: _iconFilePath,
+          webBytes: _iconBytes,
+          webFileName: _iconFileName,
+        );
+        _iconFilePath = null;
+        _iconBytes = null;
+        _iconFileName = null;
+      }
       if (mounted) {
         GlassmorphicUI.showGlassSnackBar(
           context,
@@ -226,6 +263,41 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
                             padding: const EdgeInsets.all(16),
                             child: Column(
                               children: [
+                                GestureDetector(
+                                  onTap: _isUploadingIcon ? null : _pickIcon,
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 40,
+                                        backgroundColor: Theme.of(context).colorScheme.secondary,
+                                        child: _iconUrl != null
+                                            ? ClipOval(
+                                                child: kIsWeb || _iconUrl!.startsWith('http')
+                                                    ? Image.network(
+                                                        _iconUrl!,
+                                                        width: 80,
+                                                        height: 80,
+                                                        fit: BoxFit.cover,
+                                                      )
+                                                    : Image.file(
+                                                        File(_iconUrl!),
+                                                        width: 80,
+                                                        height: 80,
+                                                        fit: BoxFit.cover,
+                                                      ),
+                                              )
+                                            : Icon(
+                                                Icons.camera_alt,
+                                                color: Theme.of(context).colorScheme.onSecondary,
+                                              ),
+                                      ),
+                                      if (_isUploadingIcon)
+                                        const CircularProgressIndicator(),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
                                 TextFormField(
                                   controller: _displayNameController,
                                   maxLength: 30,
@@ -326,41 +398,37 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
                                   },
                                 ),
                                 const SizedBox(height: 16),
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    l10n.currentAdmin,
-                                    style: TextStyle(
-                                      color: Theme.of(context).colorScheme.onPrimary,
-                                      fontWeight: FontWeight.bold,
+                                DropdownButtonFormField<Map<String, dynamic>>(
+                                  value: _selectedAdmin,
+                                  items: (_members ?? [])
+                                      .map(
+                                        (m) => DropdownMenuItem(
+                                          value: m,
+                                          child: Text(m['display_name'] ?? ''),
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: (v) {
+                                    setState(() {
+                                      _selectedAdmin = v;
+                                    });
+                                  },
+                                  decoration: InputDecoration(
+                                    labelText: l10n.currentAdmin,
+                                    labelStyle: TextStyle(
+                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                    ),
+                                    enabledBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                                      ),
+                                    ),
+                                    focusedBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Theme.of(context).colorScheme.onPrimary,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        _selectedAdmin != null
-                                            ? _selectedAdmin!['display_name'] ?? ''
-                                            : '',
-                                        style: TextStyle(
-                                          color: Theme.of(context).colorScheme.onPrimary,
-                                        ),
-                                      ),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: _selectAdmin,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                            Theme.of(context).colorScheme.secondary,
-                                        foregroundColor:
-                                            Theme.of(context).colorScheme.onSecondary,
-                                        elevation: 0,
-                                      ),
-                                      child: Text(l10n.change),
-                                    ),
-                                  ],
                                 ),
                               ],
                             ),
