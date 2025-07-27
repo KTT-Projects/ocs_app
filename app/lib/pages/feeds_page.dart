@@ -56,7 +56,7 @@ class _FeedsPageState extends State<FeedsPage> {
   void _startPeriodicRefresh() {
     // Refresh every 5 seconds
     _refreshTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      _loadFeeds();
+      _refreshJoinedFeeds();
       _loadPosts();
     });
   }
@@ -76,8 +76,15 @@ class _FeedsPageState extends State<FeedsPage> {
       final joinedFeeds = await widget.apiClient.getJoinedFeeds(context);
       final nonJoinedFeeds = await widget.apiClient.getFeeds(context);
       if (mounted) {
+        final Map<int, Feed> feedMap = {};
+        for (final feed in joinedFeeds) {
+          feedMap[feed.id] = feed;
+        }
+        for (final feed in nonJoinedFeeds) {
+          feedMap.putIfAbsent(feed.id, () => feed);
+        }
         setState(() {
-          _feeds = [...joinedFeeds, ...nonJoinedFeeds];
+          _feeds = feedMap.values.toList();
           _isLoading = false;
         });
       }
@@ -91,12 +98,29 @@ class _FeedsPageState extends State<FeedsPage> {
     }
   }
 
+  Future<void> _refreshJoinedFeeds() async {
+    try {
+      final joinedFeeds = await widget.apiClient.getJoinedFeeds(context);
+      if (mounted && _feeds != null) {
+        final Map<int, Feed> feedMap = {for (var f in _feeds!) f.id: f};
+        for (final feed in joinedFeeds) {
+          feedMap[feed.id] = feed;
+        }
+        setState(() {
+          _feeds = feedMap.values.toList();
+        });
+      }
+    } catch (_) {
+      // Ignore refresh errors
+    }
+  }
+
   Future<void> _loadPosts() async {
     try {
       final posts = _selectedFeed == null
           ? _sortBy == 'discover'
               ? await widget.apiClient.getDiscoverFeed(context)
-              : await widget.apiClient.getFollowingFeed(context)
+              : await widget.apiClient.getHomeFeed(context)
           : await widget.apiClient.getFeedPosts(context, _selectedFeed!.id);
       if (mounted) {
         setState(() {
