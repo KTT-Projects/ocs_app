@@ -558,6 +558,10 @@
   "@reorderFeeds": {
     "description": "Button to reorder feeds"
   },
+  "leaveFeed": "Leave feed",
+  "@leaveFeed": {
+    "description": "Button to leave the currently selected feed"
+  },
   "save": "Save",
   "@save": {
     "description": "Save button"

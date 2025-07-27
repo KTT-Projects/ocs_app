@@ -65,6 +65,8 @@ class FeedController
             $this->createFeed($userId);
           } else if ($action === 'join') {
             $this->joinFeed($userId);
+          } else if ($action === 'leave') {
+            $this->leaveFeed($userId);
           } else if ($action === 'post') {
             $this->createPost($userId);
           } else if ($action === 'vote') {
@@ -460,6 +462,82 @@ class FeedController
     }
 
     Response::success(null, 'Joined feed successfully');
+  }
+
+  private function leaveFeed($userId)
+  {
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    if (!isset($data['feed_id'])) {
+      Response::error('Feed ID is required', 400);
+      return;
+    }
+
+    $feedId = intval($data['feed_id']);
+
+    // Check current role
+    $query = "SELECT role FROM feed_members WHERE feed_id = :feed_id AND user_id = :user_id";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
+    $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+    $stmt->execute();
+    $role = $stmt->fetchColumn();
+
+    if (!$role) {
+      Response::error('Not a member of this feed', 400);
+      return;
+    }
+
+    if ($role === 'admin') {
+      if (!isset($data['new_admin_id'])) {
+        Response::error('New admin ID required', 400);
+        return;
+      }
+      $newAdminId = intval($data['new_admin_id']);
+
+      // Ensure new admin is a member
+      $query = "SELECT COUNT(*) FROM feed_members WHERE feed_id = :feed_id AND user_id = :new_user_id";
+      $stmt = $this->conn->prepare($query);
+      $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
+      $stmt->bindParam(':new_user_id', $newAdminId, PDO::PARAM_INT);
+      $stmt->execute();
+      if ($stmt->fetchColumn() == 0) {
+        Response::error('New admin must be a member of the feed', 400);
+        return;
+      }
+
+      $query = "UPDATE feed_members SET role = 'admin' WHERE feed_id = :feed_id AND user_id = :new_admin_id";
+      $stmt = $this->conn->prepare($query);
+      $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
+      $stmt->bindParam(':new_admin_id', $newAdminId, PDO::PARAM_INT);
+      $stmt->execute();
+    }
+
+    // Remove from feed_members
+    $query = "DELETE FROM feed_members WHERE feed_id = :feed_id AND user_id = :user_id";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
+    $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+    $stmt->execute();
+
+    // Update feed_order in users table
+    $feedOrderQuery = "SELECT feed_order FROM users WHERE id = :user_id";
+    $feedOrderStmt = $this->conn->prepare($feedOrderQuery);
+    $feedOrderStmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+    $feedOrderStmt->execute();
+    $feedOrderRaw = $feedOrderStmt->fetch(PDO::FETCH_ASSOC)['feed_order'];
+    $orderedFeedIds = $feedOrderRaw ? array_map('intval', json_decode($feedOrderRaw, true)) : [];
+    $index = array_search($feedId, $orderedFeedIds);
+    if ($index !== false) {
+      array_splice($orderedFeedIds, $index, 1);
+      $updateOrderQuery = "UPDATE users SET feed_order = :feed_order WHERE id = :user_id";
+      $updateOrderStmt = $this->conn->prepare($updateOrderQuery);
+      $updateOrderStmt->bindParam(':feed_order', json_encode($orderedFeedIds));
+      $updateOrderStmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+      $updateOrderStmt->execute();
+    }
+
+    Response::success(null, 'Left feed successfully');
   }
 
   private function createPost($userId)

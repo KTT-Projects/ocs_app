@@ -422,6 +422,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get reorderFeeds => 'フィードを並び替え';
 
   @override
+  String get leaveFeed => 'フィードを離脱';
+
+  @override
   String get save => '保存';
 
   @override

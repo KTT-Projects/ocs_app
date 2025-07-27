@@ -903,6 +903,12 @@ abstract class AppLocalizations {
   /// **'Reorder feeds'**
   String get reorderFeeds;
 
+  /// Button to leave the selected feed
+  ///
+  /// In en, this message translates to:
+  /// **'Leave feed'**
+  String get leaveFeed;
+
   /// Save button
   ///
   /// In en, this message translates to:
