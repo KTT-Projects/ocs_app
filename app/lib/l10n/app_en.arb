@@ -633,5 +633,25 @@
   "rulesTooLong": "Rules must be less than 1000 characters",
   "@rulesTooLong": {
     "description": "Error message when feed rules are too long"
+  },
+  "feedSettings": "Feed settings",
+  "@feedSettings": {
+    "description": "Title for feed settings page"
+  },
+  "feedUpdatedSuccess": "Feed updated successfully",
+  "@feedUpdatedSuccess": {
+    "description": "Success message when feed settings are saved"
+  },
+  "failedToLoadFeedMembers": "Failed to load feed members",
+  "@failedToLoadFeedMembers": {
+    "description": "Error message when loading feed members fails"
+  },
+  "currentAdmin": "Current admin",
+  "@currentAdmin": {
+    "description": "Label for current feed admin"
+  },
+  "change": "Change",
+  "@change": {
+    "description": "Button label to change selection"
   }
 }

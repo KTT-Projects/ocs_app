@@ -2,7 +2,7 @@
 // CORS headers
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: *");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Methods: GET, POST, PATCH, OPTIONS");
 header("Access-Control-Allow-Credentials: true");
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
   http_response_code(200);
@@ -79,6 +79,11 @@ class FeedController
             $this->uploadIcon($userId);
           }
           break;
+        case 'PATCH':
+          if ($action === 'update') {
+            $this->updateFeed($userId);
+          }
+          break;
         default:
           Response::error('Method not allowed', 405);
       }
@@ -140,6 +145,7 @@ class FeedController
     if (!empty($orderedFeedIds)) {
       $inClause = implode(',', array_map('intval', $orderedFeedIds));
       $query = "SELECT f.*,
+                  fm2.role as member_role,
                   COUNT(DISTINCT fm1.user_id) as member_count,
                   COUNT(DISTINCT fp.id) as post_count
                   FROM feeds f
@@ -262,7 +268,7 @@ class FeedController
 
     // Update database
     $iconUrl = '/uploads/feed_icons/' . $filename;
-    $query = "UPDATE feeds SET icon_url = :icon_url WHERE id = :feed_id";
+    $query = "UPDATE feeds SET icon_url = :icon_url, updated_at = NOW() WHERE id = :feed_id";
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':icon_url', $iconUrl);
     $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
@@ -611,6 +617,89 @@ class FeedController
       $this->conn->rollBack();
       throw $e;
     }
+  }
+
+  private function updateFeed($userId)
+  {
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    if (!isset($data['feed_id'])) {
+      Response::error('Feed ID is required', 400);
+      return;
+    }
+
+    $feedId = intval($data['feed_id']);
+
+    // Ensure user is admin
+    $query = "SELECT role FROM feed_members WHERE feed_id = :feed_id AND user_id = :user_id";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
+    $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+    $stmt->execute();
+    $role = $stmt->fetchColumn();
+
+    if ($role !== 'admin') {
+      Response::error('Insufficient permissions', 403);
+      return;
+    }
+
+    $fields = [];
+    $params = [':feed_id' => $feedId];
+    if (isset($data['display_name'])) {
+      $fields[] = 'display_name = :display_name';
+      $params[':display_name'] = $data['display_name'];
+    }
+    if (isset($data['description'])) {
+      $fields[] = 'description = :description';
+      $params[':description'] = $data['description'];
+    }
+    if (array_key_exists('rules', $data)) {
+      $fields[] = 'rules = :rules';
+      $params[':rules'] = $data['rules'];
+    }
+
+    if (!empty($fields)) {
+      $fields[] = 'updated_at = NOW()';
+      $query = 'UPDATE feeds SET ' . implode(', ', $fields) . ' WHERE id = :feed_id';
+      $stmt = $this->conn->prepare($query);
+      foreach ($params as $k => $v) {
+        if ($k === ':feed_id') {
+          $stmt->bindValue($k, $v, PDO::PARAM_INT);
+        } else {
+          $stmt->bindValue($k, $v);
+        }
+      }
+      $stmt->execute();
+    }
+
+    if (isset($data['admin_id']) && intval($data['admin_id']) !== $userId) {
+      $newAdminId = intval($data['admin_id']);
+      $query = "SELECT COUNT(*) FROM feed_members WHERE feed_id = :feed_id AND user_id = :uid";
+      $stmt = $this->conn->prepare($query);
+      $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
+      $stmt->bindParam(':uid', $newAdminId, PDO::PARAM_INT);
+      $stmt->execute();
+      if ($stmt->fetchColumn() == 0) {
+        Response::error('New admin must be a member of the feed', 400);
+        return;
+      }
+
+      $stmt = $this->conn->prepare("UPDATE feed_members SET role = 'admin' WHERE feed_id = :feed_id AND user_id = :uid");
+      $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
+      $stmt->bindParam(':uid', $newAdminId, PDO::PARAM_INT);
+      $stmt->execute();
+
+      $stmt = $this->conn->prepare("UPDATE feed_members SET role = 'member' WHERE feed_id = :feed_id AND user_id = :uid");
+      $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
+      $stmt->bindParam(':uid', $userId, PDO::PARAM_INT);
+      $stmt->execute();
+
+      $stmt = $this->conn->prepare('UPDATE feeds SET updated_at = NOW() WHERE id = :feed_id');
+      $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
+      $stmt->execute();
+    }
+
+    Response::success(null, 'Feed updated successfully');
   }
 
   private function createPost($userId)
