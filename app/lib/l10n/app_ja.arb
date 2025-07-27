@@ -336,5 +336,21 @@
   "rulesTooLong": "ルールは1000文字以内にしてください",
   "@rulesTooLong": {
     "description": "フィードのルールが長すぎるときのエラーメッセージ"
+  },
+  "feedSettings": "フィード設定",
+  "@feedSettings": {
+    "description": "フィード設定ページのタイトル"
+  },
+  "feedUpdatedSuccess": "フィードが更新されました",
+  "@feedUpdatedSuccess": {
+    "description": "フィード設定を保存したときの成功メッセージ"
+  },
+  "currentAdmin": "現在の管理者",
+  "@currentAdmin": {
+    "description": "現在のフィード管理者のラベル"
+  },
+  "change": "変更",
+  "@change": {
+    "description": "変更ボタンのラベル"
   }
 }
