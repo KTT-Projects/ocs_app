@@ -255,12 +255,12 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
             )
           else if (_posts != null)
             ListView.builder(
-              padding: EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top + AppBar().preferredSize.height + 8,
-                bottom: 8,
-                left: 8,
-                right: 8,
-              ),
+padding: EdgeInsets.only(
+  top: MediaQuery.of(context).padding.top + AppBar().preferredSize.height + 8,
+  bottom: 8,
+  left: 8,
+  right: 8,
+),
               itemCount: _posts!.length,
               itemBuilder: (context, index) {
                 final post = _posts![index];

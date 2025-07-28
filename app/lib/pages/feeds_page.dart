@@ -33,7 +33,6 @@ class FeedsPage extends StatefulWidget {
 }
 
 class _FeedsPageState extends State<FeedsPage> {
-  static const double _appBarHeight = 48;
   bool _isLoading = true;
   String? _error;
   List<Feed>? _feeds;
@@ -160,12 +159,7 @@ class _FeedsPageState extends State<FeedsPage> {
           final List<Feed> updated = [];
           for (final feed in feedMap.values) {
             final existing = _feeds!.firstWhere((f) => f.id == feed.id);
-            if (existing.isMember != feed.isMember ||
-                existing.displayName != feed.displayName ||
-                existing.description != feed.description ||
-                existing.rules != feed.rules ||
-                existing.iconUrl != feed.iconUrl ||
-                existing.role != feed.role) {
+            if (existing.isMember != feed.isMember || existing.displayName != feed.displayName || existing.description != feed.description || existing.rules != feed.rules || existing.iconUrl != feed.iconUrl || existing.role != feed.role) {
               changed = true;
               updated.add(feed);
             } else {
@@ -176,9 +170,7 @@ class _FeedsPageState extends State<FeedsPage> {
             setState(() {
               _feeds = updated;
               if (_selectedFeed != null) {
-                final updatedSelected =
-                    updated.firstWhere((f) => f.id == _selectedFeed!.id,
-                        orElse: () => _selectedFeed!);
+                final updatedSelected = updated.firstWhere((f) => f.id == _selectedFeed!.id, orElse: () => _selectedFeed!);
                 _selectedFeed = updatedSelected;
               }
             });
@@ -296,11 +288,8 @@ class _FeedsPageState extends State<FeedsPage> {
         context,
         _selectedFeed!.id,
       );
-      myId = int.parse(
-          (await widget.apiClient.getProfile(context))['id'].toString());
-      if (members.length == 1 &&
-          int.parse(members[0]['id'].toString()) == myId &&
-          (members[0]['role'] == 'admin')) {
+      myId = int.parse((await widget.apiClient.getProfile(context))['id'].toString());
+      if (members.length == 1 && int.parse(members[0]['id'].toString()) == myId && (members[0]['role'] == 'admin')) {
         final confirmed = await GlassmorphicUI.showDialog<bool>(
           context: context,
           width: 320,
@@ -337,18 +326,14 @@ class _FeedsPageState extends State<FeedsPage> {
             context,
             _selectedFeed!.id,
           );
-          myId ??= int.parse(
-              (await widget.apiClient.getProfile(context))['id'].toString());
-          final selectable = members!
-              .where((m) => int.parse(m['id'].toString()) != myId)
-              .toList();
+          myId ??= int.parse((await widget.apiClient.getProfile(context))['id'].toString());
+          final selectable = members!.where((m) => int.parse(m['id'].toString()) != myId).toList();
           if (selectable.isEmpty) {
             final confirmed = await GlassmorphicUI.showDialog<bool>(
               context: context,
               width: 320,
               child: ConfirmDialog(
-                message:
-                    AppLocalizations.of(context)!.confirmDeleteFeed,
+                message: AppLocalizations.of(context)!.confirmDeleteFeed,
                 confirmLabel: AppLocalizations.of(context)!.ok,
               ),
             );
@@ -399,7 +384,7 @@ class _FeedsPageState extends State<FeedsPage> {
       extendBody: true,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        toolbarHeight: _appBarHeight,
+        toolbarHeight: 48,
         backgroundColor: Colors.transparent,
         elevation: 0,
         titleSpacing: 0,
@@ -580,12 +565,8 @@ class _FeedsPageState extends State<FeedsPage> {
                                 ),
                               );
                             },
-                            onFeedDetails: _selectedFeed != null &&
-                                    _selectedFeed!.isMember
-                                ? () => _openFeedDetails(_selectedFeed!)
-                                : null,
-                            onFeedSettings: _selectedFeed != null &&
-                                    _selectedFeed!.role == 'admin'
+                            onFeedDetails: _selectedFeed != null && _selectedFeed!.isMember ? () => _openFeedDetails(_selectedFeed!) : null,
+                            onFeedSettings: _selectedFeed != null && _selectedFeed!.role == 'admin'
                                 ? () async {
                                     final changed = await Navigator.push<bool>(
                                       context,
@@ -602,9 +583,7 @@ class _FeedsPageState extends State<FeedsPage> {
                                     }
                                   }
                                 : null,
-                            onLeaveFeed: _selectedFeed != null && _selectedFeed!.isMember
-                                ? _leaveSelectedFeed
-                                : null,
+                            onLeaveFeed: _selectedFeed != null && _selectedFeed!.isMember ? _leaveSelectedFeed : null,
                           ),
                         );
                       },
@@ -670,7 +649,7 @@ class _FeedsPageState extends State<FeedsPage> {
                 if (_sortBy == 'discover' && _selectedFeed == null)
                   Padding(
                     padding: EdgeInsets.only(
-                      top: MediaQuery.of(context).padding.top + 48,
+                      top: MediaQuery.of(context).padding.top + 56,
                     ),
                     child: DiscoverFeedSection(
                       feeds: availableFeeds,
@@ -716,7 +695,7 @@ class _FeedsPageState extends State<FeedsPage> {
                 else
                   Padding(
                     padding: EdgeInsets.only(
-                      top: MediaQuery.of(context).padding.top + 48,
+                      top: MediaQuery.of(context).padding.top + 10,
                       bottom: MediaQuery.of(context).padding.bottom + 24,
                       left: 8,
                       right: 8,
