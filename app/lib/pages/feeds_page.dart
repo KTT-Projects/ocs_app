@@ -747,6 +747,7 @@ onTap: () {
                               (post) => PostListItem(
                                 post: post,
                                 onVote: _vote,
+                                showFeedName: _selectedFeed == null,
                                 onComments: (p) {
                                   Navigator.push(
                                     context,

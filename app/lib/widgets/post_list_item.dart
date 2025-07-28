@@ -7,12 +7,14 @@ class PostListItem extends StatefulWidget {
   final FeedPost post;
   final Function(FeedPost, String) onVote;
   final void Function(FeedPost)? onComments;
+  final bool showFeedName;
 
   const PostListItem({
     super.key,
     required this.post,
     required this.onVote,
     this.onComments,
+    this.showFeedName = false,
   });
 
   @override
@@ -123,6 +125,17 @@ class _PostListItemState extends State<PostListItem> {
                     ),
                   ],
                 ),
+                if (widget.showFeedName &&
+                    widget.post.feedDisplayName != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    widget.post.feedDisplayName!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.secondary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 16),
                 Text(
                   widget.post.title,
