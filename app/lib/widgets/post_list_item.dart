@@ -23,6 +23,12 @@ class _PostListItemState extends State<PostListItem> {
   static const int _collapsedLines = 5;
   static const int _lengthThreshold = 200;
 
+  bool get _shouldShowToggle {
+    final lineCount = widget.post.content.split('\n').length;
+    return lineCount > _collapsedLines ||
+        widget.post.content.length > _lengthThreshold;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -131,7 +137,7 @@ class _PostListItemState extends State<PostListItem> {
                   maxLines: _expanded ? null : _collapsedLines,
                   overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
                 ),
-                if (widget.post.content.length > _lengthThreshold)
+                if (_shouldShowToggle)
                   Align(
                     alignment: Alignment.centerRight,
                     child: GestureDetector(
