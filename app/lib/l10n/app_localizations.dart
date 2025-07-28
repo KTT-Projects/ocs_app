@@ -980,12 +980,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New post to...'**
   String get newPostTo;
+
   /// Title for feed selection dialog
   ///
   /// In en, this message translates to:
   /// **'Choose a feed'**
   String get chooseFeed;
-
 
   /// Success message when a feed is created
   ///
@@ -1047,7 +1047,7 @@ abstract class AppLocalizations {
   /// **'Change'**
   String get change;
 
-  /// Button label to view feed details
+  /// Button to view feed details
   ///
   /// In en, this message translates to:
   /// **'Feed details'**
