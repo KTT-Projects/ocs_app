@@ -232,10 +232,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                               ),
                               maxLines: 10,
                               validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter some content';
-                                }
-                                if (value.length > 5000) {
+                                if (value != null && value.length > 5000) {
                                   return AppLocalizations.of(context)!.contentTooLong;
                                 }
                                 return null;

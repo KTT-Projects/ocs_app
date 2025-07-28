@@ -890,7 +890,7 @@ class ApiClient extends ChangeNotifier {
     BuildContext context, {
     required int feedId,
     required String title,
-    required String content,
+    String? content,
     String? mediaUrl,
     String? mediaType,
   }) async {
@@ -905,7 +905,7 @@ class ApiClient extends ChangeNotifier {
         body: json.encode({
           'feed_id': feedId,
           'title': title,
-          'content': content,
+          if (content != null) 'content': content,
           if (mediaUrl != null) 'media_url': mediaUrl,
           if (mediaType != null) 'media_type': mediaType,
         }),
