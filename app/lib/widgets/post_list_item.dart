@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'dart:async';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/feed_post.dart';
 
 class PostListItem extends StatefulWidget {
@@ -144,13 +146,23 @@ class _PostListItemState extends State<PostListItem> {
                       ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  widget.post.content,
+                Linkify(
+                  text: widget.post.content,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),
+                  linkStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.secondary,
+                    decoration: TextDecoration.underline,
+                  ),
                   maxLines: _expanded ? null : _collapsedLines,
                   overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                  onOpen: (link) async {
+                    final uri = Uri.parse(link.url);
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri);
+                    }
+                  },
                 ),
                 if (_shouldShowToggle)
                   Align(

@@ -79,6 +79,8 @@ class FeedController
             $this->reorderFeeds($userId);
           } else if ($action === 'icon') {
             $this->uploadIcon($userId);
+          } else if ($action === 'media') {
+            $this->uploadPostMedia($userId);
           } else if ($action === 'comment') {
             $this->createComment($userId);
           }
@@ -312,6 +314,70 @@ class FeedController
     Response::json([
       'status' => 'success',
       'icon_url' => $iconUrl
+    ]);
+  }
+
+  private function uploadPostMedia($userId)
+  {
+    if (!isset($_GET['feed_id'])) {
+      Response::error('Feed ID is required', 400);
+      return;
+    }
+
+    $feedId = intval($_GET['feed_id']);
+
+    // Ensure user is a member of the feed
+    $query = "SELECT COUNT(*) FROM feed_members WHERE feed_id = :feed_id AND user_id = :user_id";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
+    $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+    $stmt->execute();
+    if ($stmt->fetchColumn() == 0) {
+      Response::error('You must be a member of this feed to post', 403);
+      return;
+    }
+
+    if (!isset($_FILES['media'])) {
+      Response::error('No media file provided', 400);
+      return;
+    }
+
+    $file = $_FILES['media'];
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+      Response::error('File upload failed', 400);
+      return;
+    }
+
+    // Validate file type
+    $allowedTypes = ['image/jpeg', 'image/png'];
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mimeType = finfo_file($finfo, $file['tmp_name']);
+    finfo_close($finfo);
+
+    if (!in_array($mimeType, $allowedTypes)) {
+      Response::error('Invalid file type. Only JPEG and PNG are allowed.', 400);
+      return;
+    }
+
+    $uploadDir = __DIR__ . '/../uploads/post_media/';
+    if (!file_exists($uploadDir)) {
+      mkdir($uploadDir, 0755, true);
+    }
+
+    $extension = $mimeType === 'image/jpeg' ? 'jpg' : 'png';
+    $filename = uniqid('post_media_') . '.' . $extension;
+    $filepath = $uploadDir . $filename;
+
+    if (!move_uploaded_file($file['tmp_name'], $filepath)) {
+      Response::error('Failed to save file', 500);
+      return;
+    }
+
+    $mediaUrl = '/uploads/post_media/' . $filename;
+
+    Response::json([
+      'status' => 'success',
+      'media_url' => $mediaUrl,
     ]);
   }
 
