@@ -413,6 +413,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get popular => '人気';
 
   @override
+  String get defaultSort => 'おすすめ';
+
+  @override
   String get feedOptions => 'フィードオプション';
 
   @override

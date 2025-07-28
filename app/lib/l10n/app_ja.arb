@@ -249,6 +249,10 @@
   "@popular": {
     "description": "人気で並び替え"
   },
+  "defaultSort": "おすすめ",
+  "@defaultSort": {
+    "description": "デフォルトの並び替え"
+  },
   "feedOptions": "フィードオプション",
   "@feedOptions": {
     "description": "フィードオプションメニューのタイトル"

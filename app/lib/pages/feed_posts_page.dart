@@ -67,7 +67,11 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
         _error = null;
       });
 
-      final posts = await widget.apiClient.getFeedPosts(context, widget.feed.id);
+      final posts = await widget.apiClient.getFeedPosts(
+        context,
+        widget.feed.id,
+        sort: 'default',
+      );
 
       if (mounted) {
         setState(() {

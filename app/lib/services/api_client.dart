@@ -610,11 +610,12 @@ class ApiClient extends ChangeNotifier {
     BuildContext context,
     int feedId, {
     int page = 1,
+    String sort = 'default',
   }) async {
     final l10n = AppLocalizations.of(context)!;
     try {
       final response = await http.get(
-        _buildUri('feeds.php?action=posts&feed_id=$feedId&page=$page'),
+        _buildUri('feeds.php?action=posts&feed_id=$feedId&page=$page&sort=$sort'),
         headers: {
           'Authorization': 'Bearer $_token',
           'Cache-Control': 'no-cache',
@@ -643,11 +644,12 @@ class ApiClient extends ChangeNotifier {
   Future<List<FeedPost>> getHomeFeed(
     BuildContext context, {
     int page = 1,
+    String sort = 'default',
   }) async {
     final l10n = AppLocalizations.of(context)!;
     try {
       final response = await http.get(
-        _buildUri('feeds.php?action=home&page=$page'),
+        _buildUri('feeds.php?action=home&page=$page&sort=$sort'),
         headers: {
           'Authorization': 'Bearer $_token',
           'Cache-Control': 'no-cache',

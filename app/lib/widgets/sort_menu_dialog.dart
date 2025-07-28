@@ -89,6 +89,13 @@ class SortMenuDialog extends StatelessWidget {
           ),
         ),
         SortMenuItem(
+          value: 'default',
+          label: l10n.defaultSort,
+          icon: Icons.auto_awesome,
+          selected: currentSort == 'default',
+          onTap: () => onSortChanged('default'),
+        ),
+        SortMenuItem(
           value: 'latest',
           label: l10n.latest,
           icon: Icons.access_time,
