@@ -232,10 +232,7 @@ class _CreatePostDialogState extends State<CreatePostDialog> {
                           ),
                           maxLines: 3,
                           validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return l10n.contentRequired;
-                            }
-                            if (value.length > 5000) {
+                            if (value != null && value.length > 5000) {
                               return l10n.contentTooLong;
                             }
                             return null;

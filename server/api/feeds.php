@@ -749,8 +749,8 @@ class FeedController
   {
     $data = json_decode(file_get_contents('php://input'), true);
 
-    if (!isset($data['feed_id']) || !isset($data['title']) || !isset($data['content'])) {
-      Response::error('Feed ID, title and content are required', 400);
+    if (!isset($data['feed_id']) || !isset($data['title'])) {
+      Response::error('Feed ID and title are required', 400);
       return;
     }
 
@@ -775,7 +775,7 @@ class FeedController
     $stmt->bindValue(':feed_id', $data['feed_id']);
     $stmt->bindValue(':user_id', $userId);
     $stmt->bindValue(':title', $data['title']);
-    $stmt->bindValue(':content', $data['content']);
+    $stmt->bindValue(':content', $data['content'] ?? '');
     $stmt->bindValue(':media_url', $data['media_url'] ?? null);
     $stmt->bindValue(':media_type', $data['media_type'] ?? 'none');
     $stmt->execute();
