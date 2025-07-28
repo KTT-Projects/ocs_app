@@ -55,7 +55,7 @@ class FeedController
           } else if ($action === 'joined') {
             $this->getJoinedFeeds($userId);
           } else if ($action === 'posts') {
-            $this->getFeedPosts();
+            $this->getFeedPosts($userId);
           } else if ($action === 'home') {
             $this->getHomeFeed($userId);
           } else if ($action === 'members') {
@@ -311,7 +311,7 @@ class FeedController
     ]);
   }
 
-  private function getFeedPosts()
+  private function getFeedPosts($userId)
   {
     if (!isset($_GET['feed_id'])) {
       Response::error('Feed ID is required', 400);
@@ -323,19 +323,22 @@ class FeedController
     $limit = 20;
     $offset = ($page - 1) * $limit;
 
-    $query = "SELECT fp.*, 
+    $query = "SELECT fp.*,
                   u.email,
                   up.display_name,
                   up.avatar_url,
-                  (SELECT COUNT(*) FROM comments WHERE post_id = fp.id) as comment_count
-                  FROM feed_posts fp 
-                  JOIN users u ON fp.user_id = u.id 
+                  (SELECT COUNT(*) FROM comments WHERE post_id = fp.id) as comment_count,
+                  fv.vote_type AS user_vote
+                  FROM feed_posts fp
+                  JOIN users u ON fp.user_id = u.id
                   JOIN user_profiles up ON u.id = up.user_id
-                  WHERE fp.feed_id = :feed_id 
+                  LEFT JOIN feed_votes fv ON fv.post_id = fp.id AND fv.user_id = :user_id
+                  WHERE fp.feed_id = :feed_id
                   ORDER BY fp.score DESC, fp.created_at DESC
                   LIMIT :limit OFFSET :offset";
 
     $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':user_id', $userId);
     $stmt->bindParam(':feed_id', $feedId);
     $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
@@ -374,19 +377,21 @@ class FeedController
     $limit = 20;
     $offset = ($page - 1) * $limit;
 
-    $query = "SELECT fp.*, 
+    $query = "SELECT fp.*,
                   f.name as feed_name,
                   f.display_name as feed_display_name,
                   u.email,
                   up.display_name,
                   up.avatar_url,
-                  (SELECT COUNT(*) FROM comments WHERE post_id = fp.id) as comment_count
-                  FROM feed_posts fp 
+                  (SELECT COUNT(*) FROM comments WHERE post_id = fp.id) as comment_count,
+                  fv.vote_type AS user_vote
+                  FROM feed_posts fp
                   JOIN feeds f ON fp.feed_id = f.id
-                  JOIN users u ON fp.user_id = u.id 
+                  JOIN users u ON fp.user_id = u.id
                   JOIN user_profiles up ON u.id = up.user_id
+                  LEFT JOIN feed_votes fv ON fv.post_id = fp.id AND fv.user_id = :user_id
                   JOIN feed_members fm ON f.id = fm.feed_id
-                  WHERE fm.user_id = :user_id 
+                  WHERE fm.user_id = :user_id
                   ORDER BY fp.score DESC, fp.created_at DESC
                   LIMIT :limit OFFSET :offset";
 
@@ -800,24 +805,39 @@ class FeedController
     $stmt->bindParam(':post_id', $data['post_id']);
     $stmt->bindParam(':user_id', $userId);
     $stmt->execute();
-    if ($stmt->fetch()) {
-      Response::error('You have already voted on this post', 409);
-      return;
-    }
+    $existingVote = $stmt->fetchColumn();
 
     // Start transaction
     $this->conn->beginTransaction();
 
     try {
-      // Add or update vote
-      $query = "INSERT INTO feed_votes (post_id, user_id, vote_type)
-                     VALUES (:post_id, :user_id, :vote_type)";
-
-      $stmt = $this->conn->prepare($query);
-      $stmt->bindParam(':post_id', $data['post_id']);
-      $stmt->bindParam(':user_id', $userId);
-      $stmt->bindParam(':vote_type', $data['vote_type']);
-      $stmt->execute();
+      if ($existingVote) {
+        if ($existingVote === $data['vote_type']) {
+          // Remove vote
+          $query = "DELETE FROM feed_votes WHERE post_id = :post_id AND user_id = :user_id";
+          $stmt = $this->conn->prepare($query);
+          $stmt->bindParam(':post_id', $data['post_id']);
+          $stmt->bindParam(':user_id', $userId);
+          $stmt->execute();
+        } else {
+          // Change vote type
+          $query = "UPDATE feed_votes SET vote_type = :vote_type WHERE post_id = :post_id AND user_id = :user_id";
+          $stmt = $this->conn->prepare($query);
+          $stmt->bindParam(':vote_type', $data['vote_type']);
+          $stmt->bindParam(':post_id', $data['post_id']);
+          $stmt->bindParam(':user_id', $userId);
+          $stmt->execute();
+        }
+      } else {
+        // Add new vote
+        $query = "INSERT INTO feed_votes (post_id, user_id, vote_type)
+                       VALUES (:post_id, :user_id, :vote_type)";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':post_id', $data['post_id']);
+        $stmt->bindParam(':user_id', $userId);
+        $stmt->bindParam(':vote_type', $data['vote_type']);
+        $stmt->execute();
+      }
 
       // Update post scores
       $query = "UPDATE feed_posts 
