@@ -55,7 +55,7 @@ class FeedController
           } else if ($action === 'joined') {
             $this->getJoinedFeeds($userId);
           } else if ($action === 'posts') {
-            $this->getFeedPosts();
+            $this->getFeedPosts($userId);
           } else if ($action === 'home') {
             $this->getHomeFeed($userId);
           } else if ($action === 'members') {
@@ -311,7 +311,7 @@ class FeedController
     ]);
   }
 
-  private function getFeedPosts()
+  private function getFeedPosts($userId)
   {
     if (!isset($_GET['feed_id'])) {
       Response::error('Feed ID is required', 400);
@@ -323,19 +323,22 @@ class FeedController
     $limit = 20;
     $offset = ($page - 1) * $limit;
 
-    $query = "SELECT fp.*, 
+    $query = "SELECT fp.*,
                   u.email,
                   up.display_name,
                   up.avatar_url,
-                  (SELECT COUNT(*) FROM comments WHERE post_id = fp.id) as comment_count
-                  FROM feed_posts fp 
-                  JOIN users u ON fp.user_id = u.id 
+                  (SELECT COUNT(*) FROM comments WHERE post_id = fp.id) as comment_count,
+                  fv.vote_type AS user_vote
+                  FROM feed_posts fp
+                  JOIN users u ON fp.user_id = u.id
                   JOIN user_profiles up ON u.id = up.user_id
-                  WHERE fp.feed_id = :feed_id 
+                  LEFT JOIN feed_votes fv ON fv.post_id = fp.id AND fv.user_id = :user_id
+                  WHERE fp.feed_id = :feed_id
                   ORDER BY fp.score DESC, fp.created_at DESC
                   LIMIT :limit OFFSET :offset";
 
     $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':user_id', $userId);
     $stmt->bindParam(':feed_id', $feedId);
     $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
@@ -374,19 +377,21 @@ class FeedController
     $limit = 20;
     $offset = ($page - 1) * $limit;
 
-    $query = "SELECT fp.*, 
+    $query = "SELECT fp.*,
                   f.name as feed_name,
                   f.display_name as feed_display_name,
                   u.email,
                   up.display_name,
                   up.avatar_url,
-                  (SELECT COUNT(*) FROM comments WHERE post_id = fp.id) as comment_count
-                  FROM feed_posts fp 
+                  (SELECT COUNT(*) FROM comments WHERE post_id = fp.id) as comment_count,
+                  fv.vote_type AS user_vote
+                  FROM feed_posts fp
                   JOIN feeds f ON fp.feed_id = f.id
-                  JOIN users u ON fp.user_id = u.id 
+                  JOIN users u ON fp.user_id = u.id
                   JOIN user_profiles up ON u.id = up.user_id
+                  LEFT JOIN feed_votes fv ON fv.post_id = fp.id AND fv.user_id = :user_id
                   JOIN feed_members fm ON f.id = fm.feed_id
-                  WHERE fm.user_id = :user_id 
+                  WHERE fm.user_id = :user_id
                   ORDER BY fp.score DESC, fp.created_at DESC
                   LIMIT :limit OFFSET :offset";
 
