@@ -670,7 +670,7 @@ class _FeedsPageState extends State<FeedsPage> {
                 if (_sortBy == 'discover' && _selectedFeed == null)
                   Padding(
                     padding: EdgeInsets.only(
-                      top: MediaQuery.of(context).padding.top + _appBarHeight,
+                      top: MediaQuery.of(context).padding.top + 48,
                     ),
                     child: DiscoverFeedSection(
                       feeds: availableFeeds,
@@ -716,7 +716,7 @@ class _FeedsPageState extends State<FeedsPage> {
                 else
                   Padding(
                     padding: EdgeInsets.only(
-                      top: MediaQuery.of(context).padding.top + _appBarHeight,
+                      top: MediaQuery.of(context).padding.top + 48,
                       bottom: MediaQuery.of(context).padding.bottom + 24,
                       left: 8,
                       right: 8,
