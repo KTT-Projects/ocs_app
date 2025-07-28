@@ -168,57 +168,14 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                     ],
                   ),
                 ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-                    border: Border(
-                      top: BorderSide(
-                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-                      ),
-                    ),
-                  ),
-                  child: SafeArea(
-                    top: false,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-                                ),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(20),
-                                child: BackdropFilter(
-                                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                                  child: TextField(
-                                    controller: _controller,
-                                    decoration: InputDecoration(
-                                      hintText: 'Add a comment...',
-                                      hintStyle: TextStyle(
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                      ),
-                                      border: InputBorder.none,
-                                      contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 14,
-                                      ),
-                                    ),
-                                    style: TextStyle(
-                                      color: Theme.of(context).colorScheme.onPrimary,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
                             decoration: BoxDecoration(
                               color: Theme.of(context).colorScheme.background.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(20),
@@ -230,18 +187,51 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                               borderRadius: BorderRadius.circular(20),
                               child: BackdropFilter(
                                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                                child: IconButton(
-                                  icon: Icon(
-                                    Icons.send,
+                                child: TextField(
+                                  controller: _controller,
+                                  decoration: InputDecoration(
+                                    hintText: 'Add a comment...',
+                                    hintStyle: TextStyle(
+                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                    ),
+                                    border: InputBorder.none,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 14,
+                                    ),
+                                  ),
+                                  style: TextStyle(
                                     color: Theme.of(context).colorScheme.onPrimary,
                                   ),
-                                  onPressed: _submit,
                                 ),
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                            ),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                              child: IconButton(
+                                icon: Icon(
+                                  Icons.send,
+                                  color: Theme.of(context).colorScheme.onPrimary,
+                                ),
+                                onPressed: _submit,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
