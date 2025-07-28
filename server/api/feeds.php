@@ -615,6 +615,12 @@ class FeedController
     // Remove all related data and the feed itself
     $this->conn->beginTransaction();
     try {
+      // Fetch icon URL so the file can be removed later
+      $iconQuery = "SELECT icon_url FROM feeds WHERE id = :feed_id";
+      $iconStmt = $this->conn->prepare($iconQuery);
+      $iconStmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
+      $iconStmt->execute();
+      $iconUrl = $iconStmt->fetchColumn();
       $query = "SELECT id FROM feed_posts WHERE feed_id = :feed_id";
       $stmt = $this->conn->prepare($query);
       $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
@@ -637,6 +643,14 @@ class FeedController
       $stmt->execute();
 
       $this->conn->commit();
+
+      // Delete icon file after database commit
+      if ($iconUrl) {
+        $iconPath = __DIR__ . '/../' . ltrim($iconUrl, '/');
+        if (file_exists($iconPath)) {
+          unlink($iconPath);
+        }
+      }
     } catch (Exception $e) {
       $this->conn->rollBack();
       throw $e;
