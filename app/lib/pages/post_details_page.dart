@@ -26,7 +26,14 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
   @override
   void initState() {
     super.initState();
-    _loadComments();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_comments == null) {
+      _loadComments();
+    }
   }
 
   Future<void> _loadComments() async {
@@ -162,30 +169,80 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-                    border: Border(top: BorderSide(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3))),
+                    border: Border(
+                      top: BorderSide(
+                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                      ),
+                    ),
                   ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _controller,
-                          decoration: InputDecoration(
-                            hintText: 'Add a comment...',
-                            border: InputBorder.none,
+                  child: SafeArea(
+                    top: false,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                                ),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: BackdropFilter(
+                                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                                  child: TextField(
+                                    controller: _controller,
+                                    decoration: InputDecoration(
+                                      hintText: 'Add a comment...',
+                                      hintStyle: TextStyle(
+                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                      ),
+                                      border: InputBorder.none,
+                                      contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 14,
+                                      ),
+                                    ),
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.onPrimary,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
+                          const SizedBox(width: 8),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                              ),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                                child: IconButton(
+                                  icon: Icon(
+                                    Icons.send,
+                                    color: Theme.of(context).colorScheme.onPrimary,
+                                  ),
+                                  onPressed: _submit,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                      IconButton(
-                        icon: Icon(Icons.send, color: Theme.of(context).colorScheme.onPrimary),
-                        onPressed: _submit,
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ],
