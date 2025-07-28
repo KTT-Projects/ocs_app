@@ -119,10 +119,12 @@ class PostListItem extends StatelessWidget {
                     IconButton(
                       icon: Icon(
                         Icons.arrow_upward,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onPrimary
-                            .withOpacity(0.7),
+                        color: post.userVote == 'upvote'
+                            ? Theme.of(context).colorScheme.secondary
+                            : Theme.of(context)
+                                .colorScheme
+                                .onPrimary
+                                .withOpacity(0.7),
                       ),
                       onPressed: () => onVote(post, 'upvote'),
                     ),
@@ -139,10 +141,12 @@ class PostListItem extends StatelessWidget {
                     IconButton(
                       icon: Icon(
                         Icons.arrow_downward,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onPrimary
-                            .withOpacity(0.7),
+                        color: post.userVote == 'downvote'
+                            ? Theme.of(context).colorScheme.secondary
+                            : Theme.of(context)
+                                .colorScheme
+                                .onPrimary
+                                .withOpacity(0.7),
                       ),
                       onPressed: () => onVote(post, 'downvote'),
                     ),

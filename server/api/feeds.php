@@ -793,14 +793,25 @@ class FeedController
       return;
     }
 
+    // Check if the user has already voted on this post
+    $stmt = $this->conn->prepare(
+      "SELECT vote_type FROM feed_votes WHERE post_id = :post_id AND user_id = :user_id"
+    );
+    $stmt->bindParam(':post_id', $data['post_id']);
+    $stmt->bindParam(':user_id', $userId);
+    $stmt->execute();
+    if ($stmt->fetch()) {
+      Response::error('You have already voted on this post', 409);
+      return;
+    }
+
     // Start transaction
     $this->conn->beginTransaction();
 
     try {
       // Add or update vote
-      $query = "INSERT INTO feed_votes (post_id, user_id, vote_type) 
-                     VALUES (:post_id, :user_id, :vote_type)
-                     ON DUPLICATE KEY UPDATE vote_type = :vote_type";
+      $query = "INSERT INTO feed_votes (post_id, user_id, vote_type)
+                     VALUES (:post_id, :user_id, :vote_type)";
 
       $stmt = $this->conn->prepare($query);
       $stmt->bindParam(':post_id', $data['post_id']);
