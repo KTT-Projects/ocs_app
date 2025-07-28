@@ -33,6 +33,7 @@ class FeedsPage extends StatefulWidget {
 }
 
 class _FeedsPageState extends State<FeedsPage> {
+  static const double _appBarHeight = 48;
   bool _isLoading = true;
   String? _error;
   List<Feed>? _feeds;
@@ -398,7 +399,7 @@ class _FeedsPageState extends State<FeedsPage> {
       extendBody: true,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        toolbarHeight: 48,
+        toolbarHeight: _appBarHeight,
         backgroundColor: Colors.transparent,
         elevation: 0,
         titleSpacing: 0,
