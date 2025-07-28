@@ -214,7 +214,7 @@
   "@writePost": {
     "description": "投稿の内容入力欄のプレースホルダーテキスト"
   },
-  "newPostIn": "{feedName}に新規投稿",
+  "newPostIn": "{feedName}",
   "@newPostIn": {
     "description": "投稿作成ダイアログのタイトル（フィード名付き）",
     "placeholders": {

@@ -388,7 +388,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String newPostIn(Object feedName) {
-    return '$feedNameに新規投稿';
+    return '$feedName';
   }
 
   @override

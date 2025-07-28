@@ -840,7 +840,7 @@ abstract class AppLocalizations {
   /// Title for new post dialog with feed name
   ///
   /// In en, this message translates to:
-  /// **'New post in {feedName}'**
+  /// **'{feedName}'**
   String newPostIn(Object feedName);
 
   /// Tooltip for button to open post editor in full page

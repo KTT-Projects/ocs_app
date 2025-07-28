@@ -511,7 +511,7 @@
   "@writePost": {
     "description": "Placeholder text for post content input field"
   },
-  "newPostIn": "New post in {feedName}",
+  "newPostIn": "{feedName}",
   "@newPostIn": {
     "description": "Title for new post dialog with feed name",
     "placeholders": {

@@ -695,7 +695,7 @@ class _FeedsPageState extends State<FeedsPage> {
                 else
                   Padding(
                     padding: EdgeInsets.only(
-                      top: MediaQuery.of(context).padding.top + 10,
+                      top: MediaQuery.of(context).padding.top + 56,
                       bottom: MediaQuery.of(context).padding.bottom + 24,
                       left: 8,
                       right: 8,

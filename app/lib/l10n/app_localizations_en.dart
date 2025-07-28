@@ -400,7 +400,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String newPostIn(Object feedName) {
-    return 'New post in $feedName';
+    return '$feedName';
   }
 
   @override
