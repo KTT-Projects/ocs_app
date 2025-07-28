@@ -50,6 +50,7 @@ class FeedMenuDialog extends StatelessWidget {
   final VoidCallback onReorderFeeds;
   final VoidCallback? onLeaveFeed;
   final VoidCallback? onFeedSettings;
+  final VoidCallback? onFeedDetails;
 
   const FeedMenuDialog({
     super.key,
@@ -57,6 +58,7 @@ class FeedMenuDialog extends StatelessWidget {
     required this.onReorderFeeds,
     this.onLeaveFeed,
     this.onFeedSettings,
+    this.onFeedDetails,
   });
 
   @override
@@ -92,6 +94,15 @@ class FeedMenuDialog extends StatelessWidget {
             onReorderFeeds();
           },
         ),
+        if (onFeedDetails != null)
+          FeedMenuItem(
+            icon: Icons.info_outline,
+            label: l10n.feedDetails,
+            onTap: () {
+              Navigator.pop(context);
+              onFeedDetails!();
+            },
+          ),
         if (onFeedSettings != null)
           FeedMenuItem(
             icon: Icons.settings,

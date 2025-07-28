@@ -578,6 +578,10 @@ class _FeedsPageState extends State<FeedsPage> {
                                 ),
                               );
                             },
+                            onFeedDetails: _selectedFeed != null &&
+                                    _selectedFeed!.isMember
+                                ? () => _openFeedDetails(_selectedFeed!)
+                                : null,
                             onFeedSettings: _selectedFeed != null &&
                                     _selectedFeed!.role == 'admin'
                                 ? () async {

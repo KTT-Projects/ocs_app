@@ -1047,6 +1047,12 @@ abstract class AppLocalizations {
   /// **'Change'**
   String get change;
 
+  /// Button label to view feed details
+  ///
+  /// In en, this message translates to:
+  /// **'Feed details'**
+  String get feedDetails;
+
   /// Section title for feed members
   ///
   /// In en, this message translates to:
