@@ -716,7 +716,10 @@ class _FeedsPageState extends State<FeedsPage> {
                       right: 8,
                     ),
                     child: ListView(
-                      padding: EdgeInsets.zero,
+                      padding: const EdgeInsets.only(
+                        top: 0,
+                        bottom: 56,
+                      ),
                       children: [
                         if (_posts != null && _posts!.isNotEmpty) ...[
                           ...(() {

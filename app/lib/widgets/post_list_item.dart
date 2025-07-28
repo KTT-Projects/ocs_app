@@ -139,7 +139,7 @@ class _PostListItemState extends State<PostListItem> {
                 ),
                 if (_shouldShowToggle)
                   Align(
-                    alignment: Alignment.centerRight,
+                    alignment: Alignment.centerLeft,
                     child: GestureDetector(
                       onTap: () => setState(() => _expanded = !_expanded),
                       child: Padding(
