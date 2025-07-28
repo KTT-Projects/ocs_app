@@ -19,6 +19,15 @@ class PostListItem extends StatefulWidget {
 
 class _PostListItemState extends State<PostListItem> {
   Timer? _timer;
+  bool _expanded = false;
+  static const int _collapsedLines = 5;
+  static const int _lengthThreshold = 200;
+
+  bool get _shouldShowToggle {
+    final lineCount = widget.post.content.split('\n').length;
+    return lineCount > _collapsedLines ||
+        widget.post.content.length > _lengthThreshold;
+  }
 
   @override
   void initState() {
@@ -125,7 +134,26 @@ class _PostListItemState extends State<PostListItem> {
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),
+                  maxLines: _expanded ? null : _collapsedLines,
+                  overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
                 ),
+                if (_shouldShowToggle)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: GestureDetector(
+                      onTap: () => setState(() => _expanded = !_expanded),
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          _expanded ? 'Show less' : 'Show more',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.secondary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 if (widget.post.mediaUrl != null) ...[
                   const SizedBox(height: 8),
                   ClipRRect(
