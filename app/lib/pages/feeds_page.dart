@@ -208,12 +208,27 @@ class _FeedsPageState extends State<FeedsPage> {
       );
 
       setState(() {
-        if (voteType == 'upvote') {
-          post.upvotes += 1;
+        if (post.userVote == voteType) {
+          if (voteType == 'upvote') {
+            post.upvotes -= 1;
+          } else {
+            post.downvotes -= 1;
+          }
+          post.userVote = null;
         } else {
-          post.downvotes += 1;
+          if (post.userVote == 'upvote') {
+            post.upvotes -= 1;
+          } else if (post.userVote == 'downvote') {
+            post.downvotes -= 1;
+          }
+
+          if (voteType == 'upvote') {
+            post.upvotes += 1;
+          } else {
+            post.downvotes += 1;
+          }
+          post.userVote = voteType;
         }
-        post.userVote = voteType;
       });
     } catch (e) {
       if (mounted) {
@@ -705,15 +720,8 @@ class _FeedsPageState extends State<FeedsPage> {
                       children: [
                         if (_posts != null && _posts!.isNotEmpty) ...[
                           ...(() {
-                            final filtered = _posts!.where((post) {
-                              if (_sortBy == 'latest') {
-                                return true;
-                              } else {
-                                // Popular: posts with score > 0
-                                return post.score > 0;
-                              }
-                            }).toList();
-                            filtered.sort((a, b) {
+                            final sorted = [..._posts!];
+                            sorted.sort((a, b) {
                               if (_sortBy == 'latest') {
                                 return b.createdAt.compareTo(a.createdAt);
                               } else if (_sortBy == 'popular') {
@@ -721,10 +729,12 @@ class _FeedsPageState extends State<FeedsPage> {
                               }
                               return 0;
                             });
-                            return filtered.map((post) => PostListItem(
-                                  post: post,
-                                  onVote: _vote,
-                                ));
+                            return sorted.map(
+                              (post) => PostListItem(
+                                post: post,
+                                onVote: _vote,
+                              ),
+                            );
                           })(),
                         ],
                         if (availableFeeds.isNotEmpty) ...[

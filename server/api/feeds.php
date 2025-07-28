@@ -800,24 +800,39 @@ class FeedController
     $stmt->bindParam(':post_id', $data['post_id']);
     $stmt->bindParam(':user_id', $userId);
     $stmt->execute();
-    if ($stmt->fetch()) {
-      Response::error('You have already voted on this post', 409);
-      return;
-    }
+    $existingVote = $stmt->fetchColumn();
 
     // Start transaction
     $this->conn->beginTransaction();
 
     try {
-      // Add or update vote
-      $query = "INSERT INTO feed_votes (post_id, user_id, vote_type)
-                     VALUES (:post_id, :user_id, :vote_type)";
-
-      $stmt = $this->conn->prepare($query);
-      $stmt->bindParam(':post_id', $data['post_id']);
-      $stmt->bindParam(':user_id', $userId);
-      $stmt->bindParam(':vote_type', $data['vote_type']);
-      $stmt->execute();
+      if ($existingVote) {
+        if ($existingVote === $data['vote_type']) {
+          // Remove vote
+          $query = "DELETE FROM feed_votes WHERE post_id = :post_id AND user_id = :user_id";
+          $stmt = $this->conn->prepare($query);
+          $stmt->bindParam(':post_id', $data['post_id']);
+          $stmt->bindParam(':user_id', $userId);
+          $stmt->execute();
+        } else {
+          // Change vote type
+          $query = "UPDATE feed_votes SET vote_type = :vote_type WHERE post_id = :post_id AND user_id = :user_id";
+          $stmt = $this->conn->prepare($query);
+          $stmt->bindParam(':vote_type', $data['vote_type']);
+          $stmt->bindParam(':post_id', $data['post_id']);
+          $stmt->bindParam(':user_id', $userId);
+          $stmt->execute();
+        }
+      } else {
+        // Add new vote
+        $query = "INSERT INTO feed_votes (post_id, user_id, vote_type)
+                       VALUES (:post_id, :user_id, :vote_type)";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':post_id', $data['post_id']);
+        $stmt->bindParam(':user_id', $userId);
+        $stmt->bindParam(':vote_type', $data['vote_type']);
+        $stmt->execute();
+      }
 
       // Update post scores
       $query = "UPDATE feed_posts 
