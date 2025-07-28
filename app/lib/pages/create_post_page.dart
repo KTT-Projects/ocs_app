@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui';
+import 'dart:io';
+import 'dart:convert';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../l10n/app_localizations.dart';
 import '../models/feed.dart';
 import '../services/api_client.dart';
@@ -29,6 +33,11 @@ class _CreatePostPageState extends State<CreatePostPage> {
   final _contentController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
+  final _imagePicker = ImagePicker();
+  String? _imagePath;
+  List<int>? _imageBytes;
+  String? _imageName;
+  String? _previewUrl;
 
   @override
   void initState() {
@@ -44,6 +53,27 @@ class _CreatePostPageState extends State<CreatePostPage> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    try {
+      final XFile? image = await _imagePicker.pickImage(source: ImageSource.gallery);
+      if (image != null && mounted) {
+        if (kIsWeb) {
+          _imageBytes = await image.readAsBytes();
+          _imageName = image.name.isNotEmpty ? image.name : 'image.png';
+          _previewUrl = 'data:${image.mimeType};base64,${base64Encode(_imageBytes!)}';
+        } else {
+          _imagePath = image.path;
+          _previewUrl = image.path;
+        }
+        setState(() {});
+      }
+    } catch (e) {
+      if (mounted) {
+        GlassmorphicUI.showGlassSnackBar(context, e.toString(), isError: true);
+      }
+    }
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -52,11 +82,24 @@ class _CreatePostPageState extends State<CreatePostPage> {
         _isLoading = true;
       });
 
+      String? mediaUrl;
+      if (_imagePath != null || _imageBytes != null) {
+        mediaUrl = await widget.apiClient.uploadPostMedia(
+          context,
+          widget.feed.id,
+          filePath: _imagePath,
+          webBytes: _imageBytes,
+          webFileName: _imageName,
+        );
+      }
+
       final postId = await widget.apiClient.createPost(
         context,
         feedId: widget.feed.id,
         title: _titleController.text,
         content: _contentController.text,
+        mediaUrl: mediaUrl,
+        mediaType: mediaUrl != null ? 'image' : null,
       );
 
       if (mounted) {
@@ -237,6 +280,32 @@ class _CreatePostPageState extends State<CreatePostPage> {
                                 }
                                 return null;
                               },
+                            ),
+                            const SizedBox(height: 16),
+                            GestureDetector(
+                              onTap: _pickImage,
+                              child: Container(
+                                width: double.infinity,
+                                height: 150,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.background.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                                  ),
+                                ),
+                                child: _previewUrl == null
+                                    ? Icon(
+                                        Icons.add_a_photo,
+                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                      )
+                                    : ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: kIsWeb
+                                            ? Image.network(_previewUrl!, fit: BoxFit.cover)
+                                            : Image.file(File(_previewUrl!), fit: BoxFit.cover),
+                                      ),
+                              ),
                             ),
                             const SizedBox(height: 24),
                             SizedBox(
