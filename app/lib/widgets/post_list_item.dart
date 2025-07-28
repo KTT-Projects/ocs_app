@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'dart:async';
 import '../models/feed_post.dart';
 
-class PostListItem extends StatelessWidget {
+class PostListItem extends StatefulWidget {
   final FeedPost post;
   final Function(FeedPost, String) onVote;
 
@@ -11,6 +12,28 @@ class PostListItem extends StatelessWidget {
     required this.post,
     required this.onVote,
   });
+
+  @override
+  State<PostListItem> createState() => _PostListItemState();
+}
+
+class _PostListItemState extends State<PostListItem> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Update time labels every minute
+    _timer = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
