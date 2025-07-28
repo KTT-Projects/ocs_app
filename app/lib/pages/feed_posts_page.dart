@@ -8,6 +8,7 @@ import '../services/api_client.dart';
 import '../widgets/create_post_dialog.dart';
 import '../widgets/glassmorphic_ui.dart';
 import '../widgets/post_list_item.dart';
+import 'post_details_page.dart';
 
 class FeedPostsPage extends StatefulWidget {
   final ApiClient apiClient;
@@ -285,6 +286,17 @@ padding: EdgeInsets.only(
                 return PostListItem(
                   post: post,
                   onVote: _vote,
+                  onComments: (p) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PostDetailsPage(
+                          apiClient: widget.apiClient,
+                          post: p,
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             ),

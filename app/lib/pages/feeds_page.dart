@@ -16,6 +16,7 @@ import '../widgets/reorder_feeds_dialog.dart';
 import 'create_feed_page.dart';
 import 'feed_details_page.dart';
 import 'feed_settings_page.dart';
+import 'post_details_page.dart';
 import '../widgets/create_post_dialog.dart';
 import '../widgets/user_selection_dialog.dart';
 import '../widgets/confirm_dialog.dart';
@@ -740,6 +741,17 @@ class _FeedsPageState extends State<FeedsPage> {
                               (post) => PostListItem(
                                 post: post,
                                 onVote: _vote,
+                                onComments: (p) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => PostDetailsPage(
+                                        apiClient: widget.apiClient,
+                                        post: p,
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
                             );
                           })(),
