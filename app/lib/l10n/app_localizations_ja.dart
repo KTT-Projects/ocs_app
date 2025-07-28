@@ -494,5 +494,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get change => '変更';
 
   @override
+  String get feedDetails => 'フィード詳細';
+
+  @override
   String get members => 'メンバー';
 }

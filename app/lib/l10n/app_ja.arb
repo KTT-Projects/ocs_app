@@ -357,6 +357,10 @@
   "@change": {
     "description": "変更ボタンのラベル"
   },
+  "feedDetails": "フィード詳細",
+  "@feedDetails": {
+    "description": "フィードの詳細を表示するボタン"
+  },
   "members": "メンバー",
   "@members": {
     "description": "フィードメンバーのセクションタイトル"

@@ -654,6 +654,10 @@
   "@change": {
     "description": "Button label to change selection"
   },
+  "feedDetails": "Feed details",
+  "@feedDetails": {
+    "description": "Button to view feed details"
+  },
   "members": "Members",
   "@members": {
     "description": "Section title for feed members"

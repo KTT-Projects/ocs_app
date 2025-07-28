@@ -508,5 +508,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get change => 'Change';
 
   @override
+  String get feedDetails => 'Feed details';
+
+  @override
   String get members => 'Members';
 }
