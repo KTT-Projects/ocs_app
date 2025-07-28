@@ -492,4 +492,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get change => '変更';
+
+  @override
+  String get members => 'メンバー';
 }

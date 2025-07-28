@@ -6,12 +6,14 @@ import '../models/feed.dart';
 class FeedListItem extends StatelessWidget {
   final Feed feed;
   final VoidCallback onJoin;
+  final VoidCallback? onTap;
   final bool showDescription;
 
   const FeedListItem({
     super.key,
     required this.feed,
     required this.onJoin,
+    this.onTap,
     this.showDescription = true,
   });
 
@@ -39,6 +41,7 @@ class FeedListItem extends StatelessWidget {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: InkWell(
+            onTap: onTap,
             borderRadius: BorderRadius.circular(24),
             child: Padding(
               padding: const EdgeInsets.all(16),

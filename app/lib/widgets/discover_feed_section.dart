@@ -11,6 +11,7 @@ class DiscoverFeedSection extends StatelessWidget {
   final Function(String) onSearchChanged;
   final Function(String) onSortChanged;
   final Function(Feed) onJoinFeed;
+  final Function(Feed)? onFeedTap;
 
   const DiscoverFeedSection({
     super.key,
@@ -20,6 +21,7 @@ class DiscoverFeedSection extends StatelessWidget {
     required this.onSearchChanged,
     required this.onSortChanged,
     required this.onJoinFeed,
+    this.onFeedTap,
   });
 
   @override
@@ -253,6 +255,9 @@ class DiscoverFeedSection extends StatelessWidget {
                         return FeedListItem(
                           feed: filteredFeeds[index],
                           onJoin: () => onJoinFeed(filteredFeeds[index]),
+                          onTap: onFeedTap == null
+                              ? null
+                              : () => onFeedTap!(filteredFeeds[index]),
                         );
                       },
                     );
