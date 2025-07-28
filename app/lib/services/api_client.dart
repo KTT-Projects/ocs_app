@@ -6,6 +6,7 @@ import '../l10n/app_localizations.dart';
 import 'dart:io';
 import '../models/feed.dart';
 import '../models/feed_post.dart';
+import '../models/comment.dart';
 import 'auth_service.dart';
 
 class ApiException implements Exception {
@@ -958,8 +959,8 @@ class ApiClient extends ChangeNotifier {
 
   Future<void> votePost(
     BuildContext context, {
-    required int postId,
-    required String voteType,
+      required int postId,
+      required String voteType,
   }) async {
     final l10n = AppLocalizations.of(context)!;
     try {
@@ -978,6 +979,76 @@ class ApiClient extends ChangeNotifier {
           _mapServerError(context, data['message'] ?? l10n.errorOccurred),
         );
       }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<List<Comment>> getComments(
+    BuildContext context,
+    int postId,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.get(
+        _buildUri('feeds.php?action=comments&post_id=$postId'),
+        headers: {
+          'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+
+      return (data['data'] as List)
+          .map((c) => Comment.fromJson(c))
+          .toList();
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<int> createComment(
+    BuildContext context, {
+    required int postId,
+    required String content,
+    int? parentCommentId,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/feeds.php?action=comment'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode({
+          'post_id': postId,
+          'content': content,
+          if (parentCommentId != null) 'parent_comment_id': parentCommentId,
+        }),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200 && response.statusCode != 201) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+
+      return int.parse(data['data']['id'].toString());
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException(l10n.errorOccurred);

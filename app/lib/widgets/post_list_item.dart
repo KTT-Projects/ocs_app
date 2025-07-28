@@ -6,11 +6,13 @@ import '../models/feed_post.dart';
 class PostListItem extends StatefulWidget {
   final FeedPost post;
   final Function(FeedPost, String) onVote;
+  final void Function(FeedPost)? onComments;
 
   const PostListItem({
     super.key,
     required this.post,
     required this.onVote,
+    this.onComments,
   });
 
   @override
@@ -202,22 +204,31 @@ class _PostListItemState extends State<PostListItem> {
                       onPressed: () => widget.onVote(widget.post, 'downvote'),
                     ),
                     const Spacer(),
-                    Icon(
-                      Icons.comment,
-                      size: 16,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onPrimary
-                          .withOpacity(0.7),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      widget.post.commentCount.toString(),
-                      style: TextStyle(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onPrimary
-                            .withOpacity(0.7),
+                    GestureDetector(
+                      onTap: widget.onComments == null
+                          ? null
+                          : () => widget.onComments!(widget.post),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.comment,
+                            size: 16,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimary
+                                .withOpacity(0.7),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            widget.post.commentCount.toString(),
+                            style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimary
+                                  .withOpacity(0.7),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
