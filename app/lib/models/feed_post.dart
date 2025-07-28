@@ -1,3 +1,5 @@
+const String _hostUrl = 'https://ocs.kttprojects.com';
+
 class FeedPost {
   final int id;
   final int feedId;
@@ -76,7 +78,7 @@ class FeedPost {
       updatedAt: DateTime.parse(json['updated_at']),
       email: json['email'],
       displayName: json['display_name'],
-      avatarUrl: json['avatar_url'],
+      avatarUrl: _formatAvatarUrl(json['avatar_url']),
       commentCount: _parseInt(json['comment_count']),
       feedName: json['feed_name'],
       feedDisplayName: json['feed_display_name'],
@@ -106,6 +108,15 @@ class FeedPost {
       'feed_name': feedName,
       'feed_display_name': feedDisplayName,
     };
+  }
+
+  static String? _formatAvatarUrl(dynamic url) {
+    if (url == null) return null;
+    String avatar = url.toString();
+    if (avatar.startsWith('/')) {
+      avatar = '$_hostUrl$avatar';
+    }
+    return avatar;
   }
 
   String getTimeAgo() {
