@@ -653,5 +653,9 @@
   "change": "Change",
   "@change": {
     "description": "Button label to change selection"
+  },
+  "members": "Members",
+  "@members": {
+    "description": "Section title for feed members"
   }
 }

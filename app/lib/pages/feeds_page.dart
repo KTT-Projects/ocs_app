@@ -14,6 +14,7 @@ import '../widgets/feed_selection_dialog.dart';
 import '../widgets/feed_menu_dialog.dart';
 import '../widgets/reorder_feeds_dialog.dart';
 import 'create_feed_page.dart';
+import 'feed_details_page.dart';
 import 'feed_settings_page.dart';
 import '../widgets/create_post_dialog.dart';
 import '../widgets/user_selection_dialog.dart';
@@ -229,6 +230,18 @@ class _FeedsPageState extends State<FeedsPage> {
         );
       }
     }
+  }
+
+  void _openFeedDetails(Feed feed) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FeedDetailsPage(
+          apiClient: widget.apiClient,
+          feed: feed,
+        ),
+      ),
+    );
   }
 
   void _onNewPostPressed(List<Feed> joinedFeeds) async {
@@ -691,6 +704,7 @@ class _FeedsPageState extends State<FeedsPage> {
                           }
                         }
                       },
+                      onFeedTap: _openFeedDetails,
                     ),
                   )
                 else
@@ -764,6 +778,7 @@ class _FeedsPageState extends State<FeedsPage> {
                                     }
                                   }
                                 },
+                                onTap: () => _openFeedDetails(feed),
                               )),
                         ],
                       ],
