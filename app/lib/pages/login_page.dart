@@ -99,7 +99,6 @@ class _LoginPageState extends State<LoginPage> {
             });
             final token = response['token'];
             await widget.apiClient.setToken(token);
-            Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
           } else {
             setState(() => _errorMessage = l10n.verificationFailed);
           }
@@ -131,9 +130,6 @@ class _LoginPageState extends State<LoginPage> {
               response['token'] != null) {
             final token = response['token'];
             await widget.apiClient.setToken(token);
-            if (mounted) {
-              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-            }
           }
         }
       }
