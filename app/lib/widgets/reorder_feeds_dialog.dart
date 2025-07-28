@@ -49,6 +49,7 @@ class _ReorderFeedsDialogState extends State<ReorderFeedsDialog> {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             child: ReorderableListView.builder(
               shrinkWrap: true,
+              buildDefaultDragHandles: false,
               itemCount: _feeds.length,
               onReorder: (oldIndex, newIndex) {
                 setState(() {
@@ -92,9 +93,12 @@ class _ReorderFeedsDialogState extends State<ReorderFeedsDialog> {
                         color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     ),
-                    trailing: Icon(
-                      Icons.drag_handle,
-                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.5),
+                    trailing: ReorderableDragStartListener(
+                      index: index,
+                      child: Icon(
+                        Icons.drag_handle,
+                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.5),
+                      ),
                     ),
                   ),
                 );
