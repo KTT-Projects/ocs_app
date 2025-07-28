@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'dart:async';
 import '../models/feed_post.dart';
 
-class PostListItem extends StatelessWidget {
+class PostListItem extends StatefulWidget {
   final FeedPost post;
   final Function(FeedPost, String) onVote;
 
@@ -11,6 +12,28 @@ class PostListItem extends StatelessWidget {
     required this.post,
     required this.onVote,
   });
+
+  @override
+  State<PostListItem> createState() => _PostListItemState();
+}
+
+class _PostListItemState extends State<PostListItem> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Update time labels every minute
+    _timer = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,17 +67,17 @@ class PostListItem extends StatelessWidget {
                     CircleAvatar(
                       radius: 16,
                       backgroundColor: Theme.of(context).colorScheme.secondary,
-                      child: post.avatarUrl != null
+                      child: widget.post.avatarUrl != null
                           ? ClipOval(
                               child: Image.network(
-                                post.avatarUrl!,
+                                widget.post.avatarUrl!,
                                 width: 32,
                                 height: 32,
                                 fit: BoxFit.cover,
                               ),
                             )
                           : Text(
-                              post.displayName[0],
+                              widget.post.displayName[0],
                               style: TextStyle(
                                 fontSize: 16,
                                 color:
@@ -68,14 +91,14 @@ class PostListItem extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            post.displayName,
+                            widget.post.displayName,
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.onPrimary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           Text(
-                            post.getTimeAgo(),
+                            widget.post.getTimeAgo(),
                             style: TextStyle(
                               color: Theme.of(context)
                                   .colorScheme
@@ -91,24 +114,24 @@ class PostListItem extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  post.title,
+                  widget.post.title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onPrimary,
                       ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  post.content,
+                  widget.post.content,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),
                 ),
-                if (post.mediaUrl != null) ...[
+                if (widget.post.mediaUrl != null) ...[
                   const SizedBox(height: 8),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.network(
-                      post.mediaUrl!,
+                      widget.post.mediaUrl!,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -119,17 +142,17 @@ class PostListItem extends StatelessWidget {
                     IconButton(
                       icon: Icon(
                         Icons.arrow_upward,
-                        color: post.userVote == 'upvote'
+                        color: widget.post.userVote == 'upvote'
                             ? Theme.of(context).colorScheme.secondary
                             : Theme.of(context)
                                 .colorScheme
                                 .onPrimary
                                 .withOpacity(0.7),
                       ),
-                      onPressed: () => onVote(post, 'upvote'),
+                      onPressed: () => widget.onVote(widget.post, 'upvote'),
                     ),
                     Text(
-                      post.upvotes.toString(),
+                      widget.post.upvotes.toString(),
                       style: TextStyle(
                         color: Theme.of(context)
                             .colorScheme
@@ -141,14 +164,14 @@ class PostListItem extends StatelessWidget {
                     IconButton(
                       icon: Icon(
                         Icons.arrow_downward,
-                        color: post.userVote == 'downvote'
+                        color: widget.post.userVote == 'downvote'
                             ? Theme.of(context).colorScheme.secondary
                             : Theme.of(context)
                                 .colorScheme
                                 .onPrimary
                                 .withOpacity(0.7),
                       ),
-                      onPressed: () => onVote(post, 'downvote'),
+                      onPressed: () => widget.onVote(widget.post, 'downvote'),
                     ),
                     const Spacer(),
                     Icon(
@@ -161,7 +184,7 @@ class PostListItem extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      post.commentCount.toString(),
+                      widget.post.commentCount.toString(),
                       style: TextStyle(
                         color: Theme.of(context)
                             .colorScheme

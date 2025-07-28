@@ -91,14 +91,31 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
         voteType: voteType,
       );
 
-      // Optimistically update the UI
+      // Optimistically update the UI with toggle behaviour
       setState(() {
-        if (voteType == 'upvote') {
-          post.upvotes += 1;
+        if (post.userVote == voteType) {
+          // Remove existing vote
+          if (voteType == 'upvote') {
+            post.upvotes -= 1;
+          } else {
+            post.downvotes -= 1;
+          }
+          post.userVote = null;
         } else {
-          post.downvotes += 1;
+          // Switch or add vote
+          if (post.userVote == 'upvote') {
+            post.upvotes -= 1;
+          } else if (post.userVote == 'downvote') {
+            post.downvotes -= 1;
+          }
+
+          if (voteType == 'upvote') {
+            post.upvotes += 1;
+          } else {
+            post.downvotes += 1;
+          }
+          post.userVote = voteType;
         }
-        post.userVote = voteType;
       });
     } catch (e) {
       if (mounted) {
