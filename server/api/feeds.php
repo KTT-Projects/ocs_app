@@ -334,7 +334,7 @@ class FeedController
                   JOIN user_profiles up ON u.id = up.user_id
                   LEFT JOIN feed_votes fv ON fv.post_id = fp.id AND fv.user_id = :user_id
                   WHERE fp.feed_id = :feed_id
-                  ORDER BY fp.score DESC, fp.created_at DESC
+                  ORDER BY (fp.upvotes - fp.downvotes) DESC, fp.created_at DESC
                   LIMIT :limit OFFSET :offset";
 
     $stmt = $this->conn->prepare($query);
@@ -392,7 +392,7 @@ class FeedController
                   LEFT JOIN feed_votes fv ON fv.post_id = fp.id AND fv.user_id = :user_id
                   JOIN feed_members fm ON f.id = fm.feed_id
                   WHERE fm.user_id = :user_id
-                  ORDER BY fp.score DESC, fp.created_at DESC
+                  ORDER BY (fp.upvotes - fp.downvotes) DESC, fp.created_at DESC
                   LIMIT :limit OFFSET :offset";
 
     $stmt = $this->conn->prepare($query);
