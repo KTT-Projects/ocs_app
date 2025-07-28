@@ -98,6 +98,7 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
         } else {
           post.downvotes += 1;
         }
+        post.userVote = voteType;
       });
     } catch (e) {
       if (mounted) {

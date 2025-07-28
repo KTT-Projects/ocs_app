@@ -21,6 +21,7 @@ class FeedPost {
   final int commentCount;
   final String? feedName;
   final String? feedDisplayName;
+  String? userVote;
 
   FeedPost({
     required this.id,
@@ -43,6 +44,7 @@ class FeedPost {
     required this.commentCount,
     this.feedName,
     this.feedDisplayName,
+    this.userVote,
   });
 
   factory FeedPost.fromJson(Map<String, dynamic> json) {
@@ -82,6 +84,7 @@ class FeedPost {
       commentCount: _parseInt(json['comment_count']),
       feedName: json['feed_name'],
       feedDisplayName: json['feed_display_name'],
+      userVote: json['user_vote'],
     );
   }
 
@@ -107,6 +110,7 @@ class FeedPost {
       'comment_count': commentCount,
       'feed_name': feedName,
       'feed_display_name': feedDisplayName,
+      'user_vote': userVote,
     };
   }
 
