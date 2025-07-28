@@ -442,13 +442,13 @@ class _FeedsPageState extends State<FeedsPage> {
                           icon: Icons.home,
                           label: l10n.home,
                           selected: _selectedFeed == null && _sortBy != 'discover',
-                          onTap: () {
-                            setState(() {
-                              _selectedFeed = null;
-                              _sortBy = 'latest';
-                            });
-                            _loadPosts();
-                          },
+onTap: () {
+  setState(() {
+    _selectedFeed = null;
+    _sortBy = 'default';
+  });
+  _loadPosts();
+},
                         );
                       } else {
                         final feed = joinedFeeds[index - 2];
@@ -466,13 +466,13 @@ class _FeedsPageState extends State<FeedsPage> {
                               : null,
                           label: feed.displayName,
                           selected: _selectedFeed?.id == feed.id,
-                          onTap: () {
-                            setState(() {
-                              _selectedFeed = feed;
-                              _sortBy = 'latest';
-                            });
-                            _loadPosts();
-                          },
+onTap: () {
+  setState(() {
+    _selectedFeed = feed;
+    _sortBy = 'default';
+  });
+  _loadPosts();
+},
                         );
                       }
                     },
