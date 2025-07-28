@@ -17,14 +17,24 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   late final ApiClient _apiClient;
-  
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _apiClient = widget.apiClient;
+    _apiClient.addListener(_onApiClientChanged);
     _checkExistingToken();
+  }
+
+  @override
+  void dispose() {
+    _apiClient.removeListener(_onApiClientChanged);
+    super.dispose();
+  }
+
+  void _onApiClientChanged() {
+    if (mounted) setState(() {});
   }
 
   Future<void> _checkExistingToken() async {

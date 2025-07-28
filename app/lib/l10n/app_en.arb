@@ -263,7 +263,7 @@
   "@displayNameRequired": {
     "description": "Error message when display name is empty"
   },
-  "displayNameTooLong": "Display name must be less than 100 characters",
+  "displayNameTooLong": "Display name must be less than 30 characters",
   "@displayNameTooLong": {
     "description": "Error message when display name is too long"
   },
@@ -422,5 +422,248 @@
   "noName": "No Name",
   "@noName": {
     "description": "Text shown when user has no name set"
+  },
+  "failedToLoadFeeds": "Failed to load feeds",
+  "@failedToLoadFeeds": {
+    "description": "Error message when loading feeds fails"
+  },
+  "failedToLoadPosts": "Failed to load posts",
+  "@failedToLoadPosts": {
+    "description": "Error message when loading posts fails"
+  },
+  "failedToJoinFeed": "Failed to join feed",
+  "@failedToJoinFeed": {
+    "description": "Error message when joining a feed fails"
+  },
+  "failedToCreateFeed": "Failed to create feed",
+  "@failedToCreateFeed": {
+    "description": "Error message when creating a feed fails"
+  },
+  "failedToCreatePost": "Failed to create post",
+  "@failedToCreatePost": {
+    "description": "Error message when creating a post fails"
+  },
+  "failedToVote": "Failed to vote",
+  "@failedToVote": {
+    "description": "Error message when voting fails"
+  },
+  "createFeed": "Create Feed",
+  "@createFeed": {
+    "description": "Title for create feed page"
+  },
+  "createPost": "Create Post",
+  "@createPost": {
+    "description": "Title for create post page"
+  },
+  "feedId": "Feed ID (Unique identifier)",
+  "@feedId": {
+    "description": "Label for feed ID input field"
+  },
+  "feedDisplayName": "Display Name",
+  "@feedDisplayName": {
+    "description": "Label for feed display name input field"
+  },
+  "feedDescription": "Description",
+  "@feedDescription": {
+    "description": "Label for feed description input field"
+  },
+  "feedRules": "Rules (Optional)",
+  "@feedRules": {
+    "description": "Label for feed rules input field"
+  },
+  "feedIdRequired": "Feed ID is required",
+  "@feedIdRequired": {
+    "description": "Error message when feed ID is empty"
+  },
+  "feedIdInvalid": "Only lowercase letters, numbers, and underscores allowed",
+  "@feedIdInvalid": {
+    "description": "Error message when feed ID contains invalid characters"
+  },
+  "displayNameRequired": "Display name is required",
+  "@displayNameRequired": {
+    "description": "Error message when display name is empty"
+  },
+  "descriptionRequired": "Description is required",
+  "@descriptionRequired": {
+    "description": "Error message when description is empty"
+  },
+  "titleRequired": "Title is required",
+  "@titleRequired": {
+    "description": "Error message when title is empty"
+  },
+  "contentRequired": "Content is required",
+  "@contentRequired": {
+    "description": "Error message when content is empty"
+  },
+  "addImage": "Add Image",
+  "@addImage": {
+    "description": "Button text for adding an image"
+  },
+  "feedIdHelperText": "Only lowercase letters, numbers, and underscores",
+  "@feedIdHelperText": {
+    "description": "Helper text for feed ID input field"
+  },
+  "postTitle": "Title",
+  "@postTitle": {
+    "description": "Label for post title input field"
+  },
+  "writePost": "Write your post...",
+  "@writePost": {
+    "description": "Placeholder text for post content input field"
+  },
+  "newPostIn": "{feedName}",
+  "@newPostIn": {
+    "description": "Title for new post dialog with feed name",
+    "placeholders": {
+      "feedName": {}
+    }
+  },
+  "openInFullPage": "Open in full page",
+  "@openInFullPage": {
+    "description": "Tooltip for button to open post editor in full page"
+  },
+  "post": "Post",
+  "@post": {
+    "description": "Button text to submit a post"
+  },
+  "discover": "Discover",
+  "@discover": {
+    "description": "Title for the discover tab"
+  },
+  "home": "Home",
+  "@home": {
+    "description": "Title for the home tab"
+  },
+  "sortBy": "Sort by",
+  "@sortBy": {
+    "description": "Title for the sort menu"
+  },
+  "latest": "Latest",
+  "@latest": {
+    "description": "Sort by latest option"
+  },
+  "popular": "Popular",
+  "@popular": {
+    "description": "Sort by popular option"
+  },
+  "defaultSort": "Default",
+  "@defaultSort": {
+    "description": "Default sort option"
+  },
+  "feedOptions": "Feed options",
+  "@feedOptions": {
+    "description": "Title for the feed options menu"
+  },
+  "createNewFeed": "Create new feed",
+  "@createNewFeed": {
+    "description": "Button to create a new feed"
+  },
+  "reorderFeeds": "Reorder feeds",
+  "@reorderFeeds": {
+    "description": "Button to reorder feeds"
+  },
+  "leaveFeed": "Leave feed",
+  "@leaveFeed": {
+    "description": "Button to leave the currently selected feed"
+  },
+  "selectNewAdmin": "Select new admin",
+  "@selectNewAdmin": {
+    "description": "Dialog title when choosing a new admin"
+  },
+  "confirmDeleteFeed": "No other members remain. Leaving will delete this feed. Continue?",
+  "@confirmDeleteFeed": {
+    "description": "Confirmation message shown to the last admin before deleting a feed"
+  },
+  "ok": "OK",
+  "@ok": {
+    "description": "Generic OK button label"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save button"
+  },
+  "searchFeeds": "Search feeds...",
+  "@searchFeeds": {
+    "description": "Placeholder for search feeds input"
+  },
+  "population": "Population",
+  "@population": {
+    "description": "Sort by population option"
+  },
+  "latestActivity": "Latest Activity",
+  "@latestActivity": {
+    "description": "Sort by latest activity option"
+  },
+  "noFeedsFound": "No feeds found.",
+  "@noFeedsFound": {
+    "description": "Message when no feeds are found"
+  },
+  "join": "Join",
+  "@join": {
+    "description": "Button to join a feed"
+  },
+  "discoverMoreFeeds": "Discover more feeds",
+  "@discoverMoreFeeds": {
+    "description": "Title for the discover more feeds section"
+  },
+  "newPost": "New post",
+  "@newPost": {
+    "description": "Button to create a new post"
+  },
+  "newPostTo": "New post to...",
+  "@newPostTo": {
+    "description": "Button to create a new post to a specific feed"
+  },
+  "chooseFeed": "Choose a feed",
+  "@chooseFeed": {
+    "description": "Title for feed selection dialog"
+  },
+  "feedCreatedSuccess": "Feed created successfully",
+  "@feedCreatedSuccess": {
+    "description": "Success message when a feed is created"
+  },
+  "titleTooLong": "Title must be less than 300 characters",
+  "@titleTooLong": {
+    "description": "Error message when post title is too long"
+  },
+  "contentTooLong": "Content must be less than 5000 characters",
+  "@contentTooLong": {
+    "description": "Error message when post content is too long"
+  },
+  "descriptionTooLong": "Description must be less than 1000 characters",
+  "@descriptionTooLong": {
+    "description": "Error message when feed description is too long"
+  },
+  "rulesTooLong": "Rules must be less than 1000 characters",
+  "@rulesTooLong": {
+    "description": "Error message when feed rules are too long"
+  },
+  "feedSettings": "Feed settings",
+  "@feedSettings": {
+    "description": "Title for feed settings page"
+  },
+  "feedUpdatedSuccess": "Feed updated successfully",
+  "@feedUpdatedSuccess": {
+    "description": "Success message when feed settings are saved"
+  },
+  "failedToLoadFeedMembers": "Failed to load feed members",
+  "@failedToLoadFeedMembers": {
+    "description": "Error message when loading feed members fails"
+  },
+  "currentAdmin": "Current admin",
+  "@currentAdmin": {
+    "description": "Label for current feed admin"
+  },
+  "change": "Change",
+  "@change": {
+    "description": "Button label to change selection"
+  },
+  "feedDetails": "Feed details",
+  "@feedDetails": {
+    "description": "Button to view feed details"
+  },
+  "members": "Members",
+  "@members": {
+    "description": "Section title for feed members"
   }
 }
