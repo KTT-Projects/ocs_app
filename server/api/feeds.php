@@ -456,6 +456,7 @@ class FeedController
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     $limit = 20;
     $offset = ($page - 1) * $limit;
+    $sort = isset($_GET['sort']) ? $_GET['sort'] : 'default';
 
     $query = "SELECT fp.*,
                   f.name as feed_name,
@@ -478,7 +479,7 @@ class FeedController
     } elseif ($sort === 'latest') {
       $query .= " ORDER BY fp.created_at DESC";
     } else {
-      $query .=" ORDER BY (fp.upvotes - fp.downvotes) DESC, fp.created_at DESC";
+      $query .= " ORDER BY (fp.upvotes - fp.downvotes) DESC, fp.created_at DESC";
     }
 
     $query .= " LIMIT :limit OFFSET :offset";
