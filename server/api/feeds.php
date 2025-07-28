@@ -60,6 +60,8 @@ class FeedController
             $this->getHomeFeed($userId);
           } else if ($action === 'members') {
             $this->getFeedMembers();
+          } else if ($action === 'comments') {
+            $this->getComments($userId);
           }
           break;
         case 'POST':
@@ -77,6 +79,8 @@ class FeedController
             $this->reorderFeeds($userId);
           } else if ($action === 'icon') {
             $this->uploadIcon($userId);
+          } else if ($action === 'comment') {
+            $this->createComment($userId);
           }
           break;
         case 'PATCH':
@@ -782,6 +786,54 @@ class FeedController
 
     $postId = $this->conn->lastInsertId();
     Response::success(['id' => $postId], 'Post created successfully');
+  }
+
+  private function getComments($userId)
+  {
+    if (!isset($_GET['post_id'])) {
+      Response::error('Post ID is required', 400);
+      return;
+    }
+
+    $postId = intval($_GET['post_id']);
+
+    $query = "SELECT c.*, up.display_name, up.avatar_url
+                FROM comments c
+                JOIN users u ON c.user_id = u.id
+                JOIN user_profiles up ON u.id = up.user_id
+                WHERE c.post_id = :post_id
+                ORDER BY c.created_at ASC";
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':post_id', $postId, PDO::PARAM_INT);
+    $stmt->execute();
+    $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    Response::success($comments, 'Comments retrieved successfully');
+  }
+
+  private function createComment($userId)
+  {
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    if (!isset($data['post_id']) || !isset($data['content'])) {
+      Response::error('Post ID and content are required', 400);
+      return;
+    }
+
+    $postId = intval($data['post_id']);
+
+    $query = "INSERT INTO comments (post_id, user_id, parent_comment_id, content)
+                 VALUES (:post_id, :user_id, :parent_comment_id, :content)";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':post_id', $postId, PDO::PARAM_INT);
+    $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+    $stmt->bindValue(':parent_comment_id', $data['parent_comment_id'] ?? null, PDO::PARAM_INT);
+    $stmt->bindParam(':content', $data['content']);
+    $stmt->execute();
+
+    $commentId = $this->conn->lastInsertId();
+    Response::success(['id' => $commentId], 'Comment created successfully');
   }
 
   private function vote($userId)
