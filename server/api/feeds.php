@@ -42,7 +42,7 @@ class FeedController
           Response::error('Invalid or expired token', 401);
           return;
         }
-        $userId = $decoded['user_id'];
+        $userId = intval($decoded['user_id']);
       } elseif (!($method === 'GET' && $action === 'list')) {
         Response::error('Authorization header is required', 401);
         return;
