@@ -44,25 +44,40 @@ class FeedPost {
   });
 
   factory FeedPost.fromJson(Map<String, dynamic> json) {
+    int _parseInt(dynamic value) {
+      if (value is int) return value;
+      return int.tryParse(value?.toString() ?? '') ?? 0;
+    }
+
+    double _parseDouble(dynamic value) {
+      if (value is double) return value;
+      if (value is int) return value.toDouble();
+      return double.tryParse(value?.toString() ?? '') ?? 0;
+    }
+
+    bool _parseBool(dynamic value) {
+      return value == 1 || value == '1' || value == true;
+    }
+
     return FeedPost(
-      id: json['id'],
-      feedId: json['feed_id'],
-      userId: json['user_id'],
-      title: json['title'],
-      content: json['content'],
+      id: _parseInt(json['id']),
+      feedId: _parseInt(json['feed_id']),
+      userId: _parseInt(json['user_id']),
+      title: json['title'] ?? '',
+      content: json['content'] ?? '',
       mediaUrl: json['media_url'],
       mediaType: json['media_type'],
-      upvotes: json['upvotes'] ?? 0,
-      downvotes: json['downvotes'] ?? 0,
-      score: (json['score'] ?? 0).toDouble(),
-      isPinned: json['is_pinned'] == 1,
-      isLocked: json['is_locked'] == 1,
+      upvotes: _parseInt(json['upvotes']),
+      downvotes: _parseInt(json['downvotes']),
+      score: _parseDouble(json['score']),
+      isPinned: _parseBool(json['is_pinned']),
+      isLocked: _parseBool(json['is_locked']),
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
       email: json['email'],
       displayName: json['display_name'],
       avatarUrl: json['avatar_url'],
-      commentCount: json['comment_count'] ?? 0,
+      commentCount: _parseInt(json['comment_count']),
       feedName: json['feed_name'],
       feedDisplayName: json['feed_display_name'],
     );
