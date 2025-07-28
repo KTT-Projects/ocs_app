@@ -8,11 +8,8 @@ class FeedDetailsPage extends StatefulWidget {
   final ApiClient apiClient;
   final Feed feed;
 
-  const FeedDetailsPage({
-    Key? key,
-    required this.apiClient,
-    required this.feed,
-  }) : super(key: key);
+  const FeedDetailsPage({Key? key, required this.apiClient, required this.feed})
+    : super(key: key);
 
   @override
   State<FeedDetailsPage> createState() => _FeedDetailsPageState();
@@ -31,8 +28,10 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
 
   Future<void> _loadMembers() async {
     try {
-      final members =
-          await widget.apiClient.getFeedMembers(context, widget.feed.id);
+      final members = await widget.apiClient.getFeedMembers(
+        context,
+        widget.feed.id,
+      );
       if (!mounted) return;
       setState(() {
         _members = members;
@@ -78,10 +77,14 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
                     ),
             ),
             const SizedBox(width: 8),
-            Text(
-              widget.feed.displayName,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onPrimary,
+            Expanded(
+              child: Text(
+                widget.feed.displayName,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -100,8 +103,10 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: IconButton(
-                icon: Icon(Icons.arrow_back,
-                    color: Theme.of(context).colorScheme.onPrimary),
+                icon: Icon(
+                  Icons.arrow_back,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
                 onPressed: () => Navigator.pop(context),
               ),
             ),
@@ -127,12 +132,14 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
               padding: const EdgeInsets.all(16),
               child: Container(
                 decoration: BoxDecoration(
-                  color:
-                      Theme.of(context).colorScheme.background.withOpacity(0.2),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.background.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color:
-                        Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onPrimary.withOpacity(0.3),
                   ),
                   boxShadow: [
                     BoxShadow(
@@ -154,8 +161,9 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
                           Center(
                             child: CircleAvatar(
                               radius: 40,
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.secondary,
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.secondary,
                               child: widget.feed.iconUrl != null
                                   ? ClipOval(
                                       child: Image.network(
@@ -169,9 +177,9 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
                                       widget.feed.displayName[0],
                                       style: TextStyle(
                                         fontSize: 40,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSecondary,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSecondary,
                                       ),
                                     ),
                             ),
@@ -180,12 +188,11 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
                           Center(
                             child: Text(
                               widget.feed.displayName,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineMedium
+                              style: Theme.of(context).textTheme.headlineMedium
                                   ?.copyWith(
-                                    color:
-                                        Theme.of(context).colorScheme.onPrimary,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimary,
                                   ),
                             ),
                           ),
@@ -193,10 +200,9 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
                           Text(
                             l10n.feedDescription,
                             style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimary
-                                  .withOpacity(0.7),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onPrimary.withOpacity(0.7),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -213,10 +219,9 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
                             Text(
                               l10n.feedRules,
                               style: TextStyle(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimary
-                                    .withOpacity(0.7),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onPrimary.withOpacity(0.7),
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -232,10 +237,9 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
                           Text(
                             l10n.members,
                             style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimary
-                                  .withOpacity(0.7),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onPrimary.withOpacity(0.7),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -261,16 +265,17 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
                                   .map(
                                     (m) => Padding(
                                       padding: const EdgeInsets.symmetric(
-                                          vertical: 4),
+                                        vertical: 4,
+                                      ),
                                       child: Row(
                                         children: [
                                           Expanded(
                                             child: Text(
                                               m['display_name'] ?? '',
                                               style: TextStyle(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onPrimary,
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.onPrimary,
                                               ),
                                             ),
                                           ),
