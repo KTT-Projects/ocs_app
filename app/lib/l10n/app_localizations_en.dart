@@ -425,6 +425,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get popular => 'Popular';
 
   @override
+  String get defaultSort => 'Default';
+
+  @override
   String get feedOptions => 'Feed options';
 
   @override

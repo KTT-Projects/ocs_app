@@ -40,7 +40,7 @@ class _FeedsPageState extends State<FeedsPage> {
   List<FeedPost>? _posts;
   bool _didLoadFeeds = false;
   Timer? _refreshTimer;
-  String _sortBy = 'latest'; // 'latest' or 'popular'
+  String _sortBy = 'default'; // 'default', 'latest', or 'popular'
   Feed? _selectedFeed; // Currently selected feed, null means home feed
   String? _currentToken;
 
@@ -188,8 +188,12 @@ class _FeedsPageState extends State<FeedsPage> {
       final posts = _selectedFeed == null
           ? _sortBy == 'discover'
               ? await widget.apiClient.getDiscoverFeed(context)
-              : await widget.apiClient.getHomeFeed(context)
-          : await widget.apiClient.getFeedPosts(context, _selectedFeed!.id);
+              : await widget.apiClient.getHomeFeed(context, sort: _sortBy)
+          : await widget.apiClient.getFeedPosts(
+              context,
+              _selectedFeed!.id,
+              sort: _sortBy,
+            );
       if (mounted) {
         setState(() {
           _posts = posts;
@@ -734,6 +738,8 @@ class _FeedsPageState extends State<FeedsPage> {
                                 final diff = bVotes.compareTo(aVotes);
                                 if (diff != 0) return diff;
                                 return b.createdAt.compareTo(a.createdAt);
+                              } else if (_sortBy == 'default') {
+                                return b.score.compareTo(a.score);
                               }
                               return 0;
                             });

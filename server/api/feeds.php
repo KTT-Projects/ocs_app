@@ -326,6 +326,7 @@ class FeedController
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     $limit = 20;
     $offset = ($page - 1) * $limit;
+    $sort = isset($_GET['sort']) ? $_GET['sort'] : 'default';
 
     $query = "SELECT fp.*,
                   u.email,
@@ -337,9 +338,18 @@ class FeedController
                   JOIN users u ON fp.user_id = u.id
                   JOIN user_profiles up ON u.id = up.user_id
                   LEFT JOIN feed_votes fv ON fv.post_id = fp.id AND fv.user_id = :user_id
-                  WHERE fp.feed_id = :feed_id
-                  ORDER BY (fp.upvotes - fp.downvotes) DESC, fp.created_at DESC
-                  LIMIT :limit OFFSET :offset";
+                  WHERE fp.feed_id = :feed_id";
+
+    if ($sort === 'default') {
+      $query .= " AND (fp.upvotes - fp.downvotes) >= -5 ORDER BY fp.score DESC";
+    } elseif ($sort === 'latest') {
+      $query .= " ORDER BY fp.created_at DESC";
+    } else {
+      $query .=
+        " ORDER BY (fp.upvotes - fp.downvotes) DESC, fp.created_at DESC";
+    }
+
+    $query .= " LIMIT :limit OFFSET :offset";
 
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':user_id', $userId);
@@ -395,9 +405,17 @@ class FeedController
                   JOIN user_profiles up ON u.id = up.user_id
                   LEFT JOIN feed_votes fv ON fv.post_id = fp.id AND fv.user_id = :user_id
                   JOIN feed_members fm ON f.id = fm.feed_id
-                  WHERE fm.user_id = :user_id
-                  ORDER BY (fp.upvotes - fp.downvotes) DESC, fp.created_at DESC
-                  LIMIT :limit OFFSET :offset";
+                  WHERE fm.user_id = :user_id";
+
+    if ($sort === 'default') {
+      $query .= " AND (fp.upvotes - fp.downvotes) >= -5 ORDER BY fp.score DESC";
+    } elseif ($sort === 'latest') {
+      $query .= " ORDER BY fp.created_at DESC";
+    } else {
+      $query .=" ORDER BY (fp.upvotes - fp.downvotes) DESC, fp.created_at DESC";
+    }
+
+    $query .= " LIMIT :limit OFFSET :offset";
 
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':user_id', $userId);
@@ -785,6 +803,12 @@ class FeedController
     $stmt->execute();
 
     $postId = $this->conn->lastInsertId();
+    // Calculate initial score based on creation time
+    $score = $this->calculateScore($postId);
+    $scoreStmt = $this->conn->prepare('UPDATE feed_posts SET score = :score WHERE id = :post_id');
+    $scoreStmt->bindParam(':score', $score);
+    $scoreStmt->bindParam(':post_id', $postId);
+    $scoreStmt->execute();
     Response::success(['id' => $postId], 'Post created successfully');
   }
 
@@ -833,6 +857,12 @@ class FeedController
     $stmt->execute();
 
     $commentId = $this->conn->lastInsertId();
+    // Recalculate post score to include new comment
+    $score = $this->calculateScore($postId);
+    $scoreStmt = $this->conn->prepare('UPDATE feed_posts SET score = :score WHERE id = :post_id');
+    $scoreStmt->bindParam(':score', $score);
+    $scoreStmt->bindParam(':post_id', $postId);
+    $scoreStmt->execute();
     Response::success(['id' => $commentId], 'Comment created successfully');
   }
 
@@ -964,13 +994,15 @@ class FeedController
   private function calculateScore($postId)
   {
     // Get post data
-    $query = "SELECT created_at, upvotes, downvotes FROM feed_posts WHERE id = :post_id";
+    $query = "SELECT fp.created_at, fp.upvotes, fp.downvotes,
+                     (SELECT COUNT(*) FROM comments WHERE post_id = fp.id) as comment_count
+                     FROM feed_posts fp WHERE fp.id = :post_id";
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':post_id', $postId);
     $stmt->execute();
     $post = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    $s = $post['upvotes'] - $post['downvotes'];
+    $s = ($post['upvotes'] - $post['downvotes']) + ($post['comment_count'] ?? 0);
     $order = log10(max(abs($s), 1));
     $sign = $s > 0 ? 1 : ($s < 0 ? -1 : 0);
 

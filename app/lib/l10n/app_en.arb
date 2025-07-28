@@ -546,6 +546,10 @@
   "@popular": {
     "description": "Sort by popular option"
   },
+  "defaultSort": "Default",
+  "@defaultSort": {
+    "description": "Default sort option"
+  },
   "feedOptions": "Feed options",
   "@feedOptions": {
     "description": "Title for the feed options menu"

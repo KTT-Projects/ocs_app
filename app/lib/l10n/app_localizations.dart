@@ -885,6 +885,12 @@ abstract class AppLocalizations {
   /// **'Popular'**
   String get popular;
 
+  /// Default sort option
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get defaultSort;
+
   /// Title for the feed options menu
   ///
   /// In en, this message translates to:
