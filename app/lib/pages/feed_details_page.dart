@@ -26,7 +26,7 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
   @override
   void initState() {
     super.initState();
-    _loadMembers();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadMembers());
   }
 
   Future<void> _loadMembers() async {
