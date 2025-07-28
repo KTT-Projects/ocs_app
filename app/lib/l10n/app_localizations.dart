@@ -1046,6 +1046,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Change'**
   String get change;
+
+  /// Section title for feed members
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get members;
 }
 
 class _AppLocalizationsDelegate

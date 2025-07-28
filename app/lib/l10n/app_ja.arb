@@ -356,5 +356,9 @@
   "change": "変更",
   "@change": {
     "description": "変更ボタンのラベル"
+  },
+  "members": "メンバー",
+  "@members": {
+    "description": "フィードメンバーのセクションタイトル"
   }
 }
