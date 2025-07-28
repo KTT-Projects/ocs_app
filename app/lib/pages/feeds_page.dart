@@ -725,7 +725,11 @@ class _FeedsPageState extends State<FeedsPage> {
                               if (_sortBy == 'latest') {
                                 return b.createdAt.compareTo(a.createdAt);
                               } else if (_sortBy == 'popular') {
-                                return b.score.compareTo(a.score);
+                                final aVotes = a.upvotes - a.downvotes;
+                                final bVotes = b.upvotes - b.downvotes;
+                                final diff = bVotes.compareTo(aVotes);
+                                if (diff != 0) return diff;
+                                return b.createdAt.compareTo(a.createdAt);
                               }
                               return 0;
                             });
