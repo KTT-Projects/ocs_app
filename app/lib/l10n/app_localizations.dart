@@ -1064,6 +1064,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Members'**
   String get members;
+
+  /// Button label to load more posts
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get loadMore;
 }
 
 class _AppLocalizationsDelegate

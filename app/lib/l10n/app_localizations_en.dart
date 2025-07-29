@@ -515,4 +515,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get members => 'Members';
+
+  @override
+  String get loadMore => 'Load more';
 }

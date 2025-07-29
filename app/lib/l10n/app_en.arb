@@ -665,5 +665,9 @@
   "members": "Members",
   "@members": {
     "description": "Section title for feed members"
+  },
+  "loadMore": "Load more",
+  "@loadMore": {
+    "description": "Button label to load more posts"
   }
 }
