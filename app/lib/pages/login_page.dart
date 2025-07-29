@@ -234,67 +234,111 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(24),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                        child: Padding(
-                          padding: EdgeInsets.all(isSmallScreen ? 20.0 : 32.0),
-                          child: Form(
-                            key: _formKey,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  l10n.welcomeBack,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineMedium
-                                      ?.copyWith(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onPrimary,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  _showOtpField
-                                      ? l10n.verifyEmail
-                                      : l10n.signInToContinue,
-                                  style: Theme.of(context).textTheme.bodyLarge
-                                      ?.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimary
-                                            .withOpacity(0.8),
-                                      ),
-                                ),
-                                if (_errorMessage != null) ...[
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    l10n.errorMessage(_errorMessage!),
-                                    style: TextStyle(
+                      child: Padding(
+                        padding: EdgeInsets.all(isSmallScreen ? 20.0 : 32.0),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                l10n.welcomeBack,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium
+                                    ?.copyWith(
                                       color: Theme.of(
                                         context,
-                                      ).colorScheme.error,
+                                      ).colorScheme.onPrimary,
+                                      fontWeight: FontWeight.bold,
                                     ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                _showOtpField
+                                    ? l10n.verifyEmail
+                                    : l10n.signInToContinue,
+                                style: Theme.of(context).textTheme.bodyLarge
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary
+                                          .withOpacity(0.8),
+                                    ),
+                              ),
+                              if (_errorMessage != null) ...[
+                                const SizedBox(height: 16),
+                                Text(
+                                  l10n.errorMessage(_errorMessage!),
+                                  style: TextStyle(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.error,
                                   ),
-                                ],
-                                const SizedBox(height: 32),
+                                ),
+                              ],
+                              const SizedBox(height: 32),
+                              TextFormField(
+                                controller: _emailController,
+                                enabled: !_showOtpField,
+                                decoration: InputDecoration(
+                                  hintText: l10n.email,
+                                  prefixIcon: Icon(
+                                    Icons.email_outlined,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimary.withOpacity(0.7),
+                                  ),
+                                  hintStyle: TextStyle(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimary.withOpacity(0.7),
+                                  ),
+                                  filled: true,
+                                  fillColor: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary.withOpacity(0.1),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                ),
+                                style: TextStyle(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary,
+                                ),
+                                validator: (value) {
+                                  if (!_showOtpField) {
+                                    if (value?.isEmpty ?? true) {
+                                      return l10n.invalidEmail;
+                                    }
+                                    if (!value!.contains('@')) {
+                                      return l10n.invalidEmail;
+                                    }
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              if (!_showOtpField) ...[
                                 TextFormField(
-                                  controller: _emailController,
-                                  enabled: !_showOtpField,
+                                  controller: _passwordController,
+                                  obscureText: true,
                                   decoration: InputDecoration(
-                                    hintText: l10n.email,
+                                    hintText: l10n.password,
                                     prefixIcon: Icon(
-                                      Icons.email_outlined,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onPrimary.withOpacity(0.7),
+                                      Icons.lock_outline,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary
+                                          .withOpacity(0.7),
                                     ),
                                     hintStyle: TextStyle(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onPrimary.withOpacity(0.7),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary
+                                          .withOpacity(0.7),
                                     ),
                                     filled: true,
                                     fillColor: Theme.of(
@@ -310,274 +354,183 @@ class _LoginPageState extends State<LoginPage> {
                                       context,
                                     ).colorScheme.onPrimary,
                                   ),
-                                  validator: (value) {
-                                    if (!_showOtpField) {
-                                      if (value?.isEmpty ?? true) {
-                                        return l10n.invalidEmail;
-                                      }
-                                      if (!value!.contains('@')) {
-                                        return l10n.invalidEmail;
-                                      }
-                                    }
-                                    return null;
-                                  },
                                 ),
+                              ],
+                              if (_showOtpField) ...[
                                 const SizedBox(height: 16),
-                                if (!_showOtpField) ...[
-                                  TextFormField(
-                                    controller: _passwordController,
-                                    obscureText: true,
-                                    decoration: InputDecoration(
-                                      hintText: l10n.password,
-                                      prefixIcon: Icon(
-                                        Icons.lock_outline,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimary
-                                            .withOpacity(0.7),
+                                TextFormField(
+                                  controller: _otpController,
+                                  autofocus: true,
+                                  maxLength: 6,
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                        decimal: false,
                                       ),
-                                      hintStyle: TextStyle(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimary
-                                            .withOpacity(0.7),
-                                      ),
-                                      filled: true,
-                                      fillColor: Theme.of(
-                                        context,
-                                      ).colorScheme.onPrimary.withOpacity(0.1),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide.none,
-                                      ),
+                                  autofillHints: null,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                    LengthLimitingTextInputFormatter(6),
+                                  ],
+                                  decoration: InputDecoration(
+                                    hintText: l10n.enterOtp,
+                                    counterText: '', // Hide character counter
+                                    prefixIcon: Icon(
+                                      Icons.security_outlined,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary
+                                          .withOpacity(0.7),
                                     ),
-                                    style: TextStyle(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onPrimary,
+                                    hintStyle: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary
+                                          .withOpacity(0.7),
                                     ),
-                                  ),
-                                ],
-                                if (_showOtpField) ...[
-                                  const SizedBox(height: 16),
-                                  TextFormField(
-                                    controller: _otpController,
-                                    autofocus: true,
-                                    maxLength: 6,
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
-                                          decimal: false,
-                                        ),
-                                    autofillHints: null,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                      LengthLimitingTextInputFormatter(6),
-                                    ],
-                                    decoration: InputDecoration(
-                                      hintText: l10n.enterOtp,
-                                      counterText: '', // Hide character counter
-                                      prefixIcon: Icon(
-                                        Icons.security_outlined,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimary
-                                            .withOpacity(0.7),
-                                      ),
-                                      hintStyle: TextStyle(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimary
-                                            .withOpacity(0.7),
-                                      ),
-                                      filled: true,
-                                      fillColor: Theme.of(
-                                        context,
-                                      ).colorScheme.onPrimary.withOpacity(0.1),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide.none,
-                                      ),
-                                    ),
-                                    style: TextStyle(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onPrimary,
+                                    filled: true,
+                                    fillColor: Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimary.withOpacity(0.1),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide.none,
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    l10n.checkSpamJunk,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onPrimary.withOpacity(0.7),
-                                      fontSize: 12,
-                                    ),
+                                  style: TextStyle(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimary,
                                   ),
-                                  const SizedBox(height: 8),
-                                  TextButton.icon(
-                                    onPressed: _isLoading
-                                        ? null
-                                        : () async {
-                                            setState(() => _isLoading = true);
-                                            try {
-                                              if (_savedPassword == null) return;
-                                              await widget.apiClient.login(
-                                                context: context,
-                                                email: _emailController.text,
-                                                password: _savedPassword!,
-                                              );
-                                              if (mounted) {
-                                                GlassmorphicUI.showGlassSnackBar(
-                                                  context,
-                                                  l10n.verificationCodeSent(
-                                                    _emailController.text,
-                                                  ),
-                                                );
-                                              }
-                                            } catch (e) {
-                                              if (mounted) {
-                                                GlassmorphicUI.showGlassSnackBar(
-                                                  context,
-                                                  e.toString(),
-                                                  isError: true,
-                                                );
-                                              }
-                                            } finally {
-                                              setState(
-                                                () => _isLoading = false,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  l10n.checkSpamJunk,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimary.withOpacity(0.7),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                TextButton.icon(
+                                  onPressed: _isLoading
+                                      ? null
+                                      : () async {
+                                          setState(() => _isLoading = true);
+                                          try {
+                                            if (_savedPassword == null) return;
+                                            await widget.apiClient.login(
+                                              context: context,
+                                              email: _emailController.text,
+                                              password: _savedPassword!,
+                                            );
+                                            if (mounted) {
+                                              GlassmorphicUI.showGlassSnackBar(
+                                                context,
+                                                l10n.verificationCodeSent(
+                                                  _emailController.text,
+                                                ),
                                               );
                                             }
-                                          },
-                                    icon: Icon(
-                                      Icons.refresh,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onPrimary.withOpacity(0.8),
-                                      size: 16,
-                                    ),
-                                    label: Text(
-                                      l10n.resendOtp,
-                                      style: TextStyle(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimary
-                                            .withOpacity(0.8),
-                                      ),
-                                    ),
+                                          } catch (e) {
+                                            if (mounted) {
+                                              GlassmorphicUI.showGlassSnackBar(
+                                                context,
+                                                e.toString(),
+                                                isError: true,
+                                              );
+                                            }
+                                          } finally {
+                                            setState(
+                                              () => _isLoading = false,
+                                            );
+                                          }
+                                        },
+                                  icon: Icon(
+                                    Icons.refresh,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimary.withOpacity(0.8),
+                                    size: 16,
                                   ),
-                                ],
-                                const SizedBox(height: 24),
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 48,
-                                  child: ElevatedButton(
-                                    onPressed: _isLoading ? null : _handleLogin,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Theme.of(
-                                        context,
-                                      ).colorScheme.secondary,
-                                      foregroundColor: Theme.of(
-                                        context,
-                                      ).colorScheme.onSecondary,
-                                      elevation: 2,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
+                                  label: Text(
+                                    l10n.resendOtp,
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary
+                                          .withOpacity(0.8),
                                     ),
-                                    child: _isLoading
-                                        ? SizedBox(
-                                            height: 20,
-                                            width: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              valueColor:
-                                                  AlwaysStoppedAnimation<Color>(
-                                                    Theme.of(
-                                                      context,
-                                                    ).colorScheme.onSecondary,
-                                                  ),
-                                            ),
-                                          )
-                                        : Text(
-                                            _showOtpField
-                                                ? l10n.verify
-                                                : l10n.signIn,
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
                                   ),
                                 ),
-                                if (_showOtpField) ...[
-                                  const SizedBox(height: 8),
-                                  TextButton(
-                                    onPressed: _resetForm,
-                                    child: Text(
-                                      l10n.backToLogin,
-                                      style: TextStyle(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimary
-                                            .withOpacity(0.8),
-                                      ),
+                              ],
+                              const SizedBox(height: 24),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 48,
+                                child: ElevatedButton(
+                                  onPressed: _isLoading ? null : _handleLogin,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Theme.of(
+                                      context,
+                                    ).colorScheme.secondary,
+                                    foregroundColor: Theme.of(
+                                      context,
+                                    ).colorScheme.onSecondary,
+                                    elevation: 2,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                   ),
-                                ],
-                                if (!_showOtpField) ...[
-                                  const SizedBox(height: 16),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        l10n.newToApp,
-                                        style: TextStyle(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onPrimary
-                                              .withOpacity(0.8),
-                                        ),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => SignupPage(
-                                                apiClient: widget.apiClient,
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                        child: Text(
-                                          l10n.signUp,
-                                          style: TextStyle(
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.secondary,
+                                  child: _isLoading
+                                      ? SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                  Theme.of(
+                                                    context,
+                                                  ).colorScheme.onSecondary,
+                                                ),
+                                          ),
+                                        )
+                                      : Text(
+                                          _showOtpField
+                                              ? l10n.verify
+                                              : l10n.signIn,
+                                          style: const TextStyle(
+                                            fontSize: 16,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                ),
+                              ),
+                              if (_showOtpField) ...[
+                                const SizedBox(height: 8),
+                                TextButton(
+                                  onPressed: _resetForm,
+                                  child: Text(
+                                    l10n.backToLogin,
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary
+                                          .withOpacity(0.8),
+                                    ),
                                   ),
-                                  const SizedBox(height: 8),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              ForgotPasswordPage(
-                                                apiClient: widget.apiClient,
-                                              ),
-                                        ),
-                                      );
-                                    },
-                                    child: Text(
-                                      l10n.forgotPassword,
+                                ),
+                              ],
+                              if (!_showOtpField) ...[
+                                const SizedBox(height: 16),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      l10n.newToApp,
                                       style: TextStyle(
                                         color: Theme.of(context)
                                             .colorScheme
@@ -585,10 +538,54 @@ class _LoginPageState extends State<LoginPage> {
                                             .withOpacity(0.8),
                                       ),
                                     ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => SignupPage(
+                                              apiClient: widget.apiClient,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: Text(
+                                        l10n.signUp,
+                                        style: TextStyle(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.secondary,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            ForgotPasswordPage(
+                                              apiClient: widget.apiClient,
+                                            ),
+                                      ),
+                                    );
+                                  },
+                                  child: Text(
+                                    l10n.forgotPassword,
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary
+                                          .withOpacity(0.8),
+                                    ),
                                   ),
-                                ],
+                                ),
                               ],
-                            ),
+                            ],
                           ),
                         ),
                       ),

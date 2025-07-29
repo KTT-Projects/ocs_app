@@ -198,12 +198,9 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: IconButton(
-                icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
-                onPressed: () => Navigator.pop(context),
-              ),
+            child: IconButton(
+              icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
+              onPressed: () => Navigator.pop(context),
             ),
           ),
         ),
@@ -219,23 +216,20 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: IconButton(
-                  icon: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary),
-                  onPressed: () async {
-                    final postId = await showDialog<int>(
-                      context: context,
-                      builder: (context) => CreatePostDialog(
-                        apiClient: widget.apiClient,
-                        feed: widget.feed,
-                      ),
-                    );
-                    if (postId != null && mounted) {
-                      _loadPosts();
-                    }
-                  },
-                ),
+              child: IconButton(
+                icon: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary),
+                onPressed: () async {
+                  final postId = await showDialog<int>(
+                    context: context,
+                    builder: (context) => CreatePostDialog(
+                      apiClient: widget.apiClient,
+                      feed: widget.feed,
+                    ),
+                  );
+                  if (postId != null && mounted) {
+                    _loadPosts();
+                  }
+                },
               ),
             ),
           ),

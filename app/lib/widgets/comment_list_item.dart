@@ -33,71 +33,68 @@ class CommentListItem extends StatelessWidget {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        GestureDetector(
-                          onTap: onUserTap == null ? null : () => onUserTap!(comment.userId),
-                          child: CircleAvatar(
-                            radius: 12,
-                            backgroundColor: Theme.of(context).colorScheme.secondary,
-                            child: comment.avatarUrl != null
-                                ? ClipOval(
-                                    child: Image.network(
-                                      comment.avatarUrl!,
-                                      width: 24,
-                                      height: 24,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  )
-                                : Text(
-                                    comment.displayName.isNotEmpty ? comment.displayName[0] : '?',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Theme.of(context).colorScheme.onSecondary,
-                                    ),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: onUserTap == null ? null : () => onUserTap!(comment.userId),
+                        child: CircleAvatar(
+                          radius: 12,
+                          backgroundColor: Theme.of(context).colorScheme.secondary,
+                          child: comment.avatarUrl != null
+                              ? ClipOval(
+                                  child: Image.network(
+                                    comment.avatarUrl!,
+                                    width: 24,
+                                    height: 24,
+                                    fit: BoxFit.cover,
                                   ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                comment.displayName,
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.onPrimary,
-                                  fontWeight: FontWeight.bold,
+                                )
+                              : Text(
+                                  comment.displayName.isNotEmpty ? comment.displayName[0] : '?',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Theme.of(context).colorScheme.onSecondary,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                comment.getTimeAgo(),
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      comment.content,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              comment.displayName,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              comment.getTimeAgo(),
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    comment.content,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),

@@ -111,15 +111,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: IconButton(
-                icon: Icon(
-                  Icons.arrow_back,
-                  color: Theme.of(context).colorScheme.onPrimary,
-                ),
-                onPressed: () => Navigator.pop(context),
+            child: IconButton(
+              icon: Icon(
+                Icons.arrow_back,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
+              onPressed: () => Navigator.pop(context),
             ),
           ),
         ),
@@ -186,69 +183,65 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(24),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: Padding(
-                            padding: EdgeInsets.all(isSmallScreen ? 20.0 : 32.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                CircleAvatar(
-                                  radius: 50,
-                                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                                  child: _profile!['avatar'] != null
-                                      ? ClipOval(
-                                          child: Image.network(
-                                            _profile!['avatar'],
-                                            width: 100,
-                                            height: 100,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        )
-                                      : Text(
-                                          _profile!['name']?[0] ?? '?',
-                                          style: TextStyle(
-                                            fontSize: 32,
-                                            color: Theme.of(context).colorScheme.onSecondary,
-                                          ),
+                        child: Padding(
+                          padding: EdgeInsets.all(isSmallScreen ? 20.0 : 32.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              CircleAvatar(
+                                radius: 50,
+                                backgroundColor: Theme.of(context).colorScheme.secondary,
+                                child: _profile!['avatar'] != null
+                                    ? ClipOval(
+                                        child: Image.network(
+                                          _profile!['avatar'],
+                                          width: 100,
+                                          height: 100,
+                                          fit: BoxFit.cover,
                                         ),
-                                ),
-                                const SizedBox(height: 16),
-                                const SizedBox(height: 24),
-                                Text(
-                                  _profile!['name'] ?? '',
-                                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                        color: Theme.of(context).colorScheme.onPrimary,
-                                        fontWeight: FontWeight.bold,
+                                      )
+                                    : Text(
+                                        _profile!['name']?[0] ?? '?',
+                                        style: TextStyle(
+                                          fontSize: 32,
+                                          color: Theme.of(context).colorScheme.onSecondary,
+                                        ),
                                       ),
-                                ),
-                                const SizedBox(height: 24),
-                                _buildInfoRow(
-                                  context,
-                                  l10n.bio,
-                                  _profile!['bio'] ?? '',
-                                ),
-                                const SizedBox(height: 12),
-                                _buildInfoRow(
-                                  context,
-                                  l10n.selectInstitution,
-                                  _getLocalizedInstitutionName(_profile!['institution'] ?? ''),
-                                ),
-                                const SizedBox(height: 12),
-                                _buildInfoRow(
-                                  context,
-                                  l10n.grade,
-                                  _formatGrade(_profile!['grade']),
-                                ),
-                                const SizedBox(height: 12),
-                                _buildInfoRow(
-                                  context,
-                                  l10n.role,
-                                  (_profile!['role'] as String).substring(0, 1).toUpperCase() +
-                                      (_profile!['role'] as String).substring(1),
-                                ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(height: 16),
+                              const SizedBox(height: 24),
+                              Text(
+                                _profile!['name'] ?? '',
+                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                      color: Theme.of(context).colorScheme.onPrimary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                              const SizedBox(height: 24),
+                              _buildInfoRow(
+                                context,
+                                l10n.bio,
+                                _profile!['bio'] ?? '',
+                              ),
+                              const SizedBox(height: 12),
+                              _buildInfoRow(
+                                context,
+                                l10n.selectInstitution,
+                                _getLocalizedInstitutionName(_profile!['institution'] ?? ''),
+                              ),
+                              const SizedBox(height: 12),
+                              _buildInfoRow(
+                                context,
+                                l10n.grade,
+                                _formatGrade(_profile!['grade']),
+                              ),
+                              const SizedBox(height: 12),
+                              _buildInfoRow(
+                                context,
+                                l10n.role,
+                                (_profile!['role'] as String).substring(0, 1).toUpperCase() + (_profile!['role'] as String).substring(1),
+                              ),
+                            ],
                           ),
                         ),
                       ),

@@ -512,31 +512,28 @@ onTap: () {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: IconButton(
-                        iconSize: 20,
-                        icon: Icon(
-                          Icons.sort,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ),
-                        onPressed: () async {
-                          final String? selected = await GlassmorphicUI.showDialog<String>(
-                            context: context,
-                            width: 320,
-                            child: SortMenuDialog(
-                              currentSort: _sortBy,
-                              onSortChanged: (value) => Navigator.pop(context, value),
-                            ),
-                          );
-                          if (selected != null) {
-                            setState(() {
-                              _sortBy = selected;
-                            });
-                            _loadPosts();
-                          }
-                        },
+                    child: IconButton(
+                      iconSize: 20,
+                      icon: Icon(
+                        Icons.sort,
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
+                      onPressed: () async {
+                        final String? selected = await GlassmorphicUI.showDialog<String>(
+                          context: context,
+                          width: 320,
+                          child: SortMenuDialog(
+                            currentSort: _sortBy,
+                            onSortChanged: (value) => Navigator.pop(context, value),
+                          ),
+                        );
+                        if (selected != null) {
+                          setState(() {
+                            _sortBy = selected;
+                          });
+                          _loadPosts();
+                        }
+                      },
                     ),
                   ),
                 ),
@@ -552,82 +549,79 @@ onTap: () {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: IconButton(
-                      iconSize: 20,
-                      icon: Icon(
-                        Icons.more_vert,
-                        color: Theme.of(context).colorScheme.onPrimary,
-                      ),
-                      onPressed: () async {
-                        await GlassmorphicUI.showDialog<void>(
-                          context: context,
-                          width: 240,
-                          child: FeedMenuDialog(
-                            onCreateFeed: () async {
-                              final feedId = await Navigator.push<int>(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => CreateFeedPage(apiClient: widget.apiClient),
-                                ),
-                              );
-                              if (feedId != null && mounted) {
-                                _loadFeeds();
-                                _loadPosts();
-                              }
-                            },
-                            onReorderFeeds: () async {
-                              final joinedFeeds = _feeds?.where((feed) => feed.isMember).toList() ?? [];
-                              await GlassmorphicUI.showDialog<void>(
-                                context: context,
-                                width: 360,
-                                child: ReorderFeedsDialog(
-                                  feeds: joinedFeeds,
-                                  onReorder: (reorderedFeeds) async {
-                                    try {
-                                      final feedOrder = reorderedFeeds.map((feed) => feed.id).toList();
-                                      await widget.apiClient.reorderFeeds(
-                                        context,
-                                        feedOrder: feedOrder,
-                                      );
-                                      _loadFeeds();
-                                    } catch (e) {
-                                      if (mounted) {
-                                        GlassmorphicUI.showGlassSnackBar(
-                                          context,
-                                          e.toString(),
-                                          isError: true,
-                                        );
-                                      }
-                                    }
-                                  },
-                                ),
-                              );
-                            },
-                            onFeedDetails: _selectedFeed != null && _selectedFeed!.isMember ? () => _openFeedDetails(_selectedFeed!) : null,
-                            onFeedSettings: _selectedFeed != null && _selectedFeed!.role == 'admin'
-                                ? () async {
-                                    final changed = await Navigator.push<bool>(
+                  child: IconButton(
+                    iconSize: 20,
+                    icon: Icon(
+                      Icons.more_vert,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                    onPressed: () async {
+                      await GlassmorphicUI.showDialog<void>(
+                        context: context,
+                        width: 240,
+                        child: FeedMenuDialog(
+                          onCreateFeed: () async {
+                            final feedId = await Navigator.push<int>(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CreateFeedPage(apiClient: widget.apiClient),
+                              ),
+                            );
+                            if (feedId != null && mounted) {
+                              _loadFeeds();
+                              _loadPosts();
+                            }
+                          },
+                          onReorderFeeds: () async {
+                            final joinedFeeds = _feeds?.where((feed) => feed.isMember).toList() ?? [];
+                            await GlassmorphicUI.showDialog<void>(
+                              context: context,
+                              width: 360,
+                              child: ReorderFeedsDialog(
+                                feeds: joinedFeeds,
+                                onReorder: (reorderedFeeds) async {
+                                  try {
+                                    final feedOrder = reorderedFeeds.map((feed) => feed.id).toList();
+                                    await widget.apiClient.reorderFeeds(
                                       context,
-                                      MaterialPageRoute(
-                                        builder: (context) => FeedSettingsPage(
-                                          apiClient: widget.apiClient,
-                                          feed: _selectedFeed!,
-                                        ),
-                                      ),
+                                      feedOrder: feedOrder,
                                     );
-                                    if (changed == true && mounted) {
-                                      _loadFeeds();
-                                      _loadPosts();
+                                    _loadFeeds();
+                                  } catch (e) {
+                                    if (mounted) {
+                                      GlassmorphicUI.showGlassSnackBar(
+                                        context,
+                                        e.toString(),
+                                        isError: true,
+                                      );
                                     }
                                   }
-                                : null,
-                            onLeaveFeed: _selectedFeed != null && _selectedFeed!.isMember ? _leaveSelectedFeed : null,
-                          ),
-                        );
-                      },
-                    ),
+                                },
+                              ),
+                            );
+                          },
+                          onFeedDetails: _selectedFeed != null && _selectedFeed!.isMember ? () => _openFeedDetails(_selectedFeed!) : null,
+                          onFeedSettings: _selectedFeed != null && _selectedFeed!.role == 'admin'
+                              ? () async {
+                                  final changed = await Navigator.push<bool>(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => FeedSettingsPage(
+                                        apiClient: widget.apiClient,
+                                        feed: _selectedFeed!,
+                                      ),
+                                    ),
+                                  );
+                                  if (changed == true && mounted) {
+                                    _loadFeeds();
+                                    _loadPosts();
+                                  }
+                                }
+                              : null,
+                          onLeaveFeed: _selectedFeed != null && _selectedFeed!.isMember ? _leaveSelectedFeed : null,
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),

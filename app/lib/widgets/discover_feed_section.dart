@@ -53,33 +53,30 @@ class DiscoverFeedSection extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: l10n.searchFeeds,
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onPrimary.withOpacity(0.7),
-                        ),
-                        hintStyle: TextStyle(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onPrimary.withOpacity(0.7),
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: l10n.searchFeeds,
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary.withOpacity(0.7),
                       ),
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onPrimary,
+                      hintStyle: TextStyle(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary.withOpacity(0.7),
                       ),
-                      onChanged: onSearchChanged,
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                     ),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                    onChanged: onSearchChanged,
                   ),
                 ),
               ),
@@ -105,21 +102,31 @@ class DiscoverFeedSection extends StatelessWidget {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: InkWell(
-                            onTap: () => onSortChanged('population'),
-                            borderRadius: BorderRadius.circular(20),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.people,
-                                    size: 16,
+                        child: InkWell(
+                          onTap: () => onSortChanged('population'),
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.people,
+                                  size: 16,
+                                  color: sortBy == 'population'
+                                      ? Theme.of(
+                                          context,
+                                        ).colorScheme.onSecondary
+                                      : Theme.of(
+                                          context,
+                                        ).colorScheme.onPrimary,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  l10n.population,
+                                  style: TextStyle(
                                     color: sortBy == 'population'
                                         ? Theme.of(
                                             context,
@@ -128,21 +135,8 @@ class DiscoverFeedSection extends StatelessWidget {
                                             context,
                                           ).colorScheme.onPrimary,
                                   ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    l10n.population,
-                                    style: TextStyle(
-                                      color: sortBy == 'population'
-                                          ? Theme.of(
-                                              context,
-                                            ).colorScheme.onSecondary
-                                          : Theme.of(
-                                              context,
-                                            ).colorScheme.onPrimary,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -165,21 +159,31 @@ class DiscoverFeedSection extends StatelessWidget {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: InkWell(
-                            onTap: () => onSortChanged('activity'),
-                            borderRadius: BorderRadius.circular(20),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.flash_on,
-                                    size: 16,
+                        child: InkWell(
+                          onTap: () => onSortChanged('activity'),
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.flash_on,
+                                  size: 16,
+                                  color: sortBy == 'activity'
+                                      ? Theme.of(
+                                          context,
+                                        ).colorScheme.onSecondary
+                                      : Theme.of(
+                                          context,
+                                        ).colorScheme.onPrimary,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  l10n.latestActivity,
+                                  style: TextStyle(
                                     color: sortBy == 'activity'
                                         ? Theme.of(
                                             context,
@@ -188,21 +192,8 @@ class DiscoverFeedSection extends StatelessWidget {
                                             context,
                                           ).colorScheme.onPrimary,
                                   ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    l10n.latestActivity,
-                                    style: TextStyle(
-                                      color: sortBy == 'activity'
-                                          ? Theme.of(
-                                              context,
-                                            ).colorScheme.onSecondary
-                                          : Theme.of(
-                                              context,
-                                            ).colorScheme.onPrimary,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
