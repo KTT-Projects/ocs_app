@@ -286,8 +286,6 @@ class _SignupPageState extends State<SignupPage> {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(24),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                         child: Padding(
                           padding: EdgeInsets.all(isSmallScreen ? 20.0 : 32.0),
                           child: Form(
@@ -300,7 +298,6 @@ class _SignupPageState extends State<SignupPage> {
                                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                                         color: Theme.of(context).colorScheme.onPrimary,
                                         fontWeight: FontWeight.bold,
-                                      ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
@@ -666,8 +663,6 @@ class _SignupPageState extends State<SignupPage> {
             right: 16,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(45),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                 child: Material(
                   color: Colors.transparent,
                   elevation: 0,
@@ -675,7 +670,6 @@ class _SignupPageState extends State<SignupPage> {
                     builder: (context, languageProvider, _) => LanguageToggle(
                       currentLanguage: languageProvider.currentLanguage,
                       onLanguageChanged: (lang) => languageProvider.setLanguage(lang),
-                    ),
                   ),
                 ),
               ),

@@ -201,8 +201,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(24),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                         child: Padding(
                           padding: EdgeInsets.all(isSmallScreen ? 20.0 : 32.0),
                           child: Form(
@@ -215,7 +213,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                                         color: Theme.of(context).colorScheme.onPrimary,
                                         fontWeight: FontWeight.bold,
-                                      ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(

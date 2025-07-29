@@ -234,13 +234,10 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: IconButton(
                 icon:
                     Icon(Icons.close, color: Theme.of(context).colorScheme.onPrimary),
                 onPressed: () => Navigator.pop(context),
-              ),
             ),
           ),
         ),
@@ -256,13 +253,10 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                 child: IconButton(
                   icon: Icon(Icons.check,
                       color: Theme.of(context).colorScheme.onPrimary),
                   onPressed: _isLoading ? null : _saveSettings,
-                ),
               ),
             ),
           ),
@@ -302,8 +296,6 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                           child: Padding(
                             padding: const EdgeInsets.all(16),
                             child: Column(
@@ -330,7 +322,6 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
                                                         width: 80,
                                                         height: 80,
                                                         fit: BoxFit.cover,
-                                                      ),
                                               )
                                             : Icon(
                                                 Icons.camera_alt,

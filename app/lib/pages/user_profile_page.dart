@@ -111,13 +111,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: IconButton(
                 icon: Icon(
                   Icons.arrow_back,
                   color: Theme.of(context).colorScheme.onPrimary,
-                ),
                 onPressed: () => Navigator.pop(context),
               ),
             ),
@@ -186,8 +183,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(24),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                           child: Padding(
                             padding: EdgeInsets.all(isSmallScreen ? 20.0 : 32.0),
                             child: Column(
@@ -203,7 +198,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                             width: 100,
                                             height: 100,
                                             fit: BoxFit.cover,
-                                          ),
                                         )
                                       : Text(
                                           _profile!['name']?[0] ?? '?',

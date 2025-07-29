@@ -100,13 +100,10 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: IconButton(
                 icon: Icon(
                   Icons.arrow_back,
                   color: Theme.of(context).colorScheme.onPrimary,
-                ),
                 onPressed: () => Navigator.pop(context),
               ),
             ),
@@ -151,8 +148,6 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(24),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -171,7 +166,6 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
                                         width: 80,
                                         height: 80,
                                         fit: BoxFit.cover,
-                                      ),
                                     )
                                   : Text(
                                       widget.feed.displayName[0],

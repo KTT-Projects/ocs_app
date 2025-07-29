@@ -145,12 +145,9 @@ class _CreatePostPageState extends State<CreatePostPage> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: IconButton(
                 icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
                 onPressed: () => Navigator.pop(context),
-              ),
             ),
           ),
         ),
@@ -194,8 +191,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(24),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
@@ -208,7 +203,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
                                 hintText: 'Title',
                                 hintStyle: TextStyle(
                                   color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.5),
-                                ),
                                 filled: true,
                                 fillColor: Theme.of(context).colorScheme.background.withOpacity(0.1),
                                 border: OutlineInputBorder(

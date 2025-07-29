@@ -234,8 +234,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(24),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                         child: Padding(
                           padding: EdgeInsets.all(isSmallScreen ? 20.0 : 32.0),
                           child: Form(
@@ -253,7 +251,6 @@ class _LoginPageState extends State<LoginPage> {
                                           context,
                                         ).colorScheme.onPrimary,
                                         fontWeight: FontWeight.bold,
-                                      ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
