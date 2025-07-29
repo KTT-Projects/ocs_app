@@ -786,13 +786,25 @@ onTap: () {
                         ],
                         if (availableFeeds.isNotEmpty) ...[
                           const SizedBox(height: 24),
-                          Text(
-                            l10n.discoverMoreFeeds,
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final maxWidth = constraints.maxWidth;
+                              final width = maxWidth > 600 ? 600.0 : maxWidth;
+                              return Center(
+                                child: Container(
+                                  width: width,
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    l10n.discoverMoreFeeds,
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.onPrimary,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                           const SizedBox(height: 8),
                           ...availableFeeds.map((feed) => FeedListItem(

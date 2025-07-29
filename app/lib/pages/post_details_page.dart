@@ -191,8 +191,15 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                   top: false,
                   child: Padding(
                     padding: const EdgeInsets.all(8),
-                    child: Row(
-                      children: [
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final maxWidth = constraints.maxWidth;
+                        final width = maxWidth > 600 ? 600.0 : maxWidth;
+                        return Center(
+                          child: SizedBox(
+                            width: width,
+                            child: Row(
+                              children: [
                         Expanded(
                           child: Container(
                             decoration: BoxDecoration(
@@ -252,6 +259,10 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                           ),
                         ),
                       ],
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),

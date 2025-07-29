@@ -9,8 +9,14 @@ class CommentListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth;
+        final width = maxWidth > 600 ? 600.0 : maxWidth;
+        return Center(
+          child: Container(
+            width: width,
+            margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.background.withOpacity(0.2),
         borderRadius: BorderRadius.circular(16),
@@ -102,6 +108,8 @@ class CommentListItem extends StatelessWidget {
           ),
         ),
       ),
+        );
+      },
     );
   }
 }
