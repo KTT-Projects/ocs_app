@@ -44,9 +44,7 @@ class FeedListItem extends StatelessWidget {
                 ),
                 child: ClipRRect(
                     borderRadius: BorderRadius.circular(24),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: InkWell(
+                    child: InkWell(
                         onTap: onTap,
                         borderRadius: BorderRadius.circular(24),
                         child: Padding(

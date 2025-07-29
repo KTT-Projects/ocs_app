@@ -228,9 +228,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(24),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: Padding(
+                        child: Padding(
                             padding: EdgeInsets.all(isSmallScreen ? 20.0 : 32.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
