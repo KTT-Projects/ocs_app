@@ -696,6 +696,8 @@ class FeedController
       } else {
         // Last admin leaving - delete the feed entirely
         $this->deleteFeed($feedId);
+        Response::success(null, 'Left feed successfully');
+        return;
       }
     }
 
@@ -723,6 +725,14 @@ class FeedController
       $updateOrderStmt->execute();
     }
 
+    // If no members remain in the feed, delete it
+    $stmt = $this->conn->prepare("SELECT COUNT(*) FROM feed_members WHERE feed_id = :feed_id");
+    $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
+    $stmt->execute();
+    if ((int)$stmt->fetchColumn() === 0) {
+      $this->deleteFeed($feedId);
+    }
+
     Response::success(null, 'Left feed successfully');
   }
 
@@ -731,20 +741,30 @@ class FeedController
     // Remove all related data and the feed itself
     $this->conn->beginTransaction();
     try {
-      // Fetch icon URL so the file can be removed later
+      // Fetch icon URL and post media so the files can be removed later
       $iconQuery = "SELECT icon_url FROM feeds WHERE id = :feed_id";
       $iconStmt = $this->conn->prepare($iconQuery);
       $iconStmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
       $iconStmt->execute();
       $iconUrl = $iconStmt->fetchColumn();
-      $query = "SELECT id FROM feed_posts WHERE feed_id = :feed_id";
+
+      $query = "SELECT id, media_url FROM feed_posts WHERE feed_id = :feed_id";
       $stmt = $this->conn->prepare($query);
       $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
       $stmt->execute();
-      $postIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+      $postData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+      $postIds = [];
+      $mediaUrls = [];
+      foreach ($postData as $post) {
+        $postIds[] = intval($post['id']);
+        if (!empty($post['media_url'])) {
+          $mediaUrls[] = $post['media_url'];
+        }
+      }
 
       if (!empty($postIds)) {
-        $in = implode(',', array_map('intval', $postIds));
+        $in = implode(',', $postIds);
         $this->conn->exec("DELETE FROM feed_votes WHERE post_id IN ($in)");
         $this->conn->exec("DELETE FROM comments WHERE post_id IN ($in)");
         $this->conn->exec("DELETE FROM feed_posts WHERE id IN ($in)");
@@ -765,6 +785,14 @@ class FeedController
         $iconPath = __DIR__ . '/../' . ltrim($iconUrl, '/');
         if (file_exists($iconPath)) {
           unlink($iconPath);
+        }
+      }
+
+      // Delete any uploaded media associated with posts
+      foreach ($mediaUrls as $url) {
+        $mediaPath = __DIR__ . '/../' . ltrim($url, '/');
+        if (file_exists($mediaPath)) {
+          unlink($mediaPath);
         }
       }
     } catch (Exception $e) {
