@@ -782,16 +782,16 @@ class FeedController
 
       // Delete icon file after database commit
       if ($iconUrl) {
-        $iconPath = __DIR__ . '/../' . ltrim($iconUrl, '/');
-        if (file_exists($iconPath)) {
+        $iconPath = dirname(__DIR__) . '/' . ltrim(trim($iconUrl), '/');
+        if (is_file($iconPath)) {
           unlink($iconPath);
         }
       }
 
       // Delete any uploaded media associated with posts
       foreach ($mediaUrls as $url) {
-        $mediaPath = __DIR__ . '/../' . ltrim($url, '/');
-        if (file_exists($mediaPath)) {
+        $mediaPath = dirname(__DIR__) . '/' . ltrim(trim($url), '/');
+        if (is_file($mediaPath)) {
           unlink($mediaPath);
         }
       }
