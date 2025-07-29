@@ -368,5 +368,9 @@
   "members": "メンバー",
   "@members": {
     "description": "フィードメンバーのセクションタイトル"
+  },
+  "loadMore": "もっと表示",
+  "@loadMore": {
+    "description": "投稿をさらに読み込むボタンのラベル"
   }
 }

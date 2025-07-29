@@ -48,6 +48,10 @@ class _FeedsPageState extends State<FeedsPage> {
   String _discoverSort = 'population';
   String _discoverSearch = '';
 
+  int _postPage = 1;
+  bool _hasMorePosts = true;
+  bool _isLoadingMore = false;
+
   @override
   void initState() {
     super.initState();
@@ -67,7 +71,7 @@ class _FeedsPageState extends State<FeedsPage> {
     // Refresh every 5 seconds
     _refreshTimer = Timer.periodic(const Duration(seconds: 5), (_) {
       _refreshJoinedFeeds();
-      _loadPosts();
+      _loadPosts(reset: true);
     });
   }
 
@@ -78,7 +82,7 @@ class _FeedsPageState extends State<FeedsPage> {
       _feeds = null;
       _selectedFeed = null;
       _loadFeeds();
-      _loadPosts();
+      _loadPosts(reset: true);
     }
   }
 
@@ -88,7 +92,7 @@ class _FeedsPageState extends State<FeedsPage> {
     if (!_didLoadFeeds) {
       _didLoadFeeds = true;
       _loadFeeds();
-      _loadPosts();
+      _loadPosts(reset: true);
     }
   }
 
@@ -191,24 +195,61 @@ class _FeedsPageState extends State<FeedsPage> {
     }
   }
 
-  Future<void> _loadPosts() async {
+  Future<void> _loadPosts({bool reset = false}) async {
+    if (reset) {
+      _postPage = 1;
+      _hasMorePosts = true;
+      _posts = null;
+    }
+
+    if (_isLoadingMore || (!_hasMorePosts && !reset)) return;
+
+    if (mounted) {
+      setState(() {
+        _isLoadingMore = true;
+      });
+    }
+
     try {
       final posts = _selectedFeed == null
           ? _sortBy == 'discover'
-              ? await widget.apiClient.getDiscoverFeed(context)
-              : await widget.apiClient.getHomeFeed(context, sort: _sortBy)
+              ? await widget.apiClient.getDiscoverFeed(
+                  context,
+                  page: _postPage,
+                )
+              : await widget.apiClient.getHomeFeed(
+                  context,
+                  page: _postPage,
+                  sort: _sortBy,
+                )
           : await widget.apiClient.getFeedPosts(
               context,
               _selectedFeed!.id,
+              page: _postPage,
               sort: _sortBy,
             );
+
       if (mounted) {
         setState(() {
-          _posts = posts;
+          if (reset || _posts == null) {
+            _posts = posts;
+          } else {
+            _posts!.addAll(posts);
+          }
+          _hasMorePosts = posts.length == 20;
+          if (_hasMorePosts) {
+            _postPage += 1;
+          }
         });
       }
     } catch (e) {
       print('Failed to load posts: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingMore = false;
+        });
+      }
     }
   }
 
@@ -288,7 +329,7 @@ class _FeedsPageState extends State<FeedsPage> {
         ),
       );
       if (resultId != null && mounted) {
-        _loadPosts();
+        _loadPosts(reset: true);
       }
     } else {
       // Show glassmorphic feed selection dialog for the Home tab
@@ -309,7 +350,7 @@ class _FeedsPageState extends State<FeedsPage> {
           ),
         );
         if (resultId != null && mounted) {
-          _loadPosts();
+          _loadPosts(reset: true);
         }
       }
     }
@@ -357,7 +398,7 @@ class _FeedsPageState extends State<FeedsPage> {
           _selectedFeed = null;
         });
         _loadFeeds();
-        _loadPosts();
+        _loadPosts(reset: true);
         break;
       } catch (e) {
         final msg = e.toString();
@@ -467,7 +508,7 @@ onTap: () {
     _selectedFeed = null;
     _sortBy = 'default';
   });
-  _loadPosts();
+  _loadPosts(reset: true);
 },
                         );
                       } else {
@@ -491,7 +532,7 @@ onTap: () {
     _selectedFeed = feed;
     _sortBy = 'default';
   });
-  _loadPosts();
+  _loadPosts(reset: true);
 },
                         );
                       }
@@ -531,7 +572,7 @@ onTap: () {
                           setState(() {
                             _sortBy = selected;
                           });
-                          _loadPosts();
+                          _loadPosts(reset: true);
                         }
                       },
                     ),
@@ -569,7 +610,7 @@ onTap: () {
                             );
                             if (feedId != null && mounted) {
                               _loadFeeds();
-                              _loadPosts();
+                              _loadPosts(reset: true);
                             }
                           },
                           onReorderFeeds: () async {
@@ -614,7 +655,7 @@ onTap: () {
                                   );
                                   if (changed == true && mounted) {
                                     _loadFeeds();
-                                    _loadPosts();
+                                    _loadPosts(reset: true);
                                   }
                                 }
                               : null,
@@ -757,7 +798,7 @@ onTap: () {
                               }
                               return 0;
                             });
-                            return sorted.map(
+                          return sorted.map(
                               (post) => PostListItem(
                                 post: post,
                                 onVote: _vote,
@@ -777,6 +818,21 @@ onTap: () {
                               ),
                             );
                           })(),
+                          if (_hasMorePosts) ...[
+                            const SizedBox(height: 8),
+                            Center(
+                              child: ElevatedButton(
+                                onPressed: _isLoadingMore ? null : () => _loadPosts(),
+                                child: _isLoadingMore
+                                    ? SizedBox(
+                                        height: 16,
+                                        width: 16,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      )
+                                    : Text(l10n.loadMore),
+                              ),
+                            ),
+                          ],
                         ],
                         if (availableFeeds.isNotEmpty) ...[
                           const SizedBox(height: 24),

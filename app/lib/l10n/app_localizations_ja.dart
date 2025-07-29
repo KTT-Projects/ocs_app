@@ -501,4 +501,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get members => 'メンバー';
+
+  @override
+  String get loadMore => 'もっと表示';
 }
