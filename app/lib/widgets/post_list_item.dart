@@ -224,23 +224,36 @@ class _PostListItemState extends State<PostListItem> {
                           onPressed: () => widget.onVote(widget.post, 'downvote'),
                         ),
                         const Spacer(),
-                        GestureDetector(
-                          onTap: widget.onComments == null ? null : () => widget.onComments!(widget.post),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.comment,
-                                size: 16,
-                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                widget.post.commentCount.toString(),
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                        InkWell(
+                          onTap: widget.onComments == null
+                              ? null
+                              : () => widget.onComments!(widget.post),
+                          borderRadius: BorderRadius.circular(12),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 8),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.comment,
+                                  size: 16,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimary
+                                      .withOpacity(0.7),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 4),
+                                Text(
+                                  widget.post.commentCount.toString(),
+                                  style: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimary
+                                        .withOpacity(0.7),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
