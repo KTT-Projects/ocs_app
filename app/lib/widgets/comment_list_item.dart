@@ -4,7 +4,8 @@ import '../models/comment.dart';
 
 class CommentListItem extends StatelessWidget {
   final Comment comment;
-  const CommentListItem({super.key, required this.comment});
+  final void Function(int userId)? onUserTap;
+  const CommentListItem({super.key, required this.comment, this.onUserTap});
 
   @override
   Widget build(BuildContext context) {
@@ -35,28 +36,32 @@ class CommentListItem extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    CircleAvatar(
-                      radius: 12,
-                      backgroundColor: Theme.of(context).colorScheme.secondary,
-                      child: comment.avatarUrl != null
-                          ? ClipOval(
-                              child: Image.network(
-                                comment.avatarUrl!,
-                                width: 24,
-                                height: 24,
-                                fit: BoxFit.cover,
+                    GestureDetector(
+                      onTap: onUserTap == null
+                          ? null
+                          : () => onUserTap!(comment.userId),
+                      child: CircleAvatar(
+                        radius: 12,
+                        backgroundColor: Theme.of(context).colorScheme.secondary,
+                        child: comment.avatarUrl != null
+                            ? ClipOval(
+                                child: Image.network(
+                                  comment.avatarUrl!,
+                                  width: 24,
+                                  height: 24,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : Text(
+                                comment.displayName.isNotEmpty
+                                    ? comment.displayName[0]
+                                    : '?',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Theme.of(context).colorScheme.onSecondary,
+                                ),
                               ),
-                            )
-                          : Text(
-                              comment.displayName.isNotEmpty
-                                  ? comment.displayName[0]
-                                  : '?',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color:
-                                    Theme.of(context).colorScheme.onSecondary,
-                              ),
-                            ),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(

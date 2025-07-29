@@ -9,6 +9,7 @@ import '../widgets/create_post_dialog.dart';
 import '../widgets/glassmorphic_ui.dart';
 import '../widgets/post_list_item.dart';
 import 'post_details_page.dart';
+import 'user_profile_page.dart';
 
 class FeedPostsPage extends StatefulWidget {
   final ApiClient apiClient;
@@ -132,6 +133,18 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
         );
       }
     }
+  }
+
+  void _openUserProfile(int userId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UserProfilePage(
+          apiClient: widget.apiClient,
+          userId: userId,
+        ),
+      ),
+    );
   }
 
   @override
@@ -290,6 +303,7 @@ padding: EdgeInsets.only(
                 return PostListItem(
                   post: post,
                   onVote: _vote,
+                  onUserTap: _openUserProfile,
                   onComments: (p) {
                     Navigator.push(
                       context,

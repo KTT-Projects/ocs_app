@@ -18,6 +18,7 @@ import 'feed_details_page.dart';
 import 'feed_settings_page.dart';
 import 'post_details_page.dart';
 import '../widgets/create_post_dialog.dart';
+import 'user_profile_page.dart';
 import '../widgets/user_selection_dialog.dart';
 import '../widgets/confirm_dialog.dart';
 
@@ -260,6 +261,18 @@ class _FeedsPageState extends State<FeedsPage> {
         builder: (context) => FeedDetailsPage(
           apiClient: widget.apiClient,
           feed: feed,
+        ),
+      ),
+    );
+  }
+
+  void _openUserProfile(int userId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UserProfilePage(
+          apiClient: widget.apiClient,
+          userId: userId,
         ),
       ),
     );
@@ -755,6 +768,7 @@ onTap: () {
                                 post: post,
                                 onVote: _vote,
                                 showFeedName: _selectedFeed == null,
+                                onUserTap: _openUserProfile,
                                 onComments: (p) {
                                   Navigator.push(
                                     context,

@@ -519,6 +519,47 @@ class ApiClient extends ChangeNotifier {
     }
   }
 
+  Future<Map<String, dynamic>> getUserProfile(
+    BuildContext context,
+    int userId,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.get(
+        _buildUri('public_profile.php?user_id=$userId'),
+        headers: {
+          'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+      );
+
+      final data = json.decode(response.body);
+
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.failedToLoadProfile),
+        );
+      }
+
+      if (data['status'] != 'success') {
+        if (data['message'] == 'Invalid or expired token') {
+          await _handleUnauthorizedResponse(context, data);
+        }
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.failedToLoadProfile),
+        );
+      }
+
+      return data['profile'];
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.failedToLoadProfile);
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getInstitutions(
     BuildContext context,
   ) async {
