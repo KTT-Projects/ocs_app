@@ -119,7 +119,9 @@ class FeedController
                     IFNULL((SELECT MAX(c.created_at) FROM comments c JOIN feed_posts fp3 ON c.post_id = fp3.id WHERE fp3.feed_id = f.id), f.updated_at)
                   ) AS updated_at,
                   COUNT(DISTINCT fm1.user_id) as member_count,
-                  COUNT(DISTINCT fp.id) as post_count";
+                  COUNT(DISTINCT fp.id) as post_count,
+                  (SELECT MAX(fp2.created_at) FROM feed_posts fp2 WHERE fp2.feed_id = f.id) AS last_post_at,
+                  (SELECT MAX(c.created_at) FROM comments c JOIN feed_posts fp3 ON c.post_id = fp3.id WHERE fp3.feed_id = f.id) AS last_comment_at";
     if ($userId !== null) {
       $query .= ", EXISTS(SELECT 1 FROM feed_members fm2 WHERE fm2.feed_id = f.id AND fm2.user_id = :user_id) as is_member";
     } else {
