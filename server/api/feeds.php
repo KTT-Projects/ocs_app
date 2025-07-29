@@ -262,16 +262,38 @@ class FeedController
 
     // Resize to max 256x256 without stretching
     list($width, $height) = getimagesize($file['tmp_name']);
+
+    // Correct orientation for JPEGs using EXIF data when available
+    if ($mimeType === 'image/jpeg') {
+      $src = imagecreatefromjpeg($file['tmp_name']);
+      if (function_exists('exif_read_data')) {
+        $exif = @exif_read_data($file['tmp_name']);
+        if ($exif && isset($exif['Orientation'])) {
+          switch ($exif['Orientation']) {
+            case 3:
+              $src = imagerotate($src, 180, 0);
+              break;
+            case 6:
+              $src = imagerotate($src, -90, 0);
+              $width = imagesx($src);
+              $height = imagesy($src);
+              break;
+            case 8:
+              $src = imagerotate($src, 90, 0);
+              $width = imagesx($src);
+              $height = imagesy($src);
+              break;
+          }
+        }
+      }
+    } else {
+      $src = imagecreatefrompng($file['tmp_name']);
+    }
+
     $maxSize = 256;
     $scale = min($maxSize / $width, $maxSize / $height, 1);
     $newWidth = (int)($width * $scale);
     $newHeight = (int)($height * $scale);
-
-    if ($mimeType === 'image/jpeg') {
-      $src = imagecreatefromjpeg($file['tmp_name']);
-    } else {
-      $src = imagecreatefrompng($file['tmp_name']);
-    }
 
     $dst = imagecreatetruecolor($newWidth, $newHeight);
     if ($mimeType === 'image/png') {
