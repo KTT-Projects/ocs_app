@@ -782,16 +782,16 @@ class FeedController
 
       // Delete icon file after database commit
       if ($iconUrl) {
-        $iconPath = __DIR__ . '/../' . ltrim($iconUrl, '/');
-        if (file_exists($iconPath)) {
+        $iconPath = $this->resolveUploadPath($iconUrl);
+        if ($iconPath && is_file($iconPath)) {
           unlink($iconPath);
         }
       }
 
       // Delete any uploaded media associated with posts
       foreach ($mediaUrls as $url) {
-        $mediaPath = __DIR__ . '/../' . ltrim($url, '/');
-        if (file_exists($mediaPath)) {
+        $mediaPath = $this->resolveUploadPath($url);
+        if ($mediaPath && is_file($mediaPath)) {
           unlink($mediaPath);
         }
       }
@@ -799,6 +799,23 @@ class FeedController
       $this->conn->rollBack();
       throw $e;
     }
+  }
+
+  private function resolveUploadPath($url)
+  {
+    if (!$url) {
+      return null;
+    }
+
+    $path = preg_match('/^https?:\/\//', $url)
+      ? parse_url($url, PHP_URL_PATH)
+      : $url;
+
+    if (!$path) {
+      return null;
+    }
+
+    return dirname(__DIR__) . '/' . ltrim(trim($path), '/');
   }
 
   private function updateFeed($userId)
