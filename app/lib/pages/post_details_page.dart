@@ -100,6 +100,48 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
     );
   }
 
+  Future<void> _vote(FeedPost post, String voteType) async {
+    try {
+      await widget.apiClient.votePost(
+        context,
+        postId: post.id,
+        voteType: voteType,
+      );
+
+      setState(() {
+        if (post.userVote == voteType) {
+          if (voteType == 'upvote') {
+            post.upvotes -= 1;
+          } else {
+            post.downvotes -= 1;
+          }
+          post.userVote = null;
+        } else {
+          if (post.userVote == 'upvote') {
+            post.upvotes -= 1;
+          } else if (post.userVote == 'downvote') {
+            post.downvotes -= 1;
+          }
+
+          if (voteType == 'upvote') {
+            post.upvotes += 1;
+          } else {
+            post.downvotes += 1;
+          }
+          post.userVote = voteType;
+        }
+      });
+    } catch (e) {
+      if (mounted) {
+        GlassmorphicUI.showGlassSnackBar(
+          context,
+          e.toString(),
+          isError: true,
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -148,14 +190,7 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                     children: [
                       PostListItem(
                         post: widget.post,
-                        onVote: (p, v) async {
-                          await widget.apiClient.votePost(
-                            context,
-                            postId: p.id,
-                            voteType: v,
-                          );
-                          setState(() {});
-                        },
+                        onVote: _vote,
                         onUserTap: _openUserProfile,
                       ),
                       const SizedBox(height: 16),
