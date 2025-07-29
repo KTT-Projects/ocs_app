@@ -214,12 +214,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                         ),
                                 ),
                                 const SizedBox(height: 16),
-                                Text(
-                                  _profile!['email'] ?? '',
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
-                                  ),
-                                ),
                                 const SizedBox(height: 24),
                                 Text(
                                   _profile!['name'] ?? '',

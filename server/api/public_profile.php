@@ -47,7 +47,7 @@ try {
   }
   $userId = intval($_GET['user_id']);
 
-  $query = "SELECT u.id, u.email, up.display_name, up.avatar_url, up.bio, up.allow_dm, r.name as role_name, ei.name as institution_name, u.grade
+  $query = "SELECT u.id, up.display_name, up.avatar_url, up.bio, up.allow_dm, r.name as role_name, ei.name as institution_name, u.grade
             FROM users u
             JOIN roles r ON u.role_id = r.id
             LEFT JOIN educational_institutions ei ON u.institution_id = ei.id
@@ -64,7 +64,6 @@ try {
 
   $profile = [
     'id' => $user['id'],
-    'email' => $user['email'],
     'name' => $user['display_name'],
     'avatar' => $user['avatar_url'],
     'bio' => $user['bio'],
