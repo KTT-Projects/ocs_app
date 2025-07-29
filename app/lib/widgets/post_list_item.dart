@@ -77,7 +77,7 @@ class _PostListItemState extends State<PostListItem> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(24),
-            child: Padding(
+              child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,7 +96,6 @@ class _PostListItemState extends State<PostListItem> {
                                       width: 32,
                                       height: 32,
                                       fit: BoxFit.cover,
-                                    ),
                                   )
                                 : Text(
                                     widget.post.displayName[0],

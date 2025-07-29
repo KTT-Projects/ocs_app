@@ -53,7 +53,7 @@ class DiscoverFeedSection extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
-                  child: TextField(
+                    child: TextField(
                       decoration: InputDecoration(
                         hintText: l10n.searchFeeds,
                         prefixIcon: Icon(
@@ -61,7 +61,6 @@ class DiscoverFeedSection extends StatelessWidget {
                           color: Theme.of(
                             context,
                           ).colorScheme.onPrimary.withOpacity(0.7),
-                        ),
                         hintStyle: TextStyle(
                           color: Theme.of(
                             context,
@@ -103,14 +102,13 @@ class DiscoverFeedSection extends StatelessWidget {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20),
-                        child: InkWell(
+                          child: InkWell(
                             onTap: () => onSortChanged('population'),
                             borderRadius: BorderRadius.circular(20),
                             child: Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
                                 vertical: 8,
-                              ),
                               child: Row(
                                 children: [
                                   Icon(
@@ -161,14 +159,13 @@ class DiscoverFeedSection extends StatelessWidget {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20),
-                        child: InkWell(
+                          child: InkWell(
                             onTap: () => onSortChanged('activity'),
                             borderRadius: BorderRadius.circular(20),
                             child: Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
                                 vertical: 8,
-                              ),
                               child: Row(
                                 children: [
                                   Icon(

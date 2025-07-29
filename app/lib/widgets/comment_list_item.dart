@@ -33,7 +33,7 @@ class CommentListItem extends StatelessWidget {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: Padding(
+              child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,7 +52,6 @@ class CommentListItem extends StatelessWidget {
                                       width: 24,
                                       height: 24,
                                       fit: BoxFit.cover,
-                                    ),
                                   )
                                 : Text(
                                     comment.displayName.isNotEmpty ? comment.displayName[0] : '?',

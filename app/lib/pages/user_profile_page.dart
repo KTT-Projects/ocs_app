@@ -111,11 +111,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: IconButton(
+              child: IconButton(
                 icon: Icon(
                   Icons.arrow_back,
                   color: Theme.of(context).colorScheme.onPrimary,
-                ),
                 onPressed: () => Navigator.pop(context),
               ),
             ),
@@ -184,7 +183,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(24),
-                        child: Padding(
+                          child: Padding(
                             padding: EdgeInsets.all(isSmallScreen ? 20.0 : 32.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -199,7 +198,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                             width: 100,
                                             height: 100,
                                             fit: BoxFit.cover,
-                                          ),
                                         )
                                       : Text(
                                           _profile!['name']?[0] ?? '?',

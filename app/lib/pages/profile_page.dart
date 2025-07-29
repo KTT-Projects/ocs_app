@@ -228,7 +228,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(24),
-                        child: Padding(
+                          child: Padding(
                             padding: EdgeInsets.all(isSmallScreen ? 20.0 : 32.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -248,7 +248,6 @@ class _ProfilePageState extends State<ProfilePage> {
                                                   width: 100,
                                                   height: 100,
                                                   fit: BoxFit.cover,
-                                                ),
                                               )
                                             : Text(
                                                 _profile!['name']?[0] ?? '?',
@@ -502,8 +501,6 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(24),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                 child: Padding(
                   padding: const EdgeInsets.all(24),
                   child: Column(
@@ -513,7 +510,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         l10n.grade,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               color: Theme.of(context).colorScheme.onPrimary,
-                            ),
                       ),
                       const SizedBox(height: 16),
                       ...List.generate(8, (index) => index + 7).map(
@@ -595,8 +591,6 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(24),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                 child: Padding(
                   padding: const EdgeInsets.all(24),
                   child: Column(
@@ -606,7 +600,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         l10n.selectInstitution,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               color: Theme.of(context).colorScheme.onPrimary,
-                            ),
                       ),
                       const SizedBox(height: 16),
                       Container(
@@ -675,8 +668,6 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(24),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                 child: Padding(
                   padding: const EdgeInsets.all(24),
                   child: Column(
@@ -686,7 +677,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         title,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               color: Theme.of(context).colorScheme.onPrimary,
-                            ),
                       ),
                       const SizedBox(height: 16),
                       Form(

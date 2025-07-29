@@ -118,10 +118,9 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: IconButton(
+              child: IconButton(
                 icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
                 onPressed: () => Navigator.pop(context),
-              ),
             ),
           ),
         ),
@@ -209,13 +208,12 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(20),
-                              child: TextField(
+                                child: TextField(
                                   controller: _controller,
                                   decoration: InputDecoration(
                                     hintText: 'Add a comment...',
                                     hintStyle: TextStyle(
                                       color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                    ),
                                     border: InputBorder.none,
                                     contentPadding: const EdgeInsets.symmetric(
                                       horizontal: 16,
@@ -241,11 +239,10 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(20),
-                            child: IconButton(
+                              child: IconButton(
                                 icon: Icon(
                                   Icons.send,
                                   color: Theme.of(context).colorScheme.onPrimary,
-                                ),
                                 onPressed: _submit,
                                 constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                               ),

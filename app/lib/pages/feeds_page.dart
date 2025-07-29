@@ -512,12 +512,11 @@ onTap: () {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: IconButton(
+                      child: IconButton(
                         iconSize: 20,
                         icon: Icon(
                           Icons.sort,
                           color: Theme.of(context).colorScheme.onPrimary,
-                        ),
                         onPressed: () async {
                           final String? selected = await GlassmorphicUI.showDialog<String>(
                             context: context,
@@ -550,12 +549,11 @@ onTap: () {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: IconButton(
+                    child: IconButton(
                       iconSize: 20,
                       icon: Icon(
                         Icons.more_vert,
                         color: Theme.of(context).colorScheme.onPrimary,
-                      ),
                       onPressed: () async {
                         await GlassmorphicUI.showDialog<void>(
                           context: context,

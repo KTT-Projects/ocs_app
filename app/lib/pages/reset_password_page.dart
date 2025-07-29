@@ -138,7 +138,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(24),
-                      child: Padding(
+                        child: Padding(
                           padding: EdgeInsets.all(isSmallScreen ? 20.0 : 32.0),
                           child: Form(
                             key: _formKey,
@@ -150,7 +150,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                                         color: Theme.of(context).colorScheme.onPrimary,
                                         fontWeight: FontWeight.bold,
-                                      ),
                                 ),
                                 const SizedBox(height: 8),
                                 if (_errorMessage != null) ...[
