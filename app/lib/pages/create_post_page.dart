@@ -129,7 +129,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
-          'New post in ${widget.feed.displayName}',
+          l10n.newPostIn(widget.feed.displayName),
           style: TextStyle(
             color: Theme.of(context).colorScheme.onPrimary,
           ),
@@ -296,9 +296,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                                     )
                                   : ClipRRect(
                                       borderRadius: BorderRadius.circular(12),
-                                      child: kIsWeb
-                                          ? Image.network(_previewUrl!, fit: BoxFit.cover)
-                                          : Image.file(File(_previewUrl!), fit: BoxFit.cover),
+                                      child: kIsWeb ? Image.network(_previewUrl!, fit: BoxFit.cover) : Image.file(File(_previewUrl!), fit: BoxFit.cover),
                                     ),
                             ),
                           ),
