@@ -1050,9 +1050,9 @@ class FeedController
       return false;
     }
 
-    $header = base64_decode(str_pad(strtr($parts[0], '-_', '+/'), 4 - ((strlen($parts[0]) % 4) ?: 4), '='));
-    $payload = base64_decode(str_pad(strtr($parts[1], '-_', '+/'), 4 - ((strlen($parts[1]) % 4) ?: 4), '='));
-    $signature = base64_decode(str_pad(strtr($parts[2], '-_', '+/'), 4 - ((strlen($parts[2]) % 4) ?: 4), '='));
+    $header = $this->base64url_decode($parts[0]);
+    $payload = $this->base64url_decode($parts[1]);
+    $signatureProvided = $this->base64url_decode($parts[2]);
 
     $headerData = json_decode($header, true);
     $payloadData = json_decode($payload, true);
@@ -1067,17 +1067,25 @@ class FeedController
       return false;
     }
 
-    // Verify signature
+    // Verify signature using the original encoded header and payload parts
     $secret_key = "kttProjects2024SecretKey"; // Should match Auth class
-    $base64UrlHeader = rtrim(strtr(base64_encode($header), '+/', '-_'), '=');
-    $base64UrlPayload = rtrim(strtr(base64_encode($payload), '+/', '-_'), '=');
-    $signatureCheck = hash_hmac('sha256', $base64UrlHeader . "." . $base64UrlPayload, $secret_key, true);
+    $signatureCheck = hash_hmac('sha256', $parts[0] . "." . $parts[1], $secret_key, true);
 
-    if ($signature !== $signatureCheck) {
+    if (!hash_equals($signatureProvided, $signatureCheck)) {
       return false;
     }
 
     return $payloadData;
+  }
+
+  private function base64url_decode($data)
+  {
+    $data = strtr($data, '-_', '+/');
+    $remainder = strlen($data) % 4;
+    if ($remainder) {
+      $data .= str_repeat('=', 4 - $remainder);
+    }
+    return base64_decode($data);
   }
 
   private function calculateScore($postId)
