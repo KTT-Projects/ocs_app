@@ -10,6 +10,7 @@ class PostListItem extends StatefulWidget {
   final Function(FeedPost, String) onVote;
   final void Function(FeedPost)? onComments;
   final void Function(int userId)? onUserTap;
+  final void Function(int feedId)? onFeedTap;
   final bool showFeedName;
 
   const PostListItem({
@@ -18,6 +19,7 @@ class PostListItem extends StatefulWidget {
     required this.onVote,
     this.onComments,
     this.onUserTap,
+    this.onFeedTap,
     this.showFeedName = false,
   });
 
@@ -133,11 +135,17 @@ class _PostListItemState extends State<PostListItem> {
                   ),
                   if (widget.showFeedName && widget.post.feedDisplayName != null) ...[
                     const SizedBox(height: 4),
-                    Text(
-                      widget.post.feedDisplayName!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.secondary,
-                        fontWeight: FontWeight.bold,
+                    GestureDetector(
+                      onTap: widget.onFeedTap == null
+                          ? null
+                          : () => widget.onFeedTap!(widget.post.feedId),
+                      child: Text(
+                        widget.post.feedDisplayName!,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.secondary,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                        ),
                       ),
                     ),
                   ],

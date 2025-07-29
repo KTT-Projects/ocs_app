@@ -278,6 +278,21 @@ class _FeedsPageState extends State<FeedsPage> {
     );
   }
 
+  void _selectFeedById(int feedId) {
+    Feed? feed;
+    if (_feeds != null) {
+      try {
+        feed = _feeds!.firstWhere((f) => f.id == feedId);
+      } catch (_) {}
+    }
+    if (feed == null) return;
+    setState(() {
+      _selectedFeed = feed;
+      _sortBy = 'default';
+    });
+    _loadPosts();
+  }
+
   void _onNewPostPressed(List<Feed> joinedFeeds) async {
     if (_selectedFeed != null) {
       final resultId = await showDialog<int>(
@@ -761,6 +776,7 @@ onTap: () {
                               (post) => PostListItem(
                                 post: post,
                                 onVote: _vote,
+                                onFeedTap: _selectFeedById,
                                 showFeedName: _selectedFeed == null,
                                 onUserTap: _openUserProfile,
                                 onComments: (p) {
