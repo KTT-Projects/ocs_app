@@ -9,6 +9,7 @@ class PostListItem extends StatefulWidget {
   final FeedPost post;
   final Function(FeedPost, String) onVote;
   final void Function(FeedPost)? onComments;
+  final void Function(int userId)? onUserTap;
   final bool showFeedName;
 
   const PostListItem({
@@ -16,6 +17,7 @@ class PostListItem extends StatefulWidget {
     required this.post,
     required this.onVote,
     this.onComments,
+    this.onUserTap,
     this.showFeedName = false,
   });
 
@@ -52,8 +54,14 @@ class _PostListItemState extends State<PostListItem> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth;
+        final width = maxWidth > 600 ? 600.0 : maxWidth;
+        return Center(
+          child: Container(
+            width: width,
+            margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.background.withOpacity(0.2),
         borderRadius: BorderRadius.circular(24),
@@ -67,8 +75,8 @@ class _PostListItemState extends State<PostListItem> {
             offset: const Offset(0, 4),
           ),
         ],
-      ),
-      child: ClipRRect(
+        ),
+          child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -79,26 +87,30 @@ class _PostListItemState extends State<PostListItem> {
               children: [
                 Row(
                   children: [
-                    CircleAvatar(
-                      radius: 16,
-                      backgroundColor: Theme.of(context).colorScheme.secondary,
-                      child: widget.post.avatarUrl != null
-                          ? ClipOval(
-                              child: Image.network(
-                                widget.post.avatarUrl!,
-                                width: 32,
-                                height: 32,
-                                fit: BoxFit.cover,
+                    GestureDetector(
+                      onTap: widget.onUserTap == null
+                          ? null
+                          : () => widget.onUserTap!(widget.post.userId),
+                      child: CircleAvatar(
+                        radius: 16,
+                        backgroundColor: Theme.of(context).colorScheme.secondary,
+                        child: widget.post.avatarUrl != null
+                            ? ClipOval(
+                                child: Image.network(
+                                  widget.post.avatarUrl!,
+                                  width: 32,
+                                  height: 32,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : Text(
+                                widget.post.displayName[0],
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Theme.of(context).colorScheme.onSecondary,
+                                ),
                               ),
-                            )
-                          : Text(
-                              widget.post.displayName[0],
-                              style: TextStyle(
-                                fontSize: 16,
-                                color:
-                                    Theme.of(context).colorScheme.onSecondary,
-                              ),
-                            ),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -185,9 +197,12 @@ class _PostListItemState extends State<PostListItem> {
                   const SizedBox(height: 8),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      widget.post.mediaUrl!,
-                      fit: BoxFit.cover,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 300),
+                      child: Image.network(
+                        widget.post.mediaUrl!,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ],

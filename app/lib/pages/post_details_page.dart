@@ -6,6 +6,7 @@ import '../services/api_client.dart';
 import '../widgets/post_list_item.dart';
 import '../widgets/comment_list_item.dart';
 import '../widgets/glassmorphic_ui.dart';
+import 'user_profile_page.dart';
 
 class PostDetailsPage extends StatefulWidget {
   final ApiClient apiClient;
@@ -87,6 +88,18 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
     super.dispose();
   }
 
+  void _openUserProfile(int userId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UserProfilePage(
+          apiClient: widget.apiClient,
+          userId: userId,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -146,6 +159,7 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                           );
                           setState(() {});
                         },
+                        onUserTap: _openUserProfile,
                       ),
                       const SizedBox(height: 16),
                       if (_isLoading)
@@ -164,7 +178,12 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                           ),
                         )
                       else if (_comments != null)
-                        ..._comments!.map((c) => CommentListItem(comment: c)),
+                        ..._comments!.map(
+                          (c) => CommentListItem(
+                            comment: c,
+                            onUserTap: _openUserProfile,
+                          ),
+                        ),
                     ],
                   ),
                 ),
