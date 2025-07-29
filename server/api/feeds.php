@@ -103,8 +103,21 @@ class FeedController
     // Get sort option from query (default: population)
     $sort = isset($_GET['sort']) ? $_GET['sort'] : 'population';
 
-    // Fetch feeds with membership information
-    $query = "SELECT f.*,
+    // Fetch feeds with membership information and compute last activity time
+    $query = "SELECT f.id,
+                  f.name,
+                  f.display_name,
+                  f.description,
+                  f.created_by,
+                  f.rules,
+                  f.banner_url,
+                  f.icon_url,
+                  f.created_at,
+                  GREATEST(
+                    f.updated_at,
+                    IFNULL((SELECT MAX(fp2.created_at) FROM feed_posts fp2 WHERE fp2.feed_id = f.id), f.updated_at),
+                    IFNULL((SELECT MAX(c.created_at) FROM comments c JOIN feed_posts fp3 ON c.post_id = fp3.id WHERE fp3.feed_id = f.id), f.updated_at)
+                  ) AS updated_at,
                   COUNT(DISTINCT fm1.user_id) as member_count,
                   COUNT(DISTINCT fp.id) as post_count";
     if ($userId !== null) {
@@ -117,7 +130,7 @@ class FeedController
                   LEFT JOIN feed_posts fp ON f.id = fp.feed_id";
     $query .= " GROUP BY f.id";
     if ($sort === 'activity') {
-      $query .= " ORDER BY MAX(fp.created_at) DESC";
+      $query .= " ORDER BY updated_at DESC";
     } else {
       $query .= " ORDER BY member_count DESC";
     }
