@@ -33,7 +33,12 @@ try {
     Response::error('Invalid token format', 401);
   }
 
-  $payload = json_decode(base64_decode(strtr($token_parts[1], '-_', '+/')), true);
+  $payloadSegment = strtr($token_parts[1], '-_', '+/');
+  $remainder = strlen($payloadSegment) % 4;
+  if ($remainder) {
+    $payloadSegment .= str_repeat('=', 4 - $remainder);
+  }
+  $payload = json_decode(base64_decode($payloadSegment), true);
 
   if (!$payload || !isset($payload['user_id']) || time() >= $payload['exp']) {
     Response::error('Invalid or expired token', 401);
