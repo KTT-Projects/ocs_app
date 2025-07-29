@@ -210,7 +210,6 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                         ),
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.background.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(20),
@@ -223,13 +222,12 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                             child: BackdropFilter(
                               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                               child: IconButton(
-                                padding: EdgeInsets.zero,
                                 icon: Icon(
                                   Icons.send,
                                   color: Theme.of(context).colorScheme.onPrimary,
                                 ),
                                 onPressed: _submit,
-                                constraints: const BoxConstraints(minWidth: 56, minHeight: 56),
+                                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                               ),
                             ),
                           ),
