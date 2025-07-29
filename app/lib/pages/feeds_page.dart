@@ -92,6 +92,12 @@ class _FeedsPageState extends State<FeedsPage> {
   }
 
   Future<void> _loadFeeds() async {
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+    }
     try {
       // Fetch non-joined feeds and joined feeds separately. The joined feeds
       // endpoint returns them in the user’s preferred order, so we need to
@@ -116,6 +122,7 @@ class _FeedsPageState extends State<FeedsPage> {
           if (_selectedFeed != null) {
             _selectedFeed = feedMap[_selectedFeed!.id] ?? _selectedFeed;
           }
+          _error = null;
           _isLoading = false;
         });
       }
