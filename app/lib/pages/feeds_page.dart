@@ -512,9 +512,7 @@ onTap: () {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: IconButton(
+                    child: IconButton(
                         iconSize: 20,
                         icon: Icon(
                           Icons.sort,
@@ -552,9 +550,7 @@ onTap: () {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: IconButton(
+                  child: IconButton(
                       iconSize: 20,
                       icon: Icon(
                         Icons.more_vert,

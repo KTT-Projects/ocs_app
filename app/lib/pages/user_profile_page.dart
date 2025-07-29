@@ -111,9 +111,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: IconButton(
+            child: IconButton(
                 icon: Icon(
                   Icons.arrow_back,
                   color: Theme.of(context).colorScheme.onPrimary,
@@ -186,9 +184,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(24),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: Padding(
+                        child: Padding(
                             padding: EdgeInsets.all(isSmallScreen ? 20.0 : 32.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,

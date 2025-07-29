@@ -53,9 +53,7 @@ class DiscoverFeedSection extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: TextField(
+                  child: TextField(
                       decoration: InputDecoration(
                         hintText: l10n.searchFeeds,
                         prefixIcon: Icon(
@@ -105,9 +103,7 @@ class DiscoverFeedSection extends StatelessWidget {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: InkWell(
+                        child: InkWell(
                             onTap: () => onSortChanged('population'),
                             borderRadius: BorderRadius.circular(20),
                             child: Container(
@@ -165,9 +161,7 @@ class DiscoverFeedSection extends StatelessWidget {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: InkWell(
+                        child: InkWell(
                             onTap: () => onSortChanged('activity'),
                             borderRadius: BorderRadius.circular(20),
                             child: Container(

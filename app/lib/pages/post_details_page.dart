@@ -118,9 +118,7 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: IconButton(
+            child: IconButton(
                 icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
                 onPressed: () => Navigator.pop(context),
               ),
@@ -211,9 +209,7 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(20),
-                              child: BackdropFilter(
-                                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                                child: TextField(
+                              child: TextField(
                                   controller: _controller,
                                   decoration: InputDecoration(
                                     hintText: 'Add a comment...',
@@ -245,9 +241,7 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(20),
-                            child: BackdropFilter(
-                              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                              child: IconButton(
+                            child: IconButton(
                                 icon: Icon(
                                   Icons.send,
                                   color: Theme.of(context).colorScheme.onPrimary,
