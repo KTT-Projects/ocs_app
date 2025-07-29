@@ -178,6 +178,7 @@ class _SignupPageState extends State<SignupPage> {
               context,
               l10n.emailVerifiedSuccess,
             );
+            await widget.apiClient.setToken(response['token']);
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
