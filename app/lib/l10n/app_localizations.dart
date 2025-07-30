@@ -98,11 +98,6 @@ abstract class AppLocalizations {
     Locale('ja')
   ];
 
-  /// Error message shown when non-Gmail email is entered
-  ///
-  /// In en, this message translates to:
-  /// **'Only Gmail accounts are supported at this time'**
-  String get onlyGoogleEmailAllowed;
 
   /// Helper text to check spam folder for verification email
   ///

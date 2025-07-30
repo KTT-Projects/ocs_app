@@ -461,11 +461,9 @@ class _SignupPageState extends State<SignupPage> {
                                     if (value?.isEmpty ?? true) {
                                       return l10n.invalidEmail;
                                     }
-                                    if (!value!.contains('@')) {
+                                    final emailPattern = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+                                    if (!emailPattern.hasMatch(value!)) {
                                       return l10n.invalidEmail;
-                                    }
-                                    if (!value.endsWith('@gmail.com')) {
-                                      return l10n.onlyGoogleEmailAllowed;
                                     }
                                     return null;
                                   },
