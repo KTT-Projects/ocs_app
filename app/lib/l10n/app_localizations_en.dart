@@ -9,10 +9,6 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get onlyGoogleEmailAllowed =>
-      'Only Gmail accounts are supported at this time';
-
-  @override
   String get checkSpamJunk =>
       'Please check your spam/junk folder if you don\'t see the email in your inbox';
 

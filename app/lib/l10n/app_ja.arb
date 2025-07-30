@@ -1,5 +1,4 @@
 {
-  "onlyGoogleEmailAllowed": "現在、Gmailアカウントのみ対応しています",
   "checkSpamJunk": "メールが届かない場合は迷惑メールフォルダをご確認ください",
   "resendOtp": "認証コードを再送信",
   "@@locale": "ja",
