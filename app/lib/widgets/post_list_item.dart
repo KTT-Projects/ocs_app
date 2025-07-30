@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/feed_post.dart';
+import '../l10n/app_localizations.dart';
 
 class PostListItem extends StatefulWidget {
   final FeedPost post;
@@ -55,6 +56,7 @@ class _PostListItemState extends State<PostListItem> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return LayoutBuilder(
       builder: (context, constraints) {
         final maxWidth = constraints.maxWidth;
@@ -136,9 +138,7 @@ class _PostListItemState extends State<PostListItem> {
                   if (widget.showFeedName && widget.post.feedDisplayName != null) ...[
                     const SizedBox(height: 4),
                     GestureDetector(
-                      onTap: widget.onFeedTap == null
-                          ? null
-                          : () => widget.onFeedTap!(widget.post.feedId),
+                      onTap: widget.onFeedTap == null ? null : () => widget.onFeedTap!(widget.post.feedId),
                       child: Text(
                         widget.post.feedDisplayName!,
                         style: TextStyle(
@@ -183,7 +183,7 @@ class _PostListItemState extends State<PostListItem> {
                         child: Padding(
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
-                            _expanded ? 'Show less' : 'Show more',
+                            _expanded ? l10n.showLess : l10n.showMore,
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.secondary,
                               fontWeight: FontWeight.bold,
@@ -231,31 +231,22 @@ class _PostListItemState extends State<PostListItem> {
                       ),
                       const Spacer(),
                       InkWell(
-                        onTap: widget.onComments == null
-                            ? null
-                            : () => widget.onComments!(widget.post),
+                        onTap: widget.onComments == null ? null : () => widget.onComments!(widget.post),
                         borderRadius: BorderRadius.circular(12),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                           child: Row(
                             children: [
                               Icon(
                                 Icons.comment,
                                 size: 16,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimary
-                                    .withOpacity(0.7),
+                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 widget.post.commentCount.toString(),
                                 style: TextStyle(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onPrimary
-                                      .withOpacity(0.7),
+                                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
                                 ),
                               ),
                             ],

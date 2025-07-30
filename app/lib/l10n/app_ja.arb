@@ -367,5 +367,13 @@
   "members": "メンバー",
   "@members": {
     "description": "フィードメンバーのセクションタイトル"
+  },
+  "showMore": "もっと見る",
+  "@showMore": {
+    "description": "投稿リストで詳細を表示するためのボタン"
+  },
+  "showLess": "閉じる",
+  "@showLess": {
+    "description": "投稿リストで詳細を閉じるためのボタン"
   }
 }

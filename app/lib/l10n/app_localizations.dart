@@ -98,7 +98,6 @@ abstract class AppLocalizations {
     Locale('ja')
   ];
 
-
   /// Helper text to check spam folder for verification email
   ///
   /// In en, this message translates to:
@@ -1059,6 +1058,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Members'**
   String get members;
+
+  /// Button to show more posts in the feed
+  ///
+  /// In en, this message translates to:
+  /// **'Show more'**
+  String get showMore;
+
+  /// Button to show less posts in the feed
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get showLess;
 }
 
 class _AppLocalizationsDelegate

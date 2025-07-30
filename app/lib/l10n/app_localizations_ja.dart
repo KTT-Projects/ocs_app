@@ -498,4 +498,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get members => 'メンバー';
+
+  @override
+  String get showMore => 'もっと見る';
+
+  @override
+  String get showLess => '閉じる';
 }
