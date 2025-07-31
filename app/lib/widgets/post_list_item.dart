@@ -210,9 +210,12 @@ class _PostListItemState extends State<PostListItem> {
                         borderRadius: BorderRadius.circular(8),
                         child: ConstrainedBox(
                           constraints: const BoxConstraints(maxHeight: 300),
-                          child: Image.network(
-                            widget.post.mediaUrl!,
-                            fit: BoxFit.cover,
+                          child: Hero(
+                            tag: widget.post.mediaUrl!,
+                            child: Image.network(
+                              widget.post.mediaUrl!,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                       ),
