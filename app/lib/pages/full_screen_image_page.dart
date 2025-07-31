@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'dart:ui';
+import '../utils/download_helper.dart';
 
 class FullScreenImagePage extends StatelessWidget {
   final String imageUrl;
@@ -8,10 +8,7 @@ class FullScreenImagePage extends StatelessWidget {
   const FullScreenImagePage({super.key, required this.imageUrl});
 
   Future<void> _downloadImage() async {
-    final uri = Uri.parse(imageUrl);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
+    await downloadFile(imageUrl);
   }
 
   @override
