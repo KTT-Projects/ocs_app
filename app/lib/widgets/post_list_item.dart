@@ -5,6 +5,7 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/feed_post.dart';
 import '../l10n/app_localizations.dart';
+import '../pages/full_screen_image_page.dart';
 
 class PostListItem extends StatefulWidget {
   final FeedPost post;
@@ -194,13 +195,25 @@ class _PostListItemState extends State<PostListItem> {
                     ),
                   if (widget.post.mediaUrl != null) ...[
                     const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxHeight: 300),
-                        child: Image.network(
-                          widget.post.mediaUrl!,
-                          fit: BoxFit.cover,
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => FullScreenImagePage(
+                              imageUrl: widget.post.mediaUrl!,
+                            ),
+                          ),
+                        );
+                      },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 300),
+                          child: Image.network(
+                            widget.post.mediaUrl!,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                     ),
