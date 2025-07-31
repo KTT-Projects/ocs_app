@@ -63,17 +63,21 @@ class FullScreenImagePage extends StatelessWidget {
     );
   }
 
-  Widget _buildGlassIcon(BuildContext context,
-      {required IconData icon, required VoidCallback onPressed}) {
+  Widget _buildGlassIcon(BuildContext context, {required IconData icon, required VoidCallback onPressed}) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
-          color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+            ),
+          ),
           child: IconButton(
-            icon: Icon(icon,
-                color: Theme.of(context).colorScheme.onPrimary),
+            icon: Icon(icon, color: Theme.of(context).colorScheme.onPrimary),
             onPressed: onPressed,
           ),
         ),
