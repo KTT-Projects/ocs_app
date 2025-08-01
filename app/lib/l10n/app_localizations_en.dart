@@ -238,9 +238,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get volunteerDescription => 'Find volunteering opportunities';
 
   @override
-  String get studyFeature => 'Study';
-
-  @override
   String get localNews => 'Local News & Updates';
 
   @override
@@ -310,6 +307,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorOccurred => 'An unexpected error occurred. Please try again.';
+
+  @override
+  String get studyFeature => 'Study';
 
   @override
   String get feed => 'Feed';
