@@ -5,6 +5,7 @@ import 'package:ocs_app/l10n/app_localizations.dart' show AppLocalizations;
 import '../services/api_client.dart';
 import 'login_page.dart';
 import '../widgets/circle_nav_bar.dart';
+// import '../widgets/circle_nav_bar_arc.dart';
 import 'profile_page.dart';
 import 'feeds_page.dart';
 import 'events_page.dart';
@@ -94,29 +95,50 @@ class _HomePageState extends State<HomePage> {
         ],
         inactiveIcons: [
           Column(children: [
-            Icon(Icons.feed_outlined, color: Colors.blue, size: 28),
-            Text(l10n.feedFeature, style: TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.bold))
+            Icon(Icons.feed_outlined, color: Colors.white, size: 28),
+            Text(l10n.feedFeature,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold))
           ]),
           Column(children: [
-            Icon(Icons.event_note_outlined, color: Colors.blue, size: 28),
-            Text(l10n.eventsFeature, style: TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.bold))
+            Icon(Icons.event_note_outlined, color: Colors.white, size: 28),
+            Text(l10n.eventsFeature,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold))
           ]),
           Column(children: [
-            Icon(Icons.volunteer_activism_outlined, color: Colors.blue, size: 28),
-            Text(l10n.volunteerFeature, style: TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.bold))
+            Icon(Icons.volunteer_activism_outlined,
+                color: Colors.white, size: 28),
+            Text(l10n.volunteerFeature,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold))
           ]),
           Column(children: [
-            Icon(Icons.school_outlined, color: Colors.blue, size: 28),
-            Text(l10n.studyFeature, style: TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.bold))
+            Icon(Icons.school_outlined, color: Colors.white, size: 28),
+            Text(l10n.studyFeature,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold))
           ]),
           Column(children: [
-            Icon(Icons.account_circle, color: Colors.blue, size: 28),
-            Text(l10n.profile, style: TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.bold))
+            Icon(Icons.account_circle, color: Colors.white, size: 28),
+            Text(l10n.profile,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold))
           ]),
         ],
-        color: Colors.white,
+        color: Colors.transparent,
         height: 60,
-        circleWidth: 40,
+        circleWidth: 37,
         padding: EdgeInsets.only(left: 16, right: 16, bottom: 20),
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -133,17 +155,7 @@ class _HomePageState extends State<HomePage> {
           });
         },
         cornerRadius: const BorderRadius.all(Radius.circular(30)),
-        shadowColor: Colors.black.withValues(alpha: 0.4),
         elevation: 10,
-        circleGradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.blue.withValues(alpha: 0.8),
-            Colors.blue.withValues(alpha: 0.8),
-          ],
-        ),
-        circleShadowColor: Colors.blue.withValues(alpha: 0.8),
       ),
     );
   }
