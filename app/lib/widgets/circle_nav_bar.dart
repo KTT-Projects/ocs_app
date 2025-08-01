@@ -142,7 +142,7 @@ class _CircleNavBarState extends State<CircleNavBar>
                   sigmaY: widget.blurSigmaY,
                 ),
                 child: Container(
-                  color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+                  // color: Theme.of(context).colorScheme.background.withOpacity(0.2),
                 ),
               ),
             ),
