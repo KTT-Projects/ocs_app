@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:ocs_app/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'services/api_client.dart';
@@ -9,14 +10,13 @@ import 'providers/language_provider.dart';
 import 'package:ocs_app/pages/main_page.dart';
 import 'package:ocs_app/pages/login_page.dart'; // Import LoginPage
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final prefs = await SharedPreferences.getInstance();
   final apiClient = ApiClient();
-  
+
   await Future.wait([
     apiClient.initialize(),
     initializeDateFormatting('en'),
@@ -37,7 +37,7 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   final ApiClient apiClient;
-  
+
   const MyApp({
     super.key,
     required this.apiClient,

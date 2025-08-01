@@ -1,7 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:ocs_app/l10n/app_localizations.dart' show AppLocalizations;
 import '../services/api_client.dart';
 import 'login_page.dart';
 import '../widgets/circle_nav_bar.dart';
