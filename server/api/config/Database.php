@@ -1,10 +1,10 @@
 <?php
 class Database
 {
-  private $host = "mysql90.conoha.ne.jp";
-  private $db_name = "on294_ocs";
-  private $username = "on294_ocs";
-  private $password = "ktdevsPro406$";
+  private $host = "";
+  private $db_name = "";
+  private $username = "";
+  private $password = "";
   private $conn;
 
   public function getConnection()
