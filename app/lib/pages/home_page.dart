@@ -137,18 +137,18 @@ class _HomePageState extends State<HomePage> {
           ]),
         ],
         color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-        circleColor: Theme.of(context).colorScheme.secondary,
+        // circleColor: Theme.of(context).colorScheme.secondary,
         height: 60,
         circleWidth: 37,
         padding: EdgeInsets.only(left: 16, right: 16, bottom: 20),
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.white,
-            Colors.white.withValues(alpha: 0.8),
-          ],
-        ),
+        // gradient: LinearGradient(
+        //   begin: Alignment.topCenter,
+        //   end: Alignment.bottomCenter,
+        //   colors: [
+        //     Colors.white,
+        //     Colors.white.withValues(alpha: 0.8),
+        //   ],
+        // ),
         activeIndex: _currentIndex,
         onTap: (index) {
           setState(() {

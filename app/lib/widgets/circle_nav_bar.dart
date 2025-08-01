@@ -18,8 +18,6 @@ class CircleNavBar extends StatefulWidget {
     this.circleColor,
     this.padding = EdgeInsets.zero,
     this.cornerRadius = BorderRadius.zero,
-    this.shadowColor = Colors.transparent,
-    this.circleShadowColor = Colors.transparent,
     this.elevation = 0,
     this.gradient,
     this.circleGradient,
@@ -46,8 +44,6 @@ class CircleNavBar extends StatefulWidget {
   final List<Widget> inactiveIcons;
   final EdgeInsets padding;
   final BorderRadius cornerRadius;
-  final Color shadowColor;
-  final Color? circleShadowColor;
   final double elevation;
   final Gradient? gradient;
   final Gradient? circleGradient;
@@ -141,9 +137,7 @@ class _CircleNavBarState extends State<CircleNavBar>
                   sigmaX: widget.blurSigmaX,
                   sigmaY: widget.blurSigmaY,
                 ),
-                child: Container(
-                  // color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-                ),
+                child: Container(),
               ),
             ),
           ),
