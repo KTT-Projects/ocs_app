@@ -234,9 +234,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get volunteerDescription => 'ボランティア活動の機会を探す';
 
   @override
-  String get studyFeature => '学習';
-
-  @override
   String get localNews => '地域ニュース・更新情報';
 
   @override
@@ -301,6 +298,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get errorOccurred => '予期せぬエラーが発生しました。もう一度お試しください。';
+
+  @override
+  String get studyFeature => '学習';
 
   @override
   String get feed => '掲示板';
