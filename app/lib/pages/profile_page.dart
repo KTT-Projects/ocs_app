@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:ocs_app/l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -8,6 +8,7 @@ import 'dart:io';
 import '../providers/language_provider.dart';
 import '../widgets/language_toggle.dart';
 import '../services/api_client.dart';
+import '../widgets/glassmorphic_ui.dart';
 
 class ProfilePage extends StatefulWidget {
   final ApiClient apiClient;
@@ -23,6 +24,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   bool _isLoading = true;
+  bool _isUploadingAvatar = false;
   String? _error;
   Map<String, dynamic>? _profile;
   List<Map<String, dynamic>>? _institutions;
@@ -34,6 +36,9 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       final XFile? image = await _imagePicker.pickImage(source: ImageSource.gallery);
       if (image != null && mounted) {
+        setState(() {
+          _isUploadingAvatar = true;
+        });
         String avatarUrl;
         if (kIsWeb) {
           final bytes = await image.readAsBytes();
@@ -53,11 +58,10 @@ class _ProfilePageState extends State<ProfilePage> {
             final exists = await file.exists();
             if (!exists) {
               if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Selected file does not exist: ${image.path}'),
-                    backgroundColor: Theme.of(context).colorScheme.error,
-                  ),
+                GlassmorphicUI.showGlassSnackBar(
+                  context,
+                  'Selected file does not exist: ${image.path}',
+                  isError: true,
                 );
               }
               return;
@@ -65,11 +69,10 @@ class _ProfilePageState extends State<ProfilePage> {
             avatarUrl = await widget.apiClient.uploadAvatar(context, image.path);
           } catch (e) {
             if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Failed to upload avatar. Please try again or check file permissions.'),
-                  backgroundColor: Theme.of(context).colorScheme.error,
-                ),
+              GlassmorphicUI.showGlassSnackBar(
+                context,
+                'Failed to upload avatar. Please try again or check file permissions.',
+                isError: true,
               );
             }
             return;
@@ -86,12 +89,17 @@ class _ProfilePageState extends State<ProfilePage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        GlassmorphicUI.showGlassSnackBar(
+          context,
+          e.toString(),
+          isError: true,
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUploadingAvatar = false;
+        });
       }
     }
   }
@@ -139,32 +147,11 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        // leading: Container(
-        //   margin: const EdgeInsets.all(8),
-        //   decoration: BoxDecoration(
-        //     color: Theme.of(context).colorScheme.background.withValues(alpha: 0.2),
-        //     borderRadius: BorderRadius.circular(12),
-        //     border: Border.all(
-        //       color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.3),
-        //     ),
-        //   ),
-        //   child: ClipRRect(
-        //     borderRadius: BorderRadius.circular(12),
-        //     child: BackdropFilter(
-        //       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        //       child: IconButton(
-        //         icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
-        //         onPressed: () => Navigator.pop(context),
-        //       ),
-        //     ),
-        //   ),
-        // ),
+      backgroundColor: Colors.transparent,
+      elevation: 0,
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12.0),
@@ -249,8 +236,9 @@ class _ProfilePageState extends State<ProfilePage> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 GestureDetector(
-                                  onTap: () => _pickImage(context),
+                                  onTap: _isUploadingAvatar ? null : () => _pickImage(context),
                                   child: Stack(
+                                    alignment: Alignment.center,
                                     children: [
                                       CircleAvatar(
                                         radius: 50,
@@ -272,22 +260,25 @@ class _ProfilePageState extends State<ProfilePage> {
                                                 ),
                                               ),
                                       ),
-                                      Positioned(
-                                        right: 0,
-                                        bottom: 0,
-                                        child: Container(
-                                          padding: const EdgeInsets.all(4),
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context).colorScheme.secondary,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: Icon(
-                                            Icons.camera_alt,
-                                            size: 20,
-                                            color: Theme.of(context).colorScheme.onSecondary,
+                                      if (_isUploadingAvatar)
+                                        const CircularProgressIndicator()
+                                      else
+                                        Positioned(
+                                          right: 0,
+                                          bottom: 0,
+                                          child: Container(
+                                            padding: const EdgeInsets.all(4),
+                                            decoration: BoxDecoration(
+                                              color: Theme.of(context).colorScheme.secondary,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(
+                                              Icons.camera_alt,
+                                              size: 20,
+                                              color: Theme.of(context).colorScheme.onSecondary,
+                                            ),
                                           ),
                                         ),
-                                      ),
                                     ],
                                   ),
                                 ),
@@ -349,11 +340,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                       }
                                     } catch (e) {
                                       if (mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text(e.toString()),
-                                            backgroundColor: Theme.of(context).colorScheme.error,
-                                          ),
+                                        GlassmorphicUI.showGlassSnackBar(
+                                          context,
+                                          e.toString(),
+                                          isError: true,
                                         );
                                       }
                                     }
@@ -394,11 +384,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                       }
                                     } catch (e) {
                                       if (mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text(e.toString()),
-                                            backgroundColor: Theme.of(context).colorScheme.error,
-                                          ),
+                                        GlassmorphicUI.showGlassSnackBar(
+                                          context,
+                                          e.toString(),
+                                          isError: true,
                                         );
                                       }
                                     }
@@ -419,9 +408,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                                   onPressed: () async {
                                     await widget.apiClient.logout(context);
-                                    if (mounted) {
-                                      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
-                                    }
+                                    // MainPage listens for token changes and automatically
+                                    // displays the login screen, so no navigation is needed here.
                                   },
                                 ),
                               ],
@@ -573,11 +561,10 @@ class _ProfilePageState extends State<ProfilePage> {
         });
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(e.toString()),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
+          GlassmorphicUI.showGlassSnackBar(
+            context,
+            e.toString(),
+            isError: true,
           );
         }
       }

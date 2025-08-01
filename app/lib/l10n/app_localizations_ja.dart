@@ -204,7 +204,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get displayNameRequired => '表示名は必須です';
 
   @override
-  String get displayNameTooLong => '表示名は100文字以内にしてください';
+  String get displayNameTooLong => '表示名は30文字以内にしてください';
 
   @override
   String get communityFeatures => 'コミュニティ機能';
@@ -235,6 +235,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get volunteerDescription => 'ボランティア活動の機会を探す';
+
+  @override
+  String get studyFeature => '学習';
 
   @override
   String get localNews => '地域ニュース・更新情報';
@@ -303,29 +306,202 @@ class AppLocalizationsJa extends AppLocalizations {
   String get errorOccurred => '予期せぬエラーが発生しました。もう一度お試しください。';
 
   @override
-  String get feed => 'Feed';
+  String get feed => '掲示板';
 
   @override
-  String get failedToUpdateProfile => 'Failed to update profile settings';
+  String get failedToUpdateProfile => 'プロフィールの更新に失敗しました';
 
   @override
-  String get role => 'Role';
+  String get role => '役割';
 
   @override
-  String get cancel => 'Cancel';
+  String get cancel => 'キャンセル';
 
   @override
-  String get gradeInputHint => 'Enter a number 1-6 or OB';
+  String get gradeInputHint => '1-6の数字またはOBを入力';
 
   @override
-  String get invalidGrade => 'Please enter a number from 1 to 6, or OB';
+  String get invalidGrade => '1-6の数字またはOBを入力してください';
 
   @override
-  String get noName => 'No Name';
+  String get noName => '名前未設定';
 
   @override
-  String get feedFeature => '掲示板';
+  String get failedToLoadFeeds => 'フィードの読み込みに失敗しました';
 
   @override
-  String get studyFeature => '学習';
+  String get failedToLoadPosts => '投稿の読み込みに失敗しました';
+
+  @override
+  String get failedToJoinFeed => 'フィードへの参加に失敗しました';
+
+  @override
+  String get failedToCreateFeed => 'フィードの作成に失敗しました';
+
+  @override
+  String get failedToCreatePost => '投稿の作成に失敗しました';
+
+  @override
+  String get failedToVote => '投票に失敗しました';
+
+  @override
+  String get createFeed => 'フィードを作成';
+
+  @override
+  String get createPost => '投稿を作成';
+
+  @override
+  String get feedId => 'フィードID（一意の識別子）';
+
+  @override
+  String get feedDisplayName => '表示名';
+
+  @override
+  String get feedDescription => '説明';
+
+  @override
+  String get feedRules => 'ルール（任意）';
+
+  @override
+  String get feedIdRequired => 'フィードIDは必須です';
+
+  @override
+  String get feedIdInvalid => '小文字、数字、アンダースコアのみ使用可能です';
+
+  @override
+  String get descriptionRequired => '説明は必須です';
+
+  @override
+  String get titleRequired => 'タイトルは必須です';
+
+  @override
+  String get contentRequired => '内容は必須です';
+
+  @override
+  String get addImage => '画像を追加';
+
+  @override
+  String get feedIdHelperText => '小文字、数字、アンダースコアのみ使用可能';
+
+  @override
+  String get postTitle => 'タイトル';
+
+  @override
+  String get writePost => '投稿を書く...';
+
+  @override
+  String newPostIn(Object feedName) {
+    return '$feedName';
+  }
+
+  @override
+  String get openInFullPage => '全画面で開く';
+
+  @override
+  String get post => '投稿';
+
+  @override
+  String get discover => '発見';
+
+  @override
+  String get home => 'ホーム';
+
+  @override
+  String get sortBy => '並び替え';
+
+  @override
+  String get latest => '最新';
+
+  @override
+  String get popular => '人気';
+
+  @override
+  String get defaultSort => 'おすすめ';
+
+  @override
+  String get feedOptions => 'フィードオプション';
+
+  @override
+  String get createNewFeed => '新しいフィードを作成';
+
+  @override
+  String get reorderFeeds => 'フィードを並び替え';
+
+  @override
+  String get leaveFeed => 'フィードを離脱';
+
+  @override
+  String get selectNewAdmin => '新しい管理者を選択';
+
+  @override
+  String get confirmDeleteFeed => '他にメンバーがいないため、離脱するとこのフィードは削除されます。続行しますか？';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get save => '保存';
+
+  @override
+  String get searchFeeds => 'フィードを検索...';
+
+  @override
+  String get population => '人口';
+
+  @override
+  String get latestActivity => '最新のアクティビティ';
+
+  @override
+  String get noFeedsFound => 'フィードが見つかりません。';
+
+  @override
+  String get join => '参加';
+
+  @override
+  String get discoverMoreFeeds => 'もっとフィードを発見';
+
+  @override
+  String get newPost => '新しい投稿';
+
+  @override
+  String get newPostTo => '投稿先...';
+
+  @override
+  String get chooseFeed => 'フィードを選択';
+
+  @override
+  String get feedCreatedSuccess => 'フィードが作成されました';
+
+  @override
+  String get titleTooLong => 'タイトルは300文字以内で入力してください';
+
+  @override
+  String get contentTooLong => '内容は5000文字以内で入力してください';
+
+  @override
+  String get descriptionTooLong => '説明は1000文字以内にしてください';
+
+  @override
+  String get rulesTooLong => 'ルールは1000文字以内にしてください';
+
+  @override
+  String get feedSettings => 'フィード設定';
+
+  @override
+  String get feedUpdatedSuccess => 'フィードが更新されました';
+
+  @override
+  String get failedToLoadFeedMembers => 'メンバーの読み込みに失敗しました';
+
+  @override
+  String get currentAdmin => '現在の管理者';
+
+  @override
+  String get change => '変更';
+
+  @override
+  String get feedDetails => 'フィード詳細';
+
+  @override
+  String get members => 'メンバー';
 }

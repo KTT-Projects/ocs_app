@@ -1,10 +1,13 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:ocs_app/l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../providers/language_provider.dart';
 import '../widgets/language_toggle.dart';
+import '../widgets/glassmorphic_ui.dart';
+import '../widgets/grade_selection_dialog.dart';
+import '../widgets/institution_selection_dialog.dart';
 import '../services/api_client.dart';
 import 'home_page.dart';
 
@@ -32,6 +35,7 @@ class _SignupPageState extends State<SignupPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _otpController = TextEditingController();
+  String? _savedPassword;
   bool _allowDm = true;
 
   int? _selectedInstitutionId;
@@ -58,6 +62,12 @@ class _SignupPageState extends State<SignupPage> {
     }
   }
 
+  String _getLocalizedInstitutionName(String fullName) {
+    final parts = fullName.split(' / ');
+    final isJapanese = Localizations.localeOf(context).languageCode == 'ja';
+    return parts.length > 1 ? (isJapanese ? parts[1] : parts[0]) : fullName;
+  }
+
   Future<void> _loadInstitutions() async {
     try {
       setState(() => _isLoading = true);
@@ -69,11 +79,44 @@ class _SignupPageState extends State<SignupPage> {
     }
   }
 
+  Future<void> _selectInstitution() async {
+    final l10n = AppLocalizations.of(context)!;
+    final selectedId = await GlassmorphicUI.showDialog<String>(
+      context: context,
+      width: 320,
+      child: InstitutionSelectionDialog(
+        title: l10n.selectInstitution,
+        institutions: _institutions,
+        onInstitutionSelected: (id) => Navigator.pop(context, id),
+        getLocalizedName: _getLocalizedInstitutionName,
+      ),
+    );
+    if (selectedId != null) {
+      setState(() => _selectedInstitutionId = int.parse(selectedId));
+    }
+  }
+
+  Future<void> _selectGrade() async {
+    final l10n = AppLocalizations.of(context)!;
+    final selectedGrade = await GlassmorphicUI.showDialog<int>(
+      context: context,
+      width: 320,
+      child: GradeSelectionDialog(
+        title: l10n.grade,
+        onGradeSelected: (grade) => Navigator.pop(context, grade),
+      ),
+    );
+    if (selectedGrade != null) {
+      setState(() => _selectedGrade = selectedGrade);
+    }
+  }
+
   void _resetForm() {
     setState(() {
       _showOtpField = false;
       _otpController.clear();
       _errorMessage = null;
+      _savedPassword = null;
     });
   }
 
@@ -106,13 +149,11 @@ class _SignupPageState extends State<SignupPage> {
     final l10n = AppLocalizations.of(context)!;
 
     if (_showOtpField) {
-      // Only validate OTP in verification mode
       if (_otpController.text.length != 6) {
         setState(() => _errorMessage = l10n.invalidVerificationCode);
         return;
       }
     } else {
-      // Validate all fields in signup mode
       if (!_validateFields()) {
         return;
       }
@@ -125,7 +166,6 @@ class _SignupPageState extends State<SignupPage> {
 
     try {
       if (_showOtpField) {
-        // Verify OTP
         final response = await widget.apiClient.verifyEmail(
           context: context,
           email: _emailController.text,
@@ -134,11 +174,9 @@ class _SignupPageState extends State<SignupPage> {
 
         if (mounted && response['status'] == 'success') {
           if (response['token'] != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(l10n.emailVerifiedSuccess),
-                backgroundColor: Colors.green,
-              ),
+            GlassmorphicUI.showGlassSnackBar(
+              context,
+              l10n.emailVerifiedSuccess,
             );
             Navigator.pushReplacement(
               context,
@@ -149,12 +187,12 @@ class _SignupPageState extends State<SignupPage> {
                 ),
               ),
             );
+            _savedPassword = null;
           } else {
             setState(() => _errorMessage = l10n.verificationFailed);
           }
         }
       } else {
-        // Normal signup
         await widget.apiClient.register(
           context: context,
           email: _emailController.text,
@@ -170,42 +208,26 @@ class _SignupPageState extends State<SignupPage> {
           setState(() {
             _showOtpField = true;
             _emailController.text = _emailController.text.trim();
-            _passwordController.clear(); // Clear password for security
+            _savedPassword = _passwordController.text;
+            _passwordController.clear();
           });
 
-          // Give time for the OTP field to be built before focusing
           Future.delayed(Duration(milliseconds: 100), () {
             FocusScope.of(context).requestFocus(FocusNode());
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l10n.verifyEmail),
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n.checkSpamJunk,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
-                    ),
-                  ),
-                ],
-              ),
-              duration: Duration(seconds: 12),
-            ),
+          GlassmorphicUI.showGlassSnackBar(
+            context,
+            '${l10n.verifyEmail}\n${l10n.checkSpamJunk}',
+            seconds: 12,
           );
         }
       }
     } catch (e) {
       setState(() => _errorMessage = e.toString());
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
+      GlassmorphicUI.showGlassSnackBar(
+        context,
+        e.toString(),
+        isError: true,
       );
     } finally {
       setState(() => _isLoading = false);
@@ -219,7 +241,6 @@ class _SignupPageState extends State<SignupPage> {
     return Scaffold(
       body: Stack(
         children: [
-          // Gradient background
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -232,7 +253,6 @@ class _SignupPageState extends State<SignupPage> {
               ),
             ),
           ),
-          // Main content
           LayoutBuilder(
             builder: (context, constraints) {
               final maxWidth = constraints.maxWidth;
@@ -242,7 +262,7 @@ class _SignupPageState extends State<SignupPage> {
                 child: SingleChildScrollView(
                   padding: EdgeInsets.fromLTRB(
                     isSmallScreen ? 16.0 : 24.0,
-                    Theme.of(context).platform == TargetPlatform.iOS ? 120.0 : 56.0, // Increased top padding for iOS
+                    Theme.of(context).platform == TargetPlatform.iOS ? 120.0 : 56.0,
                     isSmallScreen ? 16.0 : 24.0,
                     isSmallScreen ? 16.0 : 24.0,
                   ),
@@ -301,6 +321,7 @@ class _SignupPageState extends State<SignupPage> {
                                 if (!_showOtpField) ...[
                                   TextFormField(
                                     controller: _nameController,
+                                    maxLength: 100,
                                     decoration: InputDecoration(
                                       hintText: l10n.fullName,
                                       prefixIcon: Icon(
@@ -322,6 +343,7 @@ class _SignupPageState extends State<SignupPage> {
                                   TextFormField(
                                     controller: _bioController,
                                     maxLines: 3,
+                                    maxLength: 500,
                                     decoration: InputDecoration(
                                       hintText: l10n.bio,
                                       prefixIcon: Icon(
@@ -356,106 +378,63 @@ class _SignupPageState extends State<SignupPage> {
                                     ),
                                   ),
                                   const SizedBox(height: 16),
-                                  Theme(
-                                    data: Theme.of(context).copyWith(
-                                      inputDecorationTheme: InputDecorationTheme(
-                                        filled: true,
-                                        fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: BorderSide.none,
-                                        ),
-                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                  TextFormField(
+                                    readOnly: true,
+                                    onTap: _selectInstitution,
+                                    decoration: InputDecoration(
+                                      hintText: l10n.selectInstitution,
+                                      prefixIcon: Icon(
+                                        Icons.apartment_outlined,
+                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
                                       ),
-                                      dropdownMenuTheme: DropdownMenuThemeData(
-                                        menuStyle: MenuStyle(
-                                          shape: MaterialStateProperty.all(
-                                            RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(12),
-                                            ),
-                                          ),
-                                        ),
-                                        inputDecorationTheme: InputDecorationTheme(
-                                          filled: true,
-                                          fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
-                                          border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(12),
-                                            borderSide: BorderSide.none,
-                                          ),
-                                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                                        ),
+                                      suffixIcon: Icon(
+                                        Icons.arrow_drop_down,
+                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                        size: 24,
+                                      ),
+                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                      filled: true,
+                                      fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide.none,
                                       ),
                                     ),
-                                    child: Column(
-                                      children: [
-                                        DropdownButtonFormField<int>(
-                                          isExpanded: true,
-                                          value: _selectedInstitutionId,
-                                          items: _institutions.map((institution) {
-                                            return DropdownMenuItem(
-                                              value: int.parse(institution['id'].toString()),
-                                              child: Text(
-                                                (institution['name'] as String).split('/')[Localizations.localeOf(context).languageCode == 'ja' ? 1 : 0].trim(),
-                                                style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            );
-                                          }).toList(),
-                                          onChanged: (value) {
-                                            setState(() => _selectedInstitutionId = value);
-                                          },
-                                          decoration: const InputDecoration(),
-                                          hint: Text(
-                                            l10n.selectInstitution,
-                                            style: TextStyle(
-                                              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                            ),
-                                          ),
-                                          dropdownColor: Theme.of(context).colorScheme.primary.withOpacity(0.9),
-                                          icon: Icon(
-                                            Icons.arrow_drop_down,
-                                            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                          ),
-                                          validator: (value) => value == null ? l10n.pleaseSelectInstitution : null,
-                                        ),
-                                        const SizedBox(height: 16),
-                                        DropdownButtonFormField<int>(
-                                          value: _selectedGrade,
-                                          items: [
-                                            for (var i = 7; i <= 14; i++)
-                                              DropdownMenuItem(
-                                                value: i,
-                                                child: Text(
-                                                  'G$i',
-                                                  style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-                                                ),
-                                              ),
-                                            DropdownMenuItem(
-                                              value: 99,
-                                              child: Text(
-                                                'OB',
-                                                style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-                                              ),
-                                            ),
-                                          ],
-                                          onChanged: (value) {
-                                            setState(() => _selectedGrade = value);
-                                          },
-                                          decoration: const InputDecoration(),
-                                          hint: Text(
-                                            l10n.grade,
-                                            style: TextStyle(
-                                              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                            ),
-                                          ),
-                                          dropdownColor: Theme.of(context).colorScheme.primary.withOpacity(0.9),
-                                          icon: Icon(
-                                            Icons.arrow_drop_down,
-                                            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                          ),
-                                          validator: (value) => value == null ? l10n.pleaseSelectGrade : null,
-                                        ),
-                                      ],
+                                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                    controller: TextEditingController(
+                                      text: _selectedInstitutionId != null ? _getLocalizedInstitutionName(_institutions.firstWhere((i) => int.parse(i['id'].toString()) == _selectedInstitutionId)['name'] as String) : '',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  TextFormField(
+                                    readOnly: true,
+                                    onTap: _selectGrade,
+                                    decoration: InputDecoration(
+                                      hintText: l10n.grade,
+                                      prefixIcon: Icon(
+                                        Icons.school_outlined,
+                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                      ),
+                                      suffixIcon: Icon(
+                                        Icons.arrow_drop_down,
+                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                        size: 24,
+                                      ),
+                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                      filled: true,
+                                      fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                    ),
+                                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                    controller: TextEditingController(
+                                      text: _selectedGrade != null
+                                          ? _selectedGrade == 99
+                                              ? 'OB'
+                                              : 'G${_selectedGrade}'
+                                          : '',
                                     ),
                                   ),
                                 ],
@@ -559,32 +538,28 @@ class _SignupPageState extends State<SignupPage> {
                                   const SizedBox(height: 8),
                                   TextButton.icon(
                                     onPressed: () async {
+                                      if (_savedPassword == null) return;
                                       setState(() => _isLoading = true);
                                       try {
-                                        await widget.apiClient.register(
+                                        await widget.apiClient.login(
                                           context: context,
                                           email: _emailController.text,
-                                          password: _passwordController.text,
-                                          institutionId: _selectedInstitutionId!,
-                                          grade: _selectedGrade!,
-                                          displayName: _nameController.text,
-                                          bio: _bioController.text,
-                                          allowDm: _allowDm,
+                                          password: _savedPassword!,
                                         );
                                         if (mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text('${l10n.verificationCodeSent}'.replaceAll('{email}', _emailController.text)),
+                                          GlassmorphicUI.showGlassSnackBar(
+                                            context,
+                                            l10n.verificationCodeSent(
+                                              _emailController.text,
                                             ),
                                           );
                                         }
                                       } catch (e) {
                                         if (mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text(e.toString()),
-                                              backgroundColor: Theme.of(context).colorScheme.error,
-                                            ),
+                                          GlassmorphicUI.showGlassSnackBar(
+                                            context,
+                                            e.toString(),
+                                            isError: true,
                                           );
                                         }
                                       } finally {
@@ -661,9 +636,7 @@ class _SignupPageState extends State<SignupPage> {
                                         ),
                                       ),
                                       TextButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
+                                        onPressed: () => Navigator.pop(context),
                                         child: Text(
                                           l10n.signIn,
                                           style: TextStyle(
@@ -686,7 +659,7 @@ class _SignupPageState extends State<SignupPage> {
               );
             },
           ),
-          // Language toggle - positioned last to ensure highest z-index
+          // Language toggle button
           Positioned(
             top: Theme.of(context).platform == TargetPlatform.iOS ? MediaQuery.of(context).padding.top + 16 : 16,
             right: 16,
@@ -696,7 +669,7 @@ class _SignupPageState extends State<SignupPage> {
                 filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                 child: Material(
                   color: Colors.transparent,
-                  elevation: 0, // Removed elevation
+                  elevation: 0,
                   child: Consumer<LanguageProvider>(
                     builder: (context, languageProvider, _) => LanguageToggle(
                       currentLanguage: languageProvider.currentLanguage,

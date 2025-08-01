@@ -62,7 +62,7 @@
   "saveProfile": "更新",
   "profileSetupFailed": "プロフィールの設定に失敗しました",
   "displayNameRequired": "表示名は必須です",
-  "displayNameTooLong": "表示名は100文字以内にしてください",
+  "displayNameTooLong": "表示名は30文字以内にしてください",
   "communityFeatures": "コミュニティ機能",
   "communityHub": "大崎上島コミュニティハブ",
   "eventsFeature": "イベント",
@@ -98,6 +98,279 @@
   "@errorOccurred": {
     "description": "不明なエラーが発生した場合に表示される汎用エラーメッセージ"
   },
-  "feedFeature": "掲示板",
-  "studyFeature": "学習"
+  "studyFeature": "学習",
+  "@studyFeature": {
+    "description": "学習セクションのタイトル"
+  },
+  "feed": "掲示板",
+  "@feed": {
+    "description": "掲示板セクションのタイトル"
+  },
+  "failedToUpdateProfile": "プロフィールの更新に失敗しました",
+  "@failedToUpdateProfile": {
+    "description": "プロフィールの更新に失敗した場合のエラーメッセージ"
+  },
+  "role": "役割",
+  "@role": {
+    "description": "ユーザーの役割表示用のラベル"
+  },
+  "cancel": "キャンセル",
+  "@cancel": {
+    "description": "キャンセルボタンのテキスト"
+  },
+  "gradeInputHint": "1-6の数字またはOBを入力",
+  "@gradeInputHint": {
+    "description": "学年入力欄のヒントテキスト"
+  },
+  "invalidGrade": "1-6の数字またはOBを入力してください",
+  "@invalidGrade": {
+    "description": "学年入力が無効な場合のエラーメッセージ"
+  },
+  "noName": "名前未設定",
+  "@noName": {
+    "description": "名前が設定されていない場合に表示されるテキスト"
+  },
+  "failedToLoadFeeds": "フィードの読み込みに失敗しました",
+  "@failedToLoadFeeds": {
+    "description": "フィードの読み込みに失敗した場合のエラーメッセージ"
+  },
+  "failedToLoadPosts": "投稿の読み込みに失敗しました",
+  "@failedToLoadPosts": {
+    "description": "投稿の読み込みに失敗した場合のエラーメッセージ"
+  },
+  "failedToJoinFeed": "フィードへの参加に失敗しました",
+  "@failedToJoinFeed": {
+    "description": "フィードへの参加に失敗した場合のエラーメッセージ"
+  },
+  "failedToCreateFeed": "フィードの作成に失敗しました",
+  "@failedToCreateFeed": {
+    "description": "フィードの作成に失敗した場合のエラーメッセージ"
+  },
+  "failedToCreatePost": "投稿の作成に失敗しました",
+  "@failedToCreatePost": {
+    "description": "投稿の作成に失敗した場合のエラーメッセージ"
+  },
+  "failedToVote": "投票に失敗しました",
+  "@failedToVote": {
+    "description": "投票に失敗した場合のエラーメッセージ"
+  },
+  "createFeed": "フィードを作成",
+  "@createFeed": {
+    "description": "フィード作成ページのタイトル"
+  },
+  "createPost": "投稿を作成",
+  "@createPost": {
+    "description": "投稿作成ページのタイトル"
+  },
+  "feedId": "フィードID（一意の識別子）",
+  "@feedId": {
+    "description": "フィードIDの入力欄のラベル"
+  },
+  "feedDisplayName": "表示名",
+  "@feedDisplayName": {
+    "description": "フィードの表示名の入力欄のラベル"
+  },
+  "feedDescription": "説明",
+  "@feedDescription": {
+    "description": "フィードの説明の入力欄のラベル"
+  },
+  "feedRules": "ルール（任意）",
+  "@feedRules": {
+    "description": "フィードのルールの入力欄のラベル"
+  },
+  "feedIdRequired": "フィードIDは必須です",
+  "@feedIdRequired": {
+    "description": "フィードIDが空の場合のエラーメッセージ"
+  },
+  "feedIdInvalid": "小文字、数字、アンダースコアのみ使用可能です",
+  "@feedIdInvalid": {
+    "description": "フィードIDに無効な文字が含まれている場合のエラーメッセージ"
+  },
+  "displayNameRequired": "表示名は必須です",
+  "@displayNameRequired": {
+    "description": "表示名が空の場合のエラーメッセージ"
+  },
+  "descriptionRequired": "説明は必須です",
+  "@descriptionRequired": {
+    "description": "説明が空の場合のエラーメッセージ"
+  },
+  "titleRequired": "タイトルは必須です",
+  "@titleRequired": {
+    "description": "タイトルが空の場合のエラーメッセージ"
+  },
+  "contentRequired": "内容は必須です",
+  "@contentRequired": {
+    "description": "内容が空の場合のエラーメッセージ"
+  },
+  "addImage": "画像を追加",
+  "@addImage": {
+    "description": "画像追加ボタンのテキスト"
+  },
+  "feedIdHelperText": "小文字、数字、アンダースコアのみ使用可能",
+  "@feedIdHelperText": {
+    "description": "フィードID入力欄のヘルパーテキスト"
+  },
+  "postTitle": "タイトル",
+  "@postTitle": {
+    "description": "投稿のタイトル入力欄のラベル"
+  },
+  "writePost": "投稿を書く...",
+  "@writePost": {
+    "description": "投稿の内容入力欄のプレースホルダーテキスト"
+  },
+  "newPostIn": "{feedName}",
+  "@newPostIn": {
+    "description": "投稿作成ダイアログのタイトル（フィード名付き）",
+    "placeholders": {
+      "feedName": {}
+    }
+  },
+  "openInFullPage": "全画面で開く",
+  "@openInFullPage": {
+    "description": "投稿エディタを全画面で開くボタンのツールチップ"
+  },
+  "post": "投稿",
+  "@post": {
+    "description": "投稿を送信するボタンのテキスト"
+  },
+  "discover": "発見",
+  "@discover": {
+    "description": "「発見」タブのタイトル"
+  },
+  "home": "ホーム",
+  "@home": {
+    "description": "「ホーム」タブのタイトル"
+  },
+  "sortBy": "並び替え",
+  "@sortBy": {
+    "description": "並び替えメニューのタイトル"
+  },
+  "latest": "最新",
+  "@latest": {
+    "description": "最新で並び替え"
+  },
+  "popular": "人気",
+  "@popular": {
+    "description": "人気で並び替え"
+  },
+  "defaultSort": "おすすめ",
+  "@defaultSort": {
+    "description": "デフォルトの並び替え"
+  },
+  "feedOptions": "フィードオプション",
+  "@feedOptions": {
+    "description": "フィードオプションメニューのタイトル"
+  },
+  "createNewFeed": "新しいフィードを作成",
+  "@createNewFeed": {
+    "description": "新しいフィードを作成するボタン"
+  },
+  "reorderFeeds": "フィードを並び替え",
+  "@reorderFeeds": {
+    "description": "フィードを並び替えるボタン"
+  },
+  "leaveFeed": "フィードを離脱",
+  "@leaveFeed": {
+    "description": "現在選択中のフィードを離脱するボタン"
+  },
+  "selectNewAdmin": "新しい管理者を選択",
+  "@selectNewAdmin": {
+    "description": "管理者を譲渡する相手を選択するダイアログのタイトル"
+  },
+  "confirmDeleteFeed": "他にメンバーがいないため、離脱するとこのフィードは削除されます。続行しますか？",
+  "@confirmDeleteFeed": {
+    "description": "最後の管理者がフィードを離脱するときの確認メッセージ"
+  },
+  "ok": "OK",
+  "@ok": {
+    "description": "OKボタンのラベル"
+  },
+  "save": "保存",
+  "@save": {
+    "description": "保存ボタン"
+  },
+  "searchFeeds": "フィードを検索...",
+  "@searchFeeds": {
+    "description": "フィード検索のプレースホルダー"
+  },
+  "population": "人口",
+  "@population": {
+    "description": "人口で並び替え"
+  },
+  "latestActivity": "最新のアクティビティ",
+  "@latestActivity": {
+    "description": "最新のアクティビティで並び替え"
+  },
+  "noFeedsFound": "フィードが見つかりません。",
+  "@noFeedsFound": {
+    "description": "フィードが見つからない場合のメッセージ"
+  },
+  "join": "参加",
+  "@join": {
+    "description": "フィードに参加するボタン"
+  },
+  "discoverMoreFeeds": "もっとフィードを発見",
+  "@discoverMoreFeeds": {
+    "description": "もっとフィードを発見するためのセクションタイトル"
+  },
+  "newPost": "新しい投稿",
+  "@newPost": {
+    "description": "新しい投稿を作成するボタン"
+  },
+  "newPostTo": "投稿先...",
+  "@newPostTo": {
+    "description": "特定のフィードに新しい投稿を作成するボタン"
+  },
+  "chooseFeed": "フィードを選択",
+  "@chooseFeed": {
+    "description": "フィード選択ダイアログのタイトル"
+  },
+  "feedCreatedSuccess": "フィードが作成されました",
+  "@feedCreatedSuccess": {
+    "description": "フィードが正常に作成されたときのメッセージ"
+  },
+  "titleTooLong": "タイトルは300文字以内で入力してください",
+  "@titleTooLong": {
+    "description": "投稿タイトルが長すぎるときのエラーメッセージ"
+  },
+  "contentTooLong": "内容は5000文字以内で入力してください",
+  "@contentTooLong": {
+    "description": "投稿内容が長すぎるときのエラーメッセージ"
+  },
+  "descriptionTooLong": "説明は1000文字以内にしてください",
+  "@descriptionTooLong": {
+    "description": "フィードの説明が長すぎるときのエラーメッセージ"
+  },
+  "rulesTooLong": "ルールは1000文字以内にしてください",
+  "@rulesTooLong": {
+    "description": "フィードのルールが長すぎるときのエラーメッセージ"
+  },
+  "feedSettings": "フィード設定",
+  "@feedSettings": {
+    "description": "フィード設定ページのタイトル"
+  },
+  "feedUpdatedSuccess": "フィードが更新されました",
+  "@feedUpdatedSuccess": {
+    "description": "フィード設定を保存したときの成功メッセージ"
+  },
+  "failedToLoadFeedMembers": "メンバーの読み込みに失敗しました",
+  "@failedToLoadFeedMembers": {
+    "description": "フィードメンバーの取得に失敗したときのエラーメッセージ"
+  },
+  "currentAdmin": "現在の管理者",
+  "@currentAdmin": {
+    "description": "現在のフィード管理者のラベル"
+  },
+  "change": "変更",
+  "@change": {
+    "description": "変更ボタンのラベル"
+  },
+  "feedDetails": "フィード詳細",
+  "@feedDetails": {
+    "description": "フィードの詳細を表示するボタン"
+  },
+  "members": "メンバー",
+  "@members": {
+    "description": "フィードメンバーのセクションタイトル"
+  }
 }

@@ -1,0 +1,354 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'dart:ui';
+import 'dart:io';
+import 'dart:convert';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import '../l10n/app_localizations.dart';
+import '../models/feed.dart';
+import '../services/api_client.dart';
+import '../pages/create_post_page.dart';
+import 'glassmorphic_ui.dart';
+
+class CreatePostDialog extends StatefulWidget {
+  final ApiClient apiClient;
+  final Feed feed;
+
+  const CreatePostDialog({
+    super.key,
+    required this.apiClient,
+    required this.feed,
+  });
+
+  @override
+  State<CreatePostDialog> createState() => _CreatePostDialogState();
+}
+
+class _CreatePostDialogState extends State<CreatePostDialog> {
+  final _titleController = TextEditingController();
+  final _contentController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
+  final _imagePicker = ImagePicker();
+  String? _imagePath;
+  List<int>? _imageBytes;
+  String? _imageName;
+  String? _previewUrl;
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _contentController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final XFile? image = await _imagePicker.pickImage(source: ImageSource.gallery);
+      if (image != null && mounted) {
+        if (kIsWeb) {
+          _imageBytes = await image.readAsBytes();
+          _imageName = image.name.isNotEmpty ? image.name : 'image.png';
+          _previewUrl = 'data:${image.mimeType};base64,${base64Encode(_imageBytes!)}';
+        } else {
+          _imagePath = image.path;
+          _previewUrl = image.path;
+        }
+        setState(() {});
+      }
+    } catch (e) {
+      if (mounted) {
+        GlassmorphicUI.showGlassSnackBar(context, e.toString(), isError: true);
+      }
+    }
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      String? mediaUrl;
+      if (_imagePath != null || _imageBytes != null) {
+        mediaUrl = await widget.apiClient.uploadPostMedia(
+          context,
+          widget.feed.id,
+          filePath: _imagePath,
+          webBytes: _imageBytes,
+          webFileName: _imageName,
+        );
+      }
+
+      final postId = await widget.apiClient.createPost(
+        context,
+        feedId: widget.feed.id,
+        title: _titleController.text,
+        content: _contentController.text,
+        mediaUrl: mediaUrl,
+        mediaType: mediaUrl != null ? 'image' : null,
+      );
+
+      if (mounted) {
+        Navigator.pop(context, postId);
+      }
+    } catch (e) {
+      if (mounted) {
+        GlassmorphicUI.showGlassSnackBar(context, e.toString(), isError: true);
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _expandToFullPage() async {
+    final postId = await Navigator.of(context).push<int>(
+      MaterialPageRoute(
+        builder: (context) => CreatePostPage(
+          apiClient: widget.apiClient,
+          feed: widget.feed,
+          initialTitle: _titleController.text,
+          initialContent: _contentController.text,
+        ),
+      ),
+    );
+    if (mounted && postId != null) {
+      Navigator.of(context).pop(postId);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.all(16),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 500),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.background.withOpacity(0.35),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.2),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 4, 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n.newPostIn(widget.feed.displayName),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              Icons.open_in_full,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                            onPressed: _expandToFullPage,
+                            tooltip: 'Open in full page',
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              Icons.close,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: _titleController,
+                          maxLength: 300,
+                          maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                          decoration: InputDecoration(
+                            hintText: l10n.postTitle,
+                            hintStyle: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onPrimary.withOpacity(0.5),
+                            ),
+                            filled: true,
+                            fillColor: Theme.of(
+                              context,
+                            ).colorScheme.background.withOpacity(0.1),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onPrimary.withOpacity(0.3),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                            ),
+                          ),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return l10n.titleRequired;
+                            }
+                            if (value.length > 300) {
+                              return l10n.titleTooLong;
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _contentController,
+                          maxLength: 5000,
+                          maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                          decoration: InputDecoration(
+                            hintText: l10n.writePost,
+                            hintStyle: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onPrimary.withOpacity(0.5),
+                            ),
+                            filled: true,
+                            fillColor: Theme.of(
+                              context,
+                            ).colorScheme.background.withOpacity(0.1),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onPrimary.withOpacity(0.3),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                            ),
+                          ),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                          maxLines: 3,
+                          validator: (value) {
+                            if (value != null && value.length > 5000) {
+                              return l10n.contentTooLong;
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        GestureDetector(
+                          onTap: _pickImage,
+                          child: Container(
+                            width: double.infinity,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.background.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                              ),
+                            ),
+                            child: _previewUrl == null
+                                ? Icon(
+                                    Icons.add_a_photo,
+                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                  )
+                                : ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: kIsWeb
+                                        ? Image.network(_previewUrl!, fit: BoxFit.cover)
+                                        : Image.file(File(_previewUrl!), fit: BoxFit.cover),
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _submit,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.secondary,
+                              foregroundColor: Theme.of(
+                                context,
+                              ).colorScheme.onSecondary,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: _isLoading
+                                ? SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Theme.of(
+                                          context,
+                                        ).colorScheme.onSecondary,
+                                      ),
+                                    ),
+                                  )
+                                : Text(l10n.createPost),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

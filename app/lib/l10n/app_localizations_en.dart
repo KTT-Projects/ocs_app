@@ -209,7 +209,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get displayNameTooLong =>
-      'Display name must be less than 100 characters';
+      'Display name must be less than 30 characters';
 
   @override
   String get communityFeatures => 'Community Features';
@@ -240,6 +240,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get volunteerDescription => 'Find volunteering opportunities';
+
+  @override
+  String get studyFeature => 'Study';
 
   @override
   String get localNews => 'Local News & Updates';
@@ -334,8 +337,185 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noName => 'No Name';
 
   @override
-  String get feedFeature => 'Feed';
+  String get failedToLoadFeeds => 'Failed to load feeds';
 
   @override
-  String get studyFeature => 'Study';
+  String get failedToLoadPosts => 'Failed to load posts';
+
+  @override
+  String get failedToJoinFeed => 'Failed to join feed';
+
+  @override
+  String get failedToCreateFeed => 'Failed to create feed';
+
+  @override
+  String get failedToCreatePost => 'Failed to create post';
+
+  @override
+  String get failedToVote => 'Failed to vote';
+
+  @override
+  String get createFeed => 'Create Feed';
+
+  @override
+  String get createPost => 'Create Post';
+
+  @override
+  String get feedId => 'Feed ID (Unique identifier)';
+
+  @override
+  String get feedDisplayName => 'Display Name';
+
+  @override
+  String get feedDescription => 'Description';
+
+  @override
+  String get feedRules => 'Rules (Optional)';
+
+  @override
+  String get feedIdRequired => 'Feed ID is required';
+
+  @override
+  String get feedIdInvalid =>
+      'Only lowercase letters, numbers, and underscores allowed';
+
+  @override
+  String get descriptionRequired => 'Description is required';
+
+  @override
+  String get titleRequired => 'Title is required';
+
+  @override
+  String get contentRequired => 'Content is required';
+
+  @override
+  String get addImage => 'Add Image';
+
+  @override
+  String get feedIdHelperText =>
+      'Only lowercase letters, numbers, and underscores';
+
+  @override
+  String get postTitle => 'Title';
+
+  @override
+  String get writePost => 'Write your post...';
+
+  @override
+  String newPostIn(Object feedName) {
+    return '$feedName';
+  }
+
+  @override
+  String get openInFullPage => 'Open in full page';
+
+  @override
+  String get post => 'Post';
+
+  @override
+  String get discover => 'Discover';
+
+  @override
+  String get home => 'Home';
+
+  @override
+  String get sortBy => 'Sort by';
+
+  @override
+  String get latest => 'Latest';
+
+  @override
+  String get popular => 'Popular';
+
+  @override
+  String get defaultSort => 'Default';
+
+  @override
+  String get feedOptions => 'Feed options';
+
+  @override
+  String get createNewFeed => 'Create new feed';
+
+  @override
+  String get reorderFeeds => 'Reorder feeds';
+
+  @override
+  String get leaveFeed => 'Leave feed';
+
+  @override
+  String get selectNewAdmin => 'Select new admin';
+
+  @override
+  String get confirmDeleteFeed =>
+      'No other members remain. Leaving will delete this feed. Continue?';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get searchFeeds => 'Search feeds...';
+
+  @override
+  String get population => 'Population';
+
+  @override
+  String get latestActivity => 'Latest Activity';
+
+  @override
+  String get noFeedsFound => 'No feeds found.';
+
+  @override
+  String get join => 'Join';
+
+  @override
+  String get discoverMoreFeeds => 'Discover more feeds';
+
+  @override
+  String get newPost => 'New post';
+
+  @override
+  String get newPostTo => 'New post to...';
+
+  @override
+  String get chooseFeed => 'Choose a feed';
+
+  @override
+  String get feedCreatedSuccess => 'Feed created successfully';
+
+  @override
+  String get titleTooLong => 'Title must be less than 300 characters';
+
+  @override
+  String get contentTooLong => 'Content must be less than 5000 characters';
+
+  @override
+  String get descriptionTooLong =>
+      'Description must be less than 1000 characters';
+
+  @override
+  String get rulesTooLong => 'Rules must be less than 1000 characters';
+
+  @override
+  String get feedSettings => 'Feed settings';
+
+  @override
+  String get feedUpdatedSuccess => 'Feed updated successfully';
+
+  @override
+  String get failedToLoadFeedMembers => 'Failed to load feed members';
+
+  @override
+  String get currentAdmin => 'Current admin';
+
+  @override
+  String get change => 'Change';
+
+  @override
+  String get feedDetails => 'Feed details';
+
+  @override
+  String get members => 'Members';
 }

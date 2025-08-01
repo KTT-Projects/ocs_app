@@ -75,13 +75,14 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
-      FeedsPage(),
-      EventsPage(),
-      VolunteerPage(),
-      StudyPage(),
+      FeedsPage(apiClient: widget.apiClient),
+      const Center(child: Text('Events')),
+      const Center(child: Text('Volunteer')),
+      const Center(child: Text('Study')),
       ProfilePage(apiClient: widget.apiClient),
     ];
     final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       body: pages[_currentIndex],
       extendBody: true,
@@ -96,7 +97,7 @@ class _HomePageState extends State<HomePage> {
         inactiveIcons: [
           Column(children: [
             Icon(Icons.feed_outlined, color: Colors.white, size: 28),
-            Text(l10n.feedFeature,
+            Text(l10n.feed,
                 style: TextStyle(
                     color: Colors.white,
                     fontSize: 12,
@@ -141,14 +142,6 @@ class _HomePageState extends State<HomePage> {
         height: 60,
         circleWidth: 37,
         padding: EdgeInsets.only(left: 16, right: 16, bottom: 20),
-        // gradient: LinearGradient(
-        //   begin: Alignment.topCenter,
-        //   end: Alignment.bottomCenter,
-        //   colors: [
-        //     Colors.white,
-        //     Colors.white.withValues(alpha: 0.8),
-        //   ],
-        // ),
         activeIndex: _currentIndex,
         onTap: (index) {
           setState(() {

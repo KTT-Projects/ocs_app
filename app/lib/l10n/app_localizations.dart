@@ -474,7 +474,7 @@ abstract class AppLocalizations {
   /// Error message when display name is too long
   ///
   /// In en, this message translates to:
-  /// **'Display name must be less than 100 characters'**
+  /// **'Display name must be less than 30 characters'**
   String get displayNameTooLong;
 
   /// Title for the community features section
@@ -536,6 +536,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Find volunteering opportunities'**
   String get volunteerDescription;
+
+  /// Title for the study section
+  ///
+  /// In en, this message translates to:
+  /// **'Study'**
+  String get studyFeature;
 
   /// Title for the local news section
   ///
@@ -711,17 +717,359 @@ abstract class AppLocalizations {
   /// **'No Name'**
   String get noName;
 
-  /// No description provided for @feedFeature.
+  /// Error message when loading feeds fails
   ///
   /// In en, this message translates to:
-  /// **'Feed'**
-  String get feedFeature;
+  /// **'Failed to load feeds'**
+  String get failedToLoadFeeds;
 
-  /// No description provided for @studyFeature.
+  /// Error message when loading posts fails
   ///
   /// In en, this message translates to:
-  /// **'Study'**
-  String get studyFeature;
+  /// **'Failed to load posts'**
+  String get failedToLoadPosts;
+
+  /// Error message when joining a feed fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to join feed'**
+  String get failedToJoinFeed;
+
+  /// Error message when creating a feed fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create feed'**
+  String get failedToCreateFeed;
+
+  /// Error message when creating a post fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create post'**
+  String get failedToCreatePost;
+
+  /// Error message when voting fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to vote'**
+  String get failedToVote;
+
+  /// Title for create feed page
+  ///
+  /// In en, this message translates to:
+  /// **'Create Feed'**
+  String get createFeed;
+
+  /// Title for create post page
+  ///
+  /// In en, this message translates to:
+  /// **'Create Post'**
+  String get createPost;
+
+  /// Label for feed ID input field
+  ///
+  /// In en, this message translates to:
+  /// **'Feed ID (Unique identifier)'**
+  String get feedId;
+
+  /// Label for feed display name input field
+  ///
+  /// In en, this message translates to:
+  /// **'Display Name'**
+  String get feedDisplayName;
+
+  /// Label for feed description input field
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get feedDescription;
+
+  /// Label for feed rules input field
+  ///
+  /// In en, this message translates to:
+  /// **'Rules (Optional)'**
+  String get feedRules;
+
+  /// Error message when feed ID is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Feed ID is required'**
+  String get feedIdRequired;
+
+  /// Error message when feed ID contains invalid characters
+  ///
+  /// In en, this message translates to:
+  /// **'Only lowercase letters, numbers, and underscores allowed'**
+  String get feedIdInvalid;
+
+  /// Error message when description is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Description is required'**
+  String get descriptionRequired;
+
+  /// Error message when title is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Title is required'**
+  String get titleRequired;
+
+  /// Error message when content is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Content is required'**
+  String get contentRequired;
+
+  /// Button text for adding an image
+  ///
+  /// In en, this message translates to:
+  /// **'Add Image'**
+  String get addImage;
+
+  /// Helper text for feed ID input field
+  ///
+  /// In en, this message translates to:
+  /// **'Only lowercase letters, numbers, and underscores'**
+  String get feedIdHelperText;
+
+  /// Label for post title input field
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get postTitle;
+
+  /// Placeholder text for post content input field
+  ///
+  /// In en, this message translates to:
+  /// **'Write your post...'**
+  String get writePost;
+
+  /// Title for new post dialog with feed name
+  ///
+  /// In en, this message translates to:
+  /// **'{feedName}'**
+  String newPostIn(Object feedName);
+
+  /// Tooltip for button to open post editor in full page
+  ///
+  /// In en, this message translates to:
+  /// **'Open in full page'**
+  String get openInFullPage;
+
+  /// Button text to submit a post
+  ///
+  /// In en, this message translates to:
+  /// **'Post'**
+  String get post;
+
+  /// Title for the discover tab
+  ///
+  /// In en, this message translates to:
+  /// **'Discover'**
+  String get discover;
+
+  /// Title for the home tab
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get home;
+
+  /// Title for the sort menu
+  ///
+  /// In en, this message translates to:
+  /// **'Sort by'**
+  String get sortBy;
+
+  /// Sort by latest option
+  ///
+  /// In en, this message translates to:
+  /// **'Latest'**
+  String get latest;
+
+  /// Sort by popular option
+  ///
+  /// In en, this message translates to:
+  /// **'Popular'**
+  String get popular;
+
+  /// Default sort option
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get defaultSort;
+
+  /// Title for the feed options menu
+  ///
+  /// In en, this message translates to:
+  /// **'Feed options'**
+  String get feedOptions;
+
+  /// Button to create a new feed
+  ///
+  /// In en, this message translates to:
+  /// **'Create new feed'**
+  String get createNewFeed;
+
+  /// Button to reorder feeds
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder feeds'**
+  String get reorderFeeds;
+
+  /// Button to leave the currently selected feed
+  ///
+  /// In en, this message translates to:
+  /// **'Leave feed'**
+  String get leaveFeed;
+
+  /// Dialog title when choosing a new admin
+  ///
+  /// In en, this message translates to:
+  /// **'Select new admin'**
+  String get selectNewAdmin;
+
+  /// Confirmation message shown to the last admin before deleting a feed
+  ///
+  /// In en, this message translates to:
+  /// **'No other members remain. Leaving will delete this feed. Continue?'**
+  String get confirmDeleteFeed;
+
+  /// Generic OK button label
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// Save button
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// Placeholder for search feeds input
+  ///
+  /// In en, this message translates to:
+  /// **'Search feeds...'**
+  String get searchFeeds;
+
+  /// Sort by population option
+  ///
+  /// In en, this message translates to:
+  /// **'Population'**
+  String get population;
+
+  /// Sort by latest activity option
+  ///
+  /// In en, this message translates to:
+  /// **'Latest Activity'**
+  String get latestActivity;
+
+  /// Message when no feeds are found
+  ///
+  /// In en, this message translates to:
+  /// **'No feeds found.'**
+  String get noFeedsFound;
+
+  /// Button to join a feed
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get join;
+
+  /// Title for the discover more feeds section
+  ///
+  /// In en, this message translates to:
+  /// **'Discover more feeds'**
+  String get discoverMoreFeeds;
+
+  /// Button to create a new post
+  ///
+  /// In en, this message translates to:
+  /// **'New post'**
+  String get newPost;
+
+  /// Button to create a new post to a specific feed
+  ///
+  /// In en, this message translates to:
+  /// **'New post to...'**
+  String get newPostTo;
+
+  /// Title for feed selection dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a feed'**
+  String get chooseFeed;
+
+  /// Success message when a feed is created
+  ///
+  /// In en, this message translates to:
+  /// **'Feed created successfully'**
+  String get feedCreatedSuccess;
+
+  /// Error message when post title is too long
+  ///
+  /// In en, this message translates to:
+  /// **'Title must be less than 300 characters'**
+  String get titleTooLong;
+
+  /// Error message when post content is too long
+  ///
+  /// In en, this message translates to:
+  /// **'Content must be less than 5000 characters'**
+  String get contentTooLong;
+
+  /// Error message when feed description is too long
+  ///
+  /// In en, this message translates to:
+  /// **'Description must be less than 1000 characters'**
+  String get descriptionTooLong;
+
+  /// Error message when feed rules are too long
+  ///
+  /// In en, this message translates to:
+  /// **'Rules must be less than 1000 characters'**
+  String get rulesTooLong;
+
+  /// Title for feed settings page
+  ///
+  /// In en, this message translates to:
+  /// **'Feed settings'**
+  String get feedSettings;
+
+  /// Success message when feed settings are saved
+  ///
+  /// In en, this message translates to:
+  /// **'Feed updated successfully'**
+  String get feedUpdatedSuccess;
+
+  /// Error message when loading feed members fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load feed members'**
+  String get failedToLoadFeedMembers;
+
+  /// Label for current feed admin
+  ///
+  /// In en, this message translates to:
+  /// **'Current admin'**
+  String get currentAdmin;
+
+  /// Button label to change selection
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get change;
+
+  /// Button to view feed details
+  ///
+  /// In en, this message translates to:
+  /// **'Feed details'**
+  String get feedDetails;
+
+  /// Section title for feed members
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get members;
 }
 
 class _AppLocalizationsDelegate
