@@ -213,14 +213,14 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Container(
                       width: isSmallScreen ? maxWidth - 32 : 400,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.background.withValues(alpha: 0.2),
+                        color: Theme.of(context).colorScheme.background.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                          color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.3),
+                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
+                            color: Colors.black.withOpacity(0.2),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -276,22 +276,6 @@ class _ProfilePageState extends State<ProfilePage> {
                                             color: Theme.of(context).colorScheme.onSecondary,
                                           ),
                                         ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  _profile!['email'] ?? '',
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8),
-                                  ),
-                                ),
-                                const SizedBox(height: 24),
-                                Text(
-                                  _profile!['name'] ?? l10n.noName,
-                                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                        color: Theme.of(context).colorScheme.onPrimary,
-                                        fontWeight: FontWeight.bold,
                                       ),
                                   ],
                                 ),
@@ -464,7 +448,7 @@ class _ProfilePageState extends State<ProfilePage> {
           Text(
             label,
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
+              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
             ),
           ),
           const SizedBox(width: 16),
@@ -482,7 +466,7 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(width: 8),
             Icon(
               Icons.edit,
-              color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
+              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
               size: 16,
             ),
           ],
@@ -502,14 +486,14 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Container(
             width: 300, // Fixed width for dialog
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.background.withValues(alpha: 0.2),
+              color: Theme.of(context).colorScheme.background.withOpacity(0.2),
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.3),
+                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
+                  color: Colors.black.withOpacity(0.2),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -595,14 +579,14 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Container(
             width: 300, // Fixed width for dialog
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.background.withValues(alpha: 0.2),
+              color: Theme.of(context).colorScheme.background.withOpacity(0.2),
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.3),
+                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
+                  color: Colors.black.withOpacity(0.2),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -675,14 +659,14 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Container(
             width: 300, // Fixed width for dialog
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.background.withValues(alpha: 0.2),
+              color: Theme.of(context).colorScheme.background.withOpacity(0.2),
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.3),
+                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
+                  color: Colors.black.withOpacity(0.2),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -714,7 +698,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.1),
+                            fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide.none,
@@ -722,7 +706,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(
-                                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.3),
+                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
@@ -733,7 +717,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                             helperText: title == l10n.grade ? l10n.gradeInputHint : null,
                             helperStyle: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
+                              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
                             ),
                           ),
                           maxLines: title == l10n.bio ? 3 : 1,
@@ -768,7 +752,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             child: Text(
                               l10n.cancel,
                               style: TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
+                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
                               ),
                             ),
                           ),
