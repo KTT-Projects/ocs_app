@@ -7,6 +7,7 @@ import 'dart:io';
 import '../models/feed.dart';
 import '../models/feed_post.dart';
 import '../models/comment.dart';
+import '../models/volunteer_opportunity.dart';
 import 'auth_service.dart';
 
 class ApiException implements Exception {
@@ -1081,6 +1082,8 @@ class ApiClient extends ChangeNotifier {
     }
   }
 
+  // Volunteer API methods
+
   Future<List<Comment>> getComments(
     BuildContext context,
     int postId,
@@ -1150,4 +1153,332 @@ class ApiClient extends ChangeNotifier {
       throw ApiException(l10n.errorOccurred);
     }
   }
+
+  // Volunteer API methods
+  Future<List<VolunteerOpportunity>> getVolunteerOpportunities(
+    BuildContext context, {
+    int page = 1,
+    String? sortBy,
+    String? searchQuery,
+    String? status,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final params = {
+        'page': page.toString(),
+        if (searchQuery != null) 'search': searchQuery,
+        if (status != null) 'status': status,
+      };
+      
+      final uri = _buildUri('volunteer.php?action=list').replace(queryParameters: params);
+      final response = await http.get(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+
+      return (data['data'] as List)
+          .map((opportunity) => VolunteerOpportunity.fromJson(opportunity))
+          .toList();
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<VolunteerOpportunity> getVolunteerOpportunity(
+    BuildContext context,
+    int opportunityId,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.get(
+        _buildUri('volunteer.php?action=view&id=$opportunityId'),
+        headers: {
+          'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+
+      return VolunteerOpportunity.fromJson(data['data']);
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<VolunteerOpportunity> createVolunteerOpportunity(
+    BuildContext context, {
+    required String title,
+    required String description,
+    required String location,
+    required DateTime startDate,
+    DateTime? endDate,
+    int? maxParticipants,
+    String? organizer,
+    String? organizerContact,
+    List<String>? tags,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/volunteer.php?action=create'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode({
+          'title': title,
+          'description': description,
+          'location': location,
+          'start_date': startDate.toIso8601String(),
+          if (endDate != null) 'end_date': endDate.toIso8601String(),
+          if (maxParticipants != null) 'max_participants': maxParticipants,
+          if (organizer != null) 'organizer': organizer,
+          if (organizerContact != null) 'organizer_contact': organizerContact,
+          if (tags != null) 'tags': tags,
+        }),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200 && response.statusCode != 201) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+
+      return VolunteerOpportunity.fromJson(data['data']);
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<void> updateVolunteerOpportunity(
+    BuildContext context,
+    int opportunityId, {
+    String? title,
+    String? description,
+    String? location,
+    DateTime? startDate,
+    DateTime? endDate,
+    int? maxParticipants,
+    String? organizer,
+    String? organizerContact,
+    List<String>? tags,
+    String? status,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.patch(
+        Uri.parse('$baseUrl/volunteer.php?action=update&id=$opportunityId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode({
+          if (title != null) 'title': title,
+          if (description != null) 'description': description,
+          if (location != null) 'location': location,
+          if (startDate != null) 'start_date': startDate.toIso8601String(),
+          if (endDate != null) 'end_date': endDate.toIso8601String(),
+          if (maxParticipants != null) 'max_participants': maxParticipants,
+          if (organizer != null) 'organizer': organizer,
+          if (organizerContact != null) 'organizer_contact': organizerContact,
+          if (tags != null) 'tags': tags,
+          if (status != null) 'status': status,
+        }),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<void> deleteVolunteerOpportunity(
+    BuildContext context,
+    int opportunityId,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/volunteer.php?action=delete&id=$opportunityId'),
+        headers: {
+          'Authorization': 'Bearer $_token',
+        },
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<void> registerForVolunteerOpportunity(
+    BuildContext context,
+    int opportunityId,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/volunteer.php?action=register'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode({'opportunity_id': opportunityId}),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<void> unregisterFromVolunteerOpportunity(
+    BuildContext context,
+    int opportunityId,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/volunteer.php?action=unregister'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode({'opportunity_id': opportunityId}),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<List<VolunteerOpportunity>> getUserVolunteerHistory(
+    BuildContext context, {
+    int page = 1,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final params = {
+        'page': page.toString(),
+      };
+      
+      final uri = _buildUri('volunteer.php?action=my_history').replace(queryParameters: params);
+      final response = await http.get(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+
+      return (data['data'] as List)
+          .map((opportunity) => VolunteerOpportunity.fromJson(opportunity))
+          .toList();
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<String> downloadVolunteerCertificate(
+    BuildContext context,
+    int opportunityId,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final uri = _buildUri('volunteer.php?action=certificate&id=$opportunityId');
+      final response = await http.get(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $_token',
+        },
+      );
+
+      if (response.statusCode == 401) {
+        final data = json.decode(response.body);
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(context, 'Failed to download certificate'),
+        );
+      }
+
+      return response.body;
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
 }

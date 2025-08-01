@@ -235,7 +235,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get volunteerFeature => 'Volunteer';
 
   @override
-  String get volunteerDescription => 'Find volunteering opportunities';
+  String get volunteerDescription => 'Description';
 
   @override
   String get localNews => 'Local News & Updates';
@@ -520,4 +520,205 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get showLess => 'Show less';
+
+  @override
+  String get volunteerOpportunities => 'Volunteer Opportunities';
+
+  @override
+  String get createVolunteerOpportunity => 'Create Volunteer Opportunity';
+
+  @override
+  String get volunteerTitle => 'Title';
+
+  @override
+  String get volunteerLocation => 'Location';
+
+  @override
+  String get volunteerStartDate => 'Start Date';
+
+  @override
+  String get volunteerEndDate => 'End Date';
+
+  @override
+  String get volunteerOrganizer => 'Organizer';
+
+  @override
+  String get volunteerOrganizerContact => 'Organizer Contact';
+
+  @override
+  String get volunteerMaxParticipants => 'Max Participants';
+
+  @override
+  String get volunteerTags => 'Tags';
+
+  @override
+  String get volunteerImage => 'Image';
+
+  @override
+  String get volunteerStatus => 'Status';
+
+  @override
+  String get volunteerRegister => 'Register';
+
+  @override
+  String get volunteerUnregister => 'Unregister';
+
+  @override
+  String get volunteerMyHistory => 'My Volunteer History';
+
+  @override
+  String get volunteerCertificate => 'Download Certificate';
+
+  @override
+  String get volunteerFull => 'This opportunity is full';
+
+  @override
+  String get volunteerAlreadyRegistered =>
+      'You are already registered for this opportunity';
+
+  @override
+  String get volunteerNotRegistered =>
+      'You are not registered for this opportunity';
+
+  @override
+  String get volunteerRegistrationSuccess =>
+      'Successfully registered for volunteer opportunity';
+
+  @override
+  String get volunteerUnregistrationSuccess =>
+      'Successfully unregistered from volunteer opportunity';
+
+  @override
+  String get volunteerCreateSuccess =>
+      'Volunteer opportunity created successfully';
+
+  @override
+  String get volunteerUpdateSuccess =>
+      'Volunteer opportunity updated successfully';
+
+  @override
+  String get volunteerDeleteSuccess =>
+      'Volunteer opportunity deleted successfully';
+
+  @override
+  String get volunteerSearch => 'Search volunteer opportunities...';
+
+  @override
+  String get volunteerSortBy => 'Sort by';
+
+  @override
+  String get volunteerSortNewest => 'Newest';
+
+  @override
+  String get volunteerSortOldest => 'Oldest';
+
+  @override
+  String get volunteerSortPopular => 'Most Popular';
+
+  @override
+  String get volunteerSortUpcoming => 'Upcoming';
+
+  @override
+  String get volunteerStatusOpen => 'Open';
+
+  @override
+  String get volunteerStatusFull => 'Full';
+
+  @override
+  String get volunteerStatusCompleted => 'Completed';
+
+  @override
+  String get volunteerStatusCancelled => 'Cancelled';
+
+  @override
+  String get volunteerParticipants => 'Participants';
+
+  @override
+  String get volunteerDuration => 'Duration';
+
+  @override
+  String get volunteerViewDetails => 'View Details';
+
+  @override
+  String get volunteerEdit => 'Edit';
+
+  @override
+  String get volunteerDelete => 'Delete';
+
+  @override
+  String get volunteerConfirmDelete =>
+      'Are you sure you want to delete this volunteer opportunity?';
+
+  @override
+  String get volunteerNoOpportunities => 'No volunteer opportunities found';
+
+  @override
+  String get volunteerNoHistory => 'No volunteer history found';
+
+  @override
+  String get volunteerCertificateDownloadSuccess =>
+      'Certificate downloaded successfully';
+
+  @override
+  String get volunteerCertificateDownloadError =>
+      'Failed to download certificate';
+
+  @override
+  String get title => 'Title';
+
+  @override
+  String get description => 'Description';
+
+  @override
+  String get location => 'Location';
+
+  @override
+  String get locationRequired => 'Location is required';
+
+  @override
+  String get startDate => 'Start Date';
+
+  @override
+  String get endDate => 'End Date';
+
+  @override
+  String get endDateOptional => 'End date (optional)';
+
+  @override
+  String get maxParticipants => 'Max Participants';
+
+  @override
+  String get leaveEmptyForUnlimited => 'Leave empty for unlimited';
+
+  @override
+  String get organizer => 'Organizer';
+
+  @override
+  String get optional => 'Optional';
+
+  @override
+  String get organizerContact => 'Organizer Contact';
+
+  @override
+  String get tags => 'Tags';
+
+  @override
+  String get tagsHint => 'Separate tags with commas';
+
+  @override
+  String get viewDetails => 'View Details';
+
+  @override
+  String get downloadCertificate => 'Download Certificate';
+
+  @override
+  String get certificateDownloadSuccess =>
+      'Certificate downloaded successfully';
+
+  @override
+  String get viewMyVolunteerHistory => 'View My Volunteer History';
+
+  @override
+  String get volunteerCreationSuccess =>
+      'Volunteer opportunity created successfully';
 }

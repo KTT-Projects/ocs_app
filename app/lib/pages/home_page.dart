@@ -76,9 +76,9 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final List<Widget> pages = [
       FeedsPage(apiClient: widget.apiClient),
-      const Center(child: Text('Events')),
-      const Center(child: Text('Volunteer')),
-      const Center(child: Text('Study')),
+      EventsPage(apiClient: widget.apiClient),
+      VolunteerPage(apiClient: widget.apiClient),
+      StudyPage(apiClient: widget.apiClient),
       ProfilePage(apiClient: widget.apiClient),
     ];
     final l10n = AppLocalizations.of(context)!;

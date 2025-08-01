@@ -231,7 +231,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get volunteerFeature => 'ボランティア';
 
   @override
-  String get volunteerDescription => 'ボランティア活動の機会を探す';
+  String get volunteerDescription => '説明';
 
   @override
   String get localNews => '地域ニュース・更新情報';
@@ -507,4 +507,193 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get showLess => '閉じる';
+
+  @override
+  String get volunteerOpportunities => 'ボランティア活動';
+
+  @override
+  String get createVolunteerOpportunity => '活動を作成';
+
+  @override
+  String get volunteerTitle => 'タイトル';
+
+  @override
+  String get volunteerLocation => '場所';
+
+  @override
+  String get volunteerStartDate => '開始日';
+
+  @override
+  String get volunteerEndDate => '終了日';
+
+  @override
+  String get volunteerOrganizer => '主催者';
+
+  @override
+  String get volunteerOrganizerContact => '主催者連絡先';
+
+  @override
+  String get volunteerMaxParticipants => '最大参加者数';
+
+  @override
+  String get volunteerTags => 'タグ';
+
+  @override
+  String get volunteerImage => '画像';
+
+  @override
+  String get volunteerStatus => '状態';
+
+  @override
+  String get volunteerRegister => '参加登録';
+
+  @override
+  String get volunteerUnregister => '参加キャンセル';
+
+  @override
+  String get volunteerMyHistory => '参加履歴';
+
+  @override
+  String get volunteerCertificate => '証明書をダウンロード';
+
+  @override
+  String get volunteerFull => 'この活動は満員です';
+
+  @override
+  String get volunteerAlreadyRegistered => 'すでにこの活動に登録済みです';
+
+  @override
+  String get volunteerNotRegistered => 'この活動には登録されていません';
+
+  @override
+  String get volunteerRegistrationSuccess => 'ボランティア活動への登録が完了しました';
+
+  @override
+  String get volunteerUnregistrationSuccess => 'ボランティア活動への登録をキャンセルしました';
+
+  @override
+  String get volunteerCreateSuccess => 'ボランティア活動が作成されました';
+
+  @override
+  String get volunteerUpdateSuccess => 'ボランティア活動が更新されました';
+
+  @override
+  String get volunteerDeleteSuccess => 'ボランティア活動が削除されました';
+
+  @override
+  String get volunteerSearch => 'ボランティア活動を検索...';
+
+  @override
+  String get volunteerSortBy => '並び替え';
+
+  @override
+  String get volunteerSortNewest => '最新';
+
+  @override
+  String get volunteerSortOldest => '古い';
+
+  @override
+  String get volunteerSortPopular => '人気';
+
+  @override
+  String get volunteerSortUpcoming => '今後の活動';
+
+  @override
+  String get volunteerStatusOpen => '募集中';
+
+  @override
+  String get volunteerStatusFull => '満員';
+
+  @override
+  String get volunteerStatusCompleted => '完了';
+
+  @override
+  String get volunteerStatusCancelled => 'キャンセル';
+
+  @override
+  String get volunteerParticipants => '参加者';
+
+  @override
+  String get volunteerDuration => '期間';
+
+  @override
+  String get volunteerViewDetails => '詳細を見る';
+
+  @override
+  String get volunteerEdit => '編集';
+
+  @override
+  String get volunteerDelete => '削除';
+
+  @override
+  String get volunteerConfirmDelete => 'このボランティア活動を削除してもよろしいですか？';
+
+  @override
+  String get volunteerNoOpportunities => 'ボランティア活動が見つかりません';
+
+  @override
+  String get volunteerNoHistory => '参加履歴がありません';
+
+  @override
+  String get volunteerCertificateDownloadSuccess => '証明書がダウンロードされました';
+
+  @override
+  String get volunteerCertificateDownloadError => '証明書のダウンロードに失敗しました';
+
+  @override
+  String get title => 'タイトル';
+
+  @override
+  String get description => '説明';
+
+  @override
+  String get location => '場所';
+
+  @override
+  String get locationRequired => '場所は必須です';
+
+  @override
+  String get startDate => '開始日';
+
+  @override
+  String get endDate => '終了日';
+
+  @override
+  String get endDateOptional => '終了日（任意）';
+
+  @override
+  String get maxParticipants => '最大参加者数';
+
+  @override
+  String get leaveEmptyForUnlimited => '空欄で無制限に';
+
+  @override
+  String get organizer => '主催者';
+
+  @override
+  String get optional => '任意';
+
+  @override
+  String get organizerContact => '主催者連絡先';
+
+  @override
+  String get tags => 'タグ';
+
+  @override
+  String get tagsHint => 'タグをカンマで区切って入力';
+
+  @override
+  String get viewDetails => '詳細を見る';
+
+  @override
+  String get downloadCertificate => '証明書をダウンロード';
+
+  @override
+  String get certificateDownloadSuccess => '証明書がダウンロードされました';
+
+  @override
+  String get viewMyVolunteerHistory => '参加履歴を見る';
+
+  @override
+  String get volunteerCreationSuccess => 'ボランティア活動が作成されました';
 }

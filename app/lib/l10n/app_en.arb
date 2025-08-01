@@ -673,5 +673,265 @@
   "showLess": "Show less",
   "@showLess": {
     "description": "Button to show less posts in the feed"
+  },
+  "volunteerFeature": "Volunteer",
+  "@volunteerFeature": {
+    "description": "Title for the volunteer section"
+  },
+  "volunteerOpportunities": "Volunteer Opportunities",
+  "@volunteerOpportunities": {
+    "description": "Title for volunteer opportunities list"
+  },
+  "createVolunteerOpportunity": "Create Volunteer Opportunity",
+  "@createVolunteerOpportunity": {
+    "description": "Title for create volunteer opportunity form"
+  },
+  "volunteerTitle": "Title",
+  "@volunteerTitle": {
+    "description": "Label for volunteer opportunity title"
+  },
+  "volunteerDescription": "Description",
+  "@volunteerDescription": {
+    "description": "Label for volunteer opportunity description"
+  },
+  "volunteerLocation": "Location",
+  "@volunteerLocation": {
+    "description": "Label for volunteer opportunity location"
+  },
+  "volunteerStartDate": "Start Date",
+  "@volunteerStartDate": {
+    "description": "Label for volunteer opportunity start date"
+  },
+  "volunteerEndDate": "End Date",
+  "@volunteerEndDate": {
+    "description": "Label for volunteer opportunity end date"
+  },
+  "volunteerOrganizer": "Organizer",
+  "@volunteerOrganizer": {
+    "description": "Label for volunteer opportunity organizer"
+  },
+  "volunteerOrganizerContact": "Organizer Contact",
+  "@volunteerOrganizerContact": {
+    "description": "Label for volunteer opportunity organizer contact"
+  },
+  "volunteerMaxParticipants": "Max Participants",
+  "@volunteerMaxParticipants": {
+    "description": "Label for maximum number of participants"
+  },
+  "volunteerTags": "Tags",
+  "@volunteerTags": {
+    "description": "Label for volunteer opportunity tags"
+  },
+  "volunteerImage": "Image",
+  "@volunteerImage": {
+    "description": "Label for volunteer opportunity image"
+  },
+  "volunteerStatus": "Status",
+  "@volunteerStatus": {
+    "description": "Label for volunteer opportunity status"
+  },
+  "volunteerRegister": "Register",
+  "@volunteerRegister": {
+    "description": "Button to register for volunteer opportunity"
+  },
+  "volunteerUnregister": "Unregister",
+  "@volunteerUnregister": {
+    "description": "Button to unregister from volunteer opportunity"
+  },
+  "volunteerMyHistory": "My Volunteer History",
+  "@volunteerMyHistory": {
+    "description": "Title for user's volunteer history"
+  },
+  "volunteerCertificate": "Download Certificate",
+  "@volunteerCertificate": {
+    "description": "Button to download volunteer certificate"
+  },
+  "volunteerFull": "This opportunity is full",
+  "@volunteerFull": {
+    "description": "Message when volunteer opportunity is full"
+  },
+  "volunteerAlreadyRegistered": "You are already registered for this opportunity",
+  "@volunteerAlreadyRegistered": {
+    "description": "Message when user is already registered"
+  },
+  "volunteerNotRegistered": "You are not registered for this opportunity",
+  "@volunteerNotRegistered": {
+    "description": "Message when user is not registered"
+  },
+  "volunteerRegistrationSuccess": "Successfully registered for volunteer opportunity",
+  "@volunteerRegistrationSuccess": {
+    "description": "Success message for registration"
+  },
+  "volunteerUnregistrationSuccess": "Successfully unregistered from volunteer opportunity",
+  "@volunteerUnregistrationSuccess": {
+    "description": "Success message for unregistration"
+  },
+  "volunteerCreateSuccess": "Volunteer opportunity created successfully",
+  "@volunteerCreateSuccess": {
+    "description": "Success message for creating opportunity"
+  },
+  "volunteerUpdateSuccess": "Volunteer opportunity updated successfully",
+  "@volunteerUpdateSuccess": {
+    "description": "Success message for updating opportunity"
+  },
+  "volunteerDeleteSuccess": "Volunteer opportunity deleted successfully",
+  "@volunteerDeleteSuccess": {
+    "description": "Success message for deleting opportunity"
+  },
+  "volunteerSearch": "Search volunteer opportunities...",
+  "@volunteerSearch": {
+    "description": "Placeholder for search input"
+  },
+  "volunteerSortBy": "Sort by",
+  "@volunteerSortBy": {
+    "description": "Label for sort options"
+  },
+  "volunteerSortNewest": "Newest",
+  "@volunteerSortNewest": {
+    "description": "Sort by newest option"
+  },
+  "volunteerSortOldest": "Oldest",
+  "@volunteerSortOldest": {
+    "description": "Sort by oldest option"
+  },
+  "volunteerSortPopular": "Most Popular",
+  "@volunteerSortPopular": {
+    "description": "Sort by most popular option"
+  },
+  "volunteerSortUpcoming": "Upcoming",
+  "@volunteerSortUpcoming": {
+    "description": "Sort by upcoming option"
+  },
+  "volunteerStatusOpen": "Open",
+  "@volunteerStatusOpen": {
+    "description": "Open status option"
+  },
+  "volunteerStatusFull": "Full",
+  "@volunteerStatusFull": {
+    "description": "Full status option"
+  },
+  "volunteerStatusCompleted": "Completed",
+  "@volunteerStatusCompleted": {
+    "description": "Completed status option"
+  },
+  "volunteerStatusCancelled": "Cancelled",
+  "@volunteerStatusCancelled": {
+    "description": "Cancelled status option"
+  },
+  "volunteerParticipants": "Participants",
+  "@volunteerParticipants": {
+    "description": "Label for participants count"
+  },
+  "volunteerDuration": "Duration",
+  "@volunteerDuration": {
+    "description": "Label for opportunity duration"
+  },
+  "volunteerViewDetails": "View Details",
+  "@volunteerViewDetails": {
+    "description": "Button to view opportunity details"
+  },
+  "volunteerEdit": "Edit",
+  "@volunteerEdit": {
+    "description": "Button to edit opportunity"
+  },
+  "volunteerDelete": "Delete",
+  "@volunteerDelete": {
+    "description": "Button to delete opportunity"
+  },
+  "volunteerConfirmDelete": "Are you sure you want to delete this volunteer opportunity?",
+  "@volunteerConfirmDelete": {
+    "description": "Confirmation message for deletion"
+  },
+  "volunteerNoOpportunities": "No volunteer opportunities found",
+  "@volunteerNoOpportunities": {
+    "description": "Message when no opportunities are found"
+  },
+  "volunteerNoHistory": "No volunteer history found",
+  "@volunteerNoHistory": {
+    "description": "Message when no volunteer history is found"
+  },
+  "volunteerCertificateDownloadSuccess": "Certificate downloaded successfully",
+  "@volunteerCertificateDownloadSuccess": {
+    "description": "Success message for certificate download"
+  },
+  "volunteerCertificateDownloadError": "Failed to download certificate",
+  "@volunteerCertificateDownloadError": {
+    "description": "Error message for certificate download"
+  },
+  "title": "Title",
+  "@title": {
+    "description": "Generic title label"
+  },
+  "description": "Description",
+  "@description": {
+    "description": "Generic description label"
+  },
+  "location": "Location",
+  "@location": {
+    "description": "Generic location label"
+  },
+  "locationRequired": "Location is required",
+  "@locationRequired": {
+    "description": "Error message when location is empty"
+  },
+  "startDate": "Start Date",
+  "@startDate": {
+    "description": "Generic start date label"
+  },
+  "endDate": "End Date",
+  "@endDate": {
+    "description": "Generic end date label"
+  },
+  "endDateOptional": "End date (optional)",
+  "@endDateOptional": {
+    "description": "Label for optional end date"
+  },
+  "maxParticipants": "Max Participants",
+  "@maxParticipants": {
+    "description": "Label for maximum participants"
+  },
+  "leaveEmptyForUnlimited": "Leave empty for unlimited",
+  "@leaveEmptyForUnlimited": {
+    "description": "Helper text for max participants field"
+  },
+  "organizer": "Organizer",
+  "@organizer": {
+    "description": "Generic organizer label"
+  },
+  "optional": "Optional",
+  "@optional": {
+    "description": "Text indicating a field is optional"
+  },
+  "organizerContact": "Organizer Contact",
+  "@organizerContact": {
+    "description": "Label for organizer contact information"
+  },
+  "tags": "Tags",
+  "@tags": {
+    "description": "Generic tags label"
+  },
+  "tagsHint": "Separate tags with commas",
+  "@tagsHint": {
+    "description": "Helper text for tags input"
+  },
+  "viewDetails": "View Details",
+  "@viewDetails": {
+    "description": "Button to view details"
+  },
+  "downloadCertificate": "Download Certificate",
+  "@downloadCertificate": {
+    "description": "Button to download certificate"
+  },
+  "certificateDownloadSuccess": "Certificate downloaded successfully",
+  "@certificateDownloadSuccess": {
+    "description": "Success message for certificate download"
+  },
+  "viewMyVolunteerHistory": "View My Volunteer History",
+  "@viewMyVolunteerHistory": {
+    "description": "Button to view volunteer history"
+  },
+  "volunteerCreationSuccess": "Volunteer opportunity created successfully",
+  "@volunteerCreationSuccess": {
+    "description": "Success message when creating volunteer opportunity"
   }
 }

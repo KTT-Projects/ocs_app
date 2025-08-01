@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:ocs_app/l10n/app_localizations.dart';
+import '../services/api_client.dart';
 
 class EventsPage extends StatefulWidget {
-  const EventsPage({super.key});
+  final ApiClient apiClient;
+
+  const EventsPage({
+    super.key,
+    required this.apiClient,
+  });
 
   @override
   State<EventsPage> createState() => _EventsPageState();

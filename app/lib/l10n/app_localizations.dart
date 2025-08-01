@@ -519,16 +519,16 @@ abstract class AppLocalizations {
   /// **'Support local businesses'**
   String get businessDescription;
 
-  /// Title for volunteer feature
+  /// Title for the volunteer section
   ///
   /// In en, this message translates to:
   /// **'Volunteer'**
   String get volunteerFeature;
 
-  /// Description for volunteer feature
+  /// Label for volunteer opportunity description
   ///
   /// In en, this message translates to:
-  /// **'Find volunteering opportunities'**
+  /// **'Description'**
   String get volunteerDescription;
 
   /// Title for the local news section
@@ -1076,6 +1076,384 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Show less'**
   String get showLess;
+
+  /// Title for volunteer opportunities list
+  ///
+  /// In en, this message translates to:
+  /// **'Volunteer Opportunities'**
+  String get volunteerOpportunities;
+
+  /// Title for create volunteer opportunity form
+  ///
+  /// In en, this message translates to:
+  /// **'Create Volunteer Opportunity'**
+  String get createVolunteerOpportunity;
+
+  /// Label for volunteer opportunity title
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get volunteerTitle;
+
+  /// Label for volunteer opportunity location
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get volunteerLocation;
+
+  /// Label for volunteer opportunity start date
+  ///
+  /// In en, this message translates to:
+  /// **'Start Date'**
+  String get volunteerStartDate;
+
+  /// Label for volunteer opportunity end date
+  ///
+  /// In en, this message translates to:
+  /// **'End Date'**
+  String get volunteerEndDate;
+
+  /// Label for volunteer opportunity organizer
+  ///
+  /// In en, this message translates to:
+  /// **'Organizer'**
+  String get volunteerOrganizer;
+
+  /// Label for volunteer opportunity organizer contact
+  ///
+  /// In en, this message translates to:
+  /// **'Organizer Contact'**
+  String get volunteerOrganizerContact;
+
+  /// Label for maximum number of participants
+  ///
+  /// In en, this message translates to:
+  /// **'Max Participants'**
+  String get volunteerMaxParticipants;
+
+  /// Label for volunteer opportunity tags
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get volunteerTags;
+
+  /// Label for volunteer opportunity image
+  ///
+  /// In en, this message translates to:
+  /// **'Image'**
+  String get volunteerImage;
+
+  /// Label for volunteer opportunity status
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get volunteerStatus;
+
+  /// Button to register for volunteer opportunity
+  ///
+  /// In en, this message translates to:
+  /// **'Register'**
+  String get volunteerRegister;
+
+  /// Button to unregister from volunteer opportunity
+  ///
+  /// In en, this message translates to:
+  /// **'Unregister'**
+  String get volunteerUnregister;
+
+  /// Title for user's volunteer history
+  ///
+  /// In en, this message translates to:
+  /// **'My Volunteer History'**
+  String get volunteerMyHistory;
+
+  /// Button to download volunteer certificate
+  ///
+  /// In en, this message translates to:
+  /// **'Download Certificate'**
+  String get volunteerCertificate;
+
+  /// Message when volunteer opportunity is full
+  ///
+  /// In en, this message translates to:
+  /// **'This opportunity is full'**
+  String get volunteerFull;
+
+  /// Message when user is already registered
+  ///
+  /// In en, this message translates to:
+  /// **'You are already registered for this opportunity'**
+  String get volunteerAlreadyRegistered;
+
+  /// Message when user is not registered
+  ///
+  /// In en, this message translates to:
+  /// **'You are not registered for this opportunity'**
+  String get volunteerNotRegistered;
+
+  /// Success message for registration
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully registered for volunteer opportunity'**
+  String get volunteerRegistrationSuccess;
+
+  /// Success message for unregistration
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully unregistered from volunteer opportunity'**
+  String get volunteerUnregistrationSuccess;
+
+  /// Success message for creating opportunity
+  ///
+  /// In en, this message translates to:
+  /// **'Volunteer opportunity created successfully'**
+  String get volunteerCreateSuccess;
+
+  /// Success message for updating opportunity
+  ///
+  /// In en, this message translates to:
+  /// **'Volunteer opportunity updated successfully'**
+  String get volunteerUpdateSuccess;
+
+  /// Success message for deleting opportunity
+  ///
+  /// In en, this message translates to:
+  /// **'Volunteer opportunity deleted successfully'**
+  String get volunteerDeleteSuccess;
+
+  /// Placeholder for search input
+  ///
+  /// In en, this message translates to:
+  /// **'Search volunteer opportunities...'**
+  String get volunteerSearch;
+
+  /// Label for sort options
+  ///
+  /// In en, this message translates to:
+  /// **'Sort by'**
+  String get volunteerSortBy;
+
+  /// Sort by newest option
+  ///
+  /// In en, this message translates to:
+  /// **'Newest'**
+  String get volunteerSortNewest;
+
+  /// Sort by oldest option
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest'**
+  String get volunteerSortOldest;
+
+  /// Sort by most popular option
+  ///
+  /// In en, this message translates to:
+  /// **'Most Popular'**
+  String get volunteerSortPopular;
+
+  /// Sort by upcoming option
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get volunteerSortUpcoming;
+
+  /// Open status option
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get volunteerStatusOpen;
+
+  /// Full status option
+  ///
+  /// In en, this message translates to:
+  /// **'Full'**
+  String get volunteerStatusFull;
+
+  /// Completed status option
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get volunteerStatusCompleted;
+
+  /// Cancelled status option
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get volunteerStatusCancelled;
+
+  /// Label for participants count
+  ///
+  /// In en, this message translates to:
+  /// **'Participants'**
+  String get volunteerParticipants;
+
+  /// Label for opportunity duration
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get volunteerDuration;
+
+  /// Button to view opportunity details
+  ///
+  /// In en, this message translates to:
+  /// **'View Details'**
+  String get volunteerViewDetails;
+
+  /// Button to edit opportunity
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get volunteerEdit;
+
+  /// Button to delete opportunity
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get volunteerDelete;
+
+  /// Confirmation message for deletion
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this volunteer opportunity?'**
+  String get volunteerConfirmDelete;
+
+  /// Message when no opportunities are found
+  ///
+  /// In en, this message translates to:
+  /// **'No volunteer opportunities found'**
+  String get volunteerNoOpportunities;
+
+  /// Message when no volunteer history is found
+  ///
+  /// In en, this message translates to:
+  /// **'No volunteer history found'**
+  String get volunteerNoHistory;
+
+  /// Success message for certificate download
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate downloaded successfully'**
+  String get volunteerCertificateDownloadSuccess;
+
+  /// Error message for certificate download
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to download certificate'**
+  String get volunteerCertificateDownloadError;
+
+  /// Generic title label
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get title;
+
+  /// Generic description label
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get description;
+
+  /// Generic location label
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get location;
+
+  /// Error message when location is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Location is required'**
+  String get locationRequired;
+
+  /// Generic start date label
+  ///
+  /// In en, this message translates to:
+  /// **'Start Date'**
+  String get startDate;
+
+  /// Generic end date label
+  ///
+  /// In en, this message translates to:
+  /// **'End Date'**
+  String get endDate;
+
+  /// Label for optional end date
+  ///
+  /// In en, this message translates to:
+  /// **'End date (optional)'**
+  String get endDateOptional;
+
+  /// Label for maximum participants
+  ///
+  /// In en, this message translates to:
+  /// **'Max Participants'**
+  String get maxParticipants;
+
+  /// Helper text for max participants field
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty for unlimited'**
+  String get leaveEmptyForUnlimited;
+
+  /// Generic organizer label
+  ///
+  /// In en, this message translates to:
+  /// **'Organizer'**
+  String get organizer;
+
+  /// Text indicating a field is optional
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get optional;
+
+  /// Label for organizer contact information
+  ///
+  /// In en, this message translates to:
+  /// **'Organizer Contact'**
+  String get organizerContact;
+
+  /// Generic tags label
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get tags;
+
+  /// Helper text for tags input
+  ///
+  /// In en, this message translates to:
+  /// **'Separate tags with commas'**
+  String get tagsHint;
+
+  /// Button to view details
+  ///
+  /// In en, this message translates to:
+  /// **'View Details'**
+  String get viewDetails;
+
+  /// Button to download certificate
+  ///
+  /// In en, this message translates to:
+  /// **'Download Certificate'**
+  String get downloadCertificate;
+
+  /// Success message for certificate download
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate downloaded successfully'**
+  String get certificateDownloadSuccess;
+
+  /// Button to view volunteer history
+  ///
+  /// In en, this message translates to:
+  /// **'View My Volunteer History'**
+  String get viewMyVolunteerHistory;
+
+  /// Success message when creating volunteer opportunity
+  ///
+  /// In en, this message translates to:
+  /// **'Volunteer opportunity created successfully'**
+  String get volunteerCreationSuccess;
 }
 
 class _AppLocalizationsDelegate

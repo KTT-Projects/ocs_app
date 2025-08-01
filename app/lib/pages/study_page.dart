@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:ocs_app/l10n/app_localizations.dart';
+import '../services/api_client.dart';
 
 class StudyPage extends StatefulWidget {
-  const StudyPage({super.key});
+  final ApiClient apiClient;
+
+  const StudyPage({
+    super.key,
+    required this.apiClient,
+  });
 
   @override
   State<StudyPage> createState() => _StudyPageState();

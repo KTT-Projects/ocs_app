@@ -379,5 +379,261 @@
   "showLess": "閉じる",
   "@showLess": {
     "description": "投稿リストで詳細を閉じるためのボタン"
+  },
+  "volunteerFeature": "ボランティア",
+  "@volunteerFeature": {
+    "description": "ボランティアセクションのタイトル"
+  },
+  "volunteerOpportunities": "ボランティア活動",
+  "@volunteerOpportunities": {
+    "description": "ボランティア活動一覧のタイトル"
+  },
+  "createVolunteerOpportunity": "ボランティア活動を作成",
+  "@createVolunteerOpportunity": {
+    "description": "ボランティア活動作成フォームのタイトル"
+  },
+  "volunteerTitle": "タイトル",
+  "@volunteerTitle": {
+    "description": "ボランティア活動のタイトルラベル"
+  },
+  "volunteerDescription": "説明",
+  "@volunteerDescription": {
+    "description": "ボランティア活動の説明ラベル"
+  },
+  "volunteerLocation": "場所",
+  "@volunteerLocation": {
+    "description": "ボランティア活動の場所ラベル"
+  },
+  "volunteerStartDate": "開始日",
+  "@volunteerStartDate": {
+    "description": "ボランティア活動の開始日ラベル"
+  },
+  "volunteerEndDate": "終了日",
+  "@volunteerEndDate": {
+    "description": "ボランティア活動の終了日ラベル"
+  },
+  "volunteerOrganizer": "主催者",
+  "@volunteerOrganizer": {
+    "description": "ボランティア活動の主催者ラベル"
+  },
+  "volunteerOrganizerContact": "主催者連絡先",
+  "@volunteerOrganizerContact": {
+    "description": "ボランティア活動の主催者連絡先ラベル"
+  },
+  "volunteerMaxParticipants": "最大参加者数",
+  "@volunteerMaxParticipants": {
+    "description": "最大参加者数のラベル"
+  },
+  "volunteerTags": "タグ",
+  "@volunteerTags": {
+    "description": "ボランティア活動のタグラベル"
+  },
+  "volunteerImage": "画像",
+  "@volunteerImage": {
+    "description": "ボランティア活動の画像ラベル"
+  },
+  "volunteerStatus": "状態",
+  "@volunteerStatus": {
+    "description": "ボランティア活動の状態ラベル"
+  },
+  "volunteerRegister": "参加登録",
+  "@volunteerRegister": {
+    "description": "ボランティア活動に参加登録するボタン"
+  },
+  "volunteerUnregister": "参加キャンセル",
+  "@volunteerUnregister": {
+    "description": "ボランティア活動の参加をキャンセルするボタン"
+  },
+  "volunteerMyHistory": "参加履歴",
+  "@volunteerMyHistory": {
+    "description": "ユーザーのボランティア参加履歴のタイトル"
+  },
+  "volunteerCertificate": "証明書をダウンロード",
+  "@volunteerCertificate": {
+    "description": "ボランティア証明書をダウンロードするボタン"
+  },
+  "volunteerFull": "この活動は満員です",
+  "@volunteerFull": {
+    "description": "ボランティア活動が満員の場合のメッセージ"
+  },
+  "volunteerAlreadyRegistered": "すでにこの活動に登録済みです",
+  "@volunteerAlreadyRegistered": {
+    "description": "ユーザーがすでに登録済みの場合のメッセージ"
+  },
+  "volunteerNotRegistered": "この活動には登録されていません",
+  "@volunteerNotRegistered": {
+    "description": "ユーザーが登録されていない場合のメッセージ"
+  },
+  "volunteerRegistrationSuccess": "ボランティア活動への登録が完了しました",
+  "@volunteerRegistrationSuccess": {
+    "description": "登録成功時のメッセージ"
+  },
+  "volunteerUnregistrationSuccess": "ボランティア活動への登録をキャンセルしました",
+  "@volunteerUnregistrationSuccess": {
+    "description": "登録キャンセル成功時のメッセージ"
+  },
+  "volunteerCreateSuccess": "ボランティア活動が作成されました",
+  "@volunteerCreateSuccess": {
+    "description": "活動作成成功時のメッセージ"
+  },
+  "volunteerUpdateSuccess": "ボランティア活動が更新されました",
+  "@volunteerUpdateSuccess": {
+    "description": "活動更新成功時のメッセージ"
+  },
+  "volunteerDeleteSuccess": "ボランティア活動が削除されました",
+  "@volunteerDeleteSuccess": {
+    "description": "活動削除成功時のメッセージ"
+  },
+  "volunteerSearch": "ボランティア活動を検索...",
+  "@volunteerSearch": {
+    "description": "検索入力のプレースホルダー"
+  },
+  "volunteerSortBy": "並び替え",
+  "@volunteerSortBy": {
+    "description": "並び替えオプションのラベル"
+  },
+  "volunteerSortNewest": "最新",
+  "@volunteerSortNewest": {
+    "description": "最新で並び替えオプション"
+  },
+  "volunteerSortOldest": "古い",
+  "@volunteerSortOldest": {
+    "description": "古い順で並び替えオプション"
+  },
+  "volunteerSortPopular": "人気",
+  "@volunteerSortPopular": {
+    "description": "人気で並び替えオプション"
+  },
+  "volunteerSortUpcoming": "今後の活動",
+  "@volunteerSortUpcoming": {
+    "description": "今後の活動で並び替えオプション"
+  },
+  "volunteerStatusOpen": "募集中",
+  "@volunteerStatusOpen": {
+    "description": "募集中の状態オプション"
+  },
+  "volunteerStatusFull": "満員",
+  "@volunteerStatusFull": {
+    "description": "満員の状態オプション"
+  },
+  "volunteerStatusCompleted": "完了",
+  "@volunteerStatusCompleted": {
+    "description": "完了の状態オプション"
+  },
+  "volunteerStatusCancelled": "キャンセル",
+  "@volunteerStatusCancelled": {
+    "description": "キャンセルの状態オプション"
+  },
+  "volunteerParticipants": "参加者",
+  "@volunteerParticipants": {
+    "description": "参加者数のラベル"
+  },
+  "volunteerDuration": "期間",
+  "@volunteerDuration": {
+    "description": "活動期間のラベル"
+  },
+  "volunteerViewDetails": "詳細を見る",
+  "@volunteerViewDetails": {
+    "description": "活動詳細を見るボタン"
+  },
+  "volunteerEdit": "編集",
+  "@volunteerEdit": {
+    "description": "活動を編集するボタン"
+  },
+  "volunteerDelete": "削除",
+  "@volunteerDelete": {
+    "description": "活動を削除するボタン"
+  },
+  "volunteerConfirmDelete": "このボランティア活動を削除してもよろしいですか？",
+  "@volunteerConfirmDelete": {
+    "description": "削除確認メッセージ"
+  },
+  "volunteerNoOpportunities": "ボランティア活動が見つかりません",
+  "@volunteerNoOpportunities": {
+    "description": "活動が見つからない場合のメッセージ"
+  },
+  "volunteerNoHistory": "参加履歴がありません",
+  "@volunteerNoHistory": {
+    "description": "参加履歴がない場合のメッセージ"
+  },
+  "volunteerCertificateDownloadSuccess": "証明書がダウンロードされました",
+  "@volunteerCertificateDownloadSuccess": {
+    "description": "証明書ダウンロード成功時のメッセージ"
+  },
+  "volunteerCertificateDownloadError": "証明書のダウンロードに失敗しました",
+  "@volunteerCertificateDownloadError": {
+    "description": "証明書ダウンロード失敗時のメッセージ"
+  },
+  "title": "タイトル",
+  "@title": {
+    "description": "汎用のタイトルラベル"
+  },
+  "description": "説明",
+  "@description": {
+    "description": "汎用の説明ラベル"
+  },
+  "location": "場所",
+  "@location": {
+    "description": "汎用の場所ラベル"
+  },
+  "locationRequired": "場所は必須です",
+  "@locationRequired": {
+    "description": "場所が空の場合のエラーメッセージ"
+  },
+  "startDate": "開始日",
+  "@startDate": {
+    "description": "汎用の開始日ラベル"
+  },
+  "endDate": "終了日",
+  "@endDate": {
+    "description": "汎用の終了日ラベル"
+  },
+  "endDateOptional": "終了日（任意）",
+  "@endDateOptional": {
+    "description": "任意の終了日ラベル"
+  },
+  "maxParticipants": "最大参加者数",
+  "@maxParticipants": {
+    "description": "最大参加者数のラベル"
+  },
+  "leaveEmptyForUnlimited": "空欄で無制限に",
+  "@leaveEmptyForUnlimited": {
+    "description": "最大参加者数欄のヘルパーテキスト"
+  },
+  "organizer": "主催者",
+  "@organizer": {
+    "description": "汎用の主催者ラベル"
+  },
+  "optional": "任意",
+  "@optional": {
+    "description": "任意の項目であることを示すテキスト"
+  },
+  "organizerContact": "主催者連絡先",
+  "@organizerContact": {
+    "description": "主催者連絡先情報のラベル"
+  },
+  "tags": "タグ",
+  "@tags": {
+    "description": "汎用のタグラベル"
+  },
+  "tagsHint": "タグをカンマで区切って入力",
+  "@tagsHint": {
+    "description": "タグ入力のヘルパーテキスト"
+  },
+  "viewDetails": "詳細を見る",
+  "@viewDetails": {
+    "description": "詳細を見るボタン"
+  },
+  "downloadCertificate": "証明書をダウンロード",
+  "@downloadCertificate": {
+    "description": "証明書をダウンロードするボタン"
+  },
+  "certificateDownloadSuccess": "証明書がダウンロードされました",
+  "@certificateDownloadSuccess": {
+    "description": "証明書ダウンロード成功時のメッセージ"
+  },
+  "viewMyVolunteerHistory": "参加履歴を見る",
+  "@viewMyVolunteerHistory": {
+    "description": "ボランティア参加履歴を見るボタン"
   }
 }
