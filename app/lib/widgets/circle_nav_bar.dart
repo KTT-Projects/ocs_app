@@ -339,8 +339,6 @@ class _CircleBottomPainter extends CustomPainter {
       old.circleColor != circleColor ||
       old.xOffsetPercent != xOffsetPercent ||
       old.cornerRadius != cornerRadius ||
-      // old.shadowColor != shadowColor ||
-      // old.circleShadowColor != circleShadowColor ||
       old.elevation != elevation ||
       old.gradient != gradient ||
       old.circleGradient != circleGradient ||
