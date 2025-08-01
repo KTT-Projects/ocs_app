@@ -228,55 +228,52 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(24),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: Padding(
-                            padding: EdgeInsets.all(isSmallScreen ? 20.0 : 32.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                GestureDetector(
-                                  onTap: _isUploadingAvatar ? null : () => _pickImage(context),
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      CircleAvatar(
-                                        radius: 50,
-                                        backgroundColor: Theme.of(context).colorScheme.secondary,
-                                        child: _profile!['avatar'] != null
-                                            ? ClipOval(
-                                                child: Image.network(
-                                                  _profile!['avatar'],
-                                                  width: 100,
-                                                  height: 100,
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              )
-                                            : Text(
-                                                _profile!['name']?[0] ?? '?',
-                                                style: TextStyle(
-                                                  fontSize: 32,
-                                                  color: Theme.of(context).colorScheme.onSecondary,
-                                                ),
+                        child: Padding(
+                          padding: EdgeInsets.all(isSmallScreen ? 20.0 : 32.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              GestureDetector(
+                                onTap: _isUploadingAvatar ? null : () => _pickImage(context),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 50,
+                                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                                      child: _profile!['avatar'] != null
+                                          ? ClipOval(
+                                              child: Image.network(
+                                                _profile!['avatar'],
+                                                width: 100,
+                                                height: 100,
+                                                fit: BoxFit.cover,
                                               ),
-                                      ),
-                                      if (_isUploadingAvatar)
-                                        const CircularProgressIndicator()
-                                      else
-                                        Positioned(
-                                          right: 0,
-                                          bottom: 0,
-                                          child: Container(
-                                            padding: const EdgeInsets.all(4),
-                                            decoration: BoxDecoration(
-                                              color: Theme.of(context).colorScheme.secondary,
-                                              shape: BoxShape.circle,
+                                            )
+                                          : Text(
+                                              _profile!['name']?[0] ?? '?',
+                                              style: TextStyle(
+                                                fontSize: 32,
+                                                color: Theme.of(context).colorScheme.onSecondary,
+                                              ),
                                             ),
-                                            child: Icon(
-                                              Icons.camera_alt,
-                                              size: 20,
-                                              color: Theme.of(context).colorScheme.onSecondary,
-                                            ),
+                                    ),
+                                    if (_isUploadingAvatar)
+                                      const CircularProgressIndicator()
+                                    else
+                                      Positioned(
+                                        right: 0,
+                                        bottom: 0,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context).colorScheme.secondary,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            Icons.camera_alt,
+                                            size: 20,
+                                            color: Theme.of(context).colorScheme.onSecondary,
                                           ),
                                         ),
                                     ],
@@ -296,124 +293,140 @@ class _ProfilePageState extends State<ProfilePage> {
                                         color: Theme.of(context).colorScheme.onPrimary,
                                         fontWeight: FontWeight.bold,
                                       ),
+                                  ],
                                 ),
-                                const SizedBox(height: 24),
-                                _buildInfoRow(
-                                  context,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                _profile!['email'] ?? '',
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              Text(
+                                _profile!['name'] ?? l10n.noName,
+                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                      color: Theme.of(context).colorScheme.onPrimary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                              const SizedBox(height: 24),
+                              _buildInfoRow(
+                                context,
+                                l10n.bio,
+                                _profile!['bio'] ?? '',
+                                onEdit: () => _editField(
                                   l10n.bio,
                                   _profile!['bio'] ?? '',
-                                  onEdit: () => _editField(
-                                    l10n.bio,
-                                    _profile!['bio'] ?? '',
-                                    (value) async {
-                                      await widget.apiClient.updateProfile(
-                                        context,
-                                        bio: value,
-                                      );
-                                      setState(() {
-                                        _profile!['bio'] = value;
-                                      });
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                _buildInfoRow(
-                                  context,
-                                  l10n.selectInstitution,
-                                  _getLocalizedInstitutionName(_profile!['institution'] ?? ''),
-                                  onEdit: () async {
-                                    try {
-                                      final selectedInstitutionId = await _selectInstitution();
-                                      if (selectedInstitutionId != null) {
-                                        final selectedInst = _institutions?.firstWhere(
-                                          (inst) => inst['id'].toString() == selectedInstitutionId,
-                                        );
-                                        await widget.apiClient.updateProfile(
-                                          context,
-                                          institutionId: int.parse(selectedInstitutionId),
-                                        );
-                                        if (mounted && selectedInst != null) {
-                                          setState(() {
-                                            _profile!['institution'] = selectedInst['name'];
-                                          });
-                                        }
-                                      }
-                                    } catch (e) {
-                                      if (mounted) {
-                                        GlassmorphicUI.showGlassSnackBar(
-                                          context,
-                                          e.toString(),
-                                          isError: true,
-                                        );
-                                      }
-                                    }
+                                  (value) async {
+                                    await widget.apiClient.updateProfile(
+                                      context,
+                                      bio: value,
+                                    );
+                                    setState(() {
+                                      _profile!['bio'] = value;
+                                    });
                                   },
                                 ),
-                                const SizedBox(height: 12),
-                                _buildInfoRow(
-                                  context,
-                                  l10n.grade,
-                                  _formatGrade(_profile!['grade']),
-                                  onEdit: () => _selectGrade(),
-                                ),
-                                const SizedBox(height: 12),
-                                _buildInfoRow(
-                                  context,
-                                  l10n.role,
-                                  (_profile!['role'] as String).substring(0, 1).toUpperCase() + (_profile!['role'] as String).substring(1),
-                                ),
-                                const SizedBox(height: 24),
-                                SwitchListTile(
-                                  title: Text(
-                                    l10n.allowDirectMessages,
-                                    style: TextStyle(
-                                      color: Theme.of(context).colorScheme.onPrimary,
-                                    ),
-                                  ),
-                                  value: _profile!['allow_dm'] ?? false,
-                                  onChanged: (bool value) async {
-                                    try {
+                              ),
+                              const SizedBox(height: 12),
+                              _buildInfoRow(
+                                context,
+                                l10n.selectInstitution,
+                                _getLocalizedInstitutionName(_profile!['institution'] ?? ''),
+                                onEdit: () async {
+                                  try {
+                                    final selectedInstitutionId = await _selectInstitution();
+                                    if (selectedInstitutionId != null) {
+                                      final selectedInst = _institutions?.firstWhere(
+                                        (inst) => inst['id'].toString() == selectedInstitutionId,
+                                      );
                                       await widget.apiClient.updateProfile(
                                         context,
-                                        allowDm: value,
+                                        institutionId: int.parse(selectedInstitutionId),
                                       );
-                                      if (mounted) {
+                                      if (mounted && selectedInst != null) {
                                         setState(() {
-                                          _profile!['allow_dm'] = value;
+                                          _profile!['institution'] = selectedInst['name'];
                                         });
                                       }
-                                    } catch (e) {
-                                      if (mounted) {
-                                        GlassmorphicUI.showGlassSnackBar(
-                                          context,
-                                          e.toString(),
-                                          isError: true,
-                                        );
-                                      }
                                     }
-                                  },
-                                  activeColor: Theme.of(context).colorScheme.secondary,
-                                ),
-                                const SizedBox(height: 32),
-                                ElevatedButton.icon(
-                                  icon: Icon(Icons.logout),
-                                  label: Text(l10n.logout),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Theme.of(context).colorScheme.errorContainer,
-                                    foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
-                                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
+                                  } catch (e) {
+                                    if (mounted) {
+                                      GlassmorphicUI.showGlassSnackBar(
+                                        context,
+                                        e.toString(),
+                                        isError: true,
+                                      );
+                                    }
+                                  }
+                                },
+                              ),
+                              const SizedBox(height: 12),
+                              _buildInfoRow(
+                                context,
+                                l10n.grade,
+                                _formatGrade(_profile!['grade']),
+                                onEdit: () => _selectGrade(),
+                              ),
+                              const SizedBox(height: 12),
+                              _buildInfoRow(
+                                context,
+                                l10n.role,
+                                (_profile!['role'] as String).substring(0, 1).toUpperCase() + (_profile!['role'] as String).substring(1),
+                              ),
+                              const SizedBox(height: 24),
+                              SwitchListTile(
+                                title: Text(
+                                  l10n.allowDirectMessages,
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onPrimary,
                                   ),
-                                  onPressed: () async {
-                                    await widget.apiClient.logout(context);
-                                    // MainPage listens for token changes and automatically
-                                    // displays the login screen, so no navigation is needed here.
-                                  },
                                 ),
-                              ],
-                            ),
+                                value: _profile!['allow_dm'] ?? false,
+                                onChanged: (bool value) async {
+                                  try {
+                                    await widget.apiClient.updateProfile(
+                                      context,
+                                      allowDm: value,
+                                    );
+                                    if (mounted) {
+                                      setState(() {
+                                        _profile!['allow_dm'] = value;
+                                      });
+                                    }
+                                  } catch (e) {
+                                    if (mounted) {
+                                      GlassmorphicUI.showGlassSnackBar(
+                                        context,
+                                        e.toString(),
+                                        isError: true,
+                                      );
+                                    }
+                                  }
+                                },
+                                activeColor: Theme.of(context).colorScheme.secondary,
+                              ),
+                              const SizedBox(height: 32),
+                              ElevatedButton.icon(
+                                icon: Icon(Icons.logout),
+                                label: Text(l10n.logout),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Theme.of(context).colorScheme.errorContainer,
+                                  foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
+                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                onPressed: () async {
+                                  await widget.apiClient.logout(context);
+                                  // MainPage listens for token changes and automatically
+                                  // displays the login screen, so no navigation is needed here.
+                                },
+                              ),
+                            ],
                           ),
                         ),
                       ),

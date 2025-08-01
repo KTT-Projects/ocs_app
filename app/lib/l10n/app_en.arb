@@ -1,16 +1,12 @@
 {
-    "onlyGoogleEmailAllowed": "Only Gmail accounts are supported at this time",
-    "@onlyGoogleEmailAllowed": {
-        "description": "Error message shown when non-Gmail email is entered"
-    },
-    "checkSpamJunk": "Please check your spam/junk folder if you don't see the email in your inbox",
-    "@checkSpamJunk": {
-        "description": "Helper text to check spam folder for verification email"
-    },
-    "resendOtp": "Resend Code",
-    "@resendOtp": {
-        "description": "Button text to resend verification code"
-    },
+  "checkSpamJunk": "Please check your spam/junk folder if you don't see the email in your inbox",
+  "@checkSpamJunk": {
+    "description": "Helper text to check spam folder for verification email"
+  },
+  "resendOtp": "Resend Code",
+  "@resendOtp": {
+    "description": "Button text to resend verification code"
+  },
   "@@locale": "en",
   "appTitle": "Osakikamijima Community Site",
   "@appTitle": {
@@ -669,5 +665,13 @@
   "members": "Members",
   "@members": {
     "description": "Section title for feed members"
+  },
+  "showMore": "Show more",
+  "@showMore": {
+    "description": "Button to show more posts in the feed"
+  },
+  "showLess": "Show less",
+  "@showLess": {
+    "description": "Button to show less posts in the feed"
   }
 }

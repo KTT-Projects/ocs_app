@@ -18,6 +18,7 @@ import 'feed_details_page.dart';
 import 'feed_settings_page.dart';
 import 'post_details_page.dart';
 import '../widgets/create_post_dialog.dart';
+import 'user_profile_page.dart';
 import '../widgets/user_selection_dialog.dart';
 import '../widgets/confirm_dialog.dart';
 
@@ -92,6 +93,12 @@ class _FeedsPageState extends State<FeedsPage> {
   }
 
   Future<void> _loadFeeds() async {
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+    }
     try {
       // Fetch non-joined feeds and joined feeds separately. The joined feeds
       // endpoint returns them in the user’s preferred order, so we need to
@@ -116,6 +123,7 @@ class _FeedsPageState extends State<FeedsPage> {
           if (_selectedFeed != null) {
             _selectedFeed = feedMap[_selectedFeed!.id] ?? _selectedFeed;
           }
+          _error = null;
           _isLoading = false;
         });
       }
@@ -256,6 +264,33 @@ class _FeedsPageState extends State<FeedsPage> {
         ),
       ),
     );
+  }
+
+  void _openUserProfile(int userId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UserProfilePage(
+          apiClient: widget.apiClient,
+          userId: userId,
+        ),
+      ),
+    );
+  }
+
+  void _selectFeedById(int feedId) {
+    Feed? feed;
+    if (_feeds != null) {
+      try {
+        feed = _feeds!.firstWhere((f) => f.id == feedId);
+      } catch (_) {}
+    }
+    if (feed == null) return;
+    setState(() {
+      _selectedFeed = feed;
+      _sortBy = 'default';
+    });
+    _loadPosts();
   }
 
   void _onNewPostPressed(List<Feed> joinedFeeds) async {
@@ -492,31 +527,28 @@ onTap: () {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: IconButton(
-                        iconSize: 20,
-                        icon: Icon(
-                          Icons.sort,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ),
-                        onPressed: () async {
-                          final String? selected = await GlassmorphicUI.showDialog<String>(
-                            context: context,
-                            width: 320,
-                            child: SortMenuDialog(
-                              currentSort: _sortBy,
-                              onSortChanged: (value) => Navigator.pop(context, value),
-                            ),
-                          );
-                          if (selected != null) {
-                            setState(() {
-                              _sortBy = selected;
-                            });
-                            _loadPosts();
-                          }
-                        },
+                    child: IconButton(
+                      iconSize: 20,
+                      icon: Icon(
+                        Icons.sort,
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
+                      onPressed: () async {
+                        final String? selected = await GlassmorphicUI.showDialog<String>(
+                          context: context,
+                          width: 320,
+                          child: SortMenuDialog(
+                            currentSort: _sortBy,
+                            onSortChanged: (value) => Navigator.pop(context, value),
+                          ),
+                        );
+                        if (selected != null) {
+                          setState(() {
+                            _sortBy = selected;
+                          });
+                          _loadPosts();
+                        }
+                      },
                     ),
                   ),
                 ),
@@ -532,82 +564,79 @@ onTap: () {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: IconButton(
-                      iconSize: 20,
-                      icon: Icon(
-                        Icons.more_vert,
-                        color: Theme.of(context).colorScheme.onPrimary,
-                      ),
-                      onPressed: () async {
-                        await GlassmorphicUI.showDialog<void>(
-                          context: context,
-                          width: 240,
-                          child: FeedMenuDialog(
-                            onCreateFeed: () async {
-                              final feedId = await Navigator.push<int>(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => CreateFeedPage(apiClient: widget.apiClient),
-                                ),
-                              );
-                              if (feedId != null && mounted) {
-                                _loadFeeds();
-                                _loadPosts();
-                              }
-                            },
-                            onReorderFeeds: () async {
-                              final joinedFeeds = _feeds?.where((feed) => feed.isMember).toList() ?? [];
-                              await GlassmorphicUI.showDialog<void>(
-                                context: context,
-                                width: 360,
-                                child: ReorderFeedsDialog(
-                                  feeds: joinedFeeds,
-                                  onReorder: (reorderedFeeds) async {
-                                    try {
-                                      final feedOrder = reorderedFeeds.map((feed) => feed.id).toList();
-                                      await widget.apiClient.reorderFeeds(
-                                        context,
-                                        feedOrder: feedOrder,
-                                      );
-                                      _loadFeeds();
-                                    } catch (e) {
-                                      if (mounted) {
-                                        GlassmorphicUI.showGlassSnackBar(
-                                          context,
-                                          e.toString(),
-                                          isError: true,
-                                        );
-                                      }
-                                    }
-                                  },
-                                ),
-                              );
-                            },
-                            onFeedDetails: _selectedFeed != null && _selectedFeed!.isMember ? () => _openFeedDetails(_selectedFeed!) : null,
-                            onFeedSettings: _selectedFeed != null && _selectedFeed!.role == 'admin'
-                                ? () async {
-                                    final changed = await Navigator.push<bool>(
+                  child: IconButton(
+                    iconSize: 20,
+                    icon: Icon(
+                      Icons.more_vert,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                    onPressed: () async {
+                      await GlassmorphicUI.showDialog<void>(
+                        context: context,
+                        width: 240,
+                        child: FeedMenuDialog(
+                          onCreateFeed: () async {
+                            final feedId = await Navigator.push<int>(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CreateFeedPage(apiClient: widget.apiClient),
+                              ),
+                            );
+                            if (feedId != null && mounted) {
+                              _loadFeeds();
+                              _loadPosts();
+                            }
+                          },
+                          onReorderFeeds: () async {
+                            final joinedFeeds = _feeds?.where((feed) => feed.isMember).toList() ?? [];
+                            await GlassmorphicUI.showDialog<void>(
+                              context: context,
+                              width: 360,
+                              child: ReorderFeedsDialog(
+                                feeds: joinedFeeds,
+                                onReorder: (reorderedFeeds) async {
+                                  try {
+                                    final feedOrder = reorderedFeeds.map((feed) => feed.id).toList();
+                                    await widget.apiClient.reorderFeeds(
                                       context,
-                                      MaterialPageRoute(
-                                        builder: (context) => FeedSettingsPage(
-                                          apiClient: widget.apiClient,
-                                          feed: _selectedFeed!,
-                                        ),
-                                      ),
+                                      feedOrder: feedOrder,
                                     );
-                                    if (changed == true && mounted) {
-                                      _loadFeeds();
-                                      _loadPosts();
+                                    _loadFeeds();
+                                  } catch (e) {
+                                    if (mounted) {
+                                      GlassmorphicUI.showGlassSnackBar(
+                                        context,
+                                        e.toString(),
+                                        isError: true,
+                                      );
                                     }
                                   }
-                                : null,
-                            onLeaveFeed: _selectedFeed != null && _selectedFeed!.isMember ? _leaveSelectedFeed : null,
-                          ),
-                        );
-                      },
-                    ),
+                                },
+                              ),
+                            );
+                          },
+                          onFeedDetails: _selectedFeed != null && _selectedFeed!.isMember ? () => _openFeedDetails(_selectedFeed!) : null,
+                          onFeedSettings: _selectedFeed != null && _selectedFeed!.role == 'admin'
+                              ? () async {
+                                  final changed = await Navigator.push<bool>(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => FeedSettingsPage(
+                                        apiClient: widget.apiClient,
+                                        feed: _selectedFeed!,
+                                      ),
+                                    ),
+                                  );
+                                  if (changed == true && mounted) {
+                                    _loadFeeds();
+                                    _loadPosts();
+                                  }
+                                }
+                              : null,
+                          onLeaveFeed: _selectedFeed != null && _selectedFeed!.isMember ? _leaveSelectedFeed : null,
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
@@ -747,7 +776,9 @@ onTap: () {
                               (post) => PostListItem(
                                 post: post,
                                 onVote: _vote,
+                                onFeedTap: _selectFeedById,
                                 showFeedName: _selectedFeed == null,
+                                onUserTap: _openUserProfile,
                                 onComments: (p) {
                                   Navigator.push(
                                     context,
@@ -765,13 +796,25 @@ onTap: () {
                         ],
                         if (availableFeeds.isNotEmpty) ...[
                           const SizedBox(height: 24),
-                          Text(
-                            l10n.discoverMoreFeeds,
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final maxWidth = constraints.maxWidth;
+                              final width = maxWidth > 600 ? 600.0 : maxWidth;
+                              return Center(
+                                child: Container(
+                                  width: width,
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    l10n.discoverMoreFeeds,
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.onPrimary,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                           const SizedBox(height: 8),
                           ...availableFeeds.map((feed) => FeedListItem(

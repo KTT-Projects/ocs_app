@@ -1,5 +1,4 @@
 {
-  "onlyGoogleEmailAllowed": "現在、Gmailアカウントのみ対応しています",
   "checkSpamJunk": "メールが届かない場合は迷惑メールフォルダをご確認ください",
   "resendOtp": "認証コードを再送信",
   "@@locale": "ja",
@@ -372,5 +371,13 @@
   "members": "メンバー",
   "@members": {
     "description": "フィードメンバーのセクションタイトル"
+  },
+  "showMore": "もっと見る",
+  "@showMore": {
+    "description": "投稿リストで詳細を表示するためのボタン"
+  },
+  "showLess": "閉じる",
+  "@showLess": {
+    "description": "投稿リストで詳細を閉じるためのボタン"
   }
 }

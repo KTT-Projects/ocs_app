@@ -100,15 +100,12 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: IconButton(
-                icon: Icon(
-                  Icons.arrow_back,
-                  color: Theme.of(context).colorScheme.onPrimary,
-                ),
-                onPressed: () => Navigator.pop(context),
+            child: IconButton(
+              icon: Icon(
+                Icons.arrow_back,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
+              onPressed: () => Navigator.pop(context),
             ),
           ),
         ),
@@ -151,54 +148,71 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(24),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Center(
-                            child: CircleAvatar(
-                              radius: 40,
-                              backgroundColor: Theme.of(
-                                context,
-                              ).colorScheme.secondary,
-                              child: widget.feed.iconUrl != null
-                                  ? ClipOval(
-                                      child: Image.network(
-                                        widget.feed.iconUrl!,
-                                        width: 80,
-                                        height: 80,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    )
-                                  : Text(
-                                      widget.feed.displayName[0],
-                                      style: TextStyle(
-                                        fontSize: 40,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onSecondary,
-                                      ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: CircleAvatar(
+                            radius: 40,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.secondary,
+                            child: widget.feed.iconUrl != null
+                                ? ClipOval(
+                                    child: Image.network(
+                                      widget.feed.iconUrl!,
+                                      width: 80,
+                                      height: 80,
+                                      fit: BoxFit.cover,
                                     ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Center(
-                            child: Text(
-                              widget.feed.displayName,
-                              style: Theme.of(context).textTheme.headlineMedium
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onPrimary,
+                                  )
+                                : Text(
+                                    widget.feed.displayName[0],
+                                    style: TextStyle(
+                                      fontSize: 40,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSecondary,
+                                    ),
                                   ),
-                            ),
                           ),
+                        ),
+                        const SizedBox(height: 16),
+                        Center(
+                          child: Text(
+                            widget.feed.displayName,
+                            style: Theme.of(context).textTheme.headlineMedium
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary,
+                                ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          l10n.feedDescription,
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onPrimary.withOpacity(0.7),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          widget.feed.description,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        ),
+                        if (widget.feed.rules != null &&
+                            widget.feed.rules!.isNotEmpty) ...[
                           const SizedBox(height: 24),
                           Text(
-                            l10n.feedDescription,
+                            l10n.feedRules,
                             style: TextStyle(
                               color: Theme.of(
                                 context,
@@ -208,103 +222,83 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            widget.feed.description,
+                            widget.feed.rules!,
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.onPrimary,
                             ),
                           ),
-                          if (widget.feed.rules != null &&
-                              widget.feed.rules!.isNotEmpty) ...[
-                            const SizedBox(height: 24),
-                            Text(
-                              l10n.feedRules,
-                              style: TextStyle(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onPrimary.withOpacity(0.7),
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              widget.feed.rules!,
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              ),
-                            ),
-                          ],
-                          const SizedBox(height: 24),
-                          Text(
-                            l10n.members,
-                            style: TextStyle(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onPrimary.withOpacity(0.7),
-                              fontWeight: FontWeight.bold,
-                            ),
+                        ],
+                        const SizedBox(height: 24),
+                        Text(
+                          l10n.members,
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onPrimary.withOpacity(0.7),
+                            fontWeight: FontWeight.bold,
                           ),
-                          const SizedBox(height: 8),
-                          if (_isLoadingMembers)
-                            Center(
-                              child: CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Theme.of(context).colorScheme.onPrimary,
-                                ),
+                        ),
+                        const SizedBox(height: 8),
+                        if (_isLoadingMembers)
+                          Center(
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Theme.of(context).colorScheme.onPrimary,
                               ),
-                            )
-                          else if (_error != null)
-                            Text(
-                              _error!,
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.error,
-                              ),
-                            )
-                          else if (_members != null && _members!.isNotEmpty)
-                            Column(
-                              children: _members!
-                                  .map(
-                                    (m) => Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 4,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              m['display_name'] ?? '',
-                                              style: TextStyle(
-                                                color: Theme.of(
-                                                  context,
-                                                ).colorScheme.onPrimary,
-                                              ),
+                            ),
+                          )
+                        else if (_error != null)
+                          Text(
+                            _error!,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                          )
+                        else if (_members != null && _members!.isNotEmpty)
+                          Column(
+                            children: _members!
+                                .map(
+                                  (m) => Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 4,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            m['display_name'] ?? '',
+                                            style: TextStyle(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.onPrimary,
                                             ),
                                           ),
-                                          if (m['role'] != null)
-                                            Text(
-                                              '(${m['role']})',
-                                              style: TextStyle(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onPrimary
-                                                    .withOpacity(0.7),
-                                                fontSize: 12,
-                                              ),
+                                        ),
+                                        if (m['role'] != null)
+                                          Text(
+                                            '(${m['role']})',
+                                            style: TextStyle(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onPrimary
+                                                  .withOpacity(0.7),
+                                              fontSize: 12,
                                             ),
-                                        ],
-                                      ),
+                                          ),
+                                      ],
                                     ),
-                                  )
-                                  .toList(),
-                            )
-                          else
-                            Text(
-                              '-',
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              ),
+                                  ),
+                                )
+                                .toList(),
+                          )
+                        else
+                          Text(
+                            '-',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onPrimary,
                             ),
-                        ],
-                      ),
+                          ),
+                      ],
                     ),
                   ),
                 ),

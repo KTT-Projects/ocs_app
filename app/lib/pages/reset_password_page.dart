@@ -138,139 +138,136 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(24),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                        child: Padding(
-                          padding: EdgeInsets.all(isSmallScreen ? 20.0 : 32.0),
-                          child: Form(
-                            key: _formKey,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  l10n.resetPasswordTitle,
-                                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                        color: Theme.of(context).colorScheme.onPrimary,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                                const SizedBox(height: 8),
-                                if (_errorMessage != null) ...[
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    _errorMessage!, // Display error message directly (consistent with forgot_password_page)
-                                    style: TextStyle(
-                                      color: Theme.of(context).colorScheme.error,
+                      child: Padding(
+                        padding: EdgeInsets.all(isSmallScreen ? 20.0 : 32.0),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                l10n.resetPasswordTitle,
+                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                      color: Theme.of(context).colorScheme.onPrimary,
                                       fontWeight: FontWeight.bold,
                                     ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                                const SizedBox(height: 32),
-                                TextFormField(
-                                  controller: _passwordController,
-                                  obscureText: true,
-                                  decoration: InputDecoration(
-                                    hintText: l10n.newPassword,
-                                    prefixIcon: Icon(
-                                      Icons.lock_outline,
-                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                    ),
-                                    hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
-                                    filled: true,
-                                    fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                  ),
-                                  style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-                                  validator: (value) {
-                                    if (value == null || value.length < 8) {
-                                      return l10n.passwordRequirements;
-                                    }
-                                    return null;
-                                  },
-                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              if (_errorMessage != null) ...[
                                 const SizedBox(height: 16),
-                                TextFormField(
-                                  controller: _confirmPasswordController,
-                                  obscureText: true,
-                                  decoration: InputDecoration(
-                                    hintText: l10n.confirmPassword,
-                                    prefixIcon: Icon(
-                                      Icons.lock_outline,
-                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                    ),
-                                    hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
-                                    filled: true,
-                                    fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide.none,
-                                    ),
+                                Text(
+                                  _errorMessage!, // Display error message directly (consistent with forgot_password_page)
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.error,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-                                  validator: (value) {
-                                    if (value != _passwordController.text) {
-                                      return l10n.passwordsDoNotMatch;
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 24),
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 48,
-                                  child: ElevatedButton(
-                                    onPressed: _isLoading ? null : _handleReset,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Theme.of(context).colorScheme.secondary,
-                                      foregroundColor: Theme.of(context).colorScheme.onSecondary,
-                                      elevation: 2,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                    ),
-                                    child: _isLoading
-                                        ? SizedBox(
-                                            height: 20,
-                                            width: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              valueColor: AlwaysStoppedAnimation<Color>(
-                                                Theme.of(context).colorScheme.onSecondary,
-                                              ),
-                                            ),
-                                          )
-                                        : Text(
-                                            l10n.resetPasswordButton,
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => LoginPage(apiClient: widget.apiClient),
-                                      ),
-                                    );
-                                  },
-                                  child: Text(
-                                    l10n.backToLogin,
-                                    style: TextStyle(
-                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
-                                    ),
-                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
                               ],
-                            ),
+                              const SizedBox(height: 32),
+                              TextFormField(
+                                controller: _passwordController,
+                                obscureText: true,
+                                decoration: InputDecoration(
+                                  hintText: l10n.newPassword,
+                                  prefixIcon: Icon(
+                                    Icons.lock_outline,
+                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                  ),
+                                  hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                  filled: true,
+                                  fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                ),
+                                style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                validator: (value) {
+                                  if (value == null || value.length < 8) {
+                                    return l10n.passwordRequirements;
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              TextFormField(
+                                controller: _confirmPasswordController,
+                                obscureText: true,
+                                decoration: InputDecoration(
+                                  hintText: l10n.confirmPassword,
+                                  prefixIcon: Icon(
+                                    Icons.lock_outline,
+                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                  ),
+                                  hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                  filled: true,
+                                  fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                ),
+                                style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                validator: (value) {
+                                  if (value != _passwordController.text) {
+                                    return l10n.passwordsDoNotMatch;
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 24),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 48,
+                                child: ElevatedButton(
+                                  onPressed: _isLoading ? null : _handleReset,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                                    foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                                    elevation: 2,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: _isLoading
+                                      ? SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor: AlwaysStoppedAnimation<Color>(
+                                              Theme.of(context).colorScheme.onSecondary,
+                                            ),
+                                          ),
+                                        )
+                                      : Text(
+                                          l10n.resetPasswordButton,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => LoginPage(apiClient: widget.apiClient),
+                                    ),
+                                  );
+                                },
+                                child: Text(
+                                  l10n.backToLogin,
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),

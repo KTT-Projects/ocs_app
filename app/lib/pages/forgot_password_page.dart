@@ -201,249 +201,246 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(24),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                        child: Padding(
-                          padding: EdgeInsets.all(isSmallScreen ? 20.0 : 32.0),
-                          child: Form(
-                            key: _formKey,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
+                      child: Padding(
+                        padding: EdgeInsets.all(isSmallScreen ? 20.0 : 32.0),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                l10n.resetPasswordTitle,
+                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                      color: Theme.of(context).colorScheme.onPrimary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                l10n.resetPasswordSubtitle,
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                    ),
+                              ),
+                              if (_errorMessage != null) ...[
+                                const SizedBox(height: 16),
                                 Text(
-                                  l10n.resetPasswordTitle,
-                                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                        color: Theme.of(context).colorScheme.onPrimary,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                  _errorMessage!, // Display error message directly
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.error,
+                                    fontWeight: FontWeight.bold, // Make error more prominent
+                                  ),
+                                  textAlign: TextAlign.center, // Center align error
+                                ),
+                              ],
+                              const SizedBox(height: 32),
+                              if (!_showOtpField && !_showPasswordFields) ...[
+                                TextFormField(
+                                  controller: _emailController,
+                                  enabled: !_showOtpField,
+                                  decoration: InputDecoration(
+                                    hintText: l10n.email,
+                                    prefixIcon: Icon(
+                                      Icons.email_outlined,
+                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                    ),
+                                    hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                    filled: true,
+                                    fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                  ),
+                                  style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                  validator: (value) {
+                                    if (!_showOtpField) {
+                                      if (value?.isEmpty ?? true) {
+                                        return l10n.invalidEmail;
+                                      }
+                                      if (!value!.contains('@')) {
+                                        return l10n.invalidEmail;
+                                      }
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ],
+                              if (_showOtpField) ...[
+                                TextFormField(
+                                  controller: _otpController,
+                                  autofocus: true,
+                                  maxLength: 6,
+                                  keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                                  decoration: InputDecoration(
+                                    hintText: l10n.enterOtp,
+                                    counterText: '', // Hide character counter
+                                    prefixIcon: Icon(
+                                      Icons.security_outlined,
+                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                    ),
+                                    hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                    filled: true,
+                                    fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                  ),
+                                  style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  l10n.resetPasswordSubtitle,
+                                  l10n.checkSpamJunk,
                                   textAlign: TextAlign.center,
-                                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
-                                      ),
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                    fontSize: 12,
+                                  ),
                                 ),
-                                if (_errorMessage != null) ...[
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    _errorMessage!, // Display error message directly
-                                    style: TextStyle(
-                                      color: Theme.of(context).colorScheme.error,
-                                      fontWeight: FontWeight.bold, // Make error more prominent
-                                    ),
-                                    textAlign: TextAlign.center, // Center align error
-                                  ),
-                                ],
-                                const SizedBox(height: 32),
-                                if (!_showOtpField && !_showPasswordFields) ...[
-                                  TextFormField(
-                                    controller: _emailController,
-                                    enabled: !_showOtpField,
-                                    decoration: InputDecoration(
-                                      hintText: l10n.email,
-                                      prefixIcon: Icon(
-                                        Icons.email_outlined,
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                      ),
-                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
-                                      filled: true,
-                                      fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide.none,
-                                      ),
-                                    ),
-                                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-                                    validator: (value) {
-                                      if (!_showOtpField) {
-                                        if (value?.isEmpty ?? true) {
-                                          return l10n.invalidEmail;
-                                        }
-                                        if (!value!.contains('@')) {
-                                          return l10n.invalidEmail;
-                                        }
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ],
-                                if (_showOtpField) ...[
-                                  TextFormField(
-                                    controller: _otpController,
-                                    autofocus: true,
-                                    maxLength: 6,
-                                    keyboardType: const TextInputType.numberWithOptions(decimal: false),
-                                    decoration: InputDecoration(
-                                      hintText: l10n.enterOtp,
-                                      counterText: '', // Hide character counter
-                                      prefixIcon: Icon(
-                                        Icons.security_outlined,
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                      ),
-                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
-                                      filled: true,
-                                      fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide.none,
-                                      ),
-                                    ),
-                                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-                                  ),
+                                if (!_showPasswordFields) ...[
                                   const SizedBox(height: 8),
-                                  Text(
-                                    l10n.checkSpamJunk,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  if (!_showPasswordFields) ...[
-                                    const SizedBox(height: 8),
-                                    TextButton.icon(
-                                      onPressed: _isLoading
-                                          ? null
-                                          : () async {
-                                              setState(() => _isLoading = true);
-                                              try {
-                                                await widget.apiClient.requestPasswordReset(
-                                                  context: context,
-                                                  email: _email,
+                                  TextButton.icon(
+                                    onPressed: _isLoading
+                                        ? null
+                                        : () async {
+                                            setState(() => _isLoading = true);
+                                            try {
+                                              await widget.apiClient.requestPasswordReset(
+                                                context: context,
+                                                email: _email,
+                                              );
+                                              if (mounted) {
+                                                GlassmorphicUI.showGlassSnackBar(
+                                                  context,
+                                                  l10n.resetPasswordSent,
                                                 );
-                                                if (mounted) {
-                                                  GlassmorphicUI.showGlassSnackBar(
-                                                    context,
-                                                    l10n.resetPasswordSent,
-                                                  );
-                                                }
-                                              } catch (e) {
-                                                if (mounted) {
-                                                  GlassmorphicUI.showGlassSnackBar(
-                                                    context,
-                                                    e.toString(),
-                                                    isError: true,
-                                                  );
-                                                }
-                                              } finally {
-                                                setState(() => _isLoading = false);
                                               }
-                                            },
-                                      icon: Icon(
-                                        Icons.refresh,
+                                            } catch (e) {
+                                              if (mounted) {
+                                                GlassmorphicUI.showGlassSnackBar(
+                                                  context,
+                                                  e.toString(),
+                                                  isError: true,
+                                                );
+                                              }
+                                            } finally {
+                                              setState(() => _isLoading = false);
+                                            }
+                                          },
+                                    icon: Icon(
+                                      Icons.refresh,
+                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                      size: 16,
+                                    ),
+                                    label: Text(
+                                      l10n.resendOtp,
+                                      style: TextStyle(
                                         color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
-                                        size: 16,
-                                      ),
-                                      label: Text(
-                                        l10n.resendOtp,
-                                        style: TextStyle(
-                                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
-                                        ),
                                       ),
                                     ),
-                                  ],
-                                ],
-                                if (_showPasswordFields) ...[
-                                  const SizedBox(height: 16), // Add spacing before password fields
-                                  TextFormField(
-                                    controller: _passwordController,
-                                    obscureText: true,
-                                    decoration: InputDecoration(
-                                      hintText: l10n.newPassword,
-                                      prefixIcon: Icon(
-                                        Icons.lock_outline,
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                      ),
-                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
-                                      filled: true,
-                                      fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide.none,
-                                      ),
-                                    ),
-                                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-                                    validator: (value) => (value?.length ?? 0) < 8 ? l10n.passwordRequirements : null,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  TextFormField(
-                                    controller: _confirmPasswordController,
-                                    obscureText: true,
-                                    decoration: InputDecoration(
-                                      hintText: l10n.confirmPassword,
-                                      prefixIcon: Icon(
-                                        Icons.lock_outline,
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                      ),
-                                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
-                                      filled: true,
-                                      fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide.none,
-                                      ),
-                                    ),
-                                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-                                    validator: (value) {
-                                      if (value != _passwordController.text) {
-                                        return l10n.passwordsDoNotMatch;
-                                      }
-                                      return null;
-                                    },
                                   ),
                                 ],
-                                const SizedBox(height: 24),
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 48,
-                                  child: ElevatedButton(
-                                    onPressed: _isLoading ? null : _handleReset,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Theme.of(context).colorScheme.secondary,
-                                      foregroundColor: Theme.of(context).colorScheme.onSecondary,
-                                      elevation: 2,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
+                              ],
+                              if (_showPasswordFields) ...[
+                                const SizedBox(height: 16), // Add spacing before password fields
+                                TextFormField(
+                                  controller: _passwordController,
+                                  obscureText: true,
+                                  decoration: InputDecoration(
+                                    hintText: l10n.newPassword,
+                                    prefixIcon: Icon(
+                                      Icons.lock_outline,
+                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
                                     ),
-                                    child: _isLoading
-                                        ? SizedBox(
-                                            height: 20,
-                                            width: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              valueColor: AlwaysStoppedAnimation<Color>(
-                                                Theme.of(context).colorScheme.onSecondary,
-                                              ),
-                                            ),
-                                          )
-                                        : Text(
-                                            _showPasswordFields
-                                                ? l10n.resetPasswordButton
-                                                : _showOtpField
-                                                    ? l10n.verify
-                                                    : l10n.requestPasswordReset,
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
+                                    hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                    filled: true,
+                                    fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide.none,
+                                    ),
                                   ),
+                                  style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                  validator: (value) => (value?.length ?? 0) < 8 ? l10n.passwordRequirements : null,
                                 ),
                                 const SizedBox(height: 16),
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: Text(
-                                    l10n.backToLogin,
-                                    style: TextStyle(
-                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                TextFormField(
+                                  controller: _confirmPasswordController,
+                                  obscureText: true,
+                                  decoration: InputDecoration(
+                                    hintText: l10n.confirmPassword,
+                                    prefixIcon: Icon(
+                                      Icons.lock_outline,
+                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                    ),
+                                    hintStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                    filled: true,
+                                    fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide.none,
                                     ),
                                   ),
+                                  style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                  validator: (value) {
+                                    if (value != _passwordController.text) {
+                                      return l10n.passwordsDoNotMatch;
+                                    }
+                                    return null;
+                                  },
                                 ),
                               ],
-                            ),
+                              const SizedBox(height: 24),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 48,
+                                child: ElevatedButton(
+                                  onPressed: _isLoading ? null : _handleReset,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                                    foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                                    elevation: 2,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: _isLoading
+                                      ? SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor: AlwaysStoppedAnimation<Color>(
+                                              Theme.of(context).colorScheme.onSecondary,
+                                            ),
+                                          ),
+                                        )
+                                      : Text(
+                                          _showPasswordFields
+                                              ? l10n.resetPasswordButton
+                                              : _showOtpField
+                                                  ? l10n.verify
+                                                  : l10n.requestPasswordReset,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: Text(
+                                  l10n.backToLogin,
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),

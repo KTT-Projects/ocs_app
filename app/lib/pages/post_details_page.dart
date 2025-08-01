@@ -6,6 +6,7 @@ import '../services/api_client.dart';
 import '../widgets/post_list_item.dart';
 import '../widgets/comment_list_item.dart';
 import '../widgets/glassmorphic_ui.dart';
+import 'user_profile_page.dart';
 
 class PostDetailsPage extends StatefulWidget {
   final ApiClient apiClient;
@@ -87,6 +88,60 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
     super.dispose();
   }
 
+  void _openUserProfile(int userId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UserProfilePage(
+          apiClient: widget.apiClient,
+          userId: userId,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _vote(FeedPost post, String voteType) async {
+    try {
+      await widget.apiClient.votePost(
+        context,
+        postId: post.id,
+        voteType: voteType,
+      );
+
+      setState(() {
+        if (post.userVote == voteType) {
+          if (voteType == 'upvote') {
+            post.upvotes -= 1;
+          } else {
+            post.downvotes -= 1;
+          }
+          post.userVote = null;
+        } else {
+          if (post.userVote == 'upvote') {
+            post.upvotes -= 1;
+          } else if (post.userVote == 'downvote') {
+            post.downvotes -= 1;
+          }
+
+          if (voteType == 'upvote') {
+            post.upvotes += 1;
+          } else {
+            post.downvotes += 1;
+          }
+          post.userVote = voteType;
+        }
+      });
+    } catch (e) {
+      if (mounted) {
+        GlassmorphicUI.showGlassSnackBar(
+          context,
+          e.toString(),
+          isError: true,
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,12 +160,9 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: IconButton(
-                icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
-                onPressed: () => Navigator.pop(context),
-              ),
+            child: IconButton(
+              icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
+              onPressed: () => Navigator.pop(context),
             ),
           ),
         ),
@@ -138,14 +190,8 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                     children: [
                       PostListItem(
                         post: widget.post,
-                        onVote: (p, v) async {
-                          await widget.apiClient.votePost(
-                            context,
-                            postId: p.id,
-                            voteType: v,
-                          );
-                          setState(() {});
-                        },
+                        onVote: _vote,
+                        onUserTap: _openUserProfile,
                       ),
                       const SizedBox(height: 16),
                       if (_isLoading)
@@ -164,7 +210,12 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                           ),
                         )
                       else if (_comments != null)
-                        ..._comments!.map((c) => CommentListItem(comment: c)),
+                        ..._comments!.map(
+                          (c) => CommentListItem(
+                            comment: c,
+                            onUserTap: _openUserProfile,
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -172,8 +223,15 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                   top: false,
                   child: Padding(
                     padding: const EdgeInsets.all(8),
-                    child: Row(
-                      children: [
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final maxWidth = constraints.maxWidth;
+                        final width = maxWidth > 600 ? 600.0 : maxWidth;
+                        return Center(
+                          child: SizedBox(
+                            width: width,
+                            child: Row(
+                              children: [
                         Expanded(
                           child: Container(
                             decoration: BoxDecoration(
@@ -185,24 +243,21 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(20),
-                              child: BackdropFilter(
-                                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                                child: TextField(
-                                  controller: _controller,
-                                  decoration: InputDecoration(
-                                    hintText: 'Add a comment...',
-                                    hintStyle: TextStyle(
-                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                    ),
-                                    border: InputBorder.none,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 14,
-                                    ),
+                              child: TextField(
+                                controller: _controller,
+                                decoration: InputDecoration(
+                                  hintText: 'Add a comment...',
+                                  hintStyle: TextStyle(
+                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
                                   ),
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimary,
+                                  border: InputBorder.none,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 14,
                                   ),
+                                ),
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onPrimary,
                                 ),
                               ),
                             ),
@@ -219,19 +274,21 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(20),
-                            child: BackdropFilter(
-                              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                              child: IconButton(
-                                icon: Icon(
-                                  Icons.send,
-                                  color: Theme.of(context).colorScheme.onPrimary,
-                                ),
-                                onPressed: _submit,
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.send,
+                                color: Theme.of(context).colorScheme.onPrimary,
                               ),
+                              onPressed: _submit,
+                              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
                             ),
                           ),
                         ),
                       ],
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),

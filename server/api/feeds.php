@@ -103,10 +103,25 @@ class FeedController
     // Get sort option from query (default: population)
     $sort = isset($_GET['sort']) ? $_GET['sort'] : 'population';
 
-    // Fetch feeds with membership information
-    $query = "SELECT f.*,
+    // Fetch feeds with membership information and compute last activity time
+    $query = "SELECT f.id,
+                  f.name,
+                  f.display_name,
+                  f.description,
+                  f.created_by,
+                  f.rules,
+                  f.banner_url,
+                  f.icon_url,
+                  f.created_at,
+                  GREATEST(
+                    f.updated_at,
+                    IFNULL((SELECT MAX(fp2.created_at) FROM feed_posts fp2 WHERE fp2.feed_id = f.id), f.updated_at),
+                    IFNULL((SELECT MAX(c.created_at) FROM comments c JOIN feed_posts fp3 ON c.post_id = fp3.id WHERE fp3.feed_id = f.id), f.updated_at)
+                  ) AS updated_at,
                   COUNT(DISTINCT fm1.user_id) as member_count,
-                  COUNT(DISTINCT fp.id) as post_count";
+                  COUNT(DISTINCT fp.id) as post_count,
+                  (SELECT MAX(fp2.created_at) FROM feed_posts fp2 WHERE fp2.feed_id = f.id) AS last_post_at,
+                  (SELECT MAX(c.created_at) FROM comments c JOIN feed_posts fp3 ON c.post_id = fp3.id WHERE fp3.feed_id = f.id) AS last_comment_at";
     if ($userId !== null) {
       $query .= ", EXISTS(SELECT 1 FROM feed_members fm2 WHERE fm2.feed_id = f.id AND fm2.user_id = :user_id) as is_member";
     } else {
@@ -117,7 +132,7 @@ class FeedController
                   LEFT JOIN feed_posts fp ON f.id = fp.feed_id";
     $query .= " GROUP BY f.id";
     if ($sort === 'activity') {
-      $query .= " ORDER BY MAX(fp.created_at) DESC";
+      $query .= " ORDER BY updated_at DESC";
     } else {
       $query .= " ORDER BY member_count DESC";
     }
@@ -262,16 +277,38 @@ class FeedController
 
     // Resize to max 256x256 without stretching
     list($width, $height) = getimagesize($file['tmp_name']);
+
+    // Correct orientation for JPEGs using EXIF data when available
+    if ($mimeType === 'image/jpeg') {
+      $src = imagecreatefromjpeg($file['tmp_name']);
+      if (function_exists('exif_read_data')) {
+        $exif = @exif_read_data($file['tmp_name']);
+        if ($exif && isset($exif['Orientation'])) {
+          switch ($exif['Orientation']) {
+            case 3:
+              $src = imagerotate($src, 180, 0);
+              break;
+            case 6:
+              $src = imagerotate($src, -90, 0);
+              $width = imagesx($src);
+              $height = imagesy($src);
+              break;
+            case 8:
+              $src = imagerotate($src, 90, 0);
+              $width = imagesx($src);
+              $height = imagesy($src);
+              break;
+          }
+        }
+      }
+    } else {
+      $src = imagecreatefrompng($file['tmp_name']);
+    }
+
     $maxSize = 256;
     $scale = min($maxSize / $width, $maxSize / $height, 1);
     $newWidth = (int)($width * $scale);
     $newHeight = (int)($height * $scale);
-
-    if ($mimeType === 'image/jpeg') {
-      $src = imagecreatefromjpeg($file['tmp_name']);
-    } else {
-      $src = imagecreatefrompng($file['tmp_name']);
-    }
 
     $dst = imagecreatetruecolor($newWidth, $newHeight);
     if ($mimeType === 'image/png') {
@@ -674,6 +711,8 @@ class FeedController
       } else {
         // Last admin leaving - delete the feed entirely
         $this->deleteFeed($feedId);
+        Response::success(null, 'Left feed successfully');
+        return;
       }
     }
 
@@ -701,6 +740,14 @@ class FeedController
       $updateOrderStmt->execute();
     }
 
+    // If no members remain in the feed, delete it
+    $stmt = $this->conn->prepare("SELECT COUNT(*) FROM feed_members WHERE feed_id = :feed_id");
+    $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
+    $stmt->execute();
+    if ((int)$stmt->fetchColumn() === 0) {
+      $this->deleteFeed($feedId);
+    }
+
     Response::success(null, 'Left feed successfully');
   }
 
@@ -709,20 +756,30 @@ class FeedController
     // Remove all related data and the feed itself
     $this->conn->beginTransaction();
     try {
-      // Fetch icon URL so the file can be removed later
+      // Fetch icon URL and post media so the files can be removed later
       $iconQuery = "SELECT icon_url FROM feeds WHERE id = :feed_id";
       $iconStmt = $this->conn->prepare($iconQuery);
       $iconStmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
       $iconStmt->execute();
       $iconUrl = $iconStmt->fetchColumn();
-      $query = "SELECT id FROM feed_posts WHERE feed_id = :feed_id";
+
+      $query = "SELECT id, media_url FROM feed_posts WHERE feed_id = :feed_id";
       $stmt = $this->conn->prepare($query);
       $stmt->bindParam(':feed_id', $feedId, PDO::PARAM_INT);
       $stmt->execute();
-      $postIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+      $postData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+      $postIds = [];
+      $mediaUrls = [];
+      foreach ($postData as $post) {
+        $postIds[] = intval($post['id']);
+        if (!empty($post['media_url'])) {
+          $mediaUrls[] = $post['media_url'];
+        }
+      }
 
       if (!empty($postIds)) {
-        $in = implode(',', array_map('intval', $postIds));
+        $in = implode(',', $postIds);
         $this->conn->exec("DELETE FROM feed_votes WHERE post_id IN ($in)");
         $this->conn->exec("DELETE FROM comments WHERE post_id IN ($in)");
         $this->conn->exec("DELETE FROM feed_posts WHERE id IN ($in)");
@@ -740,15 +797,40 @@ class FeedController
 
       // Delete icon file after database commit
       if ($iconUrl) {
-        $iconPath = __DIR__ . '/../' . ltrim($iconUrl, '/');
-        if (file_exists($iconPath)) {
+        $iconPath = $this->resolveUploadPath($iconUrl);
+        if ($iconPath && is_file($iconPath)) {
           unlink($iconPath);
+        }
+      }
+
+      // Delete any uploaded media associated with posts
+      foreach ($mediaUrls as $url) {
+        $mediaPath = $this->resolveUploadPath($url);
+        if ($mediaPath && is_file($mediaPath)) {
+          unlink($mediaPath);
         }
       }
     } catch (Exception $e) {
       $this->conn->rollBack();
       throw $e;
     }
+  }
+
+  private function resolveUploadPath($url)
+  {
+    if (!$url) {
+      return null;
+    }
+
+    $path = preg_match('/^https?:\/\//', $url)
+      ? parse_url($url, PHP_URL_PATH)
+      : $url;
+
+    if (!$path) {
+      return null;
+    }
+
+    return dirname(__DIR__) . '/' . ltrim(trim($path), '/');
   }
 
   private function updateFeed($userId)
@@ -1028,9 +1110,9 @@ class FeedController
       return false;
     }
 
-    $header = base64_decode(str_pad(strtr($parts[0], '-_', '+/'), 4 - ((strlen($parts[0]) % 4) ?: 4), '='));
-    $payload = base64_decode(str_pad(strtr($parts[1], '-_', '+/'), 4 - ((strlen($parts[1]) % 4) ?: 4), '='));
-    $signature = base64_decode(str_pad(strtr($parts[2], '-_', '+/'), 4 - ((strlen($parts[2]) % 4) ?: 4), '='));
+    $header = $this->base64url_decode($parts[0]);
+    $payload = $this->base64url_decode($parts[1]);
+    $signatureProvided = $this->base64url_decode($parts[2]);
 
     $headerData = json_decode($header, true);
     $payloadData = json_decode($payload, true);
@@ -1045,17 +1127,25 @@ class FeedController
       return false;
     }
 
-    // Verify signature
+    // Verify signature using the original encoded header and payload parts
     $secret_key = "kttProjects2024SecretKey"; // Should match Auth class
-    $base64UrlHeader = rtrim(strtr(base64_encode($header), '+/', '-_'), '=');
-    $base64UrlPayload = rtrim(strtr(base64_encode($payload), '+/', '-_'), '=');
-    $signatureCheck = hash_hmac('sha256', $base64UrlHeader . "." . $base64UrlPayload, $secret_key, true);
+    $signatureCheck = hash_hmac('sha256', $parts[0] . "." . $parts[1], $secret_key, true);
 
-    if ($signature !== $signatureCheck) {
+    if (!hash_equals($signatureProvided, $signatureCheck)) {
       return false;
     }
 
     return $payloadData;
+  }
+
+  private function base64url_decode($data)
+  {
+    $data = strtr($data, '-_', '+/');
+    $remainder = strlen($data) % 4;
+    if ($remainder) {
+      $data .= str_repeat('=', 4 - $remainder);
+    }
+    return base64_decode($data);
   }
 
   private function calculateScore($postId)

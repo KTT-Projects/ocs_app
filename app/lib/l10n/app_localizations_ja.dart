@@ -9,9 +9,6 @@ class AppLocalizationsJa extends AppLocalizations {
   AppLocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
-  String get onlyGoogleEmailAllowed => '現在、Gmailアカウントのみ対応しています';
-
-  @override
   String get checkSpamJunk => 'メールが届かない場合は迷惑メールフォルダをご確認ください';
 
   @override
@@ -504,4 +501,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get members => 'メンバー';
+
+  @override
+  String get showMore => 'もっと見る';
+
+  @override
+  String get showLess => '閉じる';
 }

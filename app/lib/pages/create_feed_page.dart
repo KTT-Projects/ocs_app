@@ -150,12 +150,9 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: IconButton(
-                icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onPrimary),
-                onPressed: () => Navigator.pop(context),
-              ),
+            child: IconButton(
+              icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onPrimary),
+              onPressed: () => Navigator.pop(context),
             ),
           ),
         ),
@@ -171,12 +168,9 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: IconButton(
-                  icon: Icon(Icons.check, color: Theme.of(context).colorScheme.onPrimary),
-                  onPressed: _isLoading ? null : _submitFeed,
-                ),
+              child: IconButton(
+                icon: Icon(Icons.check, color: Theme.of(context).colorScheme.onPrimary),
+                onPressed: _isLoading ? null : _submitFeed,
               ),
             ),
           ),
@@ -216,150 +210,147 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              children: [
-                                GestureDetector(
-                                  onTap: _isUploadingIcon ? null : _pickIcon,
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      CircleAvatar(
-                                        radius: 40,
-                                        backgroundColor: Theme.of(context).colorScheme.secondary,
-                                        child: _iconUrl != null
-                                            ? ClipOval(
-                                                child: kIsWeb
-                                                    ? Image.network(
-                                                        _iconUrl!,
-                                                        width: 80,
-                                                        height: 80,
-                                                        fit: BoxFit.cover,
-                                                      )
-                                                    : Image.file(
-                                                        File(_iconUrl!),
-                                                        width: 80,
-                                                        height: 80,
-                                                        fit: BoxFit.cover,
-                                                      ),
-                                              )
-                                            : Icon(
-                                                Icons.camera_alt,
-                                                color: Theme.of(context).colorScheme.onSecondary,
-                                              ),
-                                      ),
-                                      if (_isUploadingIcon) const CircularProgressIndicator(),
-                                    ],
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            children: [
+                              GestureDetector(
+                                onTap: _isUploadingIcon ? null : _pickIcon,
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 40,
+                                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                                      child: _iconUrl != null
+                                          ? ClipOval(
+                                              child: kIsWeb
+                                                  ? Image.network(
+                                                      _iconUrl!,
+                                                      width: 80,
+                                                      height: 80,
+                                                      fit: BoxFit.cover,
+                                                    )
+                                                  : Image.file(
+                                                      File(_iconUrl!),
+                                                      width: 80,
+                                                      height: 80,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                            )
+                                          : Icon(
+                                              Icons.camera_alt,
+                                              color: Theme.of(context).colorScheme.onSecondary,
+                                            ),
+                                    ),
+                                    if (_isUploadingIcon) const CircularProgressIndicator(),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              TextFormField(
+                                controller: _displayNameController,
+                                maxLength: 30,
+                                maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onPrimary,
+                                ),
+                                decoration: InputDecoration(
+                                  labelText: l10n.feedDisplayName,
+                                  labelStyle: TextStyle(
+                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                  ),
+                                  enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                                    ),
+                                  ),
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Theme.of(context).colorScheme.onPrimary,
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(height: 16),
-                                TextFormField(
-                                  controller: _displayNameController,
-                                  maxLength: 30,
-                                  maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimary,
-                                  ),
-                                  decoration: InputDecoration(
-                                    labelText: l10n.feedDisplayName,
-                                    labelStyle: TextStyle(
-                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                    ),
-                                    enabledBorder: UnderlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-                                      ),
-                                    ),
-                                    focusedBorder: UnderlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: Theme.of(context).colorScheme.onPrimary,
-                                      ),
-                                    ),
-                                  ),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return l10n.displayNameRequired;
-                                    }
-                                    if (value.length > 30) {
-                                      return l10n.displayNameTooLong;
-                                    }
-                                    return null;
-                                  },
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return l10n.displayNameRequired;
+                                  }
+                                  if (value.length > 30) {
+                                    return l10n.displayNameTooLong;
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              TextFormField(
+                                controller: _descriptionController,
+                                maxLength: 1000,
+                                maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onPrimary,
                                 ),
-                                const SizedBox(height: 16),
-                                TextFormField(
-                                  controller: _descriptionController,
-                                  maxLength: 1000,
-                                  maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimary,
+                                decoration: InputDecoration(
+                                  labelText: l10n.feedDescription,
+                                  labelStyle: TextStyle(
+                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
                                   ),
-                                  decoration: InputDecoration(
-                                    labelText: l10n.feedDescription,
-                                    labelStyle: TextStyle(
-                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                    ),
-                                    enabledBorder: UnderlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-                                      ),
-                                    ),
-                                    focusedBorder: UnderlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: Theme.of(context).colorScheme.onPrimary,
-                                      ),
+                                  enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
                                     ),
                                   ),
-                                  minLines: 3,
-                                  maxLines: 20,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return l10n.descriptionRequired;
-                                    }
-                                    if (value.length > 1000) {
-                                      return l10n.descriptionTooLong;
-                                    }
-                                    return null;
-                                  },
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Theme.of(context).colorScheme.onPrimary,
+                                    ),
+                                  ),
                                 ),
-                                const SizedBox(height: 16),
-                                TextFormField(
-                                  controller: _rulesController,
-                                  maxLength: 1000,
-                                  maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimary,
-                                  ),
-                                  decoration: InputDecoration(
-                                    labelText: l10n.feedRules,
-                                    labelStyle: TextStyle(
-                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                    ),
-                                    enabledBorder: UnderlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-                                      ),
-                                    ),
-                                    focusedBorder: UnderlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: Theme.of(context).colorScheme.onPrimary,
-                                      ),
-                                    ),
-                                  ),
-                                  minLines: 5,
-                                  maxLines: 20,
-                                  validator: (value) {
-                                    if (value != null && value.length > 1000) {
-                                      return l10n.rulesTooLong;
-                                    }
-                                    return null;
-                                  },
+                                minLines: 3,
+                                maxLines: 20,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return l10n.descriptionRequired;
+                                  }
+                                  if (value.length > 1000) {
+                                    return l10n.descriptionTooLong;
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              TextFormField(
+                                controller: _rulesController,
+                                maxLength: 1000,
+                                maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onPrimary,
                                 ),
-                              ],
-                            ),
+                                decoration: InputDecoration(
+                                  labelText: l10n.feedRules,
+                                  labelStyle: TextStyle(
+                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                  ),
+                                  enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                                    ),
+                                  ),
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Theme.of(context).colorScheme.onPrimary,
+                                    ),
+                                  ),
+                                ),
+                                minLines: 5,
+                                maxLines: 20,
+                                validator: (value) {
+                                  if (value != null && value.length > 1000) {
+                                    return l10n.rulesTooLong;
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ],
                           ),
                         ),
                       ),

@@ -9,6 +9,7 @@ import '../widgets/create_post_dialog.dart';
 import '../widgets/glassmorphic_ui.dart';
 import '../widgets/post_list_item.dart';
 import 'post_details_page.dart';
+import 'user_profile_page.dart';
 
 class FeedPostsPage extends StatefulWidget {
   final ApiClient apiClient;
@@ -134,6 +135,18 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
     }
   }
 
+  void _openUserProfile(int userId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UserProfilePage(
+          apiClient: widget.apiClient,
+          userId: userId,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -185,12 +198,9 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: IconButton(
-                icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
-                onPressed: () => Navigator.pop(context),
-              ),
+            child: IconButton(
+              icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
+              onPressed: () => Navigator.pop(context),
             ),
           ),
         ),
@@ -206,23 +216,20 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: IconButton(
-                  icon: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary),
-                  onPressed: () async {
-                    final postId = await showDialog<int>(
-                      context: context,
-                      builder: (context) => CreatePostDialog(
-                        apiClient: widget.apiClient,
-                        feed: widget.feed,
-                      ),
-                    );
-                    if (postId != null && mounted) {
-                      _loadPosts();
-                    }
-                  },
-                ),
+              child: IconButton(
+                icon: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary),
+                onPressed: () async {
+                  final postId = await showDialog<int>(
+                    context: context,
+                    builder: (context) => CreatePostDialog(
+                      apiClient: widget.apiClient,
+                      feed: widget.feed,
+                    ),
+                  );
+                  if (postId != null && mounted) {
+                    _loadPosts();
+                  }
+                },
               ),
             ),
           ),
@@ -290,6 +297,7 @@ padding: EdgeInsets.only(
                 return PostListItem(
                   post: post,
                   onVote: _vote,
+                  onUserTap: _openUserProfile,
                   onComments: (p) {
                     Navigator.push(
                       context,
