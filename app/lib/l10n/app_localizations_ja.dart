@@ -237,6 +237,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get volunteerDescription => 'ボランティア活動の機会を探す';
 
   @override
+  String get studyFeature => '学習';
+
+  @override
   String get localNews => '地域ニュース・更新情報';
 
   @override
