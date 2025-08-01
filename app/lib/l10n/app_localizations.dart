@@ -531,6 +531,12 @@ abstract class AppLocalizations {
   /// **'Find volunteering opportunities'**
   String get volunteerDescription;
 
+  /// Title for the study section
+  ///
+  /// In en, this message translates to:
+  /// **'Study'**
+  String get studyFeature;
+
   /// Title for the local news section
   ///
   /// In en, this message translates to:

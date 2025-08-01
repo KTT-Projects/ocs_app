@@ -238,6 +238,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get volunteerDescription => 'Find volunteering opportunities';
 
   @override
+  String get studyFeature => 'Study';
+
+  @override
   String get localNews => 'Local News & Updates';
 
   @override

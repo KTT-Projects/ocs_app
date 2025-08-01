@@ -1,12 +1,16 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
-import '../l10n/app_localizations.dart';
+import 'package:ocs_app/l10n/app_localizations.dart' show AppLocalizations;
 import '../services/api_client.dart';
 import 'login_page.dart';
-import 'package:circle_nav_bar/circle_nav_bar.dart';
+import '../widgets/circle_nav_bar.dart';
+// import '../widgets/circle_nav_bar_arc.dart';
 import 'profile_page.dart';
 import 'feeds_page.dart';
+import 'events_page.dart';
+import 'volunteer_page.dart';
+import 'study_page.dart';
 
 class HomePage extends StatefulWidget {
   final String token;
@@ -70,9 +74,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    
-    // Define pages with actual components
     final List<Widget> pages = [
       FeedsPage(apiClient: widget.apiClient),
       const Center(child: Text('Events')),
@@ -80,6 +81,7 @@ class _HomePageState extends State<HomePage> {
       const Center(child: Text('Study')),
       ProfilePage(apiClient: widget.apiClient),
     ];
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: pages[_currentIndex],
@@ -93,47 +95,61 @@ class _HomePageState extends State<HomePage> {
           Icon(Icons.account_circle, color: Colors.white, size: 28),
         ],
         inactiveIcons: [
-          Column(children: [Icon(Icons.feed_outlined, color: Colors.blue, size: 28), Text(l10n.feed, style: TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.w500))]),
-          Icon(Icons.event_note_outlined, color: Colors.blue, size: 28),
-          Icon(Icons.volunteer_activism_outlined, color: Colors.blue, size: 28),
-          Icon(Icons.school_outlined, color: Colors.blue, size: 28),
-          Icon(Icons.account_circle_outlined, color: Colors.blue, size: 28),
+          Column(children: [
+            Icon(Icons.feed_outlined, color: Colors.white, size: 28),
+            Text(l10n.feed,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold))
+          ]),
+          Column(children: [
+            Icon(Icons.event_note_outlined, color: Colors.white, size: 28),
+            Text(l10n.eventsFeature,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold))
+          ]),
+          Column(children: [
+            Icon(Icons.volunteer_activism_outlined,
+                color: Colors.white, size: 28),
+            Text(l10n.volunteerFeature,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold))
+          ]),
+          Column(children: [
+            Icon(Icons.school_outlined, color: Colors.white, size: 28),
+            Text(l10n.studyFeature,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold))
+          ]),
+          Column(children: [
+            Icon(Icons.account_circle, color: Colors.white, size: 28),
+            Text(l10n.profile,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold))
+          ]),
         ],
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+        // circleColor: Theme.of(context).colorScheme.secondary,
         height: 60,
-        circleWidth: 60,
+        circleWidth: 37,
         padding: EdgeInsets.only(left: 16, right: 16, bottom: 20),
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.white,
-            Colors.white.withOpacity(0.8),
-          ],
-        ),
         activeIndex: _currentIndex,
         onTap: (index) {
           setState(() {
             _currentIndex = index;
           });
         },
-        cornerRadius: const BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
-          bottomRight: Radius.circular(30),
-          bottomLeft: Radius.circular(30),
-        ),
-        shadowColor: Colors.black.withOpacity(0.4),
+        cornerRadius: const BorderRadius.all(Radius.circular(30)),
         elevation: 10,
-        circleGradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.blue.withOpacity(0.8),
-            Colors.blue.withOpacity(0.8),
-          ],
-        ),
-        circleShadowColor: Colors.blue.withOpacity(0.8),
       ),
     );
   }

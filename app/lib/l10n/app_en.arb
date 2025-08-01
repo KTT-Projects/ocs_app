@@ -391,6 +391,10 @@
   "@errorOccurred": {
     "description": "Generic error message shown when an unknown error happens"
   },
+  "studyFeature": "Study",
+  "@studyFeature": {
+    "description": "Title for the study section"
+  },
   "feed": "Feed",
   "@feed": {
     "description": "Title for the feed section"

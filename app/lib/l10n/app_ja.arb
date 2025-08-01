@@ -97,6 +97,10 @@
   "@errorOccurred": {
     "description": "不明なエラーが発生した場合に表示される汎用エラーメッセージ"
   },
+  "studyFeature": "学習",
+  "@studyFeature": {
+    "description": "学習セクションのタイトル"
+  },
   "feed": "掲示板",
   "@feed": {
     "description": "掲示板セクションのタイトル"
