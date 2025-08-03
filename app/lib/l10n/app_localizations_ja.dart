@@ -512,7 +512,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get volunteerOpportunities => 'ボランティア活動';
 
   @override
-  String get createVolunteerOpportunity => '活動を作成';
+  String get createVolunteerOpportunity => 'ボランティア活動を作成';
 
   @override
   String get volunteerTitle => 'タイトル';
@@ -695,5 +695,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get viewMyVolunteerHistory => '参加履歴を見る';
 
   @override
-  String get volunteerCreationSuccess => 'ボランティア活動が作成されました';
+  String get volunteerCreationSuccess =>
+      'Volunteer opportunity created successfully';
 }

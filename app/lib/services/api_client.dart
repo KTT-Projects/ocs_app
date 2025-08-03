@@ -1165,12 +1165,16 @@ class ApiClient extends ChangeNotifier {
     final l10n = AppLocalizations.of(context)!;
     try {
       final params = {
+        'action': 'list',
         'page': page.toString(),
         if (searchQuery != null) 'search': searchQuery,
         if (status != null) 'status': status,
       };
       
-      final uri = _buildUri('volunteer.php?action=list').replace(queryParameters: params);
+      // Build query string manually
+      final queryString = params.entries.map((e) => '${e.key}=${Uri.encodeComponent(e.value)}').join('&');
+      final uri = Uri.parse('$baseUrl/volunteer.php?$queryString');
+      
       final response = await http.get(
         uri,
         headers: {
@@ -1420,10 +1424,14 @@ class ApiClient extends ChangeNotifier {
     final l10n = AppLocalizations.of(context)!;
     try {
       final params = {
+        'action': 'my_history',
         'page': page.toString(),
       };
       
-      final uri = _buildUri('volunteer.php?action=my_history').replace(queryParameters: params);
+      // Build query string manually
+      final queryString = params.entries.map((e) => '${e.key}=${Uri.encodeComponent(e.value)}').join('&');
+      final uri = Uri.parse('$baseUrl/volunteer.php?$queryString');
+      
       final response = await http.get(
         uri,
         headers: {
