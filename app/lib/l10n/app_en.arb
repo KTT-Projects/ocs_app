@@ -303,6 +303,154 @@
   "@volunteerDescription": {
     "description": "Description for volunteer feature"
   },
+  "volunteerOpportunities": "Volunteer Opportunities",
+  "@volunteerOpportunities": {
+    "description": "Title for volunteer opportunities list"
+  },
+  "myVolunteerActivities": "My Activities",
+  "@myVolunteerActivities": {
+    "description": "Title for user's volunteer activities"
+  },
+  "createOpportunity": "Create Opportunity",
+  "@createOpportunity": {
+    "description": "Button text to create new volunteer opportunity"
+  },
+  "opportunityTitle": "Title",
+  "@opportunityTitle": {
+    "description": "Label for opportunity title field"
+  },
+  "opportunityDescription": "Description",
+  "@opportunityDescription": {
+    "description": "Label for opportunity description field"
+  },
+  "opportunityLocation": "Location",
+  "@opportunityLocation": {
+    "description": "Label for opportunity location field"
+  },
+  "volunteerStartDate": "Start Date",
+  "@volunteerStartDate": {
+    "description": "Label for volunteer start date field"
+  },
+  "volunteerEndDate": "End Date",
+  "@volunteerEndDate": {
+    "description": "Label for volunteer end date field"
+  },
+  "requiredParticipants": "Required Participants",
+  "@requiredParticipants": {
+    "description": "Label for required participants field"
+  },
+  "volunteerApply": "Apply",
+  "@volunteerApply": {
+    "description": "Button text to apply for volunteer opportunity"
+  },
+  "volunteerApplied": "Applied",
+  "@volunteerApplied": {
+    "description": "Status text when user has applied for volunteer"
+  },
+  "volunteerApproved": "Approved",
+  "@volunteerApproved": {
+    "description": "Status text when user is approved for volunteer"
+  },
+  "volunteerCompleted": "Completed",
+  "@volunteerCompleted": {
+    "description": "Status text when volunteer activity is completed"
+  },
+  "volunteerCancelled": "Cancelled",
+  "@volunteerCancelled": {
+    "description": "Status text when volunteer activity is cancelled"
+  },
+  "opportunityOpen": "Open",
+  "@opportunityOpen": {
+    "description": "Status text for open volunteer opportunities"
+  },
+  "opportunityFilled": "Filled",
+  "@opportunityFilled": {
+    "description": "Status text for filled volunteer opportunities"
+  },
+  "volunteerParticipants": "Participants",
+  "@volunteerParticipants": {
+    "description": "Label for volunteer participants"
+  },
+  "volunteerOrganizer": "Organizer",
+  "@volunteerOrganizer": {
+    "description": "Label for volunteer opportunity organizer"
+  },
+  "volunteerHistory": "Volunteer History",
+  "@volunteerHistory": {
+    "description": "Title for volunteer history page"
+  },
+  "downloadCertificate": "Download Certificate",
+  "@downloadCertificate": {
+    "description": "Button text to download volunteer certificate"
+  },
+  "hoursCompleted": "Hours Completed",
+  "@hoursCompleted": {
+    "description": "Label for completed volunteer hours"
+  },
+  "certificateIssued": "Certificate Issued",
+  "@certificateIssued": {
+    "description": "Text when certificate is issued"
+  },
+  "noVolunteerOpportunities": "No volunteer opportunities available",
+  "@noVolunteerOpportunities": {
+    "description": "Message when no volunteer opportunities are found"
+  },
+  "noVolunteerActivities": "No volunteer activities yet",
+  "@noVolunteerActivities": {
+    "description": "Message when user has no volunteer activities"
+  },
+  "viewDetails": "View Details",
+  "@viewDetails": {
+    "description": "Button text to view details"
+  },
+  "cancelApplication": "Cancel",
+  "@cancelApplication": {
+    "description": "Button text to cancel application"
+  },
+  "certificateButton": "Certificate",
+  "@certificateButton": {
+    "description": "Button text for certificate"
+  },
+  "applicationCancelled": "Application cancelled",
+  "@applicationCancelled": {
+    "description": "Message when application is cancelled"
+  },
+  "certificateDownloaded": "Certificate downloaded successfully!",
+  "@certificateDownloaded": {
+    "description": "Message when certificate is downloaded"
+  },
+  "filterByVolunteerStatus": "Filter by Status",
+  "@filterByVolunteerStatus": {
+    "description": "Filter option label for volunteer status"
+  },
+  "sortVolunteerBy": "Sort by",
+  "@sortVolunteerBy": {
+    "description": "Sort option label for volunteers"
+  },
+  "volunteerNewest": "Newest",
+  "@volunteerNewest": {
+    "description": "Sort option for newest volunteer opportunities"
+  },
+  "volunteerOldest": "Oldest",
+  "@volunteerOldest": {
+    "description": "Sort option for oldest volunteer opportunities"
+  },
+  "volunteerUpcoming": "Upcoming",
+  "@volunteerUpcoming": {
+    "description": "Filter option for upcoming volunteer opportunities"
+  },
+  "volunteerOngoing": "Ongoing",
+  "@volunteerOngoing": {
+    "description": "Filter option for ongoing volunteer opportunities"
+  },
+  "volunteerPast": "Past",
+  "@volunteerPast": {
+    "description": "Filter option for past volunteer opportunities"
+  },
+  "allVolunteerStatuses": "All Statuses",
+  "@allVolunteerStatuses": {
+    "description": "Filter option to show all volunteer statuses"
+  },
   "localNews": "Local News & Updates",
   "@localNews": {
     "description": "Title for the local news section"
@@ -673,5 +821,125 @@
   "showLess": "Show less",
   "@showLess": {
     "description": "Button to show less posts in the feed"
+  },
+  "myVolunteerSchedule": "My Volunteer Schedule",
+  "@myVolunteerSchedule": {
+    "description": "Title for volunteer schedule page"
+  },
+  "createVolunteerOpportunity": "Create Volunteer Opportunity",
+  "@createVolunteerOpportunity": {
+    "description": "Button text to create new volunteer opportunity"
+  },
+  "organizer": "Organizer",
+  "@organizer": {
+    "description": "Label for volunteer opportunity organizer"
+  },
+  "manageVolunteerOpportunity": "Manage Opportunity",
+  "@manageVolunteerOpportunity": {
+    "description": "Button text to manage volunteer opportunity"
+  },
+  "approveParticipant": "Approve",
+  "@approveParticipant": {
+    "description": "Button text to approve volunteer participant"
+  },
+  "rejectParticipant": "Reject",
+  "@rejectParticipant": {
+    "description": "Button text to reject volunteer participant"
+  },
+  "editOpportunity": "Edit Opportunity",
+  "@editOpportunity": {
+    "description": "Button text to edit volunteer opportunity"
+  },
+  "participants": "Participants",
+  "@participants": {
+    "description": "Label for volunteer opportunity participants"
+  },
+  "startTime": "Start Time",
+  "@startTime": {
+    "description": "Label for volunteer start time"
+  },
+  "endTime": "End Time",
+  "@endTime": {
+    "description": "Label for volunteer end time"
+  },
+  "date": "Date",
+  "@date": {
+    "description": "Label for volunteer date"
+  },
+  "reapply": "Reapply",
+  "@reapply": {
+    "description": "Button text to reapply for volunteer opportunity"
+  },
+  "today": "Today",
+  "@today": {
+    "description": "Text for today's date"
+  },
+  "tomorrow": "Tomorrow",
+  "@tomorrow": {
+    "description": "Text for tomorrow's date"
+  },
+  "statusUnknown": "UNKNOWN",
+  "@statusUnknown": {
+    "description": "Text for unknown volunteer status"
+  },
+  "hoursUnit": "h",
+  "@hoursUnit": {
+    "description": "Unit abbreviation for hours"
+  },
+  "participantStatusUpdated": "Participant status updated",
+  "@participantStatusUpdated": {
+    "description": "Message when participant status is updated"
+  },
+  "pleaseSelectDate": "Please select a date",
+  "@pleaseSelectDate": {
+    "description": "Error message when no date is selected"
+  },
+  "pleaseSelectTimes": "Please select start and end times",
+  "@pleaseSelectTimes": {
+    "description": "Error message when start/end times are not selected"
+  },
+  "volunteerOpportunityCreated": "Volunteer opportunity created successfully!",
+  "@volunteerOpportunityCreated": {
+    "description": "Success message when volunteer opportunity is created"
+  },
+  "enterOpportunityTitle": "Enter opportunity title",
+  "@enterOpportunityTitle": {
+    "description": "Hint text for opportunity title field"
+  },
+  "describeOpportunity": "Describe the volunteer opportunity",
+  "@describeOpportunity": {
+    "description": "Hint text for opportunity description field"
+  },
+  "enterLocation": "Enter location",
+  "@enterLocation": {
+    "description": "Hint text for location field"
+  },
+  "locationRequired": "Location is required",
+  "@locationRequired": {
+    "description": "Validation message for required location field"
+  },
+  "eventDate": "Event Date",
+  "@eventDate": {
+    "description": "Label for event date field"
+  },
+  "selectDate": "Select date",
+  "@selectDate": {
+    "description": "Placeholder text for date selection"
+  },
+  "selectTime": "Select time",
+  "@selectTime": {
+    "description": "Placeholder text for time selection"
+  },
+  "leaveEmptyForUnlimited": "Leave empty for unlimited",
+  "@leaveEmptyForUnlimited": {
+    "description": "Hint text for optional fields with no limit"
+  },
+  "calendarTab": "Calendar",
+  "@calendarTab": {
+    "description": "Text for calendar tab"
+  },
+  "listTab": "List",
+  "@listTab": {
+    "description": "Text for list tab"
   }
 }

@@ -7,6 +7,8 @@ import 'dart:io';
 import '../models/feed.dart';
 import '../models/feed_post.dart';
 import '../models/comment.dart';
+import '../models/volunteer_opportunity.dart';
+import '../models/volunteer_participant.dart';
 import 'auth_service.dart';
 
 class ApiException implements Exception {
@@ -123,8 +125,7 @@ class ApiClient extends ChangeNotifier {
 
       String fullError = errorMessage;
       if (errorDetails != null) {
-        fullError +=
-            '\n\n' +
+        fullError += '\n\n' +
             l10n.errorDetailsText(
               errorDetails['error_type'] ?? l10n.unknownErrorType,
               errorDetails['error_file'] ?? l10n.unknownFile,
@@ -248,13 +249,12 @@ class ApiClient extends ChangeNotifier {
     final l10n = AppLocalizations.of(context)!;
     try {
       // Always use POST for avatar uploads to simplify server handling
-      final request =
-          http.MultipartRequest('POST', Uri.parse('$baseUrl/profile.php'))
-            ..headers.addAll({
-              'Authorization': 'Bearer $_token',
-              'Accept': 'application/json',
-              'Accept-Language': Localizations.localeOf(context).languageCode,
-            });
+      final request = http.MultipartRequest('POST', Uri.parse('$baseUrl/profile.php'))
+        ..headers.addAll({
+          'Authorization': 'Bearer $_token',
+          'Accept': 'application/json',
+          'Accept-Language': Localizations.localeOf(context).languageCode,
+        });
 
       if (kIsWeb && webBytes != null && webFileName != null) {
         request.files.add(
@@ -313,16 +313,14 @@ class ApiClient extends ChangeNotifier {
   }) async {
     final l10n = AppLocalizations.of(context)!;
     try {
-      final request =
-          http.MultipartRequest(
-              'POST',
-              Uri.parse('$baseUrl/feeds.php?action=icon&feed_id=$feedId'),
-            )
-            ..headers.addAll({
-              'Authorization': 'Bearer $_token',
-              'Accept': 'application/json',
-              'Accept-Language': Localizations.localeOf(context).languageCode,
-            });
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/feeds.php?action=icon&feed_id=$feedId'),
+      )..headers.addAll({
+          'Authorization': 'Bearer $_token',
+          'Accept': 'application/json',
+          'Accept-Language': Localizations.localeOf(context).languageCode,
+        });
 
       if (kIsWeb && webBytes != null && webFileName != null) {
         request.files.add(
@@ -516,6 +514,15 @@ class ApiClient extends ChangeNotifier {
         rethrow;
       }
       throw ApiException(l10n.failedToLoadProfile);
+    }
+  }
+
+  Future<int?> getCurrentUserId(BuildContext context) async {
+    try {
+      final profile = await getProfile(context);
+      return profile['id'] is String ? int.parse(profile['id']) : profile['id'];
+    } catch (e) {
+      return null;
     }
   }
 
@@ -726,9 +733,7 @@ class ApiClient extends ChangeNotifier {
         );
       }
 
-      return (data['data'] as List)
-          .map((post) => FeedPost.fromJson(post))
-          .toList();
+      return (data['data'] as List).map((post) => FeedPost.fromJson(post)).toList();
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException(l10n.errorOccurred);
@@ -760,9 +765,7 @@ class ApiClient extends ChangeNotifier {
         );
       }
 
-      return (data['data'] as List)
-          .map((post) => FeedPost.fromJson(post))
-          .toList();
+      return (data['data'] as List).map((post) => FeedPost.fromJson(post)).toList();
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException(l10n.errorOccurred);
@@ -830,9 +833,7 @@ class ApiClient extends ChangeNotifier {
         );
       }
 
-      return (data['data'] as List)
-          .map((post) => FeedPost.fromJson(post))
-          .toList();
+      return (data['data'] as List).map((post) => FeedPost.fromJson(post)).toList();
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException(l10n.errorOccurred);
@@ -1055,8 +1056,8 @@ class ApiClient extends ChangeNotifier {
 
   Future<void> votePost(
     BuildContext context, {
-      required int postId,
-      required String voteType,
+    required int postId,
+    required String voteType,
   }) async {
     final l10n = AppLocalizations.of(context)!;
     try {
@@ -1105,9 +1106,7 @@ class ApiClient extends ChangeNotifier {
         );
       }
 
-      return (data['data'] as List)
-          .map((c) => Comment.fromJson(c))
-          .toList();
+      return (data['data'] as List).map((c) => Comment.fromJson(c)).toList();
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException(l10n.errorOccurred);
@@ -1145,6 +1144,318 @@ class ApiClient extends ChangeNotifier {
       }
 
       return int.parse(data['data']['id'].toString());
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  // Volunteer API methods
+  Future<List<VolunteerOpportunity>> getVolunteerOpportunities(
+    BuildContext context, {
+    String? status,
+    String? sort,
+    String? search,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      String query = 'volunteers.php?action=list';
+      List<String> params = [];
+      if (status != null) params.add('status=$status');
+      if (sort != null) params.add('sort=$sort');
+      if (search != null) params.add('search=${Uri.encodeComponent(search)}');
+      if (params.isNotEmpty) query += '&${params.join('&')}';
+
+      final response = await http.get(
+        _buildUri(query),
+        headers: {
+          'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+
+      return (data['data'] as List).map((opportunity) => VolunteerOpportunity.fromJson(opportunity)).toList();
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<List<VolunteerOpportunity>> getMyVolunteerOpportunities(
+    BuildContext context, {
+    String? status,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      String query = 'volunteers.php?action=my_opportunities';
+      if (status != null) query += '&status=$status';
+
+      final response = await http.get(
+        _buildUri(query),
+        headers: {
+          'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+
+      return (data['data'] as List).map((opportunity) => VolunteerOpportunity.fromJson(opportunity)).toList();
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<VolunteerOpportunity> getVolunteerOpportunity(
+    BuildContext context,
+    int id,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.get(
+        _buildUri('volunteers.php?action=get&id=$id'),
+        headers: {
+          'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+
+      return VolunteerOpportunity.fromJson(data['data']);
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<int> createVolunteerOpportunity(
+    BuildContext context, {
+    required String title,
+    required String description,
+    required String location,
+    required DateTime date,
+    required DateTime startTime,
+    required DateTime endTime,
+    int? requiredParticipants,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/volunteers.php?action=create'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode({
+          'title': title,
+          'description': description,
+          'location': location,
+          'date': date.toIso8601String().split('T')[0],
+          'start_time': '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}:00',
+          'end_time': '${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}:00',
+          if (requiredParticipants != null) 'required_participants': requiredParticipants,
+        }),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200 && response.statusCode != 201) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+
+      return int.parse(data['data']['id'].toString());
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<void> applyToVolunteerOpportunity(
+    BuildContext context,
+    int opportunityId,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/volunteers.php?action=apply'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode({
+          'opportunity_id': opportunityId,
+        }),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200 && response.statusCode != 201) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<void> cancelVolunteerApplication(
+    BuildContext context,
+    int opportunityId,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/volunteers.php?action=cancel'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode({
+          'opportunity_id': opportunityId,
+        }),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<List<VolunteerParticipant>> getVolunteerParticipants(
+    BuildContext context,
+    int opportunityId,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.get(
+        _buildUri('volunteers.php?action=participants&opportunity_id=$opportunityId'),
+        headers: {
+          'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+
+      return (data['data'] as List).map((participant) => VolunteerParticipant.fromJson(participant)).toList();
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<void> updateParticipantStatus(
+    BuildContext context, {
+    required int opportunityId,
+    required int userId,
+    required String status,
+    double? hoursCompleted,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/volunteers.php?action=update_participant'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode({
+          'opportunity_id': opportunityId,
+          'user_id': userId,
+          'status': status,
+          if (hoursCompleted != null) 'hours_completed': hoursCompleted,
+        }),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<String> downloadVolunteerCertificate(
+    BuildContext context,
+    int opportunityId,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.get(
+        _buildUri('volunteers.php?action=certificate&opportunity_id=$opportunityId'),
+        headers: {
+          'Authorization': 'Bearer $_token',
+        },
+      );
+
+      if (response.statusCode == 401) {
+        final data = json.decode(response.body);
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        final data = json.decode(response.body);
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+
+      // Return the PDF content as base64 string
+      return response.body;
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException(l10n.errorOccurred);

@@ -77,7 +77,7 @@ class _HomePageState extends State<HomePage> {
     final List<Widget> pages = [
       FeedsPage(apiClient: widget.apiClient),
       const Center(child: Text('Events')),
-      const Center(child: Text('Volunteer')),
+      VolunteerPage(apiClient: widget.apiClient),
       const Center(child: Text('Study')),
       ProfilePage(apiClient: widget.apiClient),
     ];
@@ -95,47 +95,11 @@ class _HomePageState extends State<HomePage> {
           Icon(Icons.account_circle, color: Colors.white, size: 28),
         ],
         inactiveIcons: [
-          Column(children: [
-            Icon(Icons.feed_outlined, color: Colors.white, size: 28),
-            Text(l10n.feed,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold))
-          ]),
-          Column(children: [
-            Icon(Icons.event_note_outlined, color: Colors.white, size: 28),
-            Text(l10n.eventsFeature,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold))
-          ]),
-          Column(children: [
-            Icon(Icons.volunteer_activism_outlined,
-                color: Colors.white, size: 28),
-            Text(l10n.volunteerFeature,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold))
-          ]),
-          Column(children: [
-            Icon(Icons.school_outlined, color: Colors.white, size: 28),
-            Text(l10n.studyFeature,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold))
-          ]),
-          Column(children: [
-            Icon(Icons.account_circle, color: Colors.white, size: 28),
-            Text(l10n.profile,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold))
-          ]),
+          Column(children: [Icon(Icons.feed_outlined, color: Colors.white, size: 28), Text(l10n.feed, style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))]),
+          Column(children: [Icon(Icons.event_note_outlined, color: Colors.white, size: 28), Text(l10n.eventsFeature, style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))]),
+          Column(children: [Icon(Icons.volunteer_activism_outlined, color: Colors.white, size: 28), Text(l10n.volunteerFeature, style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))]),
+          Column(children: [Icon(Icons.school_outlined, color: Colors.white, size: 28), Text(l10n.studyFeature, style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))]),
+          Column(children: [Icon(Icons.account_circle, color: Colors.white, size: 28), Text(l10n.profile, style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))]),
         ],
         color: Theme.of(context).colorScheme.background.withOpacity(0.2),
         // circleColor: Theme.of(context).colorScheme.secondary,

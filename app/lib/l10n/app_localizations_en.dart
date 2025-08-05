@@ -238,6 +238,117 @@ class AppLocalizationsEn extends AppLocalizations {
   String get volunteerDescription => 'Find volunteering opportunities';
 
   @override
+  String get volunteerOpportunities => 'Volunteer Opportunities';
+
+  @override
+  String get myVolunteerActivities => 'My Activities';
+
+  @override
+  String get createOpportunity => 'Create Opportunity';
+
+  @override
+  String get opportunityTitle => 'Title';
+
+  @override
+  String get opportunityDescription => 'Description';
+
+  @override
+  String get opportunityLocation => 'Location';
+
+  @override
+  String get volunteerStartDate => 'Start Date';
+
+  @override
+  String get volunteerEndDate => 'End Date';
+
+  @override
+  String get requiredParticipants => 'Required Participants';
+
+  @override
+  String get volunteerApply => 'Apply';
+
+  @override
+  String get volunteerApplied => 'Applied';
+
+  @override
+  String get volunteerApproved => 'Approved';
+
+  @override
+  String get volunteerCompleted => 'Completed';
+
+  @override
+  String get volunteerCancelled => 'Cancelled';
+
+  @override
+  String get opportunityOpen => 'Open';
+
+  @override
+  String get opportunityFilled => 'Filled';
+
+  @override
+  String get volunteerParticipants => 'Participants';
+
+  @override
+  String get volunteerOrganizer => 'Organizer';
+
+  @override
+  String get volunteerHistory => 'Volunteer History';
+
+  @override
+  String get downloadCertificate => 'Download Certificate';
+
+  @override
+  String get hoursCompleted => 'Hours Completed';
+
+  @override
+  String get certificateIssued => 'Certificate Issued';
+
+  @override
+  String get noVolunteerOpportunities => 'No volunteer opportunities available';
+
+  @override
+  String get noVolunteerActivities => 'No volunteer activities yet';
+
+  @override
+  String get viewDetails => 'View Details';
+
+  @override
+  String get cancelApplication => 'Cancel';
+
+  @override
+  String get certificateButton => 'Certificate';
+
+  @override
+  String get applicationCancelled => 'Application cancelled';
+
+  @override
+  String get certificateDownloaded => 'Certificate downloaded successfully!';
+
+  @override
+  String get filterByVolunteerStatus => 'Filter by Status';
+
+  @override
+  String get sortVolunteerBy => 'Sort by';
+
+  @override
+  String get volunteerNewest => 'Newest';
+
+  @override
+  String get volunteerOldest => 'Oldest';
+
+  @override
+  String get volunteerUpcoming => 'Upcoming';
+
+  @override
+  String get volunteerOngoing => 'Ongoing';
+
+  @override
+  String get volunteerPast => 'Past';
+
+  @override
+  String get allVolunteerStatuses => 'All Statuses';
+
+  @override
   String get localNews => 'Local News & Updates';
 
   @override
@@ -520,4 +631,95 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get showLess => 'Show less';
+
+  @override
+  String get myVolunteerSchedule => 'My Volunteer Schedule';
+
+  @override
+  String get createVolunteerOpportunity => 'Create Volunteer Opportunity';
+
+  @override
+  String get organizer => 'Organizer';
+
+  @override
+  String get manageVolunteerOpportunity => 'Manage Opportunity';
+
+  @override
+  String get approveParticipant => 'Approve';
+
+  @override
+  String get rejectParticipant => 'Reject';
+
+  @override
+  String get editOpportunity => 'Edit Opportunity';
+
+  @override
+  String get participants => 'Participants';
+
+  @override
+  String get startTime => 'Start Time';
+
+  @override
+  String get endTime => 'End Time';
+
+  @override
+  String get date => 'Date';
+
+  @override
+  String get reapply => 'Reapply';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get tomorrow => 'Tomorrow';
+
+  @override
+  String get statusUnknown => 'UNKNOWN';
+
+  @override
+  String get hoursUnit => 'h';
+
+  @override
+  String get participantStatusUpdated => 'Participant status updated';
+
+  @override
+  String get pleaseSelectDate => 'Please select a date';
+
+  @override
+  String get pleaseSelectTimes => 'Please select start and end times';
+
+  @override
+  String get volunteerOpportunityCreated =>
+      'Volunteer opportunity created successfully!';
+
+  @override
+  String get enterOpportunityTitle => 'Enter opportunity title';
+
+  @override
+  String get describeOpportunity => 'Describe the volunteer opportunity';
+
+  @override
+  String get enterLocation => 'Enter location';
+
+  @override
+  String get locationRequired => 'Location is required';
+
+  @override
+  String get eventDate => 'Event Date';
+
+  @override
+  String get selectDate => 'Select date';
+
+  @override
+  String get selectTime => 'Select time';
+
+  @override
+  String get leaveEmptyForUnlimited => 'Leave empty for unlimited';
+
+  @override
+  String get calendarTab => 'Calendar';
+
+  @override
+  String get listTab => 'List';
 }

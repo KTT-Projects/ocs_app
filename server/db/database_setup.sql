@@ -284,8 +284,9 @@ CREATE TABLE
     description TEXT,
     organizer_id INT NOT NULL,
     location VARCHAR(255),
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
+    date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
     required_participants INT,
     status ENUM ('open', 'filled', 'completed', 'cancelled') DEFAULT 'open',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -410,6 +411,6 @@ CREATE INDEX idx_comments_post ON comments (post_id);
 
 CREATE INDEX idx_events_date ON events (start_datetime);
 
-CREATE INDEX idx_volunteer_date ON volunteer_opportunities (start_date);
+CREATE INDEX idx_volunteer_date ON volunteer_opportunities (date);
 
 CREATE INDEX idx_notifications_user ON notifications (user_id, is_read);
