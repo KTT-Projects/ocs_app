@@ -62,8 +62,11 @@ class _CreateVolunteerOpportunityPageState extends State<CreateVolunteerOpportun
       setState(() {
         if (isStartTime) {
           _startTime = picked;
-          // If end time is before start time, reset it
-          if (_endTime != null && _endTime!.hour < picked.hour || (_endTime!.hour == picked.hour && _endTime!.minute <= picked.minute)) {
+          // If end time is before or equal to start time, reset it
+          if (_endTime != null &&
+              (_endTime!.hour < picked.hour ||
+                  (_endTime!.hour == picked.hour &&
+                      _endTime!.minute <= picked.minute))) {
             _endTime = null;
           }
         } else {
