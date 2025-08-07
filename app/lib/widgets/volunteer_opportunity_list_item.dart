@@ -5,12 +5,15 @@ import '../models/volunteer_opportunity.dart';
 import '../pages/volunteer_opportunity_details_page.dart';
 import '../services/api_client.dart';
 import '../l10n/app_localizations.dart';
+import '../widgets/glassmorphic_ui.dart';
 
 class VolunteerOpportunityListItem extends StatelessWidget {
   final VolunteerOpportunity opportunity;
   final VoidCallback? onTap;
   final bool showFullDetails;
   final bool showDescription;
+  final ApiClient? apiClient;
+  final Function(VolunteerOpportunity)? onOpportunityUpdated;
 
   const VolunteerOpportunityListItem({
     Key? key,
@@ -18,6 +21,8 @@ class VolunteerOpportunityListItem extends StatelessWidget {
     this.onTap,
     this.showFullDetails = false,
     this.showDescription = true,
+    this.apiClient,
+    this.onOpportunityUpdated,
   }) : super(key: key);
 
   String _getStatusText(BuildContext context, String status) {
@@ -79,6 +84,7 @@ class VolunteerOpportunityListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final timeRange = _formatTimeRange(opportunity);
+    final l10n = AppLocalizations.of(context)!;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -89,192 +95,41 @@ class VolunteerOpportunityListItem extends StatelessWidget {
             width: width,
             margin: const EdgeInsets.only(bottom: 16),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(24),
+              color: Theme.of(context).colorScheme.background.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: InkWell(
-                onTap: onTap ??
-                    () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => VolunteerOpportunityDetailsPage(
-                            opportunity: opportunity,
-                            apiClient: ApiClient(),
-                          ),
-                        ),
-                      );
-                    },
-                borderRadius: BorderRadius.circular(24),
-                child: Container(
+            child: Column(
+              children: [
+                // Main content
+                Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Title and organizer row
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  opportunity.title,
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimary,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    // Organizer avatar - small size next to name
-                                    if (opportunity.organizerAvatar != null && opportunity.organizerAvatar!.isNotEmpty)
-                                      Container(
-                                        width: 20,
-                                        height: 20,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          image: DecorationImage(
-                                            image: NetworkImage(opportunity.organizerAvatar!),
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      )
-                                    else
-                                      Container(
-                                        width: 20,
-                                        height: 20,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-                                        ),
-                                        child: Icon(
-                                          Icons.person,
-                                          size: 12,
-                                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                        ),
-                                      ),
-                                    const SizedBox(width: 6),
-                                    Expanded(
-                                      child: Text(
-                                        opportunity.organizerName ?? AppLocalizations.of(context)!.organizer,
-                                        style: TextStyle(
-                                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                          fontSize: 14,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      // Location row
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.location_on,
-                            size: 16,
-                            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                          ),
-                          const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              opportunity.location,
+                              opportunity.title,
                               style: TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                fontSize: 14,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      // Date and time row
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today,
-                            size: 16,
-                            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            _formatDate(context, opportunity.date),
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                              fontSize: 14,
-                            ),
-                          ),
-                          if (timeRange.isNotEmpty) ...[
-                            const SizedBox(width: 16),
-                            Icon(
-                              Icons.access_time,
-                              size: 16,
-                              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              timeRange,
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                fontSize: 14,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ],
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      // Participants and status row
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.people,
-                            size: 16,
-                            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            opportunity.requiredParticipants != null ? '${opportunity.participantCount}/${opportunity.requiredParticipants}' : opportunity.participantCount.toString(),
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                              fontSize: 14,
-                            ),
-                          ),
-                          const Spacer(),
                           if (showFullDetails)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
                                 color: _getStatusColor(context, opportunity.status).withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
                                   color: _getStatusColor(context, opportunity.status),
-                                  width: 1,
                                 ),
                               ),
                               child: Text(
@@ -288,22 +143,323 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                             ),
                         ],
                       ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          // Organizer avatar - small size next to name
+                          if (opportunity.organizerAvatar != null && opportunity.organizerAvatar!.isNotEmpty)
+                            Container(
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                image: DecorationImage(
+                                  image: NetworkImage(opportunity.organizerAvatar!),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            )
+                          else
+                            Container(
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                              ),
+                              child: Icon(
+                                Icons.person,
+                                size: 12,
+                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                              ),
+                            ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              opportunity.organizerName ?? l10n.organizer,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                fontSize: 14,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      // Description
                       if (showDescription && opportunity.description.isNotEmpty) ...[
-                        const SizedBox(height: 12),
                         Text(
                           opportunity.description,
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
+                            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
                             fontSize: 14,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
+                        const SizedBox(height: 12),
                       ],
+                      // Location row
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on,
+                            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              opportunity.location,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      // Date and time row
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_today,
+                            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            _formatDate(context, opportunity.date),
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                              fontSize: 14,
+                            ),
+                          ),
+                          if (timeRange.isNotEmpty) ...[
+                            const SizedBox(width: 16),
+                            Icon(
+                              Icons.access_time,
+                              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                              size: 16,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              timeRange,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      // Participants row
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.people,
+                            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            opportunity.requiredParticipants != null 
+                                ? '${opportunity.participantCount}/${opportunity.requiredParticipants}' 
+                                : opportunity.participantCount.toString(),
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
-              ),
+
+                // Action buttons
+                if (apiClient != null) ...[
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.background.withOpacity(0.05),
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(20),
+                        bottomRight: Radius.circular(20),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextButton(
+                            onPressed: onTap != null 
+                                ? onTap 
+                                : () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => VolunteerOpportunityDetailsPage(
+                                          apiClient: apiClient!,
+                                          opportunity: opportunity,
+                                        ),
+                                      ),
+                                    ).then((_) {
+                                      if (onOpportunityUpdated != null) {
+                                        onOpportunityUpdated!(opportunity);
+                                      }
+                                    });
+                                  },
+                            child: Text(
+                              l10n.viewDetails,
+                              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                            ),
+                          ),
+                        ),
+                        if (opportunity.isParticipant && opportunity.participantStatus == 'applied') ...[
+                          const SizedBox(width: 8),
+                          TextButton(
+                            onPressed: () async {
+                              try {
+                                await apiClient!.cancelVolunteerApplication(context, opportunity.id);
+                                
+                                // Create a copy of the opportunity with updated status
+                                final updatedOpportunity = opportunity.copyWith(
+                                  participantStatus: 'cancelled',
+                                  isParticipant: true,
+                                );
+                                
+                                if (onOpportunityUpdated != null) {
+                                  onOpportunityUpdated!(updatedOpportunity);
+                                }
+                                GlassmorphicUI.showGlassSnackBar(
+                                  context,
+                                  l10n.applicationCancelled,
+                                );
+                              } catch (e) {
+                                GlassmorphicUI.showGlassSnackBar(
+                                  context,
+                                  e.toString(),
+                                  isError: true,
+                                );
+                              }
+                            },
+                            child: Text(
+                              l10n.cancelApplication,
+                              style: TextStyle(color: Theme.of(context).colorScheme.error),
+                            ),
+                          ),
+                        ],
+                        if (opportunity.isParticipant && opportunity.participantStatus == 'cancelled') ...[
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () async {
+                              try {
+                                await apiClient!.applyToVolunteerOpportunity(context, opportunity.id);
+                                
+                                // Create a copy of the opportunity with updated status
+                                final updatedOpportunity = opportunity.copyWith(
+                                  participantStatus: 'applied',
+                                  isParticipant: true,
+                                );
+                                
+                                if (onOpportunityUpdated != null) {
+                                  onOpportunityUpdated!(updatedOpportunity);
+                                }
+                                GlassmorphicUI.showGlassSnackBar(
+                                  context,
+                                  l10n.volunteerApplied,
+                                );
+                              } catch (e) {
+                                GlassmorphicUI.showGlassSnackBar(
+                                  context,
+                                  e.toString(),
+                                  isError: true,
+                                );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            ),
+                            child: Text(
+                              l10n.reapply,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                        if (!opportunity.isParticipant && opportunity.canApply) ...[
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () async {
+                              try {
+                                await apiClient!.applyToVolunteerOpportunity(context, opportunity.id);
+                                
+                                // Create a copy of the opportunity with updated status
+                                final updatedOpportunity = opportunity.copyWith(
+                                  participantStatus: 'applied',
+                                  isParticipant: true,
+                                );
+                                
+                                if (onOpportunityUpdated != null) {
+                                  onOpportunityUpdated!(updatedOpportunity);
+                                }
+                                GlassmorphicUI.showGlassSnackBar(
+                                  context,
+                                  l10n.volunteerApplied,
+                                );
+                              } catch (e) {
+                                GlassmorphicUI.showGlassSnackBar(
+                                  context,
+                                  e.toString(),
+                                  isError: true,
+                                );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context).colorScheme.secondary,
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            ),
+                            child: Text(
+                              l10n.volunteerApply,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSecondary,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ] else ...[
+                  // Tap to view details if no API client provided
+                  InkWell(
+                    onTap: onTap ??
+                        () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => VolunteerOpportunityDetailsPage(
+                                opportunity: opportunity,
+                                apiClient: ApiClient(),
+                              ),
+                            ),
+                          );
+                        },
+                    borderRadius: BorderRadius.circular(20),
+                    child: const SizedBox(
+                      height: 50,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
         );

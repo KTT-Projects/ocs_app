@@ -107,9 +107,6 @@ class _VolunteerPageState extends State<VolunteerPage> {
   }
 
   Future<void> _loadNewOpportunities() async {
-    // Only load new opportunities if we're not currently loading and have existing data
-    if (_isLoading || _opportunities == null || _opportunities!.isEmpty) return;
-
     try {
       final newOpportunities = await widget.apiClient.getVolunteerOpportunities(
         context,
@@ -473,20 +470,25 @@ class _VolunteerPageState extends State<VolunteerPage> {
       ),
       child: RefreshIndicator(
         onRefresh: _loadOpportunities,
-        child: ListView.builder(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          itemCount: _opportunities!.length,
-          itemBuilder: (context, index) {
-            final opportunity = _opportunities![index];
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: VolunteerOpportunityListItem(
-                opportunity: opportunity,
-                onTap: () => _openOpportunityDetails(opportunity),
-              ),
-            );
-          },
-        ),
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              itemCount: _opportunities!.length,
+              itemBuilder: (context, index) {
+                final opportunity = _opportunities![index];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: VolunteerOpportunityListItem(
+                    opportunity: opportunity,
+                    apiClient: widget.apiClient,
+                    onTap: () => _openOpportunityDetails(opportunity),
+                    onOpportunityUpdated: (updatedOpportunity) {
+                      // Refresh the data from server to ensure consistency
+                      _loadNewOpportunities();
+                    },
+                  ),
+                );
+              },
+            ),
       ),
     );
   }
