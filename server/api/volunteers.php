@@ -393,6 +393,18 @@ class VolunteerController
 
       if ($result) {
         $opportunityId = $this->conn->lastInsertId();
+
+        // Automatically add the creator as a participant with approved status
+        try {
+          $participantStmt = $this->conn->prepare(
+            "INSERT INTO volunteer_participants (opportunity_id, user_id, status) VALUES (?, ?, 'approved')"
+          );
+          $participantStmt->execute([$opportunityId, $userId]);
+        } catch (Exception $e) {
+          // If adding the participant fails, log the error but continue
+          error_log('Failed to add organizer as participant: ' . $e->getMessage());
+        }
+
         Response::success(['id' => $opportunityId, 'message' => 'Volunteer opportunity created successfully']);
       } else {
         Response::error('Failed to create volunteer opportunity', 500);

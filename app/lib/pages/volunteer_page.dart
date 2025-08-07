@@ -468,27 +468,24 @@ class _VolunteerPageState extends State<VolunteerPage> {
         right: 8,
         bottom: MediaQuery.of(context).padding.bottom + 24,
       ),
-      child: RefreshIndicator(
-        onRefresh: _loadOpportunities,
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              itemCount: _opportunities!.length,
-              itemBuilder: (context, index) {
-                final opportunity = _opportunities![index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: VolunteerOpportunityListItem(
-                    opportunity: opportunity,
-                    apiClient: widget.apiClient,
-                    onTap: () => _openOpportunityDetails(opportunity),
-                    onOpportunityUpdated: (updatedOpportunity) {
-                      // Refresh the data from server to ensure consistency
-                      _loadNewOpportunities();
-                    },
-                  ),
-                );
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        itemCount: _opportunities!.length,
+        itemBuilder: (context, index) {
+          final opportunity = _opportunities![index];
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: VolunteerOpportunityListItem(
+              opportunity: opportunity,
+              apiClient: widget.apiClient,
+              onTap: () => _openOpportunityDetails(opportunity),
+              onOpportunityUpdated: (updatedOpportunity) {
+                // Refresh the data from server to ensure consistency
+                _loadNewOpportunities();
               },
             ),
+          );
+        },
       ),
     );
   }
