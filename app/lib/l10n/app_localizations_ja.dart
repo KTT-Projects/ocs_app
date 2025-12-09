@@ -565,7 +565,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get leaveFeed => 'フィードを離脱';
 
   @override
-  String get selectNewAdmin => '新しい管理者を選択';
+  String get selectNewAdmin => '';
 
   @override
   String get confirmDeleteFeed => '他にメンバーがいないため、離脱するとこのフィードは削除されます。続行しますか？';
@@ -625,7 +625,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get failedToLoadFeedMembers => 'メンバーの読み込みに失敗しました';
 
   @override
-  String get currentAdmin => '現在の管理者';
+  String get currentAdmin => '管理者';
 
   @override
   String get change => '変更';
@@ -646,7 +646,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get myVolunteerSchedule => 'ボランティア予定';
 
   @override
-  String get createVolunteerOpportunity => 'ボランティア募集を作成';
+  String get createVolunteerOpportunity => '新規作成';
 
   @override
   String get organizer => '主催者';

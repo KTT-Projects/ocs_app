@@ -150,29 +150,6 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
     return url;
   }
 
-  Widget _headerIconButton({
-    required IconData? icon,
-    required VoidCallback? onPressed,
-    Widget? child,
-  }) {
-    return Container(
-      margin: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.background.withOpacity(0.25),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.25)),
-      ),
-      child: IconButton(
-        icon: child ??
-            Icon(
-              icon,
-              color: Theme.of(context).colorScheme.onPrimary,
-            ),
-        onPressed: onPressed,
-      ),
-    );
-  }
-
   Widget _buildField({
     required String label,
     required TextEditingController controller,
@@ -309,27 +286,26 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
           ),
         ),
         leadingWidth: 56,
-        leading: _headerIconButton(
+        leading: GlassmorphicUI.buildAppBarIconButton(
+          context: context,
           icon: Icons.close,
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: _headerIconButton(
-              icon: _isLoading ? null : Icons.check,
-              onPressed: _isLoading ? null : _saveSettings,
-              child: _isLoading
-                  ? SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Theme.of(context).colorScheme.onPrimary,
-                      ),
-                    )
-                  : null,
-            ),
+          GlassmorphicUI.buildAppBarIconButton(
+            context: context,
+            icon: _isLoading ? null : Icons.check,
+            onPressed: _isLoading ? null : _saveSettings,
+            child: _isLoading
+                ? SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                  )
+                : null,
           ),
         ],
       ),

@@ -325,7 +325,7 @@
   "@leaveFeed": {
     "description": "現在選択中のフィードを離脱するボタン"
   },
-  "selectNewAdmin": "新しい管理者を選択",
+  "selectNewAdmin": "",
   "@selectNewAdmin": {
     "description": "管理者を譲渡する相手を選択するダイアログのタイトル"
   },
@@ -409,7 +409,7 @@
   "@failedToLoadFeedMembers": {
     "description": "フィードメンバーの取得に失敗したときのエラーメッセージ"
   },
-  "currentAdmin": "現在の管理者",
+  "currentAdmin": "管理者",
   "@currentAdmin": {
     "description": "現在のフィード管理者のラベル"
   },
@@ -434,7 +434,7 @@
     "description": "投稿リストで詳細を閉じるためのボタン"
   },
   "myVolunteerSchedule": "ボランティア予定",
-  "createVolunteerOpportunity": "ボランティア募集を作成",
+  "createVolunteerOpportunity": "新規作成",
   "organizer": "主催者",
   "manageVolunteerOpportunity": "募集管理",
   "approveParticipant": "承認",

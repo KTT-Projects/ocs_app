@@ -3,6 +3,8 @@ import '../l10n/app_localizations.dart';
 import '../services/api_client.dart';
 import '../widgets/glassmorphic_ui.dart';
 import 'package:intl/intl.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 
 class CreateVolunteerOpportunityPage extends StatefulWidget {
   final ApiClient apiClient;
@@ -22,6 +24,7 @@ class _CreateVolunteerOpportunityPageState extends State<CreateVolunteerOpportun
   final _descriptionController = TextEditingController();
   final _locationController = TextEditingController();
   final _requiredParticipantsController = TextEditingController();
+  List<PlatformFile> _attachments = [];
 
   DateTime? _selectedDate;
   TimeOfDay? _startTime;
@@ -38,14 +41,34 @@ class _CreateVolunteerOpportunityPageState extends State<CreateVolunteerOpportun
   }
 
   Future<void> _selectDate(BuildContext context) async {
+    final theme = Theme.of(context);
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: (context, child) {
+        return Theme(
+          data: theme.copyWith(
+            colorScheme: theme.colorScheme.copyWith(
+              primary: theme.colorScheme.secondary,
+              onPrimary: Colors.white,
+              surface: theme.colorScheme.background,
+              onSurface: theme.colorScheme.onBackground,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: theme.colorScheme.secondary,
+                textStyle: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
     );
 
-    if (picked != null) {
+    if (picked != null && mounted) {
       setState(() {
         _selectedDate = picked;
       });
@@ -53,12 +76,32 @@ class _CreateVolunteerOpportunityPageState extends State<CreateVolunteerOpportun
   }
 
   Future<void> _selectTime(BuildContext context, bool isStartTime) async {
+    final theme = Theme.of(context);
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: isStartTime ? (_startTime ?? TimeOfDay.now()) : (_endTime ?? TimeOfDay.now()),
+      builder: (context, child) {
+        return Theme(
+          data: theme.copyWith(
+            colorScheme: theme.colorScheme.copyWith(
+              primary: theme.colorScheme.secondary,
+              onPrimary: Colors.white,
+              surface: theme.colorScheme.background,
+              onSurface: theme.colorScheme.onBackground,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: theme.colorScheme.secondary,
+                textStyle: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
     );
 
-    if (picked != null) {
+    if (picked != null && mounted) {
       setState(() {
         if (isStartTime) {
           _startTime = picked;
@@ -73,6 +116,51 @@ class _CreateVolunteerOpportunityPageState extends State<CreateVolunteerOpportun
           _endTime = picked;
         }
       });
+    }
+  }
+
+  Future<void> _pickAttachment() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        allowMultiple: true,
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+        withData: kIsWeb,
+      );
+      if (result != null && result.files.isNotEmpty) {
+        setState(() {
+          // Append to existing selections instead of replacing, and de-dupe by name + size.
+          for (final file in result.files) {
+            final alreadyHas = _attachments.any((f) => f.name == file.name && f.size == file.size);
+            if (!alreadyHas) {
+              _attachments.add(file);
+            }
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        GlassmorphicUI.showGlassSnackBar(
+          context,
+          e.toString(),
+          isError: true,
+      );
+    }
+  }
+  }
+
+  String? _inferMime(PlatformFile file) {
+    final ext = (file.extension ?? '').toLowerCase();
+    switch (ext) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'pdf':
+        return 'application/pdf';
+      default:
+        return null;
     }
   }
 
@@ -117,7 +205,7 @@ class _CreateVolunteerOpportunityPageState extends State<CreateVolunteerOpportun
         _endTime!.minute,
       );
 
-      await widget.apiClient.createVolunteerOpportunity(
+      final opportunityId = await widget.apiClient.createVolunteerOpportunity(
         context,
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
@@ -127,6 +215,25 @@ class _CreateVolunteerOpportunityPageState extends State<CreateVolunteerOpportun
         endTime: endDateTime,
         requiredParticipants: requiredParticipants,
       );
+
+      for (final file in _attachments) {
+        try {
+          await widget.apiClient.uploadVolunteerAttachment(
+            context,
+            opportunityId: opportunityId,
+            filePath: kIsWeb ? null : file.path,
+            webBytes: kIsWeb ? file.bytes : null,
+            fileName: file.name,
+            mimeType: _inferMime(file),
+          );
+        } catch (e) {
+          GlassmorphicUI.showGlassSnackBar(
+            context,
+            'Failed to upload ${file.name}: $e',
+            isError: true,
+          );
+        }
+      }
 
       if (mounted) {
         GlassmorphicUI.showGlassSnackBar(
@@ -587,6 +694,88 @@ class _CreateVolunteerOpportunityPageState extends State<CreateVolunteerOpportun
                             return null;
                           },
                         ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Attachments
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.3),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.attachment, color: Colors.white),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Attachments (optional)',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const Spacer(),
+                            TextButton.icon(
+                              onPressed: _pickAttachment,
+                              icon: const Icon(Icons.add, color: Colors.white),
+                              label: const Text(
+                                'Add files',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        if (_attachments.isEmpty)
+                          Text(
+                            'Images or PDFs to share extra details.',
+                            style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                          )
+                        else
+                          Column(
+                            children: _attachments
+                                .map(
+                                  (file) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          (file.extension ?? '').toLowerCase() == 'pdf' ? Icons.picture_as_pdf : Icons.insert_drive_file,
+                                          color: Colors.white,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            file.name,
+                                            style: const TextStyle(color: Colors.white),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.close, color: Colors.white70),
+                                          onPressed: () {
+                                            setState(() {
+                                              _attachments.remove(file);
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          ),
                       ],
                     ),
                   ),

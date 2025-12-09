@@ -187,51 +187,27 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
             ),
           ],
         ),
-        leading: Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-            ),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: IconButton(
-              icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
+        leading: GlassmorphicUI.buildAppBarIconButton(
+          context: context,
+          icon: Icons.arrow_back,
+          onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          Container(
-            margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-              ),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: IconButton(
-                icon: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary),
-                onPressed: () async {
-                  final postId = await showDialog<int>(
-                    context: context,
-                    builder: (context) => CreatePostDialog(
-                      apiClient: widget.apiClient,
-                      feed: widget.feed,
-                    ),
-                  );
-                  if (postId != null && mounted) {
-                    _loadPosts();
-                  }
-                },
-              ),
-            ),
+          GlassmorphicUI.buildAppBarIconButton(
+            context: context,
+            icon: Icons.add,
+            onPressed: () async {
+              final postId = await showDialog<int>(
+                context: context,
+                builder: (context) => CreatePostDialog(
+                  apiClient: widget.apiClient,
+                  feed: widget.feed,
+                ),
+              );
+              if (postId != null && mounted) {
+                _loadPosts();
+              }
+            },
           ),
         ],
       ),

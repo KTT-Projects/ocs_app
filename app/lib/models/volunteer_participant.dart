@@ -8,6 +8,7 @@ class VolunteerParticipant {
   final String? userGrade;
   final String? userInstitution;
   final String status; // 'applied', 'approved', 'completed', 'cancelled'
+  final String? role; // 'member','coordinator','admin'
   final double? hoursCompleted;
   final bool certificateIssued;
   final DateTime createdAt;
@@ -21,6 +22,7 @@ class VolunteerParticipant {
     this.userGrade,
     this.userInstitution,
     required this.status,
+    this.role,
     this.hoursCompleted,
     this.certificateIssued = false,
     required this.createdAt,
@@ -33,16 +35,35 @@ class VolunteerParticipant {
       avatarUrl = '$_hostUrl$avatarUrl';
     }
 
+    int _parseInt(dynamic value) {
+      if (value is int) return value;
+      if (value is num) return value.toInt();
+      if (value is String) return int.tryParse(value) ?? 0;
+      return 0;
+    }
+
+    double? _parseDouble(dynamic value) {
+      if (value == null) return null;
+      if (value is num) return value.toDouble();
+      if (value is String) return double.tryParse(value);
+      return null;
+    }
+
+    bool _parseBool(dynamic value) {
+      return value == true || value == 1 || value == '1';
+    }
+
     return VolunteerParticipant(
-      opportunityId: int.parse(json['opportunity_id']),
-      userId: int.parse(json['user_id']),
-      userName: json['user_name'] ?? '',
+      opportunityId: _parseInt(json['opportunity_id']),
+      userId: _parseInt(json['user_id']),
+      userName: (json['user_name'] ?? '').toString(),
       userAvatar: avatarUrl,
       userGrade: json['user_grade'],
       userInstitution: json['user_institution'],
       status: json['status'] ?? 'applied',
-      hoursCompleted: json['hours_completed'] != null ? double.parse(json['hours_completed']) : null,
-      certificateIssued: json['certificate_issued'] == '1' || json['certificate_issued'] == 1 || json['certificate_issued'] == true,
+      role: json['role'],
+      hoursCompleted: _parseDouble(json['hours_completed']),
+      certificateIssued: _parseBool(json['certificate_issued']),
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
     );
@@ -57,6 +78,7 @@ class VolunteerParticipant {
       'user_grade': userGrade,
       'user_institution': userInstitution,
       'status': status,
+      'role': role,
       'hours_completed': hoursCompleted,
       'certificate_issued': certificateIssued,
       'created_at': createdAt.toIso8601String(),
@@ -72,6 +94,7 @@ class VolunteerParticipant {
     String? userGrade,
     String? userInstitution,
     String? status,
+    String? role,
     double? hoursCompleted,
     bool? certificateIssued,
     DateTime? createdAt,
@@ -85,6 +108,7 @@ class VolunteerParticipant {
       userGrade: userGrade ?? this.userGrade,
       userInstitution: userInstitution ?? this.userInstitution,
       status: status ?? this.status,
+      role: role ?? this.role,
       hoursCompleted: hoursCompleted ?? this.hoursCompleted,
       certificateIssued: certificateIssued ?? this.certificateIssued,
       createdAt: createdAt ?? this.createdAt,

@@ -633,11 +633,59 @@ abstract class AppLocalizations {
   /// **'Participants'**
   String get volunteerParticipants;
 
+  /// Label for member role
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get volunteerRoleMember;
+
+  /// Label for coordinator role
+  ///
+  /// In en, this message translates to:
+  /// **'Coordinator'**
+  String get volunteerRoleCoordinator;
+
+  /// Label for admin role
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get volunteerRoleAdmin;
+
+  /// Title for manage volunteer page
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Volunteer'**
+  String get volunteerManageTitle;
+
+  /// Optional required participants field label
+  ///
+  /// In en, this message translates to:
+  /// **'Required participants (Optional)'**
+  String get volunteerRequiredParticipantsOptional;
+
+  /// Capacity label showing how many volunteer spots remain
+  ///
+  /// In en, this message translates to:
+  /// **'{count} spots left'**
+  String volunteerSpotsRemaining(int count);
+
+  /// Label for volunteer opportunities that have no capacity limit
+  ///
+  /// In en, this message translates to:
+  /// **'No capacity limit'**
+  String get volunteerNoLimit;
+
   /// Label for volunteer opportunity organizer
   ///
   /// In en, this message translates to:
   /// **'Organizer'**
   String get volunteerOrganizer;
+
+  /// Save button
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
 
   /// Title for volunteer history page
   ///
@@ -1140,7 +1188,7 @@ abstract class AppLocalizations {
   /// Dialog title when choosing a new admin
   ///
   /// In en, this message translates to:
-  /// **'Select new admin'**
+  /// **''**
   String get selectNewAdmin;
 
   /// Confirmation message shown to the last admin before deleting a feed
@@ -1154,12 +1202,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'OK'**
   String get ok;
-
-  /// Save button
-  ///
-  /// In en, this message translates to:
-  /// **'Save'**
-  String get save;
 
   /// Placeholder for search feeds input
   ///
@@ -1266,7 +1308,7 @@ abstract class AppLocalizations {
   /// Label for current feed admin
   ///
   /// In en, this message translates to:
-  /// **'Current admin'**
+  /// **'Admin'**
   String get currentAdmin;
 
   /// Button label to change selection
@@ -1308,7 +1350,7 @@ abstract class AppLocalizations {
   /// Button text to create new volunteer opportunity
   ///
   /// In en, this message translates to:
-  /// **'Create Volunteer Opportunity'**
+  /// **'Create New'**
   String get createVolunteerOpportunity;
 
   /// Label for volunteer opportunity organizer

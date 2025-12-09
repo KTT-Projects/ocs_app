@@ -751,7 +751,7 @@
   "@leaveFeed": {
     "description": "Button to leave the currently selected feed"
   },
-  "selectNewAdmin": "Select new admin",
+  "selectNewAdmin": "",
   "@selectNewAdmin": {
     "description": "Dialog title when choosing a new admin"
   },
@@ -835,7 +835,7 @@
   "@failedToLoadFeedMembers": {
     "description": "Error message when loading feed members fails"
   },
-  "currentAdmin": "Current admin",
+  "currentAdmin": "Admin",
   "@currentAdmin": {
     "description": "Label for current feed admin"
   },
@@ -863,7 +863,7 @@
   "@myVolunteerSchedule": {
     "description": "Title for volunteer schedule page"
   },
-  "createVolunteerOpportunity": "Create Volunteer Opportunity",
+  "createVolunteerOpportunity": "Create New",
   "@createVolunteerOpportunity": {
     "description": "Button text to create new volunteer opportunity"
   },

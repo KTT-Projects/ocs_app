@@ -4,6 +4,7 @@ import '../l10n/app_localizations.dart';
 import '../models/volunteer_opportunity.dart';
 import '../services/api_client.dart';
 import '../widgets/volunteer_opportunity_list_item.dart';
+// cSpell:ignore glassmorphic Glassmorphic
 import '../widgets/glassmorphic_ui.dart';
 import '../widgets/volunteer_sort_dialog.dart';
 import '../widgets/volunteer_filter_dialog.dart';
@@ -116,14 +117,15 @@ class _VolunteerPageState extends State<VolunteerPage> {
 
       if (mounted) {
         setState(() {
-          // Only update if there are changes
+          // Initialize or only update if there are changes
+          if (_opportunities == null) {
+            _opportunities = newOpportunities;
+            return;
+          }
           bool hasChanges = false;
-
-          // Check if the list size changed
           if (newOpportunities.length != _opportunities!.length) {
             hasChanges = true;
           } else {
-            // Check if any opportunity has changed
             for (int i = 0; i < newOpportunities.length; i++) {
               if (i < _opportunities!.length && (newOpportunities[i].status != _opportunities![i].status || newOpportunities[i].participantCount != _opportunities![i].participantCount || newOpportunities[i].isParticipant != _opportunities![i].isParticipant || newOpportunities[i].participantStatus != _opportunities![i].participantStatus)) {
                 hasChanges = true;
@@ -131,10 +133,7 @@ class _VolunteerPageState extends State<VolunteerPage> {
               }
             }
           }
-
-          if (hasChanges) {
-            _opportunities = newOpportunities;
-          }
+          if (hasChanges) _opportunities = newOpportunities;
         });
       }
     } catch (e) {
@@ -216,14 +215,14 @@ class _VolunteerPageState extends State<VolunteerPage> {
       ),
     );
   }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final mediaQuery = MediaQuery.of(context);
+    final toolbarHeight = mediaQuery.padding.top + 52;
 
     return Stack(
       children: [
-        // Gradient background
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -238,151 +237,85 @@ class _VolunteerPageState extends State<VolunteerPage> {
         ),
         Scaffold(
           backgroundColor: Colors.transparent,
-          body: Column(
-            children: [
-              // Custom AppBar with glassmorphic style similar to feeds page
-              Container(
+          extendBodyBehindAppBar: true,
+          extendBody: true,
+          appBar: PreferredSize(
+            preferredSize: Size.fromHeight(toolbarHeight),
+            child: AppBar(
+              automaticallyImplyLeading: false,
+              toolbarHeight: toolbarHeight,
+              backgroundColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              shadowColor: Colors.transparent,
+              titleSpacing: 0,
+              flexibleSpace: Padding(
                 padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).padding.top + 8,
-                  left: 16,
-                  right: 16,
-                  bottom: 8,
+                  top: mediaQuery.padding.top + 4,
+                  left: 8,
+                  right: 8,
+                  bottom: 4,
                 ),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    // Title
-                    Expanded(
-                      child: Text(
-                        l10n.volunteerFeature,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
+                    for (final entry in [
+                      {'icon': Icons.filter_list, 'onTap': _showFilterDialog},
+                      {'icon': Icons.sort, 'onTap': _showSortDialog},
+                      {'icon': Icons.history, 'onTap': _openMyActivities},
+                      {'icon': Icons.calendar_today, 'onTap': _openSchedule},
+                    ]) ...[
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                          ),
                         ),
-                      ),
-                    ),
-                    // Filter button
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-                        ),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
                         child: IconButton(
                           iconSize: 20,
-                          icon: Icon(
-                            Icons.filter_list,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                          onPressed: _showFilterDialog,
+                          icon: Icon(entry['icon'] as IconData, color: Theme.of(context).colorScheme.onPrimary),
+                          onPressed: entry['onTap'] as void Function()?,
                         ),
                       ),
-                    ),
-                    // Sort button
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-                        ),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: IconButton(
-                          iconSize: 20,
-                          icon: Icon(
-                            Icons.sort,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                          onPressed: _showSortDialog,
-                        ),
-                      ),
-                    ),
-                    // My Activities button
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-                        ),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: IconButton(
-                          iconSize: 20,
-                          icon: Icon(
-                            Icons.history,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                          onPressed: _openMyActivities,
-                        ),
-                      ),
-                    ),
-                    // Schedule button
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-                        ),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: IconButton(
-                          iconSize: 20,
-                          icon: Icon(
-                            Icons.calendar_today,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                          onPressed: _openSchedule,
-                        ),
-                      ),
-                    ),
+                    ],
                   ],
                 ),
               ),
-              // Main content
-              Expanded(
-                child: Stack(
-                  children: [
-                    _buildBody(),
-                    // Glassmorphic floating button
-                    GlassmorphicUI.buildFloatingButton(
-                      context: context,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.add,
-                            size: 20,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            l10n.createVolunteerOpportunity,
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
-                          ),
-                        ],
+            ),
+          ),
+          body: Padding(
+            padding: EdgeInsets.only(top: toolbarHeight),
+            child: Stack(
+              children: [
+                _buildBody(),
+                // Floating button with a frosted-glass effect
+                GlassmorphicUI.buildFloatingButton(
+                  context: context,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.add,
+                        size: 20,
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
-                      onTap: _openCreateOpportunity,
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      Text(
+                        l10n.createVolunteerOpportunity,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  onTap: _openCreateOpportunity,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],
@@ -425,26 +358,16 @@ class _VolunteerPageState extends State<VolunteerPage> {
                 foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
               ),
             ),
-          ],
-        ),
-      );
-    }
-
-    if (_opportunities == null || _opportunities!.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
             Icon(
               Icons.volunteer_activism_outlined,
               size: 64,
-              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+              color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
             ),
             const SizedBox(height: 16),
             Text(
               l10n.noVolunteerOpportunities,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
                 fontSize: 18,
               ),
             ),
@@ -469,7 +392,10 @@ class _VolunteerPageState extends State<VolunteerPage> {
         bottom: MediaQuery.of(context).padding.bottom + 24,
       ),
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.only(
+          top: 8,
+          bottom: 56,
+        ),
         itemCount: _opportunities!.length,
         itemBuilder: (context, index) {
           final opportunity = _opportunities![index];

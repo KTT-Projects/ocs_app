@@ -365,12 +365,15 @@ class _EnhancedVolunteerSchedulePageState extends State<EnhancedVolunteerSchedul
       groupedOpportunities.putIfAbsent(status, () => []).add(opportunity);
     }
 
+    final orderedStatuses = ['approved', 'applied', 'completed', 'cancelled', 'unknown'];
+    final keys = groupedOpportunities.keys.toList()..sort((a, b) => orderedStatuses.indexOf(a).compareTo(orderedStatuses.indexOf(b)));
+
     return ListView.builder(
       controller: _listController,
       padding: const EdgeInsets.all(16),
-      itemCount: groupedOpportunities.length,
+      itemCount: keys.length,
       itemBuilder: (context, index) {
-        final status = groupedOpportunities.keys.elementAt(index);
+        final status = keys[index];
         final opportunities = groupedOpportunities[status]!;
 
         return Column(

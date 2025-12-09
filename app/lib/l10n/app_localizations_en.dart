@@ -577,7 +577,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leaveFeed => 'Leave feed';
 
   @override
-  String get selectNewAdmin => 'Select new admin';
+  String get selectNewAdmin => '';
 
   @override
   String get confirmDeleteFeed =>
@@ -639,7 +639,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get failedToLoadFeedMembers => 'Failed to load feed members';
 
   @override
-  String get currentAdmin => 'Current admin';
+  String get currentAdmin => 'Admin';
 
   @override
   String get change => 'Change';
@@ -660,7 +660,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get myVolunteerSchedule => 'My Volunteer Schedule';
 
   @override
-  String get createVolunteerOpportunity => 'Create Volunteer Opportunity';
+  String get createVolunteerOpportunity => 'Create New';
 
   @override
   String get organizer => 'Organizer';

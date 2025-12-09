@@ -1,10 +1,17 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import '../l10n/app_localizations.dart';
+import '../models/volunteer_attachment.dart';
 import '../models/volunteer_opportunity.dart';
 import '../models/volunteer_participant.dart';
 import '../services/api_client.dart';
 import '../widgets/glassmorphic_ui.dart';
-import 'package:intl/intl.dart';
+import 'volunteer_admin_page.dart';
 
 class VolunteerOpportunityDetailsPage extends StatefulWidget {
   final ApiClient apiClient;
@@ -26,20 +33,29 @@ class _VolunteerOpportunityDetailsPageState extends State<VolunteerOpportunityDe
   List<VolunteerParticipant>? _participants;
   late VolunteerOpportunity _opportunity;
   bool _isOrganizer = false;
+  bool _didLoadAttachments = false;
+  bool _loadingAttachments = false;
+  List<VolunteerAttachment> _attachments = [];
+  bool get _canViewParticipants => _opportunity.isParticipant || _isOrganizer || _opportunity.canManageParticipants;
 
   @override
   void initState() {
     super.initState();
     _opportunity = widget.opportunity;
+    _attachments = widget.opportunity.attachments;
     _checkOrganizerStatus();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_didLoadParticipants) {
+    if (!_didLoadParticipants && _canViewParticipants) {
       _didLoadParticipants = true;
       _loadParticipants();
+    }
+    if (!_didLoadAttachments) {
+      _didLoadAttachments = true;
+      _loadAttachments();
     }
   }
 
@@ -49,7 +65,14 @@ class _VolunteerOpportunityDetailsPageState extends State<VolunteerOpportunityDe
       if (userId != null) {
         setState(() {
           _isOrganizer = _opportunity.isOrganizer(userId);
+          if (_isOrganizer && _opportunity.participantRole != 'admin') {
+            _opportunity = _opportunity.copyWith(participantRole: 'admin');
+          }
         });
+        if (_isOrganizer && !_didLoadParticipants) {
+          _didLoadParticipants = true;
+          _loadParticipants();
+        }
       }
     } catch (e) {
       // Ignore errors in organizer check
@@ -57,6 +80,7 @@ class _VolunteerOpportunityDetailsPageState extends State<VolunteerOpportunityDe
   }
 
   Future<void> _loadParticipants() async {
+    if (!_canViewParticipants) return;
     try {
       setState(() => _isLoading = true);
       final participants = await widget.apiClient.getVolunteerParticipants(
@@ -81,17 +105,61 @@ class _VolunteerOpportunityDetailsPageState extends State<VolunteerOpportunityDe
     }
   }
 
+  Future<void> _loadAttachments() async {
+    try {
+      setState(() => _loadingAttachments = true);
+      final items = await widget.apiClient.getVolunteerAttachments(context, _opportunity.id);
+      if (mounted) {
+        VolunteerAttachment? firstImage;
+        for (final a in items) {
+          if (a.isImage) {
+            firstImage = a;
+            break;
+          }
+        }
+        setState(() {
+          _attachments = items;
+          _opportunity = _opportunity.copyWith(
+            attachments: items,
+            attachmentCount: items.length,
+            coverAttachmentUrl: firstImage != null && firstImage.isImage ? firstImage.fileUrl : _opportunity.coverAttachmentUrl,
+          );
+          _loadingAttachments = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _loadingAttachments = false);
+        GlassmorphicUI.showGlassSnackBar(
+          context,
+          e.toString(),
+          isError: true,
+        );
+      }
+    }
+  }
+
   Future<void> _applyToOpportunity() async {
     try {
       setState(() => _isLoading = true);
       await widget.apiClient.applyToVolunteerOpportunity(context, _opportunity.id);
 
       if (mounted) {
+        final newCount = _opportunity.participantCount + 1;
+        int? newSpots;
+        var isNowFull = _opportunity.isFull;
+        if (_opportunity.requiredParticipants != null) {
+          newSpots = _opportunity.requiredParticipants! - newCount;
+          if (newSpots < 0) newSpots = 0;
+          isNowFull = isNowFull || newCount >= _opportunity.requiredParticipants!;
+        }
         setState(() {
           _opportunity = _opportunity.copyWith(
             isParticipant: true,
             participantStatus: 'applied',
-            participantCount: _opportunity.participantCount + 1,
+            participantCount: newCount,
+            spotsRemaining: newSpots ?? _opportunity.spotsRemaining,
+            isFull: isNowFull,
           );
           _isLoading = false;
         });
@@ -121,11 +189,19 @@ class _VolunteerOpportunityDetailsPageState extends State<VolunteerOpportunityDe
       await widget.apiClient.cancelVolunteerApplication(context, _opportunity.id);
 
       if (mounted) {
+        final newCount = (_opportunity.participantCount - 1) < 0 ? 0 : _opportunity.participantCount - 1;
+        int? newSpots = _opportunity.spotsRemaining;
+        if (_opportunity.requiredParticipants != null) {
+          newSpots = _opportunity.requiredParticipants! - newCount;
+          if (newSpots < 0) newSpots = 0;
+        }
         setState(() {
           _opportunity = _opportunity.copyWith(
-            isParticipant: false,
-            participantStatus: null,
-            participantCount: _opportunity.participantCount - 1,
+            isParticipant: true,
+            participantStatus: 'cancelled',
+            participantCount: newCount,
+            spotsRemaining: newSpots,
+            isFull: false,
           );
           _isLoading = false;
         });
@@ -209,11 +285,144 @@ class _VolunteerOpportunityDetailsPageState extends State<VolunteerOpportunityDe
     }
   }
 
+  String _availabilityLabel() {
+    final l10n = AppLocalizations.of(context)!;
+    if (_opportunity.requiredParticipants == null) {
+      return l10n.volunteerNoLimit;
+    }
+    if (_opportunity.isFull || _opportunity.spotsRemaining == 0) {
+      return l10n.opportunityFilled;
+    }
+    final remaining = _opportunity.spotsRemaining ?? (_opportunity.requiredParticipants! - _opportunity.participantCount);
+    final safeRemaining = remaining < 0 ? 0 : remaining;
+    return l10n.volunteerSpotsRemaining(safeRemaining);
+  }
+
+  Color _availabilityColor() {
+    if (_opportunity.isFull || _opportunity.spotsRemaining == 0) {
+      return Colors.redAccent;
+    }
+    if (_opportunity.requiredParticipants == null) {
+      return Colors.blueAccent;
+    }
+    return Colors.green;
+  }
+
+  String _participantStatusText(String status) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (status) {
+      case 'applied':
+        return l10n.volunteerApplied;
+      case 'approved':
+        return l10n.volunteerApproved;
+      case 'completed':
+        return l10n.volunteerCompleted;
+      case 'cancelled':
+        return l10n.volunteerCancelled;
+      default:
+        return status;
+    }
+  }
+
+  Color _participantStatusColor(String status) {
+    switch (status) {
+      case 'approved':
+        return const Color(0xFF2ECC71);
+      case 'applied':
+        return const Color(0xFFF39C12);
+      case 'completed':
+        return const Color(0xFF3498DB);
+      case 'cancelled':
+        return const Color(0xFFE74C3C);
+      default:
+        return Colors.grey;
+    }
+  }
+
+  Future<void> _openLink(LinkableElement link) async {
+    final uri = Uri.parse(link.url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  Future<void> _openAttachment(VolunteerAttachment attachment) async {
+    final uri = Uri.parse(attachment.fileUrl);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      GlassmorphicUI.showGlassSnackBar(
+        context,
+        AppLocalizations.of(context)!.errorOccurred,
+        isError: true,
+      );
+    }
+  }
+
+  Widget _glassCard({
+    required Widget child,
+    EdgeInsets padding = const EdgeInsets.all(24),
+  }) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          width: double.infinity,
+          padding: padding,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+            ),
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+
   Widget _buildActionButton() {
     final l10n = AppLocalizations.of(context)!;
 
     if (_isLoading) {
-      return const CircularProgressIndicator(color: Colors.white);
+      return const SizedBox(
+        height: 48,
+        child: Center(
+          child: SizedBox(
+            width: 32,
+            height: 32,
+            child: CircularProgressIndicator(
+              strokeWidth: 3,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      );
+    }
+
+    final isOrganizerView = _isOrganizer || _opportunity.canManageDetails;
+
+    if (isOrganizerView) {
+      return OutlinedButton.icon(
+        onPressed: null,
+        icon: const Icon(Icons.verified_user, color: Colors.white),
+        label: Text(
+          l10n.volunteerOrganizer,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        style: OutlinedButton.styleFrom(
+          side: const BorderSide(color: Colors.white70),
+          minimumSize: const Size.fromHeight(48),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          disabledForegroundColor: Colors.white,
+          disabledBackgroundColor: Colors.white.withOpacity(0.06),
+        ),
+      );
     }
 
     // Handle cancelled applications - allow reapplication
@@ -224,6 +433,7 @@ class _VolunteerOpportunityDetailsPageState extends State<VolunteerOpportunityDe
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.secondary,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            minimumSize: const Size.fromHeight(48),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(25),
             ),
@@ -242,24 +452,28 @@ class _VolunteerOpportunityDetailsPageState extends State<VolunteerOpportunityDe
     if (_opportunity.isParticipant && _opportunity.participantStatus != 'cancelled') {
       return Column(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(25),
-              border: Border.all(color: Colors.green),
-            ),
-            child: Text(
-              _opportunity.participantStatus == 'applied'
-                  ? l10n.volunteerApplied
-                  : _opportunity.participantStatus == 'approved'
-                      ? l10n.volunteerApproved
-                      : _opportunity.participantStatus == 'completed'
-                          ? l10n.volunteerCompleted
-                          : l10n.volunteerCancelled,
-              style: const TextStyle(
-                color: Colors.green,
-                fontWeight: FontWeight.bold,
+          SizedBox(
+            height: 48,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: Colors.green.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(25),
+                border: Border.all(color: Colors.green),
+              ),
+              child: Center(
+                child: Text(
+                  _opportunity.participantStatus == 'applied'
+                      ? l10n.volunteerApplied
+                      : _opportunity.participantStatus == 'approved'
+                          ? l10n.volunteerApproved
+                          : _opportunity.participantStatus == 'completed'
+                              ? l10n.volunteerCompleted
+                              : l10n.volunteerCancelled,
+                  style: const TextStyle(
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ),
@@ -278,18 +492,22 @@ class _VolunteerOpportunityDetailsPageState extends State<VolunteerOpportunityDe
     }
 
     if (!_opportunity.canApply) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(25),
-          border: Border.all(color: Colors.grey),
-        ),
-        child: Text(
-          _opportunity.isFilled ? l10n.opportunityFilled : _getStatusText(_opportunity.status),
-          style: const TextStyle(
-            color: Colors.grey,
-            fontWeight: FontWeight.bold,
+      return SizedBox(
+        height: 48,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.grey.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(25),
+            border: Border.all(color: Colors.grey),
+          ),
+          child: Center(
+            child: Text(
+              _opportunity.isFilled ? l10n.opportunityFilled : _getStatusText(_opportunity.status),
+              style: const TextStyle(
+                color: Colors.grey,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ),
       );
@@ -300,6 +518,7 @@ class _VolunteerOpportunityDetailsPageState extends State<VolunteerOpportunityDe
       style: ElevatedButton.styleFrom(
         backgroundColor: Theme.of(context).colorScheme.secondary,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        minimumSize: const Size.fromHeight(48),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(25),
         ),
@@ -336,416 +555,582 @@ class _VolunteerOpportunityDetailsPageState extends State<VolunteerOpportunityDe
         ),
         Scaffold(
           backgroundColor: Colors.transparent,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
-            ),
-            title: Text(
-              _opportunity.title,
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Main info card
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.3),
+          body: Column(
+            children: [
+              Container(
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 8,
+                  left: 12,
+                  right: 12,
+                  bottom: 12,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.background.withOpacity(0.25),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.25)),
+                      ),
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
+                        onPressed: () => Navigator.pop(context),
+                      ),
                     ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Title and status
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              _opportunity.title,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: _getStatusColor(_opportunity.status).withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(15),
-                              border: Border.all(
-                                color: _getStatusColor(_opportunity.status),
-                              ),
-                            ),
-                            child: Text(
-                              _getStatusText(_opportunity.status),
-                              style: TextStyle(
-                                color: _getStatusColor(_opportunity.status),
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Organizer
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundColor: Colors.white.withOpacity(0.2),
-                            child: _opportunity.organizerAvatar != null
-                                ? ClipOval(
-                                    child: Image.network(
-                                      _opportunity.organizerAvatar!,
-                                      width: 40,
-                                      height: 40,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  )
-                                : Icon(
-                                    Icons.person,
-                                    color: Colors.white.withOpacity(0.7),
-                                  ),
-                          ),
-                          const SizedBox(width: 12),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                l10n.volunteerOrganizer,
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.7),
-                                  fontSize: 12,
-                                ),
-                              ),
-                              Text(
-                                _opportunity.organizerName ?? 'Unknown',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // Details grid
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.location_on,
-                                      color: Colors.white.withOpacity(0.7),
-                                      size: 16,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      l10n.opportunityLocation,
-                                      style: TextStyle(
-                                        color: Colors.white.withOpacity(0.7),
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  _opportunity.location,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.people,
-                                      color: Colors.white.withOpacity(0.7),
-                                      size: 16,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      l10n.volunteerParticipants,
-                                      style: TextStyle(
-                                        color: Colors.white.withOpacity(0.7),
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  _opportunity.requiredParticipants != null ? '${_opportunity.participantCount}/${_opportunity.requiredParticipants}' : _opportunity.participantCount.toString(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Dates
-                      Column(
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.calendar_today,
-                                color: Colors.white.withOpacity(0.7),
-                                size: 16,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                l10n.eventDate,
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.7),
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
                           Text(
-                            dateFormat.format(_opportunity.date),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            _opportunity.title,
+                            style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 8),
-                          if (_opportunity.startTime != null && _opportunity.endTime != null)
-                            Text(
-                              '${DateFormat('HH:mm').format(_opportunity.startTime!)} - ${DateFormat('HH:mm').format(_opportunity.endTime!)}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
                         ],
                       ),
-
-                      const SizedBox(height: 24),
-
-                      // Action button
-                      Center(child: _buildActionButton()),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Description
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.3),
                     ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.opportunityDescription,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        _opportunity.description,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
-                          fontSize: 16,
-                          height: 1.5,
-                        ),
-                      ),
-                    ],
-                  ),
+                  ],
                 ),
-
-                if (_participants != null && _participants!.isNotEmpty) ...[
-                  const SizedBox(height: 24),
-
-                  // Participants
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${l10n.volunteerParticipants} (${_participants!.length})',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        ..._participants!
-                            .map((participant) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.05),
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: Colors.white.withOpacity(0.1),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 600),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _glassCard(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 20,
+                                      backgroundColor: Theme.of(context).colorScheme.background.withOpacity(0.25),
+                                      child: _opportunity.organizerAvatar != null
+                                          ? ClipOval(
+                                              child: Image.network(
+                                                _opportunity.organizerAvatar!,
+                                                width: 40,
+                                                height: 40,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            )
+                                          : Icon(
+                                              Icons.person,
+                                              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                            ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          l10n.volunteerOrganizer,
+                                          style: TextStyle(
+                                            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                        Text(
+                                          _opportunity.organizerName ?? 'Unknown',
+                                          style: TextStyle(
+                                            color: Theme.of(context).colorScheme.onPrimary,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const Spacer(),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.background.withOpacity(0.18),
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(color: _getStatusColor(_opportunity.status)),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.event_available, color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.9), size: 16),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            _getStatusText(_opportunity.status),
+                                            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.w700, fontSize: 12),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                    child: Column(
-                                      children: [
-                                        Row(
-                                          children: [
-                                            CircleAvatar(
-                                              radius: 16,
-                                              backgroundColor: Colors.white.withOpacity(0.2),
-                                              child: participant.userAvatar != null
-                                                  ? ClipOval(
-                                                      child: Image.network(
-                                                        participant.userAvatar!,
-                                                        width: 32,
-                                                        height: 32,
-                                                        fit: BoxFit.cover,
-                                                      ),
-                                                    )
-                                                  : Icon(
-                                                      Icons.person,
-                                                      color: Colors.white.withOpacity(0.7),
-                                                      size: 16,
-                                                    ),
-                                            ),
-                                            const SizedBox(width: 12),
-                                            Expanded(
-                                              child: Text(
-                                                participant.userName,
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ),
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                              decoration: BoxDecoration(
-                                                color: participant.status == 'approved'
-                                                    ? Colors.green.withOpacity(0.2)
-                                                    : participant.status == 'applied'
-                                                        ? Colors.orange.withOpacity(0.2)
-                                                        : Colors.red.withOpacity(0.2),
-                                                borderRadius: BorderRadius.circular(10),
-                                              ),
-                                              child: Text(
-                                                _getStatusText(participant.status),
-                                                style: TextStyle(
-                                                  color: participant.status == 'approved'
-                                                      ? Colors.green
-                                                      : participant.status == 'applied'
-                                                          ? Colors.orange
-                                                          : Colors.red,
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        if (_isOrganizer && participant.status == 'applied') ...[
-                                          const SizedBox(height: 8),
+                                  ],
+                                ),
+                                const SizedBox(height: 18),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
                                           Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                             children: [
-                                              Expanded(
-                                                child: ElevatedButton.icon(
-                                                  onPressed: () => _updateParticipantStatus(participant.userId, 'approved'),
-                                                  icon: const Icon(Icons.check, size: 16),
-                                                  label: Text(l10n.approveParticipant),
-                                                  style: ElevatedButton.styleFrom(
-                                                    backgroundColor: Colors.green,
-                                                    foregroundColor: Colors.white,
-                                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                                  ),
-                                                ),
+                                              Icon(
+                                                Icons.location_on,
+                                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                                size: 16,
                                               ),
                                               const SizedBox(width: 8),
-                                              Expanded(
-                                                child: ElevatedButton.icon(
-                                                  onPressed: () => _updateParticipantStatus(participant.userId, 'rejected'),
-                                                  icon: const Icon(Icons.close, size: 16),
-                                                  label: Text(l10n.rejectParticipant),
-                                                  style: ElevatedButton.styleFrom(
-                                                    backgroundColor: Colors.red,
-                                                    foregroundColor: Colors.white,
-                                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                                  ),
+                                              Text(
+                                                l10n.opportunityLocation,
+                                                style: TextStyle(
+                                                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                                  fontSize: 14,
                                                 ),
                                               ),
                                             ],
                                           ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            _opportunity.location,
+                                            style: TextStyle(
+                                              color: Theme.of(context).colorScheme.onPrimary,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
                                         ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.people,
+                                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                                size: 16,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                l10n.volunteerParticipants,
+                                                style: TextStyle(
+                                                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            _opportunity.requiredParticipants != null ? '${_opportunity.participantCount}/${_opportunity.requiredParticipants}' : _opportunity.participantCount.toString(),
+                                            style: TextStyle(
+                                              color: Theme.of(context).colorScheme.onPrimary,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 6),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                            decoration: BoxDecoration(
+                                              color: Theme.of(context).colorScheme.background.withOpacity(0.16),
+                                              borderRadius: BorderRadius.circular(12),
+                                              border: Border.all(color: _availabilityColor().withOpacity(0.8)),
+                                            ),
+                                            child: Text(
+                                              _availabilityLabel(),
+                                              style: TextStyle(
+                                                color: Theme.of(context).colorScheme.onPrimary,
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.calendar_today,
+                                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                          size: 16,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          l10n.eventDate,
+                                          style: TextStyle(
+                                            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                            fontSize: 14,
+                                          ),
+                                        ),
                                       ],
                                     ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      dateFormat.format(_opportunity.date),
+                                      style: TextStyle(
+                                        color: Theme.of(context).colorScheme.onPrimary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    if (_opportunity.startTime != null && _opportunity.endTime != null)
+                                      Text(
+                                        '${DateFormat('HH:mm').format(_opportunity.startTime!)} - ${DateFormat('HH:mm').format(_opportunity.endTime!)}',
+                                        style: TextStyle(
+                                          color: Theme.of(context).colorScheme.onPrimary,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 16),
+                                  child: Row(
+                                    children: [
+                                      Expanded(child: _buildActionButton()),
+                                      if (_isOrganizer || _opportunity.canManageDetails || _opportunity.canManageParticipants) ...[
+                                        const SizedBox(width: 8),
+                                        OutlinedButton.icon(
+                                          onPressed: () async {
+                                            final updated = await Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => VolunteerAdminPage(
+                                                  apiClient: widget.apiClient,
+                                                  opportunity: _opportunity,
+                                                ),
+                                              ),
+                                            );
+                                            if (updated is VolunteerOpportunity && mounted) {
+                                              setState(() => _opportunity = updated);
+                                            }
+                                          },
+                                          icon: Icon(Icons.admin_panel_settings, color: Theme.of(context).colorScheme.onPrimary),
+                                          label: Text(
+                                            'Manage',
+                                            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold),
+                                          ),
+                                          style: OutlinedButton.styleFrom(
+                                            side: BorderSide(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                            minimumSize: const Size(140, 48),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
                                   ),
-                                ))
-                            .toList(),
-                      ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          _glassCard(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.opportunityDescription,
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onPrimary,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Linkify(
+                                  text: _opportunity.description,
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.9),
+                                    fontSize: 16,
+                                    height: 1.5,
+                                  ),
+                                  linkStyle: TextStyle(
+                                    color: Theme.of(context).colorScheme.secondary,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                  onOpen: _openLink,
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (_loadingAttachments) ...[
+                            const SizedBox(height: 16),
+                            Center(
+                              child: SizedBox(
+                                width: 28,
+                                height: 28,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 3,
+                                  color: Theme.of(context).colorScheme.onPrimary,
+                                ),
+                              ),
+                            ),
+                          ] else if (_attachments.isNotEmpty) ...[
+                            const SizedBox(height: 24),
+                            _glassCard(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(Icons.attachment, color: Theme.of(context).colorScheme.onPrimary),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'Attachments',
+                                        style: TextStyle(
+                                          color: Theme.of(context).colorScheme.onPrimary,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      if (_attachments.isNotEmpty)
+                                        Text(
+                                          '${_attachments.length}',
+                                          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                        ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Wrap(
+                                    spacing: 12,
+                                    runSpacing: 12,
+                                    children: [
+                                      ..._attachments.where((a) => a.isImage).map(
+                                            (a) => GestureDetector(
+                                              onTap: () => _openAttachment(a),
+                                              child: ClipRRect(
+                                                borderRadius: BorderRadius.circular(12),
+                                                child: Image.network(
+                                                  a.fileUrl,
+                                                  width: 110,
+                                                  height: 110,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (_, __, ___) => Container(
+                                                    width: 110,
+                                                    height: 110,
+                                                    color: Colors.white24,
+                                                    child: const Icon(Icons.broken_image),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                      ..._attachments.where((a) => !a.isImage).map(
+                                            (a) => InkWell(
+                                              onTap: () => _openAttachment(a),
+                                              borderRadius: BorderRadius.circular(12),
+                                              child: Container(
+                                                width: 220,
+                                                padding: const EdgeInsets.all(12),
+                                                decoration: BoxDecoration(
+                                                  color: Theme.of(context).colorScheme.background.withOpacity(0.12),
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  border: Border.all(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.12)),
+                                                ),
+                                                child: Row(
+                                                  children: [
+                                                    Icon(
+                                                      a.isPdf ? Icons.picture_as_pdf : Icons.insert_drive_file,
+                                                      color: Theme.of(context).colorScheme.onPrimary,
+                                                    ),
+                                                    const SizedBox(width: 12),
+                                                    Expanded(
+                                                      child: Text(
+                                                        a.fileName,
+                                                        style: TextStyle(
+                                                          color: Theme.of(context).colorScheme.onPrimary,
+                                                          fontWeight: FontWeight.w600,
+                                                        ),
+                                                        maxLines: 2,
+                                                        overflow: TextOverflow.ellipsis,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                          if (_participants != null && _participants!.isNotEmpty) ...[
+                            const SizedBox(height: 24),
+                            _glassCard(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${l10n.volunteerParticipants} (${_participants!.length})',
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.onPrimary,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  ..._participants!
+                                      .map((participant) => Padding(
+                                            padding: const EdgeInsets.only(bottom: 12),
+                                            child: Container(
+                                              padding: const EdgeInsets.all(12),
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(context).colorScheme.background.withOpacity(0.12),
+                                                borderRadius: BorderRadius.circular(12),
+                                                border: Border.all(
+                                                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.12),
+                                                ),
+                                              ),
+                                              child: Column(
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      CircleAvatar(
+                                                        radius: 16,
+                                                        backgroundColor: Theme.of(context).colorScheme.background.withOpacity(0.25),
+                                                        child: participant.userAvatar != null
+                                                            ? ClipOval(
+                                                                child: Image.network(
+                                                                  participant.userAvatar!,
+                                                                  width: 32,
+                                                                  height: 32,
+                                                                  fit: BoxFit.cover,
+                                                                ),
+                                                              )
+                                                            : Icon(
+                                                                Icons.person,
+                                                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                                                size: 16,
+                                                              ),
+                                                      ),
+                                                      const SizedBox(width: 12),
+                                                      Expanded(
+                                                        child: Text(
+                                                          participant.userName,
+                                                          style: TextStyle(
+                                                            color: Theme.of(context).colorScheme.onPrimary,
+                                                            fontWeight: FontWeight.bold,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Container(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                        decoration: BoxDecoration(
+                                                          color: Theme.of(context).colorScheme.background.withOpacity(0.16),
+                                                          borderRadius: BorderRadius.circular(10),
+                                                          border: Border.all(color: _participantStatusColor(participant.status).withOpacity(0.7)),
+                                                        ),
+                                                        child: Text(
+                                                          _participantStatusText(participant.status),
+                                                          style: TextStyle(
+                                                            color: Theme.of(context).colorScheme.onPrimary,
+                                                            fontSize: 12,
+                                                            fontWeight: FontWeight.bold,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  const SizedBox(height: 6),
+                                                  Row(
+                                                    children: [
+                                                      if (participant.role != null && participant.role!.isNotEmpty)
+                                                        Container(
+                                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                          margin: const EdgeInsets.only(right: 8),
+                                                          decoration: BoxDecoration(
+                                                            color: Theme.of(context).colorScheme.background.withOpacity(0.1),
+                                                            borderRadius: BorderRadius.circular(10),
+                                                            border: Border.all(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.15)),
+                                                          ),
+                                                          child: Text(
+                                                            '${AppLocalizations.of(context)!.role}: ${participant.role}',
+                                                            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.9), fontSize: 12),
+                                                          ),
+                                                        ),
+                                                      if (participant.hoursCompleted != null)
+                                                        Container(
+                                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                          decoration: BoxDecoration(
+                                                            color: Theme.of(context).colorScheme.background.withOpacity(0.1),
+                                                            borderRadius: BorderRadius.circular(10),
+                                                            border: Border.all(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.15)),
+                                                          ),
+                                                          child: Text(
+                                                            '${AppLocalizations.of(context)!.hoursCompleted}: ${participant.hoursCompleted!.toStringAsFixed(1)}',
+                                                            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.9), fontSize: 12),
+                                                          ),
+                                                        ),
+                                                      if (participant.certificateIssued) ...[
+                                                        const SizedBox(width: 8),
+                                                        Icon(Icons.verified, color: Colors.lightGreenAccent.shade100, size: 18),
+                                                      ],
+                                                    ],
+                                                  ),
+                                                  if (_isOrganizer && participant.status == 'applied') ...[
+                                                    const SizedBox(height: 8),
+                                                    Row(
+                                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                      children: [
+                                                        Expanded(
+                                                          child: ElevatedButton.icon(
+                                                            onPressed: () => _updateParticipantStatus(participant.userId, 'approved'),
+                                                            icon: const Icon(Icons.check, size: 16),
+                                                            label: Text(l10n.approveParticipant),
+                                                            style: ElevatedButton.styleFrom(
+                                                              backgroundColor: Colors.green,
+                                                              foregroundColor: Colors.white,
+                                                              padding: const EdgeInsets.symmetric(vertical: 8),
+                                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        const SizedBox(width: 8),
+                                                        Expanded(
+                                                          child: ElevatedButton.icon(
+                                                            onPressed: () => _updateParticipantStatus(participant.userId, 'cancelled'),
+                                                            icon: const Icon(Icons.close, size: 16),
+                                                            label: Text(l10n.rejectParticipant),
+                                                            style: ElevatedButton.styleFrom(
+                                                              backgroundColor: Colors.red,
+                                                              foregroundColor: Colors.white,
+                                                              padding: const EdgeInsets.symmetric(vertical: 8),
+                                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ],
+                                              ),
+                                            ),
+                                          ))
+                                      .toList(),
+                                ],
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 100),
+                        ],
+                      ),
                     ),
                   ),
-                ],
-
-                const SizedBox(height: 100), // Bottom padding for floating action button
-              ],
-            ),
+                ),
+              ),
+            ],
           ),
         ),
       ],

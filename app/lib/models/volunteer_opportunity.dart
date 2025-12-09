@@ -1,3 +1,5 @@
+import 'volunteer_attachment.dart';
+
 const String _hostUrl = 'https://ocs.kttprojects.com';
 
 class VolunteerOpportunity {
@@ -16,10 +18,16 @@ class VolunteerOpportunity {
   final DateTime createdAt;
   final DateTime updatedAt;
   final int participantCount;
+  final bool isFull;
+  final int? spotsRemaining;
   final bool isParticipant;
   final String? participantStatus; // 'applied', 'approved', 'completed', 'cancelled'
+  final String? participantRole; // 'member', 'coordinator', 'admin'
   final double? hoursCompleted;
   final bool? certificateIssued;
+  final int attachmentCount;
+  final String? coverAttachmentUrl;
+  final List<VolunteerAttachment> attachments;
 
   VolunteerOpportunity({
     required this.id,
@@ -37,10 +45,16 @@ class VolunteerOpportunity {
     required this.createdAt,
     required this.updatedAt,
     this.participantCount = 0,
+    this.isFull = false,
+    this.spotsRemaining,
     this.isParticipant = false,
     this.participantStatus,
+    this.participantRole,
     this.hoursCompleted,
     this.certificateIssued,
+    this.attachmentCount = 0,
+    this.coverAttachmentUrl,
+    this.attachments = const [],
   });
 
   factory VolunteerOpportunity.fromJson(Map<String, dynamic> json) {
@@ -55,50 +69,89 @@ class VolunteerOpportunity {
     final startTimeStr = json['start_time'];
     final endTimeStr = json['end_time'];
 
-    DateTime? startTime;
-    if (startTimeStr != null) {
-      final timeParts = startTimeStr.split(':');
-      startTime = DateTime(
+    int? _parseIntNullable(dynamic v) {
+      if (v == null) return null;
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      if (v is String) return int.tryParse(v);
+      return null;
+    }
+
+    int _parseInt(dynamic v, {required int defaultValue}) {
+      return _parseIntNullable(v) ?? defaultValue;
+    }
+
+    double? _parseDoubleNullable(dynamic v) {
+      if (v == null) return null;
+      if (v is num) return v.toDouble();
+      if (v is String) return double.tryParse(v);
+      return null;
+    }
+
+    DateTime? _parseTime(String? value) {
+      if (value == null) return null;
+      final timeParts = value.split(':');
+      if (timeParts.length < 2) return null;
+      return DateTime(
         date.year,
         date.month,
         date.day,
-        int.parse(timeParts[0]),
-        int.parse(timeParts[1]),
+        int.tryParse(timeParts[0]) ?? 0,
+        int.tryParse(timeParts[1]) ?? 0,
       );
     }
 
-    DateTime? endTime;
-    if (endTimeStr != null) {
-      final timeParts = endTimeStr.split(':');
-      endTime = DateTime(
-        date.year,
-        date.month,
-        date.day,
-        int.parse(timeParts[0]),
-        int.parse(timeParts[1]),
-      );
+    final startTime = _parseTime(startTimeStr);
+    final endTime = _parseTime(endTimeStr);
+
+    bool _parseBool(dynamic value) {
+      return value == true || value == 1 || value == '1';
+    }
+
+    final parsedSpots = _parseIntNullable(json['spots_remaining']);
+
+    int attachmentCount = _parseInt(json['attachment_count'], defaultValue: 0);
+    String? coverAttachmentUrl = json['cover_attachment_url'];
+    if (coverAttachmentUrl != null && coverAttachmentUrl.startsWith('/')) {
+      coverAttachmentUrl = '$_hostUrl$coverAttachmentUrl';
+    }
+
+    List<VolunteerAttachment> attachments = [];
+    if (json['attachments'] is List) {
+      attachments = (json['attachments'] as List)
+          .map((a) => VolunteerAttachment.fromJson(Map<String, dynamic>.from(a), _hostUrl))
+          .toList();
+      if (attachmentCount == 0) {
+        attachmentCount = attachments.length;
+      }
     }
 
     return VolunteerOpportunity(
-      id: json['id'] is String ? int.parse(json['id']) : json['id'],
+      id: _parseInt(json['id'], defaultValue: 0),
       title: json['title'],
       description: json['description'],
-      organizerId: json['organizer_id'] is String ? int.parse(json['organizer_id']) : json['organizer_id'],
+      organizerId: _parseInt(json['organizer_id'], defaultValue: 0),
       organizerName: json['organizer_name'],
       organizerAvatar: avatarUrl,
       location: json['location'],
       date: date,
       startTime: startTime,
       endTime: endTime,
-      requiredParticipants: json['required_participants'] != null ? int.parse(json['required_participants']) : null,
+      requiredParticipants: _parseIntNullable(json['required_participants']),
       status: json['status'] ?? 'open',
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
-      participantCount: int.parse(json['participant_count'] ?? '0'),
-      isParticipant: json['is_participant'] == '1' || json['is_participant'] == 1 || json['is_participant'] == true,
+      participantCount: _parseInt(json['participant_count'], defaultValue: 0),
+      isFull: _parseBool(json['is_full'] ?? false),
+      spotsRemaining: parsedSpots != null && parsedSpots < 0 ? 0 : parsedSpots,
+      isParticipant: _parseBool(json['is_participant']),
       participantStatus: json['participant_status'],
-      hoursCompleted: json['hours_completed'] != null ? double.parse(json['hours_completed']) : null,
-      certificateIssued: json['certificate_issued'] == '1' || json['certificate_issued'] == 1 || json['certificate_issued'] == true,
+      participantRole: json['participant_role'],
+      hoursCompleted: _parseDoubleNullable(json['hours_completed']),
+      certificateIssued: _parseBool(json['certificate_issued']),
+      attachmentCount: attachmentCount,
+      coverAttachmentUrl: coverAttachmentUrl,
+      attachments: attachments,
     );
   }
 
@@ -119,10 +172,25 @@ class VolunteerOpportunity {
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
       'participant_count': participantCount,
+      'is_full': isFull,
+      'spots_remaining': spotsRemaining,
       'is_participant': isParticipant,
       'participant_status': participantStatus,
+      'participant_role': participantRole,
       'hours_completed': hoursCompleted,
       'certificate_issued': certificateIssued,
+      'attachment_count': attachmentCount,
+      'cover_attachment_url': coverAttachmentUrl,
+      'attachments': attachments.map((a) => {
+            'id': a.id,
+            'opportunity_id': a.opportunityId,
+            'file_name': a.fileName,
+            'file_url': a.fileUrl,
+            'mime_type': a.mimeType,
+            'file_size': a.fileSize,
+            'uploaded_by': a.uploadedBy,
+            'created_at': a.createdAt.toIso8601String(),
+          }).toList(),
     };
   }
 
@@ -142,10 +210,16 @@ class VolunteerOpportunity {
     DateTime? createdAt,
     DateTime? updatedAt,
     int? participantCount,
+    bool? isFull,
+    int? spotsRemaining,
     bool? isParticipant,
     String? participantStatus,
+    String? participantRole,
     double? hoursCompleted,
     bool? certificateIssued,
+    int? attachmentCount,
+    String? coverAttachmentUrl,
+    List<VolunteerAttachment>? attachments,
   }) {
     return VolunteerOpportunity(
       id: id ?? this.id,
@@ -163,10 +237,16 @@ class VolunteerOpportunity {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       participantCount: participantCount ?? this.participantCount,
+      isFull: isFull ?? this.isFull,
+      spotsRemaining: spotsRemaining ?? this.spotsRemaining,
       isParticipant: isParticipant ?? this.isParticipant,
       participantStatus: participantStatus ?? this.participantStatus,
+      participantRole: participantRole ?? this.participantRole,
       hoursCompleted: hoursCompleted ?? this.hoursCompleted,
       certificateIssued: certificateIssued ?? this.certificateIssued,
+      attachmentCount: attachmentCount ?? this.attachmentCount,
+      coverAttachmentUrl: coverAttachmentUrl ?? this.coverAttachmentUrl,
+      attachments: attachments ?? this.attachments,
     );
   }
 
@@ -175,7 +255,11 @@ class VolunteerOpportunity {
   bool get isCompleted => status == 'completed';
   bool get isCancelled => status == 'cancelled';
 
-  bool get canApply => isOpen && (!isParticipant || participantStatus == 'cancelled') && (requiredParticipants == null || participantCount < requiredParticipants!);
+  bool get canApply {
+    final fullByCount = requiredParticipants != null && participantCount >= requiredParticipants!;
+    final fullByFlag = isFull || spotsRemaining == 0;
+    return isOpen && (!isParticipant || participantStatus == 'cancelled') && !fullByCount && !fullByFlag;
+  }
 
   bool isOrganizer(int userId) => organizerId == userId;
 
@@ -208,4 +292,8 @@ class VolunteerOpportunity {
         return 'grey';
     }
   }
+
+  // Permissions (client can add organizer checks separately)
+  bool get canManageDetails => participantRole == 'admin';
+  bool get canManageParticipants => participantRole == 'admin' || participantRole == 'coordinator';
 }

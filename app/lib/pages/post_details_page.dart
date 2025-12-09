@@ -149,22 +149,10 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-            ),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: IconButton(
-              icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
+        leading: GlassmorphicUI.buildAppBarIconButton(
+          context: context,
+          icon: Icons.arrow_back,
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Stack(

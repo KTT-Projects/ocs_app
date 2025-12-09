@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../l10n/app_localizations.dart';
@@ -9,6 +10,7 @@ import '../models/feed_post.dart';
 import '../models/comment.dart';
 import '../models/volunteer_opportunity.dart';
 import '../models/volunteer_participant.dart';
+import '../models/volunteer_attachment.dart';
 import 'auth_service.dart';
 
 class ApiException implements Exception {
@@ -21,6 +23,7 @@ class ApiException implements Exception {
 
 class ApiClient extends ChangeNotifier {
   static const String baseUrl = 'https://ocs.kttprojects.com/api';
+  static const String baseHost = 'https://ocs.kttprojects.com';
   String? _token;
   final _authService = AuthService();
 
@@ -1166,13 +1169,15 @@ class ApiClient extends ChangeNotifier {
       if (search != null) params.add('search=${Uri.encodeComponent(search)}');
       if (params.isNotEmpty) query += '&${params.join('&')}';
 
+      final headers = <String, String>{
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        if (_token != null && _token!.isNotEmpty) 'Authorization': 'Bearer $_token',
+      };
+
       final response = await http.get(
         _buildUri(query),
-        headers: {
-          'Authorization': 'Bearer $_token',
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
-        },
+        headers: headers,
       );
 
       final data = json.decode(response.body);
@@ -1394,6 +1399,36 @@ class ApiClient extends ChangeNotifier {
     }
   }
 
+  Future<List<VolunteerAttachment>> getVolunteerAttachments(
+    BuildContext context,
+    int opportunityId,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.get(
+        _buildUri('volunteers.php?action=attachments&opportunity_id=$opportunityId'),
+        headers: {
+          'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+      }
+
+      final list = List<Map<String, dynamic>>.from(data['data'] ?? []);
+      return list.map((a) => VolunteerAttachment.fromJson(a, baseHost)).toList();
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
   Future<void> updateParticipantStatus(
     BuildContext context, {
     required int opportunityId,
@@ -1456,6 +1491,155 @@ class ApiClient extends ChangeNotifier {
 
       // Return the PDF content as base64 string
       return response.body;
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<void> updateVolunteerOpportunity(
+    BuildContext context, {
+    required int id,
+    String? title,
+    String? description,
+    String? location,
+    DateTime? date,
+    DateTime? startTime,
+    DateTime? endTime,
+    int? requiredParticipants,
+    String? status,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final body = <String, dynamic>{'id': id};
+      if (title != null) body['title'] = title;
+      if (description != null) body['description'] = description;
+      if (location != null) body['location'] = location;
+      if (date != null) body['date'] = date.toIso8601String().split('T')[0];
+      if (startTime != null) body['start_time'] = '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}:00';
+      if (endTime != null) body['end_time'] = '${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}:00';
+      if (requiredParticipants != null) body['required_participants'] = requiredParticipants;
+      if (status != null) body['status'] = status;
+
+      final response = await http.patch(
+        Uri.parse('$baseUrl/volunteers.php?action=update'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode(body),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<VolunteerAttachment> uploadVolunteerAttachment(
+    BuildContext context, {
+    required int opportunityId,
+    String? filePath,
+    List<int>? webBytes,
+    required String fileName,
+    String? mimeType,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/volunteers.php?action=upload_attachment&opportunity_id=$opportunityId'),
+      )..headers.addAll({
+          'Authorization': 'Bearer $_token',
+          'Accept': 'application/json',
+          'Accept-Language': Localizations.localeOf(context).languageCode,
+        });
+
+      if (kIsWeb && webBytes != null) {
+        request.files.add(http.MultipartFile.fromBytes('attachment', webBytes, filename: fileName, contentType: mimeType != null ? MediaType.parse(mimeType) : null));
+      } else if (filePath != null) {
+        final file = File(filePath);
+        final bytes = await file.readAsBytes();
+        request.files.add(http.MultipartFile.fromBytes('attachment', bytes, filename: fileName));
+      } else {
+        throw ApiException(l10n.errorOccurred);
+      }
+
+      final response = await request.send();
+      final data = json.decode(await response.stream.bytesToString());
+
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+      }
+
+      return VolunteerAttachment.fromJson(Map<String, dynamic>.from(data['data']), baseHost);
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<void> deleteVolunteerAttachment(
+    BuildContext context, {
+    required int attachmentId,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/volunteers.php?action=delete_attachment'),
+        headers: {
+          'Authorization': 'Bearer $_token',
+        },
+        body: {'attachment_id': attachmentId.toString()},
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<void> updateParticipantRole(
+    BuildContext context, {
+    required int opportunityId,
+    required int userId,
+    required String role, // 'member'|'coordinator'|'admin'
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/volunteers.php?action=update_role'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode({
+          'opportunity_id': opportunityId,
+          'user_id': userId,
+          'role': role,
+        }),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+      }
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException(l10n.errorOccurred);
