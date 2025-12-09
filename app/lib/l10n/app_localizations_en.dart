@@ -289,7 +289,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get volunteerParticipants => 'Participants';
 
   @override
+  String get volunteerRoleMember => 'Member';
+
+  @override
+  String get volunteerRoleCoordinator => 'Coordinator';
+
+  @override
+  String get volunteerRoleAdmin => 'Admin';
+
+  @override
+  String get volunteerManageTitle => 'Manage Volunteer';
+
+  @override
+  String get volunteerRequiredParticipantsOptional =>
+      'Required participants (Optional)';
+
+  @override
+  String volunteerSpotsRemaining(int count) {
+    return '$count spots left';
+  }
+
+  @override
+  String get volunteerNoLimit => 'No capacity limit';
+
+  @override
   String get volunteerOrganizer => 'Organizer';
+
+  @override
+  String get save => 'Save';
 
   @override
   String get volunteerHistory => 'Volunteer History';
@@ -558,9 +585,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ok => 'OK';
-
-  @override
-  String get save => 'Save';
 
   @override
   String get searchFeeds => 'Search feeds...';

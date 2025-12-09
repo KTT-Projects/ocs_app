@@ -285,7 +285,33 @@ class AppLocalizationsJa extends AppLocalizations {
   String get volunteerParticipants => '参加者';
 
   @override
+  String get volunteerRoleMember => 'メンバー';
+
+  @override
+  String get volunteerRoleCoordinator => 'コーディネーター';
+
+  @override
+  String get volunteerRoleAdmin => '管理者';
+
+  @override
+  String get volunteerManageTitle => 'ボランティア管理';
+
+  @override
+  String get volunteerRequiredParticipantsOptional => '必要参加者数（任意）';
+
+  @override
+  String volunteerSpotsRemaining(int count) {
+    return '残り$count枠';
+  }
+
+  @override
+  String get volunteerNoLimit => '定員なし';
+
+  @override
   String get volunteerOrganizer => '主催者';
+
+  @override
+  String get save => '保存';
 
   @override
   String get volunteerHistory => 'ボランティア履歴';
@@ -546,9 +572,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ok => 'OK';
-
-  @override
-  String get save => '保存';
 
   @override
   String get searchFeeds => 'フィードを検索...';

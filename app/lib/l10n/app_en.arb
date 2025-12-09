@@ -371,9 +371,46 @@
   "@volunteerParticipants": {
     "description": "Label for volunteer participants"
   },
+  "volunteerRoleMember": "Member",
+  "@volunteerRoleMember": {
+    "description": "Label for member role"
+  },
+  "volunteerRoleCoordinator": "Coordinator",
+  "@volunteerRoleCoordinator": {
+    "description": "Label for coordinator role"
+  },
+  "volunteerRoleAdmin": "Admin",
+  "@volunteerRoleAdmin": {
+    "description": "Label for admin role"
+  },
+  "volunteerManageTitle": "Manage Volunteer",
+  "@volunteerManageTitle": {
+    "description": "Title for manage volunteer page"
+  },
+  "volunteerRequiredParticipantsOptional": "Required participants (Optional)",
+  "@volunteerRequiredParticipantsOptional": {
+    "description": "Optional required participants field label"
+  },
+  "volunteerSpotsRemaining": "{count} spots left",
+  "@volunteerSpotsRemaining": {
+    "description": "Capacity label showing how many volunteer spots remain",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "volunteerNoLimit": "No capacity limit",
+  "@volunteerNoLimit": {
+    "description": "Label for volunteer opportunities that have no capacity limit"
+  },
   "volunteerOrganizer": "Organizer",
   "@volunteerOrganizer": {
     "description": "Label for volunteer opportunity organizer"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Generic save button"
   },
   "volunteerHistory": "Volunteer History",
   "@volunteerHistory": {

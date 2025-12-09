@@ -89,7 +89,23 @@
   "opportunityOpen": "募集中",
   "opportunityFilled": "定員満了",
   "volunteerParticipants": "参加者",
+  "volunteerRoleMember": "メンバー",
+  "volunteerRoleCoordinator": "コーディネーター",
+  "volunteerRoleAdmin": "管理者",
+  "volunteerManageTitle": "ボランティア管理",
+  "volunteerRequiredParticipantsOptional": "必要参加者数（任意）",
+  "volunteerSpotsRemaining": "残り{count}枠",
+  "@volunteerSpotsRemaining": {
+    "description": "Remaining volunteer spots label",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "volunteerNoLimit": "定員なし",
   "volunteerOrganizer": "主催者",
+  "save": "保存",
   "volunteerHistory": "ボランティア履歴",
   "downloadCertificate": "証明書をダウンロード",
   "hoursCompleted": "完了時間",
