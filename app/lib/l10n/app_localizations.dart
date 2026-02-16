@@ -669,6 +669,18 @@ abstract class AppLocalizations {
   /// **'Study'**
   String get studyFeature;
 
+  /// Placeholder title shown on the Study page
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get studyComingSoon;
+
+  /// Placeholder description shown on the Study page
+  ///
+  /// In en, this message translates to:
+  /// **'Study Q&A is currently under development.'**
+  String get studyComingSoonDescription;
+
   /// Title for the feed section
   ///
   /// In en, this message translates to:

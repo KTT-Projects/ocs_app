@@ -303,6 +303,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get studyFeature => '学習';
 
   @override
+  String get studyComingSoon => '準備中';
+
+  @override
+  String get studyComingSoonDescription => 'Study Q&A機能は現在開発中です。';
+
+  @override
   String get feed => '掲示板';
 
   @override

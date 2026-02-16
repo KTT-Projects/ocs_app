@@ -312,6 +312,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studyFeature => 'Study';
 
   @override
+  String get studyComingSoon => 'Coming soon';
+
+  @override
+  String get studyComingSoonDescription =>
+      'Study Q&A is currently under development.';
+
+  @override
   String get feed => 'Feed';
 
   @override

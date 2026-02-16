@@ -101,6 +101,14 @@
   "@studyFeature": {
     "description": "学習セクションのタイトル"
   },
+  "studyComingSoon": "準備中",
+  "@studyComingSoon": {
+    "description": "学習ページに表示するプレースホルダータイトル"
+  },
+  "studyComingSoonDescription": "Study Q&A機能は現在開発中です。",
+  "@studyComingSoonDescription": {
+    "description": "学習ページに表示するプレースホルダー説明文"
+  },
   "feed": "掲示板",
   "@feed": {
     "description": "掲示板セクションのタイトル"

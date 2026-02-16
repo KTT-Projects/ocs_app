@@ -17,6 +17,7 @@ class _StudyPageState extends State<StudyPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+
     return Stack(children: [
       // Gradient background
       Container(
@@ -32,8 +33,50 @@ class _StudyPageState extends State<StudyPage> {
         ),
       ),
       Center(
-          child:
-              Text(l10n.studyFeature, style: TextStyle(color: Colors.white))),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.school_outlined,
+                color: Colors.white,
+                size: 52,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.studyFeature,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.studyComingSoon,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.studyComingSoonDescription,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 15,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     ]);
   }
 }

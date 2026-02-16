@@ -395,6 +395,14 @@
   "@studyFeature": {
     "description": "Title for the study section"
   },
+  "studyComingSoon": "Coming soon",
+  "@studyComingSoon": {
+    "description": "Placeholder title shown on the Study page"
+  },
+  "studyComingSoonDescription": "Study Q&A is currently under development.",
+  "@studyComingSoonDescription": {
+    "description": "Placeholder description shown on the Study page"
+  },
   "feed": "Feed",
   "@feed": {
     "description": "Title for the feed section"
