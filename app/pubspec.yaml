@@ -37,3 +37,8 @@ flutter:
 
   assets:
     - lib/images/
+
+dependency_overrides:
+  # flutter_localizations (SDK) pins intl 0.20.2 on current Flutter.
+  # Keep declared app constraint at ^0.19.0 per project requirement.
+  intl: 0.20.2

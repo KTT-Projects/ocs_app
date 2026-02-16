@@ -7,6 +7,7 @@ import 'dart:io';
 import '../models/feed.dart';
 import '../models/feed_post.dart';
 import '../models/comment.dart';
+import '../models/study_question.dart';
 import 'auth_service.dart';
 
 class ApiException implements Exception {
@@ -123,8 +124,7 @@ class ApiClient extends ChangeNotifier {
 
       String fullError = errorMessage;
       if (errorDetails != null) {
-        fullError +=
-            '\n\n' +
+        fullError += '\n\n' +
             l10n.errorDetailsText(
               errorDetails['error_type'] ?? l10n.unknownErrorType,
               errorDetails['error_file'] ?? l10n.unknownFile,
@@ -313,16 +313,14 @@ class ApiClient extends ChangeNotifier {
   }) async {
     final l10n = AppLocalizations.of(context)!;
     try {
-      final request =
-          http.MultipartRequest(
-              'POST',
-              Uri.parse('$baseUrl/feeds.php?action=icon&feed_id=$feedId'),
-            )
-            ..headers.addAll({
-              'Authorization': 'Bearer $_token',
-              'Accept': 'application/json',
-              'Accept-Language': Localizations.localeOf(context).languageCode,
-            });
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/feeds.php?action=icon&feed_id=$feedId'),
+      )..headers.addAll({
+          'Authorization': 'Bearer $_token',
+          'Accept': 'application/json',
+          'Accept-Language': Localizations.localeOf(context).languageCode,
+        });
 
       if (kIsWeb && webBytes != null && webFileName != null) {
         request.files.add(
@@ -386,12 +384,14 @@ class ApiClient extends ChangeNotifier {
         });
 
       if (kIsWeb && webBytes != null && webFileName != null) {
-        request.files.add(http.MultipartFile.fromBytes('media', webBytes, filename: webFileName));
+        request.files.add(http.MultipartFile.fromBytes('media', webBytes,
+            filename: webFileName));
       } else if (filePath != null) {
         final file = File(filePath);
         final bytes = await file.readAsBytes();
         final filename = filePath.split('/').last;
-        request.files.add(http.MultipartFile.fromBytes('media', bytes, filename: filename));
+        request.files.add(
+            http.MultipartFile.fromBytes('media', bytes, filename: filename));
       } else {
         throw ApiException(l10n.errorOccurred);
       }
@@ -402,11 +402,13 @@ class ApiClient extends ChangeNotifier {
       if (response.statusCode == 401) {
         await _handleUnauthorizedResponse(context, data);
       } else if (response.statusCode != 200) {
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+        throw ApiException(
+            _mapServerError(context, data['message'] ?? l10n.errorOccurred));
       }
 
       if (data['status'] != 'success' || data['media_url'] == null) {
-        throw ApiException(_mapServerError(context, data['message'] ?? l10n.errorOccurred));
+        throw ApiException(
+            _mapServerError(context, data['message'] ?? l10n.errorOccurred));
       }
 
       String url = data['media_url'];
@@ -644,6 +646,115 @@ class ApiClient extends ChangeNotifier {
     }
   }
 
+  Future<List<StudyQuestion>> getStudyQuestions(
+    BuildContext context, {
+    int page = 1,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.get(
+        _buildUri('study.php?action=list&page=$page'),
+        headers: {
+          'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(
+            context,
+            data['message'] ?? l10n.failedToLoadStudyQuestions,
+          ),
+        );
+      }
+
+      final list = data['data'] as List? ?? [];
+      return list.map((item) => StudyQuestion.fromJson(item)).toList();
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.failedToLoadStudyQuestions);
+    }
+  }
+
+  Future<StudyQuestion> getStudyQuestionDetail(
+    BuildContext context,
+    int questionId,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.get(
+        _buildUri('study.php?action=detail&question_id=$questionId'),
+        headers: {
+          'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(
+            context,
+            data['message'] ?? l10n.failedToLoadStudyQuestionDetail,
+          ),
+        );
+      }
+
+      return StudyQuestion.fromJson(data['data']);
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.failedToLoadStudyQuestionDetail);
+    }
+  }
+
+  Future<int> createStudyQuestion(
+    BuildContext context, {
+    required String title,
+    required String body,
+    required String category,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/study.php?action=create'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode({
+          'title': title,
+          'body': body,
+          'category': category,
+        }),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200 && response.statusCode != 201) {
+        throw ApiException(
+          _mapServerError(
+            context,
+            data['message'] ?? l10n.failedToCreateStudyQuestion,
+          ),
+        );
+      }
+
+      return int.parse(data['data']['id'].toString());
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.failedToCreateStudyQuestion);
+    }
+  }
+
   Future<List<Feed>> getFeeds(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
     try {
@@ -709,7 +820,8 @@ class ApiClient extends ChangeNotifier {
     final l10n = AppLocalizations.of(context)!;
     try {
       final response = await http.get(
-        _buildUri('feeds.php?action=posts&feed_id=$feedId&page=$page&sort=$sort'),
+        _buildUri(
+            'feeds.php?action=posts&feed_id=$feedId&page=$page&sort=$sort'),
         headers: {
           'Authorization': 'Bearer $_token',
           'Cache-Control': 'no-cache',
@@ -1055,8 +1167,8 @@ class ApiClient extends ChangeNotifier {
 
   Future<void> votePost(
     BuildContext context, {
-      required int postId,
-      required String voteType,
+    required int postId,
+    required String voteType,
   }) async {
     final l10n = AppLocalizations.of(context)!;
     try {
@@ -1105,9 +1217,7 @@ class ApiClient extends ChangeNotifier {
         );
       }
 
-      return (data['data'] as List)
-          .map((c) => Comment.fromJson(c))
-          .toList();
+      return (data['data'] as List).map((c) => Comment.fromJson(c)).toList();
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException(l10n.errorOccurred);

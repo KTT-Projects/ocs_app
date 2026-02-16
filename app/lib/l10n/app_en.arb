@@ -395,6 +395,70 @@
   "@studyFeature": {
     "description": "Title for the study section"
   },
+  "studyQuestions": "Study Questions",
+  "@studyQuestions": {
+    "description": "Title for the Study question list"
+  },
+  "createQuestion": "Create Question",
+  "@createQuestion": {
+    "description": "Title for the create question screen"
+  },
+  "questionBody": "Question body",
+  "@questionBody": {
+    "description": "Hint label for question body input"
+  },
+  "questionCategory": "Category",
+  "@questionCategory": {
+    "description": "Hint label for question category input"
+  },
+  "postQuestion": "Post Question",
+  "@postQuestion": {
+    "description": "Button text to submit a question"
+  },
+  "noStudyQuestions": "No questions yet.",
+  "@noStudyQuestions": {
+    "description": "Message shown when no study questions exist"
+  },
+  "failedToLoadStudyQuestions": "Failed to load questions",
+  "@failedToLoadStudyQuestions": {
+    "description": "Error message when study questions cannot be loaded"
+  },
+  "failedToLoadStudyQuestionDetail": "Failed to load question detail",
+  "@failedToLoadStudyQuestionDetail": {
+    "description": "Error message when a study question detail cannot be loaded"
+  },
+  "failedToCreateStudyQuestion": "Failed to create question",
+  "@failedToCreateStudyQuestion": {
+    "description": "Error message when a study question cannot be created"
+  },
+  "questionDetails": "Question Details",
+  "@questionDetails": {
+    "description": "Title for study question details screen"
+  },
+  "questionCategoryRequired": "Category is required",
+  "@questionCategoryRequired": {
+    "description": "Validation error when category is empty"
+  },
+  "questionCategoryTooLong": "Category must be less than 100 characters",
+  "@questionCategoryTooLong": {
+    "description": "Validation error when category exceeds max length"
+  },
+  "questionStatusOpen": "Open",
+  "@questionStatusOpen": {
+    "description": "Question status label for open"
+  },
+  "questionStatusResolved": "Resolved",
+  "@questionStatusResolved": {
+    "description": "Question status label for resolved"
+  },
+  "questionAuthor": "Author",
+  "@questionAuthor": {
+    "description": "Label for question author"
+  },
+  "questionCreatedAt": "Created",
+  "@questionCreatedAt": {
+    "description": "Label for question creation date"
+  },
   "studyComingSoon": "Coming soon",
   "@studyComingSoon": {
     "description": "Placeholder title shown on the Study page"

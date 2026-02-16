@@ -20,6 +20,7 @@ chat_group_members,
 group_messages,
 event_participants,
 volunteer_participants,
+study_questions,
 answers,
 tutor_sessions,
 feed_votes,
@@ -324,6 +325,20 @@ CREATE TABLE
     FOREIGN KEY (user_id) REFERENCES users (id)
   );
 
+-- Study Q&A questions (Question-only phase)
+CREATE TABLE
+  study_questions (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    author_user_id INT NOT NULL,
+    title VARCHAR(300) NOT NULL,
+    body TEXT NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    status ENUM ('open', 'resolved') DEFAULT 'open',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (author_user_id) REFERENCES users (id)
+  );
+
 -- Q&A answers
 CREATE TABLE
   answers (
@@ -413,3 +428,9 @@ CREATE INDEX idx_events_date ON events (start_datetime);
 CREATE INDEX idx_volunteer_date ON volunteer_opportunities (start_date);
 
 CREATE INDEX idx_notifications_user ON notifications (user_id, is_read);
+
+CREATE INDEX idx_study_questions_author ON study_questions (author_user_id);
+
+CREATE INDEX idx_study_questions_status ON study_questions (status);
+
+CREATE INDEX idx_study_questions_created_at ON study_questions (created_at);

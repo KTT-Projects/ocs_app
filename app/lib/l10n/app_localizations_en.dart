@@ -9,8 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get checkSpamJunk =>
-      'Please check your spam/junk folder if you don\'t see the email in your inbox';
+  String get checkSpamJunk => 'Please check your spam/junk folder if you don\'t see the email in your inbox';
 
   @override
   String get resendOtp => 'Resend Code';
@@ -107,8 +106,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get enterVerificationCode =>
-      'Please enter the 6-digit code to verify your account:';
+  String get enterVerificationCode => 'Please enter the 6-digit code to verify your account:';
 
   @override
   String get enterSixDigitCode => 'Enter 6-digit code';
@@ -141,8 +139,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get failedToLoadInstitutions => 'Failed to load institutions';
 
   @override
-  String errorDetailsText(
-      Object errorType, Object errorFile, Object errorLine, Object stackTrace) {
+  String errorDetailsText(Object errorType, Object errorFile, Object errorLine, Object stackTrace) {
     return 'Details:\n$errorType at $errorFile:$errorLine\n\nStack trace:\n$stackTrace';
   }
 
@@ -165,8 +162,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backToRegistration => 'Back to Registration';
 
   @override
-  String get invalidOrExpiredOtp =>
-      'Invalid or expired verification code. Please request a new code.';
+  String get invalidOrExpiredOtp => 'Invalid or expired verification code. Please request a new code.';
 
   @override
   String welcomeUser(Object name) {
@@ -204,8 +200,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get displayNameRequired => 'Display name is required';
 
   @override
-  String get displayNameTooLong =>
-      'Display name must be less than 30 characters';
+  String get displayNameTooLong => 'Display name must be less than 30 characters';
 
   @override
   String get communityFeatures => 'Community Features';
@@ -256,33 +251,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newCommunityCenter => 'New Community Center Opening';
 
   @override
-  String get communityCenterDesc =>
-      'The new community center will open next week with various facilities.';
+  String get communityCenterDesc => 'The new community center will open next week with various facilities.';
 
   @override
   String get beachCleanup => 'Beach Cleanup Event';
 
   @override
-  String get beachCleanupDesc =>
-      'Join us for the monthly beach cleanup activity.';
+  String get beachCleanupDesc => 'Join us for the monthly beach cleanup activity.';
 
   @override
   String get summerFestival => 'Summer Festival Planning';
 
   @override
-  String get summerFestivalDesc =>
-      'Planning meeting for this year\'s summer festival.';
+  String get summerFestivalDesc => 'Planning meeting for this year\'s summer festival.';
 
   @override
   String get resetPasswordTitle => 'Reset Password';
 
   @override
-  String get resetPasswordSubtitle =>
-      'Enter your email to receive reset instructions';
+  String get resetPasswordSubtitle => 'Enter your email to receive reset instructions';
 
   @override
-  String get resetPasswordSent =>
-      'Password reset instructions sent to your email';
+  String get resetPasswordSent => 'Password reset instructions sent to your email';
 
   @override
   String get resetPasswordFailed => 'Failed to reset password';
@@ -312,11 +302,58 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studyFeature => 'Study';
 
   @override
+  String get studyQuestions => 'Study Questions';
+
+  @override
+  String get createQuestion => 'Create Question';
+
+  @override
+  String get questionBody => 'Question body';
+
+  @override
+  String get questionCategory => 'Category';
+
+  @override
+  String get postQuestion => 'Post Question';
+
+  @override
+  String get noStudyQuestions => 'No questions yet.';
+
+  @override
+  String get failedToLoadStudyQuestions => 'Failed to load questions';
+
+  @override
+  String get failedToLoadStudyQuestionDetail => 'Failed to load question detail';
+
+  @override
+  String get failedToCreateStudyQuestion => 'Failed to create question';
+
+  @override
+  String get questionDetails => 'Question Details';
+
+  @override
+  String get questionCategoryRequired => 'Category is required';
+
+  @override
+  String get questionCategoryTooLong => 'Category must be less than 100 characters';
+
+  @override
+  String get questionStatusOpen => 'Open';
+
+  @override
+  String get questionStatusResolved => 'Resolved';
+
+  @override
+  String get questionAuthor => 'Author';
+
+  @override
+  String get questionCreatedAt => 'Created';
+
+  @override
   String get studyComingSoon => 'Coming soon';
 
   @override
-  String get studyComingSoonDescription =>
-      'Study Q&A is currently under development.';
+  String get studyComingSoonDescription => 'Study Q&A is currently under development.';
 
   @override
   String get feed => 'Feed';
@@ -379,8 +416,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get feedIdRequired => 'Feed ID is required';
 
   @override
-  String get feedIdInvalid =>
-      'Only lowercase letters, numbers, and underscores allowed';
+  String get feedIdInvalid => 'Only lowercase letters, numbers, and underscores allowed';
 
   @override
   String get descriptionRequired => 'Description is required';
@@ -395,8 +431,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addImage => 'Add Image';
 
   @override
-  String get feedIdHelperText =>
-      'Only lowercase letters, numbers, and underscores';
+  String get feedIdHelperText => 'Only lowercase letters, numbers, and underscores';
 
   @override
   String get postTitle => 'Title';
@@ -449,8 +484,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectNewAdmin => 'Select new admin';
 
   @override
-  String get confirmDeleteFeed =>
-      'No other members remain. Leaving will delete this feed. Continue?';
+  String get confirmDeleteFeed => 'No other members remain. Leaving will delete this feed. Continue?';
 
   @override
   String get ok => 'OK';
@@ -495,8 +529,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get contentTooLong => 'Content must be less than 5000 characters';
 
   @override
-  String get descriptionTooLong =>
-      'Description must be less than 1000 characters';
+  String get descriptionTooLong => 'Description must be less than 1000 characters';
 
   @override
   String get rulesTooLong => 'Rules must be less than 1000 characters';

@@ -101,6 +101,70 @@
   "@studyFeature": {
     "description": "学習セクションのタイトル"
   },
+  "studyQuestions": "質問一覧",
+  "@studyQuestions": {
+    "description": "学習質問一覧画面のタイトル"
+  },
+  "createQuestion": "質問を作成",
+  "@createQuestion": {
+    "description": "質問作成画面のタイトル"
+  },
+  "questionBody": "質問本文",
+  "@questionBody": {
+    "description": "質問本文入力欄のヒント"
+  },
+  "questionCategory": "カテゴリ",
+  "@questionCategory": {
+    "description": "カテゴリ入力欄のヒント"
+  },
+  "postQuestion": "質問を投稿",
+  "@postQuestion": {
+    "description": "質問投稿ボタンのテキスト"
+  },
+  "noStudyQuestions": "まだ質問がありません。",
+  "@noStudyQuestions": {
+    "description": "質問が存在しない場合のメッセージ"
+  },
+  "failedToLoadStudyQuestions": "質問の読み込みに失敗しました",
+  "@failedToLoadStudyQuestions": {
+    "description": "質問一覧の読み込みに失敗した場合のエラーメッセージ"
+  },
+  "failedToLoadStudyQuestionDetail": "質問詳細の読み込みに失敗しました",
+  "@failedToLoadStudyQuestionDetail": {
+    "description": "質問詳細の読み込みに失敗した場合のエラーメッセージ"
+  },
+  "failedToCreateStudyQuestion": "質問の作成に失敗しました",
+  "@failedToCreateStudyQuestion": {
+    "description": "質問作成に失敗した場合のエラーメッセージ"
+  },
+  "questionDetails": "質問詳細",
+  "@questionDetails": {
+    "description": "質問詳細画面のタイトル"
+  },
+  "questionCategoryRequired": "カテゴリは必須です",
+  "@questionCategoryRequired": {
+    "description": "カテゴリ未入力時のバリデーションエラー"
+  },
+  "questionCategoryTooLong": "カテゴリは100文字以内で入力してください",
+  "@questionCategoryTooLong": {
+    "description": "カテゴリが長すぎる場合のバリデーションエラー"
+  },
+  "questionStatusOpen": "未解決",
+  "@questionStatusOpen": {
+    "description": "質問ステータス（未解決）"
+  },
+  "questionStatusResolved": "解決済み",
+  "@questionStatusResolved": {
+    "description": "質問ステータス（解決済み）"
+  },
+  "questionAuthor": "投稿者",
+  "@questionAuthor": {
+    "description": "質問投稿者のラベル"
+  },
+  "questionCreatedAt": "作成日時",
+  "@questionCreatedAt": {
+    "description": "質問作成日時のラベル"
+  },
   "studyComingSoon": "準備中",
   "@studyComingSoon": {
     "description": "学習ページに表示するプレースホルダータイトル"

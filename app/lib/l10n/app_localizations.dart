@@ -62,8 +62,7 @@ import 'app_localizations_ja.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale)
-      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -71,8 +70,7 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -84,8 +82,7 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
-      <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
@@ -354,8 +351,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Details:\n{errorType} at {errorFile}:{errorLine}\n\nStack trace:\n{stackTrace}'**
-  String errorDetailsText(
-      Object errorType, Object errorFile, Object errorLine, Object stackTrace);
+  String errorDetailsText(Object errorType, Object errorFile, Object errorLine, Object stackTrace);
 
   /// Text for unknown error type
   ///
@@ -668,6 +664,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Study'**
   String get studyFeature;
+
+  /// Title for the Study question list
+  ///
+  /// In en, this message translates to:
+  /// **'Study Questions'**
+  String get studyQuestions;
+
+  /// Title for the create question screen
+  ///
+  /// In en, this message translates to:
+  /// **'Create Question'**
+  String get createQuestion;
+
+  /// Hint label for question body input
+  ///
+  /// In en, this message translates to:
+  /// **'Question body'**
+  String get questionBody;
+
+  /// Hint label for question category input
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get questionCategory;
+
+  /// Button text to submit a question
+  ///
+  /// In en, this message translates to:
+  /// **'Post Question'**
+  String get postQuestion;
+
+  /// Message shown when no study questions exist
+  ///
+  /// In en, this message translates to:
+  /// **'No questions yet.'**
+  String get noStudyQuestions;
+
+  /// Error message when study questions cannot be loaded
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load questions'**
+  String get failedToLoadStudyQuestions;
+
+  /// Error message when a study question detail cannot be loaded
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load question detail'**
+  String get failedToLoadStudyQuestionDetail;
+
+  /// Error message when a study question cannot be created
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create question'**
+  String get failedToCreateStudyQuestion;
+
+  /// Title for study question details screen
+  ///
+  /// In en, this message translates to:
+  /// **'Question Details'**
+  String get questionDetails;
+
+  /// Validation error when category is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Category is required'**
+  String get questionCategoryRequired;
+
+  /// Validation error when category exceeds max length
+  ///
+  /// In en, this message translates to:
+  /// **'Category must be less than 100 characters'**
+  String get questionCategoryTooLong;
+
+  /// Question status label for open
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get questionStatusOpen;
+
+  /// Question status label for resolved
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved'**
+  String get questionStatusResolved;
+
+  /// Label for question author
+  ///
+  /// In en, this message translates to:
+  /// **'Author'**
+  String get questionAuthor;
+
+  /// Label for question creation date
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get questionCreatedAt;
 
   /// Placeholder title shown on the Study page
   ///
@@ -1090,8 +1182,7 @@ abstract class AppLocalizations {
   String get showLess;
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -1100,25 +1191,25 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en', 'ja'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en', 'ja'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+
+
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en':
-      return AppLocalizationsEn();
-    case 'ja':
-      return AppLocalizationsJa();
+    case 'en': return AppLocalizationsEn();
+    case 'ja': return AppLocalizationsJa();
   }
 
   throw FlutterError(
-      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-      'an issue with the localizations generation tool. Please file an issue '
-      'on GitHub with a reproducible sample app and the gen-l10n configuration '
-      'that was used.');
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.'
+  );
 }

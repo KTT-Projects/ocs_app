@@ -139,8 +139,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get failedToLoadInstitutions => '教育機関の読み込みに失敗しました';
 
   @override
-  String errorDetailsText(
-      Object errorType, Object errorFile, Object errorLine, Object stackTrace) {
+  String errorDetailsText(Object errorType, Object errorFile, Object errorLine, Object stackTrace) {
     return '詳細:\n$errorType at $errorFile:$errorLine\n\nスタックトレース:\n$stackTrace';
   }
 
@@ -301,6 +300,54 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get studyFeature => '学習';
+
+  @override
+  String get studyQuestions => '質問一覧';
+
+  @override
+  String get createQuestion => '質問を作成';
+
+  @override
+  String get questionBody => '質問本文';
+
+  @override
+  String get questionCategory => 'カテゴリ';
+
+  @override
+  String get postQuestion => '質問を投稿';
+
+  @override
+  String get noStudyQuestions => 'まだ質問がありません。';
+
+  @override
+  String get failedToLoadStudyQuestions => '質問の読み込みに失敗しました';
+
+  @override
+  String get failedToLoadStudyQuestionDetail => '質問詳細の読み込みに失敗しました';
+
+  @override
+  String get failedToCreateStudyQuestion => '質問の作成に失敗しました';
+
+  @override
+  String get questionDetails => '質問詳細';
+
+  @override
+  String get questionCategoryRequired => 'カテゴリは必須です';
+
+  @override
+  String get questionCategoryTooLong => 'カテゴリは100文字以内で入力してください';
+
+  @override
+  String get questionStatusOpen => '未解決';
+
+  @override
+  String get questionStatusResolved => '解決済み';
+
+  @override
+  String get questionAuthor => '投稿者';
+
+  @override
+  String get questionCreatedAt => '作成日時';
 
   @override
   String get studyComingSoon => '準備中';
