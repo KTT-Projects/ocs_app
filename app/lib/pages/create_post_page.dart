@@ -200,7 +200,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                             maxLength: 300,
                             maxLengthEnforcement: MaxLengthEnforcement.enforced,
                             decoration: InputDecoration(
-                              hintText: 'Title',
+                              hintText: l10n.postTitle,
                               hintStyle: TextStyle(
                                 color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.5),
                               ),
@@ -228,7 +228,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Please enter a title';
+                                return l10n.titleRequired;
                               }
                               if (value.length > 300) {
                                 return AppLocalizations.of(context)!.titleTooLong;
@@ -242,7 +242,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                             maxLength: 5000,
                             maxLengthEnforcement: MaxLengthEnforcement.enforced,
                             decoration: InputDecoration(
-                              hintText: 'Write your post...',
+                              hintText:l10n.writePost,
                               hintStyle: TextStyle(
                                 color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.5),
                               ),
@@ -324,7 +324,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                                         ),
                                       ),
                                     )
-                                  : const Text('Post'),
+                                  : Text(l10n.post),
                             ),
                           ),
                         ],

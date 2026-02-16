@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:ocs_app/l10n/app_localizations.dart';
+import 'package:ocs_app/services/api_client.dart';
 
 class StudyPage extends StatefulWidget {
-  const StudyPage({super.key});
+  final ApiClient apiClient;
+  const StudyPage({
+    super.key,
+    required this.apiClient,
+  });
 
   @override
   State<StudyPage> createState() => _StudyPageState();
@@ -26,7 +31,9 @@ class _StudyPageState extends State<StudyPage> {
           ),
         ),
       ),
-      Center(child: Text(l10n.studyFeature, style: TextStyle(color: Colors.white))),
+      Center(
+          child:
+              Text(l10n.studyFeature, style: TextStyle(color: Colors.white))),
     ]);
   }
 }
