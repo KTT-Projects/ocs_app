@@ -81,6 +81,22 @@ PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
+SET @has_idx_questions_category := (
+  SELECT COUNT(*)
+  FROM INFORMATION_SCHEMA.STATISTICS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'study_questions'
+    AND INDEX_NAME = 'idx_study_questions_category'
+);
+SET @sql := IF(
+  @has_idx_questions_category = 0,
+  "CREATE INDEX idx_study_questions_category ON study_questions (category)",
+  "SELECT 1"
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
 SET @has_idx_answers_question := (
   SELECT COUNT(*)
   FROM INFORMATION_SCHEMA.STATISTICS

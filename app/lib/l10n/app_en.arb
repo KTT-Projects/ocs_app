@@ -411,9 +411,61 @@
   "@questionCategory": {
     "description": "Hint label for question category input"
   },
+  "questionTags": "Tags",
+  "@questionTags": {
+    "description": "Label for question tags input"
+  },
+  "questionTagsHint": "Enter a tag (e.g. Physics)",
+  "@questionTagsHint": {
+    "description": "Hint label for single question tag input"
+  },
+  "addTag": "Add",
+  "@addTag": {
+    "description": "Button text to add a tag to the tag list"
+  },
   "postQuestion": "Post Question",
   "@postQuestion": {
     "description": "Button text to submit a question"
+  },
+  "studySearchHint": "Search title/body/tag...",
+  "@studySearchHint": {
+    "description": "Placeholder for study question search input"
+  },
+  "studyFilterTitle": "Filter Questions",
+  "@studyFilterTitle": {
+    "description": "Title for study filter dialog"
+  },
+  "studyFilterCategory": "Category",
+  "@studyFilterCategory": {
+    "description": "Category field label in study filter dialog"
+  },
+  "studyFilterTag": "Tag",
+  "@studyFilterTag": {
+    "description": "Tag field label in study filter dialog"
+  },
+  "studyFilterUnresolvedOnly": "Unresolved only",
+  "@studyFilterUnresolvedOnly": {
+    "description": "Toggle label to show only unresolved questions"
+  },
+  "studyFilterApply": "Apply",
+  "@studyFilterApply": {
+    "description": "Apply button text in study filter dialog"
+  },
+  "studyFilterReset": "Reset",
+  "@studyFilterReset": {
+    "description": "Reset button text in study filter dialog"
+  },
+  "studySortNewest": "Newest",
+  "@studySortNewest": {
+    "description": "Sort option for newest study questions"
+  },
+  "studySortAnswers": "Most Answers",
+  "@studySortAnswers": {
+    "description": "Sort option for study questions by answer count"
+  },
+  "studySortUnresolvedFirst": "Unresolved First",
+  "@studySortUnresolvedFirst": {
+    "description": "Sort option to prioritize unresolved study questions"
   },
   "noStudyQuestions": "No questions yet.",
   "@noStudyQuestions": {
@@ -442,6 +494,18 @@
   "questionCategoryTooLong": "Category must be less than 100 characters",
   "@questionCategoryTooLong": {
     "description": "Validation error when category exceeds max length"
+  },
+  "questionTagsRequired": "At least one tag is required",
+  "@questionTagsRequired": {
+    "description": "Validation error when no tags are entered"
+  },
+  "questionTagsTooMany": "You can add up to 5 tags",
+  "@questionTagsTooMany": {
+    "description": "Validation error when too many tags are entered"
+  },
+  "questionTagTooLong": "Each tag must be 30 characters or less",
+  "@questionTagTooLong": {
+    "description": "Validation error when a tag exceeds max length"
   },
   "questionStatusOpen": "Open",
   "@questionStatusOpen": {
@@ -550,6 +614,30 @@
   "totalPoints": "Total Points",
   "@totalPoints": {
     "description": "Label for user's cumulative points"
+  },
+  "studyBadge": "Badge",
+  "@studyBadge": {
+    "description": "Label for study badge display"
+  },
+  "studyBadgeNone": "No Badge",
+  "@studyBadgeNone": {
+    "description": "Label when user has no study badge yet"
+  },
+  "studyBadgeBronze": "Bronze",
+  "@studyBadgeBronze": {
+    "description": "Bronze study badge name"
+  },
+  "studyBadgeSilver": "Silver",
+  "@studyBadgeSilver": {
+    "description": "Silver study badge name"
+  },
+  "studyBadgeGold": "Gold",
+  "@studyBadgeGold": {
+    "description": "Gold study badge name"
+  },
+  "studyBadgePlatinum": "Platinum",
+  "@studyBadgePlatinum": {
+    "description": "Platinum study badge name"
   },
   "cancel": "Cancel",
   "@cancel": {

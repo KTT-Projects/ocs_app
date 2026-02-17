@@ -10,6 +10,7 @@ class StudyAnswer {
   final DateTime updatedAt;
   final String authorDisplayName;
   final String? authorAvatarUrl;
+  final int totalPoints;
 
   StudyAnswer({
     required this.id,
@@ -21,6 +22,7 @@ class StudyAnswer {
     required this.updatedAt,
     required this.authorDisplayName,
     this.authorAvatarUrl,
+    this.totalPoints = 0,
   });
 
   factory StudyAnswer.fromJson(Map<String, dynamic> json) {
@@ -43,6 +45,7 @@ class StudyAnswer {
       updatedAt: DateTime.parse(json['updated_at']),
       authorDisplayName: json['display_name'] ?? '',
       authorAvatarUrl: _formatAvatarUrl(json['avatar_url']),
+      totalPoints: parseInt(json['total_points']),
     );
   }
 

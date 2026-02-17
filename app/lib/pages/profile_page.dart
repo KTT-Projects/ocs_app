@@ -8,6 +8,7 @@ import 'dart:io';
 import '../providers/language_provider.dart';
 import '../widgets/language_toggle.dart';
 import '../services/api_client.dart';
+import '../utils/study_badge.dart';
 import '../widgets/glassmorphic_ui.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -404,6 +405,12 @@ class _ProfilePageState extends State<ProfilePage> {
                                 l10n.totalPoints,
                                 _formatPoints(_profile!['total_points']),
                               ),
+                              const SizedBox(height: 12),
+                              _buildInfoRow(
+                                context,
+                                l10n.studyBadge,
+                                _resolveBadge(l10n).label,
+                              ),
                               const SizedBox(height: 24),
                               SwitchListTile(
                                 title: Text(
@@ -487,6 +494,12 @@ class _ProfilePageState extends State<ProfilePage> {
   String _formatPoints(dynamic points) {
     final value = int.tryParse(points?.toString() ?? '') ?? 0;
     return value.toString();
+  }
+
+  StudyBadgeInfo _resolveBadge(AppLocalizations l10n) {
+    final points =
+        int.tryParse(_profile?['total_points']?.toString() ?? '') ?? 0;
+    return StudyBadgePolicy.resolve(l10n, points);
   }
 
   String _getLocalizedInstitutionName(String fullName) {

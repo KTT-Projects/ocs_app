@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS study_questions (
   author_user_id INT NOT NULL,
   title VARCHAR(300) NOT NULL,
   body TEXT NOT NULL,
-  category VARCHAR(100) NOT NULL,
+  category VARCHAR(300) NOT NULL,
   status ENUM ('open', 'resolved') NOT NULL DEFAULT 'open',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS point_ledger (
 CREATE INDEX idx_study_questions_author ON study_questions (author_user_id);
 CREATE INDEX idx_study_questions_status ON study_questions (status);
 CREATE INDEX idx_study_questions_created_at ON study_questions (created_at);
+CREATE INDEX idx_study_questions_category ON study_questions (category);
 CREATE INDEX idx_study_answers_question ON study_answers (question_id);
 CREATE INDEX idx_study_answers_best ON study_answers (question_id, is_best);
 CREATE INDEX idx_point_ledger_user ON point_ledger (user_id);

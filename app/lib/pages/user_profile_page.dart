@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../services/api_client.dart';
+import '../utils/study_badge.dart';
 
 class UserProfilePage extends StatefulWidget {
   final ApiClient apiClient;
@@ -67,6 +68,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
   String _formatPoints(dynamic points) {
     final value = int.tryParse(points?.toString() ?? '') ?? 0;
     return value.toString();
+  }
+
+  StudyBadgeInfo _resolveBadge(AppLocalizations l10n) {
+    final points =
+        int.tryParse(_profile?['total_points']?.toString() ?? '') ?? 0;
+    return StudyBadgePolicy.resolve(l10n, points);
   }
 
   String _getLocalizedInstitutionName(String fullName) {
@@ -272,6 +279,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                 context,
                                 l10n.totalPoints,
                                 _formatPoints(_profile!['total_points']),
+                              ),
+                              const SizedBox(height: 12),
+                              _buildInfoRow(
+                                context,
+                                l10n.studyBadge,
+                                _resolveBadge(l10n).label,
                               ),
                             ],
                           ),

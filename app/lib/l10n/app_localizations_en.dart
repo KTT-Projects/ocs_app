@@ -314,7 +314,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get questionCategory => 'Category';
 
   @override
+  String get questionTags => 'Tags';
+
+  @override
+  String get questionTagsHint => 'Enter a tag (e.g. Physics)';
+
+  @override
+  String get addTag => 'Add';
+
+  @override
   String get postQuestion => 'Post Question';
+
+  @override
+  String get studySearchHint => 'Search title/body/tag...';
+
+  @override
+  String get studyFilterTitle => 'Filter Questions';
+
+  @override
+  String get studyFilterCategory => 'Category';
+
+  @override
+  String get studyFilterTag => 'Tag';
+
+  @override
+  String get studyFilterUnresolvedOnly => 'Unresolved only';
+
+  @override
+  String get studyFilterApply => 'Apply';
+
+  @override
+  String get studyFilterReset => 'Reset';
+
+  @override
+  String get studySortNewest => 'Newest';
+
+  @override
+  String get studySortAnswers => 'Most Answers';
+
+  @override
+  String get studySortUnresolvedFirst => 'Unresolved First';
 
   @override
   String get noStudyQuestions => 'No questions yet.';
@@ -336,6 +375,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get questionCategoryTooLong => 'Category must be less than 100 characters';
+
+  @override
+  String get questionTagsRequired => 'At least one tag is required';
+
+  @override
+  String get questionTagsTooMany => 'You can add up to 5 tags';
+
+  @override
+  String get questionTagTooLong => 'Each tag must be 30 characters or less';
 
   @override
   String get questionStatusOpen => 'Open';
@@ -417,6 +465,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get totalPoints => 'Total Points';
+
+  @override
+  String get studyBadge => 'Badge';
+
+  @override
+  String get studyBadgeNone => 'No Badge';
+
+  @override
+  String get studyBadgeBronze => 'Bronze';
+
+  @override
+  String get studyBadgeSilver => 'Silver';
+
+  @override
+  String get studyBadgeGold => 'Gold';
+
+  @override
+  String get studyBadgePlatinum => 'Platinum';
 
   @override
   String get cancel => 'Cancel';

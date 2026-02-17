@@ -5,6 +5,7 @@ class StudyQuestion {
   final int authorUserId;
   final String title;
   final String body;
+  final List<String> tags;
   final String category;
   final String status;
   final DateTime createdAt;
@@ -20,6 +21,7 @@ class StudyQuestion {
     required this.authorUserId,
     required this.title,
     required this.body,
+    required this.tags,
     required this.category,
     required this.status,
     required this.createdAt,
@@ -39,12 +41,60 @@ class StudyQuestion {
       return int.tryParse(value?.toString() ?? '') ?? 0;
     }
 
+    List<String> parseTags(dynamic rawTags, String fallbackCategory) {
+      final values = <String>[];
+      if (rawTags is List) {
+        for (final item in rawTags) {
+          final text = item?.toString().trim() ?? '';
+          if (text.isNotEmpty) {
+            values.add(text);
+          }
+        }
+      } else if (rawTags is String && rawTags.trim().isNotEmpty) {
+        values.addAll(
+          rawTags
+              .split(RegExp(r'[,、]'))
+              .map((tag) => tag.trim())
+              .where((tag) => tag.isNotEmpty),
+        );
+      }
+
+      if (values.isEmpty && fallbackCategory.trim().isNotEmpty) {
+        values.addAll(
+          fallbackCategory
+              .split(RegExp(r'[,、]'))
+              .map((tag) => tag.trim())
+              .where((tag) => tag.isNotEmpty),
+        );
+      }
+
+      if (values.isEmpty && fallbackCategory.trim().isNotEmpty) {
+        values.add(fallbackCategory.trim());
+      }
+
+      final normalized = <String>[];
+      final seen = <String>{};
+      for (final value in values) {
+        final key = value.toLowerCase();
+        if (seen.contains(key)) continue;
+        seen.add(key);
+        normalized.add(value);
+      }
+      return normalized;
+    }
+
+    final fallbackCategory = json['category']?.toString() ?? '';
+    final parsedTags = parseTags(json['tags'], fallbackCategory);
+    final primaryCategory =
+        parsedTags.isNotEmpty ? parsedTags.first : fallbackCategory;
+
     return StudyQuestion(
       id: parseInt(json['id']),
       authorUserId: parseInt(json['author_user_id']),
       title: json['title'] ?? '',
       body: json['body'] ?? '',
-      category: json['category'] ?? '',
+      tags: parsedTags,
+      category: primaryCategory,
       status: json['status'] ?? 'open',
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
@@ -66,6 +116,7 @@ class StudyQuestion {
       'author_user_id': authorUserId,
       'title': title,
       'body': body,
+      'tags': tags,
       'category': category,
       'status': status,
       'created_at': createdAt.toIso8601String(),

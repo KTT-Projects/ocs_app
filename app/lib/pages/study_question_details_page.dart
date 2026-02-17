@@ -4,6 +4,7 @@ import 'package:ocs_app/models/study_answer.dart';
 import 'package:ocs_app/models/study_question.dart';
 import 'package:ocs_app/pages/user_profile_page.dart';
 import 'package:ocs_app/services/api_client.dart';
+import 'package:ocs_app/utils/study_badge.dart';
 import 'package:ocs_app/widgets/glassmorphic_ui.dart';
 
 class StudyQuestionDetailsPage extends StatefulWidget {
@@ -330,10 +331,12 @@ class _StudyQuestionDetailsPageState extends State<StudyQuestionDetailsPage> {
             spacing: 8,
             runSpacing: 8,
             children: [
-              _chip(
-                context,
-                _question!.category,
-                Theme.of(context).colorScheme.onPrimary,
+              ..._question!.tags.map(
+                (tag) => _chip(
+                  context,
+                  tag,
+                  Theme.of(context).colorScheme.onPrimary,
+                ),
               ),
               _chip(
                 context,
@@ -425,6 +428,7 @@ class _StudyQuestionDetailsPageState extends State<StudyQuestionDetailsPage> {
         _question!.canMarkBest &&
         !_hasBestAnswer &&
         !answer.isBest;
+    final badge = StudyBadgePolicy.resolve(l10n, answer.totalPoints);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -492,6 +496,29 @@ class _StudyQuestionDetailsPageState extends State<StudyQuestionDetailsPage> {
                       ),
                     ),
                   ),
+                  if (badge.hasBadge)
+                    Container(
+                      margin: const EdgeInsets.only(right: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: badge.color.withOpacity(0.25),
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: badge.color.withOpacity(0.7),
+                        ),
+                      ),
+                      child: Text(
+                        badge.label,
+                        style: TextStyle(
+                          color: badge.color,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
                   if (answer.isBest)
                     Container(
                       padding: const EdgeInsets.symmetric(

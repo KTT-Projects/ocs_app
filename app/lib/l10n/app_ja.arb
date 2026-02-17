@@ -117,9 +117,61 @@
   "@questionCategory": {
     "description": "カテゴリ入力欄のヒント"
   },
+  "questionTags": "タグ",
+  "@questionTags": {
+    "description": "質問タグ入力欄のラベル"
+  },
+  "questionTagsHint": "タグを入力（例: 物理）",
+  "@questionTagsHint": {
+    "description": "単一タグ入力欄のヒント"
+  },
+  "addTag": "追加",
+  "@addTag": {
+    "description": "タグをリストに追加するボタンのテキスト"
+  },
   "postQuestion": "質問を投稿",
   "@postQuestion": {
     "description": "質問投稿ボタンのテキスト"
+  },
+  "studySearchHint": "タイトル/本文/タグで検索...",
+  "@studySearchHint": {
+    "description": "学習質問検索ボックスのプレースホルダー"
+  },
+  "studyFilterTitle": "質問フィルタ",
+  "@studyFilterTitle": {
+    "description": "学習質問フィルターダイアログのタイトル"
+  },
+  "studyFilterCategory": "カテゴリ",
+  "@studyFilterCategory": {
+    "description": "学習質問フィルターのカテゴリ項目ラベル"
+  },
+  "studyFilterTag": "タグ",
+  "@studyFilterTag": {
+    "description": "学習質問フィルターのタグ項目ラベル"
+  },
+  "studyFilterUnresolvedOnly": "未解決のみ",
+  "@studyFilterUnresolvedOnly": {
+    "description": "未解決のみ表示するトグルのラベル"
+  },
+  "studyFilterApply": "適用",
+  "@studyFilterApply": {
+    "description": "学習質問フィルター適用ボタン"
+  },
+  "studyFilterReset": "リセット",
+  "@studyFilterReset": {
+    "description": "学習質問フィルターリセットボタン"
+  },
+  "studySortNewest": "新着",
+  "@studySortNewest": {
+    "description": "学習質問の新着順ソートラベル"
+  },
+  "studySortAnswers": "回答数",
+  "@studySortAnswers": {
+    "description": "学習質問の回答数順ソートラベル"
+  },
+  "studySortUnresolvedFirst": "未解決優先",
+  "@studySortUnresolvedFirst": {
+    "description": "学習質問の未解決優先ソートラベル"
   },
   "noStudyQuestions": "まだ質問がありません。",
   "@noStudyQuestions": {
@@ -148,6 +200,18 @@
   "questionCategoryTooLong": "カテゴリは100文字以内で入力してください",
   "@questionCategoryTooLong": {
     "description": "カテゴリが長すぎる場合のバリデーションエラー"
+  },
+  "questionTagsRequired": "タグを1つ以上入力してください",
+  "@questionTagsRequired": {
+    "description": "タグ未入力時のバリデーションエラー"
+  },
+  "questionTagsTooMany": "タグは最大5つまでです",
+  "@questionTagsTooMany": {
+    "description": "タグを入力しすぎた場合のバリデーションエラー"
+  },
+  "questionTagTooLong": "各タグは30文字以内で入力してください",
+  "@questionTagTooLong": {
+    "description": "各タグが長すぎる場合のバリデーションエラー"
   },
   "questionStatusOpen": "未解決",
   "@questionStatusOpen": {
@@ -256,6 +320,30 @@
   "totalPoints": "累計ポイント",
   "@totalPoints": {
     "description": "ユーザーの累計ポイント表示用ラベル"
+  },
+  "studyBadge": "バッジ",
+  "@studyBadge": {
+    "description": "学習バッジ表示のラベル"
+  },
+  "studyBadgeNone": "なし",
+  "@studyBadgeNone": {
+    "description": "バッジ未獲得時の表示"
+  },
+  "studyBadgeBronze": "ブロンズ",
+  "@studyBadgeBronze": {
+    "description": "ブロンズバッジ名"
+  },
+  "studyBadgeSilver": "シルバー",
+  "@studyBadgeSilver": {
+    "description": "シルバーバッジ名"
+  },
+  "studyBadgeGold": "ゴールド",
+  "@studyBadgeGold": {
+    "description": "ゴールドバッジ名"
+  },
+  "studyBadgePlatinum": "プラチナ",
+  "@studyBadgePlatinum": {
+    "description": "プラチナバッジ名"
   },
   "cancel": "キャンセル",
   "@cancel": {

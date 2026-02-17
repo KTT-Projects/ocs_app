@@ -35,8 +35,8 @@ flutter:
   generate: true
   uses-material-design: true
 
-  assets:
-    - lib/images/
+  # assets:
+  #   - lib/images/
 
 dependency_overrides:
   # flutter_localizations (SDK) pins intl 0.20.2 on current Flutter.

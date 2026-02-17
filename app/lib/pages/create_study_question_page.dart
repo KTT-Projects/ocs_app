@@ -20,7 +20,8 @@ class CreateStudyQuestionPage extends StatefulWidget {
 class _CreateStudyQuestionPageState extends State<CreateStudyQuestionPage> {
   final _titleController = TextEditingController();
   final _bodyController = TextEditingController();
-  final _categoryController = TextEditingController();
+  final _tagInputController = TextEditingController();
+  final List<String> _tags = [];
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
@@ -28,12 +29,75 @@ class _CreateStudyQuestionPageState extends State<CreateStudyQuestionPage> {
   void dispose() {
     _titleController.dispose();
     _bodyController.dispose();
-    _categoryController.dispose();
+    _tagInputController.dispose();
     super.dispose();
+  }
+
+  bool _addTag({bool showError = true}) {
+    final l10n = AppLocalizations.of(context)!;
+    final raw = _tagInputController.text.trim();
+    if (raw.isEmpty) {
+      if (showError) {
+        GlassmorphicUI.showGlassSnackBar(
+          context,
+          l10n.questionTagsRequired,
+          isError: true,
+        );
+      }
+      return false;
+    }
+
+    if (raw.length > 30) {
+      GlassmorphicUI.showGlassSnackBar(
+        context,
+        l10n.questionTagTooLong,
+        isError: true,
+      );
+      return false;
+    }
+
+    if (_tags.length >= 5) {
+      GlassmorphicUI.showGlassSnackBar(
+        context,
+        l10n.questionTagsTooMany,
+        isError: true,
+      );
+      return false;
+    }
+
+    final normalized = raw.toLowerCase();
+    if (_tags.any((tag) => tag.toLowerCase() == normalized)) {
+      _tagInputController.clear();
+      return false;
+    }
+
+    setState(() {
+      _tags.add(raw);
+      _tagInputController.clear();
+    });
+    return true;
+  }
+
+  void _removeTag(String tag) {
+    setState(() {
+      _tags.remove(tag);
+    });
   }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_tagInputController.text.trim().isNotEmpty) {
+      _addTag();
+    }
+    if (_tags.isEmpty) {
+      final l10n = AppLocalizations.of(context)!;
+      GlassmorphicUI.showGlassSnackBar(
+        context,
+        l10n.questionTagsRequired,
+        isError: true,
+      );
+      return;
+    }
 
     try {
       setState(() {
@@ -44,7 +108,7 @@ class _CreateStudyQuestionPageState extends State<CreateStudyQuestionPage> {
         context,
         title: _titleController.text.trim(),
         body: _bodyController.text.trim(),
-        category: _categoryController.text.trim(),
+        tags: _tags,
       );
 
       if (mounted) {
@@ -152,25 +216,116 @@ class _CreateStudyQuestionPageState extends State<CreateStudyQuestionPage> {
                           },
                         ),
                         const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _categoryController,
-                          maxLength: 100,
-                          maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                          decoration:
-                              _inputDecoration(context, l10n.questionCategory),
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            l10n.questionTags,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return l10n.questionCategoryRequired;
-                            }
-                            if (value.length > 100) {
-                              return l10n.questionCategoryTooLong;
-                            }
-                            return null;
-                          },
                         ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _tagInputController,
+                                maxLength: 30,
+                                maxLengthEnforcement:
+                                    MaxLengthEnforcement.enforced,
+                                textInputAction: TextInputAction.done,
+                                onSubmitted: (_) => _addTag(showError: false),
+                                decoration: _inputDecoration(
+                                  context,
+                                  l10n.questionTagsHint,
+                                ).copyWith(counterText: ''),
+                                style: TextStyle(
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            SizedBox(
+                              height: 48,
+                              child: ElevatedButton.icon(
+                                onPressed: () => _addTag(),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.secondary,
+                                  foregroundColor:
+                                      Theme.of(context).colorScheme.onSecondary,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                icon: const Icon(Icons.add, size: 18),
+                                label: Text(l10n.addTag),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (_tags.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: _tags
+                                .map(
+                                  (tag) => Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .background
+                                          .withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimary
+                                            .withOpacity(0.3),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          tag,
+                                          style: TextStyle(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onPrimary,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        InkWell(
+                                          borderRadius:
+                                              BorderRadius.circular(999),
+                                          onTap: () => _removeTag(tag),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(2),
+                                            child: Icon(
+                                              Icons.close,
+                                              size: 16,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onPrimary,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        ],
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _bodyController,

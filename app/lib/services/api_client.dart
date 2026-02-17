@@ -653,11 +653,38 @@ class ApiClient extends ChangeNotifier {
   Future<List<StudyQuestion>> getStudyQuestions(
     BuildContext context, {
     int page = 1,
+    String? q,
+    String? tag,
+    String? category,
+    String? status,
+    String sort = 'latest',
   }) async {
     final l10n = AppLocalizations.of(context)!;
     try {
+      final queryParams = <String, String>{
+        'action': 'list',
+        'page': page.toString(),
+      };
+      if (q != null && q.trim().isNotEmpty) {
+        queryParams['q'] = q.trim();
+      }
+      final effectiveTag = (tag ?? category)?.trim() ?? '';
+      if (effectiveTag.isNotEmpty) {
+        queryParams['tag'] = effectiveTag;
+        // Backward compatibility for older backends.
+        queryParams['category'] = effectiveTag;
+      }
+      if (status != null && status.trim().isNotEmpty) {
+        queryParams['status'] = status.trim();
+      }
+      if (sort.trim().isNotEmpty) {
+        queryParams['sort'] = sort.trim();
+      }
+
+      final queryString = Uri(queryParameters: queryParams).query;
+      final uri = _buildUri('study.php?$queryString');
       final response = await http.get(
-        _buildUri('study.php?action=list&page=$page'),
+        uri,
         headers: {
           'Authorization': 'Bearer $_token',
           'Cache-Control': 'no-cache',
@@ -678,11 +705,79 @@ class ApiClient extends ChangeNotifier {
       }
 
       final list = data['data'] as List? ?? [];
-      return list.map((item) => StudyQuestion.fromJson(item)).toList();
+      final questions =
+          list.map((item) => StudyQuestion.fromJson(item)).toList();
+      return _applyStudyQuestionQuery(
+        questions,
+        q: q,
+        tag: tag ?? category,
+        status: status,
+        sort: sort,
+      );
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException(l10n.failedToLoadStudyQuestions);
     }
+  }
+
+  List<StudyQuestion> _applyStudyQuestionQuery(
+    List<StudyQuestion> source, {
+    String? q,
+    String? tag,
+    String? status,
+    String sort = 'latest',
+  }) {
+    final filtered = List<StudyQuestion>.from(source);
+
+    final keyword = q?.trim().toLowerCase() ?? '';
+    if (keyword.isNotEmpty) {
+      filtered.retainWhere((question) {
+        return question.title.toLowerCase().contains(keyword) ||
+            question.body.toLowerCase().contains(keyword) ||
+            question.tags.any((item) => item.toLowerCase().contains(keyword));
+      });
+    }
+
+    final tagFilter = tag?.trim().toLowerCase() ?? '';
+    if (tagFilter.isNotEmpty) {
+      filtered.retainWhere(
+        (question) =>
+            question.tags.any((item) => item.toLowerCase() == tagFilter),
+      );
+    }
+
+    final statusFilter = status?.trim().toLowerCase() ?? '';
+    if (statusFilter == 'open' || statusFilter == 'resolved') {
+      filtered.retainWhere(
+        (question) => question.status.trim().toLowerCase() == statusFilter,
+      );
+    }
+
+    switch (sort.trim().toLowerCase()) {
+      case 'answers':
+        filtered.sort((a, b) {
+          final byCount = b.answerCount.compareTo(a.answerCount);
+          if (byCount != 0) return byCount;
+          return b.createdAt.compareTo(a.createdAt);
+        });
+        break;
+      case 'unresolved':
+        filtered.sort((a, b) {
+          final aRank = a.status == 'open' ? 0 : 1;
+          final bRank = b.status == 'open' ? 0 : 1;
+          final byStatus = aRank.compareTo(bRank);
+          if (byStatus != 0) return byStatus;
+          return b.createdAt.compareTo(a.createdAt);
+        });
+        break;
+      case 'newest':
+      case 'latest':
+      default:
+        filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        break;
+    }
+
+    return filtered;
   }
 
   Future<StudyQuestion> getStudyQuestionDetail(
@@ -723,7 +818,7 @@ class ApiClient extends ChangeNotifier {
     BuildContext context, {
     required String title,
     required String body,
-    required String category,
+    required List<String> tags,
   }) async {
     final l10n = AppLocalizations.of(context)!;
     try {
@@ -736,7 +831,9 @@ class ApiClient extends ChangeNotifier {
         body: json.encode({
           'title': title,
           'body': body,
-          'category': category,
+          'tags': tags,
+          // Backward compatibility for older backends.
+          'category': tags.isNotEmpty ? tags.first : '',
         }),
       );
 

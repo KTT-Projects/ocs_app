@@ -3,6 +3,7 @@ import 'package:ocs_app/l10n/app_localizations.dart';
 import 'package:ocs_app/models/study_ranking.dart';
 import 'package:ocs_app/pages/user_profile_page.dart';
 import 'package:ocs_app/services/api_client.dart';
+import 'package:ocs_app/utils/study_badge.dart';
 
 class StudyRankingPage extends StatefulWidget {
   final ApiClient apiClient;
@@ -65,6 +66,7 @@ class _StudyRankingPageState extends State<StudyRankingPage> {
     if (_myRank == null) return const SizedBox.shrink();
 
     final isUnranked = _myRank!.rank <= 0;
+    final myBadge = StudyBadgePolicy.resolve(l10n, _myRank!.points);
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(14),
@@ -94,16 +96,28 @@ class _StudyRankingPageState extends State<StudyRankingPage> {
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  _myRank!.displayName.isEmpty
-                      ? l10n.noName
-                      : _myRank!.displayName,
-                  style: TextStyle(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onPrimary
-                        .withOpacity(0.9),
-                  ),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        _myRank!.displayName.isEmpty
+                            ? l10n.noName
+                            : _myRank!.displayName,
+                        style: TextStyle(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onPrimary
+                              .withOpacity(0.9),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (myBadge.hasBadge) ...[
+                      const SizedBox(width: 6),
+                      _buildBadgeChip(myBadge),
+                    ],
+                  ],
                 ),
               ],
             ),
@@ -137,6 +151,7 @@ class _StudyRankingPageState extends State<StudyRankingPage> {
   Widget _buildRankingItem(StudyRankingItem item) {
     final isMine = _myRank != null && item.userId == _myRank!.userId;
     final l10n = AppLocalizations.of(context)!;
+    final badge = StudyBadgePolicy.resolve(l10n, item.points);
     return InkWell(
       borderRadius: BorderRadius.circular(14),
       onTap: () {
@@ -193,14 +208,24 @@ class _StudyRankingPageState extends State<StudyRankingPage> {
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(
-                item.displayName.isEmpty ? l10n.noName : item.displayName,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimary,
-                  fontWeight: FontWeight.w600,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              child: Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      item.displayName.isEmpty ? l10n.noName : item.displayName,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (badge.hasBadge) ...[
+                    const SizedBox(width: 6),
+                    _buildBadgeChip(badge),
+                  ],
+                ],
               ),
             ),
             const SizedBox(width: 8),
@@ -212,6 +237,27 @@ class _StudyRankingPageState extends State<StudyRankingPage> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBadgeChip(StudyBadgeInfo badge) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: badge.color.withOpacity(0.25),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: badge.color.withOpacity(0.7),
+        ),
+      ),
+      child: Text(
+        badge.label,
+        style: TextStyle(
+          color: badge.color,
+          fontWeight: FontWeight.w700,
+          fontSize: 10,
         ),
       ),
     );

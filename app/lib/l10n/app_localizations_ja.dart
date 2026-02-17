@@ -314,7 +314,46 @@ class AppLocalizationsJa extends AppLocalizations {
   String get questionCategory => 'カテゴリ';
 
   @override
+  String get questionTags => 'タグ';
+
+  @override
+  String get questionTagsHint => 'タグを入力（例: 物理）';
+
+  @override
+  String get addTag => '追加';
+
+  @override
   String get postQuestion => '質問を投稿';
+
+  @override
+  String get studySearchHint => 'タイトル/本文/タグで検索...';
+
+  @override
+  String get studyFilterTitle => '質問フィルタ';
+
+  @override
+  String get studyFilterCategory => 'カテゴリ';
+
+  @override
+  String get studyFilterTag => 'タグ';
+
+  @override
+  String get studyFilterUnresolvedOnly => '未解決のみ';
+
+  @override
+  String get studyFilterApply => '適用';
+
+  @override
+  String get studyFilterReset => 'リセット';
+
+  @override
+  String get studySortNewest => '新着';
+
+  @override
+  String get studySortAnswers => '回答数';
+
+  @override
+  String get studySortUnresolvedFirst => '未解決優先';
 
   @override
   String get noStudyQuestions => 'まだ質問がありません。';
@@ -336,6 +375,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get questionCategoryTooLong => 'カテゴリは100文字以内で入力してください';
+
+  @override
+  String get questionTagsRequired => 'タグを1つ以上入力してください';
+
+  @override
+  String get questionTagsTooMany => 'タグは最大5つまでです';
+
+  @override
+  String get questionTagTooLong => '各タグは30文字以内で入力してください';
 
   @override
   String get questionStatusOpen => '未解決';
@@ -417,6 +465,24 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get totalPoints => '累計ポイント';
+
+  @override
+  String get studyBadge => 'バッジ';
+
+  @override
+  String get studyBadgeNone => 'なし';
+
+  @override
+  String get studyBadgeBronze => 'ブロンズ';
+
+  @override
+  String get studyBadgeSilver => 'シルバー';
+
+  @override
+  String get studyBadgeGold => 'ゴールド';
+
+  @override
+  String get studyBadgePlatinum => 'プラチナ';
 
   @override
   String get cancel => 'キャンセル';

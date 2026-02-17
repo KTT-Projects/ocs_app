@@ -20,6 +20,9 @@ class StudyController
   private $conn;
   private const BEST_ANSWER_POINTS = 50;
   private const BEST_ANSWER_EVENT_TYPE = 'BEST_ANSWER';
+  private const MAX_TAG_COUNT = 5;
+  private const MAX_TAG_LENGTH = 30;
+  private const MAX_TAGS_STORAGE_LENGTH = 300;
 
   public function __construct()
   {
@@ -79,6 +82,54 @@ class StudyController
     $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
     $limit = 20;
     $offset = ($page - 1) * $limit;
+    $q = isset($_GET['q']) ? trim($_GET['q']) : '';
+    $tag = isset($_GET['tag']) ? trim($_GET['tag']) : '';
+    $category = isset($_GET['category']) ? trim($_GET['category']) : '';
+    if ($tag === '' && $category !== '') {
+      // Backward compatibility.
+      $tag = $category;
+    }
+    $status = isset($_GET['status']) ? trim($_GET['status']) : '';
+    $sort = isset($_GET['sort']) ? trim($_GET['sort']) : 'latest';
+    $unresolvedOnlyRaw = isset($_GET['unresolved_only']) ? strtolower(trim((string)$_GET['unresolved_only'])) : '';
+    $unresolvedOnly = in_array($unresolvedOnlyRaw, ['1', 'true', 'yes'], true);
+
+    if ($unresolvedOnly) {
+      $status = 'open';
+    }
+
+    $allowedStatus = ['open', 'resolved'];
+    if ($status !== '' && !in_array($status, $allowedStatus, true)) {
+      $status = '';
+    }
+
+    $allowedSort = ['latest', 'newest', 'answers', 'unresolved'];
+    if (!in_array($sort, $allowedSort, true)) {
+      $sort = 'latest';
+    }
+
+    $where = [];
+    $params = [];
+    if ($q !== '') {
+      // Search over title/body/tags.
+      $where[] = "(sq.title LIKE :q OR sq.body LIKE :q OR sq.category LIKE :q)";
+      $params[':q'] = '%' . $q . '%';
+    }
+    if ($tag !== '') {
+      $where[] = "FIND_IN_SET(:tag, sq.category) > 0";
+      $params[':tag'] = $tag;
+    }
+    if ($status !== '') {
+      $where[] = "sq.status = :status";
+      $params[':status'] = $status;
+    }
+
+    $orderBy = "sq.created_at DESC";
+    if ($sort === 'answers') {
+      $orderBy = "COALESCE(ac.answer_count, 0) DESC, sq.created_at DESC";
+    } else if ($sort === 'unresolved') {
+      $orderBy = "(CASE WHEN sq.status = 'open' THEN 0 ELSE 1 END) ASC, sq.created_at DESC";
+    }
 
     $query = "SELECT sq.id,
                      sq.author_user_id,
@@ -90,19 +141,35 @@ class StudyController
                      sq.updated_at,
                      up.display_name,
                      up.avatar_url,
-                     (SELECT COUNT(*) FROM study_answers sa WHERE sa.question_id = sq.id) AS answer_count,
+                     COALESCE(ac.answer_count, 0) AS answer_count,
                      (SELECT sa2.id FROM study_answers sa2 WHERE sa2.question_id = sq.id AND sa2.is_best = 1 LIMIT 1) AS best_answer_id
               FROM study_questions sq
               JOIN user_profiles up ON up.user_id = sq.author_user_id
-              ORDER BY sq.created_at DESC
-              LIMIT :limit OFFSET :offset";
+              LEFT JOIN (
+                SELECT question_id, COUNT(*) AS answer_count
+                FROM study_answers
+                GROUP BY question_id
+              ) ac ON ac.question_id = sq.id";
+
+    if (!empty($where)) {
+      $query .= " WHERE " . implode(" AND ", $where);
+    }
+
+    $query .= " ORDER BY " . $orderBy . " LIMIT :limit OFFSET :offset";
 
     $stmt = $this->conn->prepare($query);
+    foreach ($params as $key => $value) {
+      $stmt->bindValue($key, $value);
+    }
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
 
     $questions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($questions as &$question) {
+      $question['tags'] = $this->parseStoredTags($question['category'] ?? '');
+    }
+    unset($question);
     Response::success($questions, 'Questions retrieved successfully');
   }
 
@@ -146,6 +213,7 @@ class StudyController
     }
 
     $question['can_mark_best'] = $currentUserId !== null && intval($question['author_user_id']) === intval($currentUserId);
+    $question['tags'] = $this->parseStoredTags($question['category'] ?? '');
 
     Response::success($question, 'Question retrieved successfully');
   }
@@ -171,7 +239,8 @@ class StudyController
                      sa.created_at,
                      sa.updated_at,
                      up.display_name,
-                     up.avatar_url
+                     up.avatar_url,
+                     COALESCE((SELECT SUM(pl.points) FROM point_ledger pl WHERE pl.user_id = sa.author_user_id), 0) AS total_points
               FROM study_answers sa
               JOIN user_profiles up ON up.user_id = sa.author_user_id
               WHERE sa.question_id = :question_id
@@ -326,7 +395,8 @@ class StudyController
 
     $title = trim($data['title'] ?? '');
     $body = trim($data['body'] ?? '');
-    $category = trim($data['category'] ?? '');
+    $tagsInput = $data['tags'] ?? ($data['category'] ?? '');
+    $tags = $this->normalizeTagsInput($tagsInput);
 
     if ($title === '') {
       Response::error('Title is required', 400);
@@ -334,10 +404,6 @@ class StudyController
     }
     if ($body === '') {
       Response::error('Body is required', 400);
-      return;
-    }
-    if ($category === '') {
-      Response::error('Category is required', 400);
       return;
     }
     if ($this->stringLength($title) > 300) {
@@ -348,8 +414,24 @@ class StudyController
       Response::error('Body must be less than 5000 characters', 400);
       return;
     }
-    if ($this->stringLength($category) > 100) {
-      Response::error('Category must be less than 100 characters', 400);
+    if (count($tags) === 0) {
+      Response::error('At least one tag is required', 400);
+      return;
+    }
+    if (count($tags) > self::MAX_TAG_COUNT) {
+      Response::error('Too many tags', 400);
+      return;
+    }
+    foreach ($tags as $tag) {
+      if ($this->stringLength($tag) > self::MAX_TAG_LENGTH) {
+        Response::error('Tag must be less than 30 characters', 400);
+        return;
+      }
+    }
+
+    $tagsValue = implode(',', $tags);
+    if ($this->stringLength($tagsValue) > self::MAX_TAGS_STORAGE_LENGTH) {
+      Response::error('Tags must be less than 300 characters', 400);
       return;
     }
 
@@ -359,7 +441,7 @@ class StudyController
     $stmt->bindValue(':author_user_id', $userId, PDO::PARAM_INT);
     $stmt->bindValue(':title', $title);
     $stmt->bindValue(':body', $body);
-    $stmt->bindValue(':category', $category);
+    $stmt->bindValue(':category', $tagsValue);
     $stmt->execute();
 
     Response::success(['id' => $this->conn->lastInsertId()], 'Question created successfully');
@@ -530,6 +612,62 @@ class StudyController
       return mb_strlen($value, 'UTF-8');
     }
     return strlen($value);
+  }
+
+  private function parseStoredTags($stored)
+  {
+    $source = trim((string)$stored);
+    if ($source === '') {
+      return [];
+    }
+    $source = str_replace('、', ',', $source);
+
+    $tags = array_map('trim', explode(',', $source));
+    $tags = array_values(array_filter($tags, function ($tag) {
+      return $tag !== '';
+    }));
+
+    $unique = [];
+    $seen = [];
+    foreach ($tags as $tag) {
+      $key = function_exists('mb_strtolower') ? mb_strtolower($tag, 'UTF-8') : strtolower($tag);
+      if (isset($seen[$key])) {
+        continue;
+      }
+      $seen[$key] = true;
+      $unique[] = $tag;
+    }
+    return $unique;
+  }
+
+  private function normalizeTagsInput($raw)
+  {
+    $items = [];
+    if (is_array($raw)) {
+      $items = $raw;
+    } else {
+      $text = trim((string)$raw);
+      if ($text !== '') {
+        $text = str_replace('、', ',', $text);
+        $items = explode(',', $text);
+      }
+    }
+
+    $normalized = [];
+    $seen = [];
+    foreach ($items as $item) {
+      $tag = trim((string)$item);
+      if ($tag === '') {
+        continue;
+      }
+      $key = function_exists('mb_strtolower') ? mb_strtolower($tag, 'UTF-8') : strtolower($tag);
+      if (isset($seen[$key])) {
+        continue;
+      }
+      $seen[$key] = true;
+      $normalized[] = $tag;
+    }
+    return $normalized;
   }
 
   private function validateJWT($token)

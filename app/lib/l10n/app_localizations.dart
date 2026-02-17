@@ -689,11 +689,89 @@ abstract class AppLocalizations {
   /// **'Category'**
   String get questionCategory;
 
+  /// Label for question tags input
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get questionTags;
+
+  /// Hint label for single question tag input
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a tag (e.g. Physics)'**
+  String get questionTagsHint;
+
+  /// Button text to add a tag to the tag list
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get addTag;
+
   /// Button text to submit a question
   ///
   /// In en, this message translates to:
   /// **'Post Question'**
   String get postQuestion;
+
+  /// Placeholder for study question search input
+  ///
+  /// In en, this message translates to:
+  /// **'Search title/body/tag...'**
+  String get studySearchHint;
+
+  /// Title for study filter dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Filter Questions'**
+  String get studyFilterTitle;
+
+  /// Category field label in study filter dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get studyFilterCategory;
+
+  /// Tag field label in study filter dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Tag'**
+  String get studyFilterTag;
+
+  /// Toggle label to show only unresolved questions
+  ///
+  /// In en, this message translates to:
+  /// **'Unresolved only'**
+  String get studyFilterUnresolvedOnly;
+
+  /// Apply button text in study filter dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get studyFilterApply;
+
+  /// Reset button text in study filter dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get studyFilterReset;
+
+  /// Sort option for newest study questions
+  ///
+  /// In en, this message translates to:
+  /// **'Newest'**
+  String get studySortNewest;
+
+  /// Sort option for study questions by answer count
+  ///
+  /// In en, this message translates to:
+  /// **'Most Answers'**
+  String get studySortAnswers;
+
+  /// Sort option to prioritize unresolved study questions
+  ///
+  /// In en, this message translates to:
+  /// **'Unresolved First'**
+  String get studySortUnresolvedFirst;
 
   /// Message shown when no study questions exist
   ///
@@ -736,6 +814,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Category must be less than 100 characters'**
   String get questionCategoryTooLong;
+
+  /// Validation error when no tags are entered
+  ///
+  /// In en, this message translates to:
+  /// **'At least one tag is required'**
+  String get questionTagsRequired;
+
+  /// Validation error when too many tags are entered
+  ///
+  /// In en, this message translates to:
+  /// **'You can add up to 5 tags'**
+  String get questionTagsTooMany;
+
+  /// Validation error when a tag exceeds max length
+  ///
+  /// In en, this message translates to:
+  /// **'Each tag must be 30 characters or less'**
+  String get questionTagTooLong;
 
   /// Question status label for open
   ///
@@ -898,6 +994,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Total Points'**
   String get totalPoints;
+
+  /// Label for study badge display
+  ///
+  /// In en, this message translates to:
+  /// **'Badge'**
+  String get studyBadge;
+
+  /// Label when user has no study badge yet
+  ///
+  /// In en, this message translates to:
+  /// **'No Badge'**
+  String get studyBadgeNone;
+
+  /// Bronze study badge name
+  ///
+  /// In en, this message translates to:
+  /// **'Bronze'**
+  String get studyBadgeBronze;
+
+  /// Silver study badge name
+  ///
+  /// In en, this message translates to:
+  /// **'Silver'**
+  String get studyBadgeSilver;
+
+  /// Gold study badge name
+  ///
+  /// In en, this message translates to:
+  /// **'Gold'**
+  String get studyBadgeGold;
+
+  /// Platinum study badge name
+  ///
+  /// In en, this message translates to:
+  /// **'Platinum'**
+  String get studyBadgePlatinum;
 
   /// Text for cancel button
   ///
