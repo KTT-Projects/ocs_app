@@ -44,6 +44,8 @@ class StudyController
             $this->getQuestionDetail($userId);
           } else if ($action === 'answers') {
             $this->getAnswers();
+          } else if ($action === 'ranking') {
+            $this->getRanking($userId);
           } else {
             Response::error('Invalid action', 400);
           }
@@ -180,6 +182,138 @@ class StudyController
     $answers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     Response::success($answers, 'Answers retrieved successfully');
+  }
+
+  private function getRanking($currentUserId)
+  {
+    $period = isset($_GET['period']) ? trim($_GET['period']) : 'all';
+    if ($period !== 'all') {
+      Response::error('Invalid period', 400);
+      return;
+    }
+
+    $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+    $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 20;
+    $limit = max(1, min(100, $limit));
+    $offset = ($page - 1) * $limit;
+
+    $totalUsersQuery = "SELECT COUNT(*) AS total_users
+                        FROM (
+                          SELECT pl.user_id
+                          FROM point_ledger pl
+                          GROUP BY pl.user_id
+                        ) t";
+    $totalUsersStmt = $this->conn->prepare($totalUsersQuery);
+    $totalUsersStmt->execute();
+    $totalUsers = intval($totalUsersStmt->fetch(PDO::FETCH_ASSOC)['total_users'] ?? 0);
+
+    $rankingQuery = "SELECT ranked.rank,
+                            ranked.user_id,
+                            ranked.total_points,
+                            up.display_name,
+                            up.avatar_url
+                     FROM (
+                       SELECT ordered.user_id,
+                              ordered.total_points,
+                              (@row_num := @row_num + 1) AS rank
+                       FROM (
+                         SELECT pl.user_id, SUM(pl.points) AS total_points
+                         FROM point_ledger pl
+                         GROUP BY pl.user_id
+                         ORDER BY total_points DESC, pl.user_id ASC
+                       ) ordered
+                       CROSS JOIN (SELECT @row_num := 0) vars
+                     ) ranked
+                     LEFT JOIN user_profiles up ON up.user_id = ranked.user_id
+                     LIMIT :limit OFFSET :offset";
+    $rankingStmt = $this->conn->prepare($rankingQuery);
+    $rankingStmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $rankingStmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $rankingStmt->execute();
+    $rows = $rankingStmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $items = array_map(function ($row) {
+      return [
+        'rank' => intval($row['rank']),
+        'user_id' => intval($row['user_id']),
+        'display_name' => $row['display_name'] ?? '',
+        'avatar_url' => $row['avatar_url'],
+        'points' => intval($row['total_points']),
+        'badge' => null
+      ];
+    }, $rows);
+
+    $myRank = null;
+    if ($currentUserId !== null) {
+      $myRankQuery = "SELECT ranked.rank,
+                             ranked.user_id,
+                             ranked.total_points,
+                             up.display_name,
+                             up.avatar_url
+                      FROM (
+                        SELECT ordered.user_id,
+                               ordered.total_points,
+                               (@row_num_my := @row_num_my + 1) AS rank
+                        FROM (
+                          SELECT pl.user_id, SUM(pl.points) AS total_points
+                          FROM point_ledger pl
+                          GROUP BY pl.user_id
+                          ORDER BY total_points DESC, pl.user_id ASC
+                        ) ordered
+                        CROSS JOIN (SELECT @row_num_my := 0) vars
+                      ) ranked
+                      LEFT JOIN user_profiles up ON up.user_id = ranked.user_id
+                      WHERE ranked.user_id = :user_id
+                      LIMIT 1";
+      $myRankStmt = $this->conn->prepare($myRankQuery);
+      $myRankStmt->bindValue(':user_id', $currentUserId, PDO::PARAM_INT);
+      $myRankStmt->execute();
+      $myRankRow = $myRankStmt->fetch(PDO::FETCH_ASSOC);
+      if ($myRankRow) {
+        $myRank = [
+          'rank' => intval($myRankRow['rank']),
+          'user_id' => intval($myRankRow['user_id']),
+          'display_name' => $myRankRow['display_name'] ?? '',
+          'avatar_url' => $myRankRow['avatar_url'],
+          'points' => intval($myRankRow['total_points']),
+          'badge' => null
+        ];
+      } else {
+        $profileQuery = "SELECT up.display_name, up.avatar_url
+                         FROM user_profiles up
+                         WHERE up.user_id = :user_id
+                         LIMIT 1";
+        $profileStmt = $this->conn->prepare($profileQuery);
+        $profileStmt->bindValue(':user_id', $currentUserId, PDO::PARAM_INT);
+        $profileStmt->execute();
+        $profile = $profileStmt->fetch(PDO::FETCH_ASSOC);
+        $displayName = '';
+        $avatarUrl = null;
+        if (is_array($profile)) {
+          $displayName = $profile['display_name'] ?? '';
+          $avatarUrl = $profile['avatar_url'] ?? null;
+        }
+        $myRank = [
+          'rank' => null,
+          'user_id' => intval($currentUserId),
+          'display_name' => $displayName,
+          'avatar_url' => $avatarUrl,
+          'points' => 0,
+          'badge' => null
+        ];
+      }
+    }
+
+    $response = [
+      'items' => $items,
+      'page' => $page,
+      'limit' => $limit,
+      'total_users' => $totalUsers,
+      'has_more' => ($offset + count($items)) < $totalUsers,
+      'my_rank' => $myRank
+    ];
+
+    Response::success($response, 'Study ranking retrieved successfully');
   }
 
   private function createQuestion($userId)

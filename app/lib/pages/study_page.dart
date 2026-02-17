@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ocs_app/l10n/app_localizations.dart';
 import 'package:ocs_app/models/study_question.dart';
 import 'package:ocs_app/pages/create_study_question_page.dart';
+import 'package:ocs_app/pages/study_ranking_page.dart';
 import 'package:ocs_app/pages/study_question_details_page.dart';
 import 'package:ocs_app/services/api_client.dart';
 import 'package:ocs_app/widgets/glassmorphic_ui.dart';
@@ -87,6 +88,15 @@ class _StudyPageState extends State<StudyPage> {
     }
   }
 
+  Future<void> _openRankingPage() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => StudyRankingPage(apiClient: widget.apiClient),
+      ),
+    );
+  }
+
   Color _statusColor(String status) {
     if (status == 'resolved') {
       return Colors.greenAccent.shade100;
@@ -139,6 +149,35 @@ class _StudyPageState extends State<StudyPage> {
                           color: Theme.of(context).colorScheme.onPrimary,
                           fontSize: 24,
                           fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const Spacer(),
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .background
+                              .withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimary
+                                .withOpacity(0.3),
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: IconButton(
+                            tooltip: l10n.studyRanking,
+                            iconSize: 20,
+                            onPressed: _openRankingPage,
+                            icon: Icon(
+                              Icons.emoji_events_outlined,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                          ),
                         ),
                       ),
                     ],

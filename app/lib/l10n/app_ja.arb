@@ -213,6 +213,26 @@
   "@bestAnswerAlreadySelected": {
     "description": "ベストアンサーが既に存在する場合のエラーメッセージ"
   },
+  "studyRanking": "ランキング",
+  "@studyRanking": {
+    "description": "学習ポイントランキング画面のタイトル"
+  },
+  "studyRankingMyRank": "自分の順位",
+  "@studyRankingMyRank": {
+    "description": "現在ログイン中ユーザーの順位セクションラベル"
+  },
+  "studyRankingUnranked": "ランク外",
+  "@studyRankingUnranked": {
+    "description": "まだ順位がついていない場合の表示"
+  },
+  "noStudyRanking": "ランキングデータがまだありません。",
+  "@noStudyRanking": {
+    "description": "ランキングが空のときのメッセージ"
+  },
+  "failedToLoadStudyRanking": "ランキングの読み込みに失敗しました",
+  "@failedToLoadStudyRanking": {
+    "description": "ランキング読み込み失敗時のエラーメッセージ"
+  },
   "studyComingSoon": "準備中",
   "@studyComingSoon": {
     "description": "学習ページに表示するプレースホルダータイトル"

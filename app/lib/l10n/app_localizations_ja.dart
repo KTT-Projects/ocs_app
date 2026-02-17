@@ -386,6 +386,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String get bestAnswerAlreadySelected => 'すでにベストアンサーが選定されています';
 
   @override
+  String get studyRanking => 'ランキング';
+
+  @override
+  String get studyRankingMyRank => '自分の順位';
+
+  @override
+  String get studyRankingUnranked => 'ランク外';
+
+  @override
+  String get noStudyRanking => 'ランキングデータがまだありません。';
+
+  @override
+  String get failedToLoadStudyRanking => 'ランキングの読み込みに失敗しました';
+
+  @override
   String get studyComingSoon => '準備中';
 
   @override

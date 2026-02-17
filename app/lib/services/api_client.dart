@@ -9,6 +9,7 @@ import '../models/feed_post.dart';
 import '../models/comment.dart';
 import '../models/study_question.dart';
 import '../models/study_answer.dart';
+import '../models/study_ranking.dart';
 import 'auth_service.dart';
 
 class ApiException implements Exception {
@@ -862,6 +863,43 @@ class ApiClient extends ChangeNotifier {
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException(l10n.failedToSelectBestAnswer);
+    }
+  }
+
+  Future<StudyRankingResponse> getStudyRanking(
+    BuildContext context, {
+    String period = 'all',
+    int page = 1,
+    int limit = 20,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.get(
+        _buildUri(
+            'study.php?action=ranking&period=$period&page=$page&limit=$limit'),
+        headers: {
+          'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(
+            context,
+            data['message'] ?? l10n.failedToLoadStudyRanking,
+          ),
+        );
+      }
+
+      return StudyRankingResponse.fromJson(data['data'] ?? {});
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.failedToLoadStudyRanking);
     }
   }
 

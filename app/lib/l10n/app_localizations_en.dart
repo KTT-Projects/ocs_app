@@ -386,6 +386,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bestAnswerAlreadySelected => 'Best answer already selected';
 
   @override
+  String get studyRanking => 'Ranking';
+
+  @override
+  String get studyRankingMyRank => 'Your Rank';
+
+  @override
+  String get studyRankingUnranked => 'Unranked';
+
+  @override
+  String get noStudyRanking => 'No ranking data yet.';
+
+  @override
+  String get failedToLoadStudyRanking => 'Failed to load ranking';
+
+  @override
   String get studyComingSoon => 'Coming soon';
 
   @override

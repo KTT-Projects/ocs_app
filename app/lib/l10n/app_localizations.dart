@@ -833,6 +833,36 @@ abstract class AppLocalizations {
   /// **'Best answer already selected'**
   String get bestAnswerAlreadySelected;
 
+  /// Title for study points ranking page
+  ///
+  /// In en, this message translates to:
+  /// **'Ranking'**
+  String get studyRanking;
+
+  /// Label for current user's rank section
+  ///
+  /// In en, this message translates to:
+  /// **'Your Rank'**
+  String get studyRankingMyRank;
+
+  /// Text shown when user is not ranked yet
+  ///
+  /// In en, this message translates to:
+  /// **'Unranked'**
+  String get studyRankingUnranked;
+
+  /// Message shown when ranking list is empty
+  ///
+  /// In en, this message translates to:
+  /// **'No ranking data yet.'**
+  String get noStudyRanking;
+
+  /// Error message when study ranking cannot be loaded
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load ranking'**
+  String get failedToLoadStudyRanking;
+
   /// Placeholder title shown on the Study page
   ///
   /// In en, this message translates to:

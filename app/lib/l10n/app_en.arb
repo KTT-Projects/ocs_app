@@ -507,6 +507,26 @@
   "@bestAnswerAlreadySelected": {
     "description": "Error message when trying to select best answer twice"
   },
+  "studyRanking": "Ranking",
+  "@studyRanking": {
+    "description": "Title for study points ranking page"
+  },
+  "studyRankingMyRank": "Your Rank",
+  "@studyRankingMyRank": {
+    "description": "Label for current user's rank section"
+  },
+  "studyRankingUnranked": "Unranked",
+  "@studyRankingUnranked": {
+    "description": "Text shown when user is not ranked yet"
+  },
+  "noStudyRanking": "No ranking data yet.",
+  "@noStudyRanking": {
+    "description": "Message shown when ranking list is empty"
+  },
+  "failedToLoadStudyRanking": "Failed to load ranking",
+  "@failedToLoadStudyRanking": {
+    "description": "Error message when study ranking cannot be loaded"
+  },
   "studyComingSoon": "Coming soon",
   "@studyComingSoon": {
     "description": "Placeholder title shown on the Study page"
