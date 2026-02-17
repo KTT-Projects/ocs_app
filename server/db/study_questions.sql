@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS study_questions (
   author_user_id INT NOT NULL,
   title VARCHAR(300) NOT NULL,
   body TEXT NOT NULL,
+  media_url VARCHAR(255),
   category VARCHAR(300) NOT NULL,
   status ENUM ('open', 'resolved') NOT NULL DEFAULT 'open',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -30,6 +31,15 @@ CREATE TABLE IF NOT EXISTS study_answers (
   FOREIGN KEY (author_user_id) REFERENCES users (id)
 );
 
+CREATE TABLE IF NOT EXISTS study_question_media (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  question_id INT NOT NULL,
+  media_url VARCHAR(255) NOT NULL,
+  sort_order INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (question_id) REFERENCES study_questions (id)
+);
+
 CREATE TABLE IF NOT EXISTS point_ledger (
   id INT PRIMARY KEY AUTO_INCREMENT,
   user_id INT NOT NULL,
@@ -47,4 +57,5 @@ CREATE INDEX idx_study_questions_created_at ON study_questions (created_at);
 CREATE INDEX idx_study_questions_category ON study_questions (category);
 CREATE INDEX idx_study_answers_question ON study_answers (question_id);
 CREATE INDEX idx_study_answers_best ON study_answers (question_id, is_best);
+CREATE INDEX idx_study_question_media_question ON study_question_media (question_id, sort_order);
 CREATE INDEX idx_point_ledger_user ON point_ledger (user_id);

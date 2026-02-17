@@ -18,6 +18,7 @@ class StudyController
   private $db;
   private $auth;
   private $conn;
+  private $hasQuestionMediaTable = null;
   private const BEST_ANSWER_POINTS = 50;
   private const BEST_ANSWER_EVENT_TYPE = 'BEST_ANSWER';
   private const MAX_TAG_COUNT = 5;
@@ -61,6 +62,8 @@ class StudyController
 
           if ($action === 'create') {
             $this->createQuestion($userId);
+          } else if ($action === 'media') {
+            $this->uploadQuestionMedia($userId);
           } else if ($action === 'answer') {
             $this->createAnswer($userId);
           } else if ($action === 'best') {
@@ -135,6 +138,7 @@ class StudyController
                      sq.author_user_id,
                      sq.title,
                      sq.body,
+                     sq.media_url,
                      sq.category,
                      sq.status,
                      sq.created_at,
@@ -166,8 +170,17 @@ class StudyController
     $stmt->execute();
 
     $questions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $mediaMap = $this->getQuestionMediaMap($questions);
     foreach ($questions as &$question) {
       $question['tags'] = $this->parseStoredTags($question['category'] ?? '');
+      $questionMedia = $mediaMap[intval($question['id'])] ?? [];
+      if (!empty($questionMedia)) {
+        $question['media_urls'] = $questionMedia;
+        $question['media_url'] = $questionMedia[0];
+      } else {
+        $fallback = trim((string)($question['media_url'] ?? ''));
+        $question['media_urls'] = $fallback !== '' ? [$fallback] : [];
+      }
     }
     unset($question);
     Response::success($questions, 'Questions retrieved successfully');
@@ -190,6 +203,7 @@ class StudyController
                      sq.author_user_id,
                      sq.title,
                      sq.body,
+                     sq.media_url,
                      sq.category,
                      sq.status,
                      sq.created_at,
@@ -214,6 +228,14 @@ class StudyController
 
     $question['can_mark_best'] = $currentUserId !== null && intval($question['author_user_id']) === intval($currentUserId);
     $question['tags'] = $this->parseStoredTags($question['category'] ?? '');
+    $questionMedia = $this->getQuestionMediaList(intval($question['id']));
+    if (!empty($questionMedia)) {
+      $question['media_urls'] = $questionMedia;
+      $question['media_url'] = $questionMedia[0];
+    } else {
+      $fallback = trim((string)($question['media_url'] ?? ''));
+      $question['media_urls'] = $fallback !== '' ? [$fallback] : [];
+    }
 
     Response::success($question, 'Question retrieved successfully');
   }
@@ -395,6 +417,8 @@ class StudyController
 
     $title = trim($data['title'] ?? '');
     $body = trim($data['body'] ?? '');
+    $mediaUrl = trim((string)($data['media_url'] ?? ''));
+    $mediaUrls = $this->normalizeMediaUrlsInput($data['media_urls'] ?? [], $mediaUrl);
     $tagsInput = $data['tags'] ?? ($data['category'] ?? '');
     $tags = $this->normalizeTagsInput($tagsInput);
 
@@ -434,17 +458,26 @@ class StudyController
       Response::error('Tags must be less than 300 characters', 400);
       return;
     }
+    foreach ($mediaUrls as $url) {
+      if ($this->stringLength($url) > 255) {
+        Response::error('Media URL must be less than 255 characters', 400);
+        return;
+      }
+    }
 
-    $query = "INSERT INTO study_questions (author_user_id, title, body, category, status)
-              VALUES (:author_user_id, :title, :body, :category, 'open')";
+    $query = "INSERT INTO study_questions (author_user_id, title, body, media_url, category, status)
+              VALUES (:author_user_id, :title, :body, :media_url, :category, 'open')";
     $stmt = $this->conn->prepare($query);
     $stmt->bindValue(':author_user_id', $userId, PDO::PARAM_INT);
     $stmt->bindValue(':title', $title);
     $stmt->bindValue(':body', $body);
+    $stmt->bindValue(':media_url', !empty($mediaUrls) ? $mediaUrls[0] : null);
     $stmt->bindValue(':category', $tagsValue);
     $stmt->execute();
+    $questionId = intval($this->conn->lastInsertId());
+    $this->insertQuestionMedia($questionId, $mediaUrls);
 
-    Response::success(['id' => $this->conn->lastInsertId()], 'Question created successfully');
+    Response::success(['id' => $questionId], 'Question created successfully');
   }
 
   private function createAnswer($userId)
@@ -489,6 +522,50 @@ class StudyController
     $stmt->execute();
 
     Response::success(['id' => $this->conn->lastInsertId()], 'Answer created successfully');
+  }
+
+  private function uploadQuestionMedia($userId)
+  {
+    if (!isset($_FILES['media'])) {
+      Response::error('No media file provided', 400);
+      return;
+    }
+
+    $file = $_FILES['media'];
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+      Response::error('File upload failed', 400);
+      return;
+    }
+
+    $allowedTypes = ['image/jpeg', 'image/png'];
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mimeType = finfo_file($finfo, $file['tmp_name']);
+    finfo_close($finfo);
+
+    if (!in_array($mimeType, $allowedTypes, true)) {
+      Response::error('Invalid file type. Only JPEG and PNG are allowed.', 400);
+      return;
+    }
+
+    $uploadDir = __DIR__ . '/../uploads/study_media/';
+    if (!file_exists($uploadDir)) {
+      mkdir($uploadDir, 0755, true);
+    }
+
+    $extension = $mimeType === 'image/jpeg' ? 'jpg' : 'png';
+    $filename = uniqid('study_media_' . intval($userId) . '_') . '.' . $extension;
+    $filepath = $uploadDir . $filename;
+
+    if (!move_uploaded_file($file['tmp_name'], $filepath)) {
+      Response::error('Failed to save file', 500);
+      return;
+    }
+
+    $mediaUrl = '/uploads/study_media/' . $filename;
+    Response::json([
+      'status' => 'success',
+      'media_url' => $mediaUrl,
+    ]);
   }
 
   private function markBestAnswer($userId)
@@ -668,6 +745,146 @@ class StudyController
       $normalized[] = $tag;
     }
     return $normalized;
+  }
+
+  private function normalizeMediaUrlsInput($raw, $fallback = '')
+  {
+    $items = [];
+    if (is_array($raw)) {
+      $items = $raw;
+    } else {
+      $text = trim((string)$raw);
+      if ($text !== '') {
+        $items = explode(',', $text);
+      }
+    }
+
+    if (trim((string)$fallback) !== '') {
+      $items[] = trim((string)$fallback);
+    }
+
+    $normalized = [];
+    $seen = [];
+    foreach ($items as $item) {
+      $url = trim((string)$item);
+      if ($url === '') {
+        continue;
+      }
+      if (isset($seen[$url])) {
+        continue;
+      }
+      $seen[$url] = true;
+      $normalized[] = $url;
+    }
+    return $normalized;
+  }
+
+  private function hasQuestionMediaTable()
+  {
+    if ($this->hasQuestionMediaTable !== null) {
+      return $this->hasQuestionMediaTable;
+    }
+
+    $query = "SELECT COUNT(*)
+              FROM INFORMATION_SCHEMA.TABLES
+              WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'study_question_media'";
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute();
+    $this->hasQuestionMediaTable = intval($stmt->fetchColumn()) > 0;
+    return $this->hasQuestionMediaTable;
+  }
+
+  private function getQuestionMediaMap($questions)
+  {
+    if (empty($questions) || !$this->hasQuestionMediaTable()) {
+      return [];
+    }
+
+    $ids = [];
+    foreach ($questions as $question) {
+      $id = intval($question['id'] ?? 0);
+      if ($id > 0) {
+        $ids[] = $id;
+      }
+    }
+    if (empty($ids)) {
+      return [];
+    }
+
+    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+    $query = "SELECT question_id, media_url
+              FROM study_question_media
+              WHERE question_id IN ($placeholders)
+              ORDER BY question_id ASC, sort_order ASC, id ASC";
+    $stmt = $this->conn->prepare($query);
+    foreach ($ids as $idx => $id) {
+      $stmt->bindValue($idx + 1, $id, PDO::PARAM_INT);
+    }
+    $stmt->execute();
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $map = [];
+    foreach ($rows as $row) {
+      $questionId = intval($row['question_id'] ?? 0);
+      $url = trim((string)($row['media_url'] ?? ''));
+      if ($questionId <= 0 || $url === '') {
+        continue;
+      }
+      if (!isset($map[$questionId])) {
+        $map[$questionId] = [];
+      }
+      $map[$questionId][] = $url;
+    }
+    return $map;
+  }
+
+  private function getQuestionMediaList($questionId)
+  {
+    $questionId = intval($questionId);
+    if ($questionId <= 0 || !$this->hasQuestionMediaTable()) {
+      return [];
+    }
+
+    $query = "SELECT media_url
+              FROM study_question_media
+              WHERE question_id = :question_id
+              ORDER BY sort_order ASC, id ASC";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindValue(':question_id', $questionId, PDO::PARAM_INT);
+    $stmt->execute();
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $urls = [];
+    foreach ($rows as $row) {
+      $url = trim((string)($row['media_url'] ?? ''));
+      if ($url !== '') {
+        $urls[] = $url;
+      }
+    }
+    return $urls;
+  }
+
+  private function insertQuestionMedia($questionId, $mediaUrls)
+  {
+    $questionId = intval($questionId);
+    if ($questionId <= 0 || empty($mediaUrls) || !$this->hasQuestionMediaTable()) {
+      return;
+    }
+
+    $query = "INSERT INTO study_question_media (question_id, media_url, sort_order)
+              VALUES (:question_id, :media_url, :sort_order)";
+    $stmt = $this->conn->prepare($query);
+    foreach ($mediaUrls as $index => $url) {
+      $value = trim((string)$url);
+      if ($value === '') {
+        continue;
+      }
+      $stmt->bindValue(':question_id', $questionId, PDO::PARAM_INT);
+      $stmt->bindValue(':media_url', $value);
+      $stmt->bindValue(':sort_order', $index, PDO::PARAM_INT);
+      $stmt->execute();
+    }
   }
 
   private function validateJWT($token)

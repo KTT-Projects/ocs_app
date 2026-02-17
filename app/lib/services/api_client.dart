@@ -426,6 +426,67 @@ class ApiClient extends ChangeNotifier {
     }
   }
 
+  Future<String> uploadStudyQuestionMedia(
+    BuildContext context, {
+    String? filePath,
+    List<int>? webBytes,
+    String? webFileName,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/study.php?action=media'),
+      )..headers.addAll({
+          'Authorization': 'Bearer $_token',
+          'Accept': 'application/json',
+          'Accept-Language': Localizations.localeOf(context).languageCode,
+        });
+
+      if (kIsWeb && webBytes != null && webFileName != null) {
+        request.files.add(
+          http.MultipartFile.fromBytes('media', webBytes,
+              filename: webFileName),
+        );
+      } else if (filePath != null) {
+        final file = File(filePath);
+        final bytes = await file.readAsBytes();
+        final filename = filePath.split('/').last;
+        request.files.add(
+          http.MultipartFile.fromBytes('media', bytes, filename: filename),
+        );
+      } else {
+        throw ApiException(l10n.errorOccurred);
+      }
+
+      final response = await request.send();
+      final data = json.decode(await response.stream.bytesToString());
+
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+
+      if (data['status'] != 'success' || data['media_url'] == null) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+
+      String url = data['media_url'];
+      if (url.startsWith('/')) {
+        url = 'https://ocs.kttprojects.com' + url;
+      }
+      return url;
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
   Future<void> updateProfile(
     BuildContext context, {
     bool? allowDm,
@@ -819,9 +880,24 @@ class ApiClient extends ChangeNotifier {
     required String title,
     required String body,
     required List<String> tags,
+    List<String>? mediaUrls,
+    String? mediaUrl,
   }) async {
     final l10n = AppLocalizations.of(context)!;
     try {
+      final normalizedMediaUrls = <String>[
+        ...(mediaUrls ?? []),
+        if (mediaUrl != null && mediaUrl.trim().isNotEmpty) mediaUrl,
+      ];
+      final dedupedMediaUrls = <String>[];
+      final seenMedia = <String>{};
+      for (final url in normalizedMediaUrls) {
+        final value = url.trim();
+        if (value.isEmpty || seenMedia.contains(value)) continue;
+        seenMedia.add(value);
+        dedupedMediaUrls.add(value);
+      }
+
       final response = await http.post(
         Uri.parse('$baseUrl/study.php?action=create'),
         headers: {
@@ -831,6 +907,8 @@ class ApiClient extends ChangeNotifier {
         body: json.encode({
           'title': title,
           'body': body,
+          if (dedupedMediaUrls.isNotEmpty) 'media_urls': dedupedMediaUrls,
+          if (dedupedMediaUrls.isNotEmpty) 'media_url': dedupedMediaUrls.first,
           'tags': tags,
           // Backward compatibility for older backends.
           'category': tags.isNotEmpty ? tags.first : '',

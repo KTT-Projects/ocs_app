@@ -414,6 +414,22 @@ class _StudyQuestionDetailsPageState extends State<StudyQuestionDetailsPage> {
               height: 1.5,
             ),
           ),
+          if (_question!.mediaUrls.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            ..._question!.mediaUrls.map(
+              (url) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: Image.network(
+                    url,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

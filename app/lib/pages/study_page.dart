@@ -516,6 +516,19 @@ class _StudyPageState extends State<StudyPage> {
                                           fontWeight: FontWeight.w700,
                                         ),
                                       ),
+                                      if (question.mediaUrls.isNotEmpty) ...[
+                                        const SizedBox(height: 10),
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          child: Image.network(
+                                            question.mediaUrls.first,
+                                            height: 140,
+                                            width: double.infinity,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ],
                                       const SizedBox(height: 10),
                                       Wrap(
                                         spacing: 8,

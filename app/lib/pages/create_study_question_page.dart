@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'dart:convert';
 import 'package:ocs_app/l10n/app_localizations.dart';
 import 'package:ocs_app/services/api_client.dart';
 import 'package:ocs_app/widgets/glassmorphic_ui.dart';
@@ -23,6 +27,8 @@ class _CreateStudyQuestionPageState extends State<CreateStudyQuestionPage> {
   final _tagInputController = TextEditingController();
   final List<String> _tags = [];
   final _formKey = GlobalKey<FormState>();
+  final _imagePicker = ImagePicker();
+  final List<_SelectedStudyImage> _selectedImages = [];
   bool _isLoading = false;
 
   @override
@@ -84,6 +90,72 @@ class _CreateStudyQuestionPageState extends State<CreateStudyQuestionPage> {
     });
   }
 
+  Future<void> _pickImages() async {
+    try {
+      final pickedImages = await _imagePicker.pickMultiImage();
+      if (pickedImages.isEmpty || !mounted) return;
+
+      final newItems = <_SelectedStudyImage>[];
+      for (final image in pickedImages) {
+        if (kIsWeb) {
+          final bytes = await image.readAsBytes();
+          final fileName =
+              image.name.isNotEmpty ? image.name : 'study_image.png';
+          final previewUrl =
+              'data:${image.mimeType};base64,${base64Encode(bytes)}';
+          newItems.add(
+            _SelectedStudyImage(
+              previewUrl: previewUrl,
+              bytes: bytes,
+              fileName: fileName,
+            ),
+          );
+        } else {
+          newItems.add(
+            _SelectedStudyImage(
+              previewUrl: image.path,
+              filePath: image.path,
+            ),
+          );
+        }
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _selectedImages.addAll(newItems);
+      });
+    } catch (e) {
+      if (mounted) {
+        GlassmorphicUI.showGlassSnackBar(
+          context,
+          e.toString(),
+          isError: true,
+        );
+      }
+    }
+  }
+
+  void _removeImageAt(int index) {
+    if (index < 0 || index >= _selectedImages.length) return;
+    setState(() {
+      _selectedImages.removeAt(index);
+    });
+  }
+
+  Future<List<String>> _uploadSelectedImages() async {
+    final urls = <String>[];
+    for (final image in _selectedImages) {
+      final url = await widget.apiClient.uploadStudyQuestionMedia(
+        context,
+        filePath: image.filePath,
+        webBytes: image.bytes,
+        webFileName: image.fileName,
+      );
+      urls.add(url);
+    }
+    return urls;
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_tagInputController.text.trim().isNotEmpty) {
@@ -104,11 +176,14 @@ class _CreateStudyQuestionPageState extends State<CreateStudyQuestionPage> {
         _isLoading = true;
       });
 
+      final mediaUrls = await _uploadSelectedImages();
+
       await widget.apiClient.createStudyQuestion(
         context,
         title: _titleController.text.trim(),
         body: _bodyController.text.trim(),
         tags: _tags,
+        mediaUrls: mediaUrls,
       );
 
       if (mounted) {
@@ -347,6 +422,107 @@ class _CreateStudyQuestionPageState extends State<CreateStudyQuestionPage> {
                             return null;
                           },
                         ),
+                        const SizedBox(height: 12),
+                        Container(
+                          width: double.infinity,
+                          constraints: const BoxConstraints(minHeight: 150),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .background
+                                .withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimary
+                                  .withOpacity(0.3),
+                            ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                TextButton.icon(
+                                  onPressed: _pickImages,
+                                  icon: const Icon(Icons.add_a_photo),
+                                  label: Text(l10n.addImage),
+                                ),
+                                if (_selectedImages.isNotEmpty)
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: List.generate(
+                                      _selectedImages.length,
+                                      (index) {
+                                        final image = _selectedImages[index];
+                                        return Stack(
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              child: kIsWeb
+                                                  ? Image.network(
+                                                      image.previewUrl,
+                                                      width: 100,
+                                                      height: 100,
+                                                      fit: BoxFit.cover,
+                                                    )
+                                                  : Image.file(
+                                                      File(image.previewUrl),
+                                                      width: 100,
+                                                      height: 100,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                            ),
+                                            Positioned(
+                                              top: 4,
+                                              right: 4,
+                                              child: InkWell(
+                                                onTap: () =>
+                                                    _removeImageAt(index),
+                                                borderRadius:
+                                                    BorderRadius.circular(999),
+                                                child: Container(
+                                                  padding:
+                                                      const EdgeInsets.all(2),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.black
+                                                        .withOpacity(0.45),
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: const Icon(
+                                                    Icons.close,
+                                                    size: 14,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    ),
+                                  )
+                                else
+                                  Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(8, 8, 8, 16),
+                                    child: Text(
+                                      l10n.addImage,
+                                      style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimary
+                                            .withOpacity(0.75),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 20),
                         SizedBox(
                           width: double.infinity,
@@ -414,4 +590,18 @@ class _CreateStudyQuestionPageState extends State<CreateStudyQuestionPage> {
       ),
     );
   }
+}
+
+class _SelectedStudyImage {
+  final String previewUrl;
+  final String? filePath;
+  final List<int>? bytes;
+  final String? fileName;
+
+  const _SelectedStudyImage({
+    required this.previewUrl,
+    this.filePath,
+    this.bytes,
+    this.fileName,
+  });
 }
