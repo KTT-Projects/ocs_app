@@ -459,6 +459,54 @@
   "@questionCreatedAt": {
     "description": "Label for question creation date"
   },
+  "studyAnswers": "Answers",
+  "@studyAnswers": {
+    "description": "Section title for study answers"
+  },
+  "noStudyAnswers": "No answers yet.",
+  "@noStudyAnswers": {
+    "description": "Message shown when a question has no answers"
+  },
+  "answerInputHint": "Write your answer...",
+  "@answerInputHint": {
+    "description": "Hint text for answer input field"
+  },
+  "answerBodyRequired": "Answer is required",
+  "@answerBodyRequired": {
+    "description": "Validation error when answer body is empty"
+  },
+  "answerBodyTooLong": "Answer must be less than 5000 characters",
+  "@answerBodyTooLong": {
+    "description": "Validation error when answer body is too long"
+  },
+  "failedToLoadStudyAnswers": "Failed to load answers",
+  "@failedToLoadStudyAnswers": {
+    "description": "Error message when study answers cannot be loaded"
+  },
+  "failedToCreateStudyAnswer": "Failed to create answer",
+  "@failedToCreateStudyAnswer": {
+    "description": "Error message when creating answer fails"
+  },
+  "failedToSelectBestAnswer": "Failed to select best answer",
+  "@failedToSelectBestAnswer": {
+    "description": "Error message when selecting best answer fails"
+  },
+  "markAsBest": "Mark as Best",
+  "@markAsBest": {
+    "description": "Action button text to mark an answer as best"
+  },
+  "bestAnswerLabel": "Best",
+  "@bestAnswerLabel": {
+    "description": "Badge label shown on best answer"
+  },
+  "bestAnswerSelectedSuccess": "Best answer selected",
+  "@bestAnswerSelectedSuccess": {
+    "description": "Success message when a best answer is selected"
+  },
+  "bestAnswerAlreadySelected": "Best answer already selected",
+  "@bestAnswerAlreadySelected": {
+    "description": "Error message when trying to select best answer twice"
+  },
   "studyComingSoon": "Coming soon",
   "@studyComingSoon": {
     "description": "Placeholder title shown on the Study page"
@@ -478,6 +526,10 @@
   "role": "Role",
   "@role": {
     "description": "Label for user role display"
+  },
+  "totalPoints": "Total Points",
+  "@totalPoints": {
+    "description": "Label for user's cumulative points"
   },
   "cancel": "Cancel",
   "@cancel": {

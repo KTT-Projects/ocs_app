@@ -72,8 +72,8 @@ class _StudyPageState extends State<StudyPage> {
     }
   }
 
-  void _openQuestionDetail(StudyQuestion question) {
-    Navigator.push(
+  Future<void> _openQuestionDetail(StudyQuestion question) async {
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => StudyQuestionDetailsPage(
@@ -82,6 +82,9 @@ class _StudyPageState extends State<StudyPage> {
         ),
       ),
     );
+    if (mounted) {
+      await _loadQuestions();
+    }
   }
 
   Color _statusColor(String status) {

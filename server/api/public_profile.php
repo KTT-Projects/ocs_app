@@ -47,7 +47,15 @@ try {
   }
   $userId = intval($_GET['user_id']);
 
-  $query = "SELECT u.id, up.display_name, up.avatar_url, up.bio, up.allow_dm, r.name as role_name, ei.name as institution_name, u.grade
+  $query = "SELECT u.id,
+                   up.display_name,
+                   up.avatar_url,
+                   up.bio,
+                   up.allow_dm,
+                   r.name as role_name,
+                   ei.name as institution_name,
+                   u.grade,
+                   COALESCE((SELECT SUM(pl.points) FROM point_ledger pl WHERE pl.user_id = u.id), 0) AS total_points
             FROM users u
             JOIN roles r ON u.role_id = r.id
             LEFT JOIN educational_institutions ei ON u.institution_id = ei.id
@@ -70,7 +78,8 @@ try {
     'allow_dm' => (bool)$user['allow_dm'],
     'role' => $user['role_name'],
     'institution' => $user['institution_name'],
-    'grade' => $user['grade']
+    'grade' => $user['grade'],
+    'total_points' => intval($user['total_points'] ?? 0)
   ];
 
   Response::json([

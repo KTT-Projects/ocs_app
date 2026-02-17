@@ -7,7 +7,8 @@ class UserProfilePage extends StatefulWidget {
   final ApiClient apiClient;
   final int userId;
 
-  const UserProfilePage({super.key, required this.apiClient, required this.userId});
+  const UserProfilePage(
+      {super.key, required this.apiClient, required this.userId});
 
   @override
   State<UserProfilePage> createState() => _UserProfilePageState();
@@ -34,9 +35,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
         _isLoading = true;
         _error = null;
       });
-      final profile = await widget.apiClient.getUserProfile(context, widget.userId);
+      final profile =
+          await widget.apiClient.getUserProfile(context, widget.userId);
       if (!mounted) return;
-      if (profile['avatar'] != null && profile['avatar'].toString().startsWith('/')) {
+      if (profile['avatar'] != null &&
+          profile['avatar'].toString().startsWith('/')) {
         profile['avatar'] = 'https://ocs.kttprojects.com' + profile['avatar'];
       }
       setState(() {
@@ -59,6 +62,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
     if (gradeNum == 99) return 'OB';
     if (gradeNum >= 7 && gradeNum <= 14) return 'G$gradeNum';
     return grade.toString();
+  }
+
+  String _formatPoints(dynamic points) {
+    final value = int.tryParse(points?.toString() ?? '') ?? 0;
+    return value.toString();
   }
 
   String _getLocalizedInstitutionName(String fullName) {
@@ -168,10 +176,16 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     child: Container(
                       width: isSmallScreen ? maxWidth - 32 : 400,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .background
+                            .withOpacity(0.2),
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onPrimary
+                              .withOpacity(0.3),
                         ),
                         boxShadow: [
                           BoxShadow(
@@ -190,7 +204,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
                             children: [
                               CircleAvatar(
                                 radius: 50,
-                                backgroundColor: Theme.of(context).colorScheme.secondary,
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.secondary,
                                 child: _profile!['avatar'] != null
                                     ? ClipOval(
                                         child: Image.network(
@@ -204,7 +219,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                         _profile!['name']?[0] ?? '?',
                                         style: TextStyle(
                                           fontSize: 32,
-                                          color: Theme.of(context).colorScheme.onSecondary,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSecondary,
                                         ),
                                       ),
                               ),
@@ -212,8 +229,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
                               const SizedBox(height: 24),
                               Text(
                                 _profile!['name'] ?? '',
-                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                      color: Theme.of(context).colorScheme.onPrimary,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary,
                                       fontWeight: FontWeight.bold,
                                     ),
                               ),
@@ -227,7 +249,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
                               _buildInfoRow(
                                 context,
                                 l10n.selectInstitution,
-                                _getLocalizedInstitutionName(_profile!['institution'] ?? ''),
+                                _getLocalizedInstitutionName(
+                                    _profile!['institution'] ?? ''),
                               ),
                               const SizedBox(height: 12),
                               _buildInfoRow(
@@ -239,7 +262,16 @@ class _UserProfilePageState extends State<UserProfilePage> {
                               _buildInfoRow(
                                 context,
                                 l10n.role,
-                                (_profile!['role'] as String).substring(0, 1).toUpperCase() + (_profile!['role'] as String).substring(1),
+                                (_profile!['role'] as String)
+                                        .substring(0, 1)
+                                        .toUpperCase() +
+                                    (_profile!['role'] as String).substring(1),
+                              ),
+                              const SizedBox(height: 12),
+                              _buildInfoRow(
+                                context,
+                                l10n.totalPoints,
+                                _formatPoints(_profile!['total_points']),
                               ),
                             ],
                           ),

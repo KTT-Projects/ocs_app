@@ -350,6 +350,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get questionCreatedAt => 'Created';
 
   @override
+  String get studyAnswers => 'Answers';
+
+  @override
+  String get noStudyAnswers => 'No answers yet.';
+
+  @override
+  String get answerInputHint => 'Write your answer...';
+
+  @override
+  String get answerBodyRequired => 'Answer is required';
+
+  @override
+  String get answerBodyTooLong => 'Answer must be less than 5000 characters';
+
+  @override
+  String get failedToLoadStudyAnswers => 'Failed to load answers';
+
+  @override
+  String get failedToCreateStudyAnswer => 'Failed to create answer';
+
+  @override
+  String get failedToSelectBestAnswer => 'Failed to select best answer';
+
+  @override
+  String get markAsBest => 'Mark as Best';
+
+  @override
+  String get bestAnswerLabel => 'Best';
+
+  @override
+  String get bestAnswerSelectedSuccess => 'Best answer selected';
+
+  @override
+  String get bestAnswerAlreadySelected => 'Best answer already selected';
+
+  @override
   String get studyComingSoon => 'Coming soon';
 
   @override
@@ -363,6 +399,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get role => 'Role';
+
+  @override
+  String get totalPoints => 'Total Points';
 
   @override
   String get cancel => 'Cancel';

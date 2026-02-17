@@ -18,6 +18,8 @@ class StudyController
   private $db;
   private $auth;
   private $conn;
+  private const BEST_ANSWER_POINTS = 50;
+  private const BEST_ANSWER_EVENT_TYPE = 'BEST_ANSWER';
 
   public function __construct()
   {
@@ -39,7 +41,9 @@ class StudyController
           if ($action === 'list') {
             $this->getQuestions();
           } else if ($action === 'detail') {
-            $this->getQuestionDetail();
+            $this->getQuestionDetail($userId);
+          } else if ($action === 'answers') {
+            $this->getAnswers();
           } else {
             Response::error('Invalid action', 400);
           }
@@ -49,8 +53,13 @@ class StudyController
             Response::error('Authorization header is required', 401);
             return;
           }
+
           if ($action === 'create') {
             $this->createQuestion($userId);
+          } else if ($action === 'answer') {
+            $this->createAnswer($userId);
+          } else if ($action === 'best') {
+            $this->markBestAnswer($userId);
           } else {
             Response::error('Invalid action', 400);
           }
@@ -78,7 +87,9 @@ class StudyController
                      sq.created_at,
                      sq.updated_at,
                      up.display_name,
-                     up.avatar_url
+                     up.avatar_url,
+                     (SELECT COUNT(*) FROM study_answers sa WHERE sa.question_id = sq.id) AS answer_count,
+                     (SELECT sa2.id FROM study_answers sa2 WHERE sa2.question_id = sq.id AND sa2.is_best = 1 LIMIT 1) AS best_answer_id
               FROM study_questions sq
               JOIN user_profiles up ON up.user_id = sq.author_user_id
               ORDER BY sq.created_at DESC
@@ -93,7 +104,7 @@ class StudyController
     Response::success($questions, 'Questions retrieved successfully');
   }
 
-  private function getQuestionDetail()
+  private function getQuestionDetail($currentUserId)
   {
     if (!isset($_GET['question_id'])) {
       Response::error('Question ID is required', 400);
@@ -115,7 +126,9 @@ class StudyController
                      sq.created_at,
                      sq.updated_at,
                      up.display_name,
-                     up.avatar_url
+                     up.avatar_url,
+                     (SELECT COUNT(*) FROM study_answers sa WHERE sa.question_id = sq.id) AS answer_count,
+                     (SELECT sa2.id FROM study_answers sa2 WHERE sa2.question_id = sq.id AND sa2.is_best = 1 LIMIT 1) AS best_answer_id
               FROM study_questions sq
               JOIN user_profiles up ON up.user_id = sq.author_user_id
               WHERE sq.id = :question_id
@@ -130,7 +143,43 @@ class StudyController
       return;
     }
 
+    $question['can_mark_best'] = $currentUserId !== null && intval($question['author_user_id']) === intval($currentUserId);
+
     Response::success($question, 'Question retrieved successfully');
+  }
+
+  private function getAnswers()
+  {
+    if (!isset($_GET['question_id'])) {
+      Response::error('Question ID is required', 400);
+      return;
+    }
+
+    $questionId = intval($_GET['question_id']);
+    if ($questionId <= 0) {
+      Response::error('Question ID is required', 400);
+      return;
+    }
+
+    $query = "SELECT sa.id,
+                     sa.question_id,
+                     sa.author_user_id,
+                     sa.body,
+                     sa.is_best,
+                     sa.created_at,
+                     sa.updated_at,
+                     up.display_name,
+                     up.avatar_url
+              FROM study_answers sa
+              JOIN user_profiles up ON up.user_id = sa.author_user_id
+              WHERE sa.question_id = :question_id
+              ORDER BY sa.is_best DESC, sa.created_at ASC";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindValue(':question_id', $questionId, PDO::PARAM_INT);
+    $stmt->execute();
+    $answers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    Response::success($answers, 'Answers retrieved successfully');
   }
 
   private function createQuestion($userId)
@@ -180,6 +229,141 @@ class StudyController
     $stmt->execute();
 
     Response::success(['id' => $this->conn->lastInsertId()], 'Question created successfully');
+  }
+
+  private function createAnswer($userId)
+  {
+    $data = json_decode(file_get_contents('php://input'), true);
+    if (!is_array($data)) {
+      Response::error('Invalid input format', 400);
+      return;
+    }
+
+    $questionId = intval($data['question_id'] ?? 0);
+    $body = trim($data['body'] ?? '');
+
+    if ($questionId <= 0) {
+      Response::error('Question ID is required', 400);
+      return;
+    }
+    if ($body === '') {
+      Response::error('Body is required', 400);
+      return;
+    }
+    if ($this->stringLength($body) > 5000) {
+      Response::error('Body must be less than 5000 characters', 400);
+      return;
+    }
+
+    $checkQuery = "SELECT id FROM study_questions WHERE id = :question_id LIMIT 1";
+    $checkStmt = $this->conn->prepare($checkQuery);
+    $checkStmt->bindValue(':question_id', $questionId, PDO::PARAM_INT);
+    $checkStmt->execute();
+    if (!$checkStmt->fetch(PDO::FETCH_ASSOC)) {
+      Response::error('Question not found', 404);
+      return;
+    }
+
+    $query = "INSERT INTO study_answers (question_id, author_user_id, body, is_best)
+              VALUES (:question_id, :author_user_id, :body, 0)";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindValue(':question_id', $questionId, PDO::PARAM_INT);
+    $stmt->bindValue(':author_user_id', $userId, PDO::PARAM_INT);
+    $stmt->bindValue(':body', $body);
+    $stmt->execute();
+
+    Response::success(['id' => $this->conn->lastInsertId()], 'Answer created successfully');
+  }
+
+  private function markBestAnswer($userId)
+  {
+    $data = json_decode(file_get_contents('php://input'), true);
+    if (!is_array($data)) {
+      Response::error('Invalid input format', 400);
+      return;
+    }
+
+    $answerId = intval($data['answer_id'] ?? 0);
+    if ($answerId <= 0) {
+      Response::error('Answer ID is required', 400);
+      return;
+    }
+
+    $this->conn->beginTransaction();
+    try {
+      $targetQuery = "SELECT sa.id AS answer_id,
+                             sa.question_id,
+                             sa.author_user_id AS answer_author_user_id,
+                             sq.author_user_id AS question_author_user_id
+                      FROM study_answers sa
+                      JOIN study_questions sq ON sq.id = sa.question_id
+                      WHERE sa.id = :answer_id
+                      LIMIT 1
+                      FOR UPDATE";
+      $targetStmt = $this->conn->prepare($targetQuery);
+      $targetStmt->bindValue(':answer_id', $answerId, PDO::PARAM_INT);
+      $targetStmt->execute();
+      $target = $targetStmt->fetch(PDO::FETCH_ASSOC);
+
+      if (!$target) {
+        $this->conn->rollBack();
+        Response::error('Answer not found', 404);
+        return;
+      }
+
+      if (intval($target['question_author_user_id']) !== intval($userId)) {
+        $this->conn->rollBack();
+        Response::error('Insufficient permissions', 403);
+        return;
+      }
+
+      $questionId = intval($target['question_id']);
+      $answerAuthorUserId = intval($target['answer_author_user_id']);
+
+      $bestQuery = "SELECT id
+                    FROM study_answers
+                    WHERE question_id = :question_id
+                      AND is_best = 1
+                    LIMIT 1
+                    FOR UPDATE";
+      $bestStmt = $this->conn->prepare($bestQuery);
+      $bestStmt->bindValue(':question_id', $questionId, PDO::PARAM_INT);
+      $bestStmt->execute();
+      $existingBest = $bestStmt->fetch(PDO::FETCH_ASSOC);
+      if ($existingBest) {
+        $this->conn->rollBack();
+        Response::error('Best answer already selected', 400);
+        return;
+      }
+
+      $updateBest = "UPDATE study_answers SET is_best = 1 WHERE id = :answer_id";
+      $updateBestStmt = $this->conn->prepare($updateBest);
+      $updateBestStmt->bindValue(':answer_id', $answerId, PDO::PARAM_INT);
+      $updateBestStmt->execute();
+
+      $resolveQuestion = "UPDATE study_questions SET status = 'resolved' WHERE id = :question_id";
+      $resolveStmt = $this->conn->prepare($resolveQuestion);
+      $resolveStmt->bindValue(':question_id', $questionId, PDO::PARAM_INT);
+      $resolveStmt->execute();
+
+      $ledgerQuery = "INSERT INTO point_ledger (user_id, event_type, ref_id, points)
+                      VALUES (:user_id, :event_type, :ref_id, :points)
+                      ON DUPLICATE KEY UPDATE id = id";
+      $ledgerStmt = $this->conn->prepare($ledgerQuery);
+      $ledgerStmt->bindValue(':user_id', $answerAuthorUserId, PDO::PARAM_INT);
+      $ledgerStmt->bindValue(':event_type', self::BEST_ANSWER_EVENT_TYPE);
+      $ledgerStmt->bindValue(':ref_id', $answerId, PDO::PARAM_INT);
+      $ledgerStmt->bindValue(':points', self::BEST_ANSWER_POINTS, PDO::PARAM_INT);
+      $ledgerStmt->execute();
+
+      $this->conn->commit();
+      Response::success(null, 'Best answer selected successfully');
+    } catch (Exception $e) {
+      if ($this->conn->inTransaction()) {
+        $this->conn->rollBack();
+      }
+      throw $e;
+    }
   }
 
   private function getAuthorizedUserId()

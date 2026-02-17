@@ -761,6 +761,78 @@ abstract class AppLocalizations {
   /// **'Created'**
   String get questionCreatedAt;
 
+  /// Section title for study answers
+  ///
+  /// In en, this message translates to:
+  /// **'Answers'**
+  String get studyAnswers;
+
+  /// Message shown when a question has no answers
+  ///
+  /// In en, this message translates to:
+  /// **'No answers yet.'**
+  String get noStudyAnswers;
+
+  /// Hint text for answer input field
+  ///
+  /// In en, this message translates to:
+  /// **'Write your answer...'**
+  String get answerInputHint;
+
+  /// Validation error when answer body is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Answer is required'**
+  String get answerBodyRequired;
+
+  /// Validation error when answer body is too long
+  ///
+  /// In en, this message translates to:
+  /// **'Answer must be less than 5000 characters'**
+  String get answerBodyTooLong;
+
+  /// Error message when study answers cannot be loaded
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load answers'**
+  String get failedToLoadStudyAnswers;
+
+  /// Error message when creating answer fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create answer'**
+  String get failedToCreateStudyAnswer;
+
+  /// Error message when selecting best answer fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to select best answer'**
+  String get failedToSelectBestAnswer;
+
+  /// Action button text to mark an answer as best
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as Best'**
+  String get markAsBest;
+
+  /// Badge label shown on best answer
+  ///
+  /// In en, this message translates to:
+  /// **'Best'**
+  String get bestAnswerLabel;
+
+  /// Success message when a best answer is selected
+  ///
+  /// In en, this message translates to:
+  /// **'Best answer selected'**
+  String get bestAnswerSelectedSuccess;
+
+  /// Error message when trying to select best answer twice
+  ///
+  /// In en, this message translates to:
+  /// **'Best answer already selected'**
+  String get bestAnswerAlreadySelected;
+
   /// Placeholder title shown on the Study page
   ///
   /// In en, this message translates to:
@@ -790,6 +862,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Role'**
   String get role;
+
+  /// Label for user's cumulative points
+  ///
+  /// In en, this message translates to:
+  /// **'Total Points'**
+  String get totalPoints;
 
   /// Text for cancel button
   ///

@@ -1,81 +1,49 @@
 const String _hostUrl = 'https://ocs.kttprojects.com';
 
-class StudyQuestion {
+class StudyAnswer {
   final int id;
+  final int questionId;
   final int authorUserId;
-  final String title;
   final String body;
-  final String category;
-  final String status;
+  final bool isBest;
   final DateTime createdAt;
   final DateTime updatedAt;
   final String authorDisplayName;
   final String? authorAvatarUrl;
-  final int answerCount;
-  final int? bestAnswerId;
-  final bool canMarkBest;
 
-  StudyQuestion({
+  StudyAnswer({
     required this.id,
+    required this.questionId,
     required this.authorUserId,
-    required this.title,
     required this.body,
-    required this.category,
-    required this.status,
+    required this.isBest,
     required this.createdAt,
     required this.updatedAt,
     required this.authorDisplayName,
     this.authorAvatarUrl,
-    this.answerCount = 0,
-    this.bestAnswerId,
-    this.canMarkBest = false,
   });
 
-  bool get isResolved => status == 'resolved';
-
-  factory StudyQuestion.fromJson(Map<String, dynamic> json) {
+  factory StudyAnswer.fromJson(Map<String, dynamic> json) {
     int parseInt(dynamic value) {
       if (value is int) return value;
       return int.tryParse(value?.toString() ?? '') ?? 0;
     }
 
-    return StudyQuestion(
+    bool parseBool(dynamic value) {
+      return value == 1 || value == '1' || value == true;
+    }
+
+    return StudyAnswer(
       id: parseInt(json['id']),
+      questionId: parseInt(json['question_id']),
       authorUserId: parseInt(json['author_user_id']),
-      title: json['title'] ?? '',
       body: json['body'] ?? '',
-      category: json['category'] ?? '',
-      status: json['status'] ?? 'open',
+      isBest: parseBool(json['is_best']),
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
       authorDisplayName: json['display_name'] ?? '',
       authorAvatarUrl: _formatAvatarUrl(json['avatar_url']),
-      answerCount: parseInt(json['answer_count']),
-      bestAnswerId: json['best_answer_id'] != null
-          ? parseInt(json['best_answer_id'])
-          : null,
-      canMarkBest: json['can_mark_best'] == 1 ||
-          json['can_mark_best'] == '1' ||
-          json['can_mark_best'] == true,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'author_user_id': authorUserId,
-      'title': title,
-      'body': body,
-      'category': category,
-      'status': status,
-      'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt.toIso8601String(),
-      'display_name': authorDisplayName,
-      'avatar_url': authorAvatarUrl,
-      'answer_count': answerCount,
-      'best_answer_id': bestAnswerId,
-      'can_mark_best': canMarkBest,
-    };
   }
 
   static String? _formatAvatarUrl(dynamic url) {

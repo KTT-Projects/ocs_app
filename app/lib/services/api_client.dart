@@ -8,6 +8,7 @@ import '../models/feed.dart';
 import '../models/feed_post.dart';
 import '../models/comment.dart';
 import '../models/study_question.dart';
+import '../models/study_answer.dart';
 import 'auth_service.dart';
 
 class ApiException implements Exception {
@@ -70,6 +71,8 @@ class ApiClient extends ChangeNotifier {
       case 'Invalid or expired token':
         clearToken(); // Clear token immediately
         return serverMessage;
+      case 'Best answer already selected':
+        return l10n.bestAnswerAlreadySelected;
       default:
         return serverMessage;
     }
@@ -752,6 +755,113 @@ class ApiClient extends ChangeNotifier {
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException(l10n.failedToCreateStudyQuestion);
+    }
+  }
+
+  Future<List<StudyAnswer>> getStudyAnswers(
+    BuildContext context,
+    int questionId,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.get(
+        _buildUri('study.php?action=answers&question_id=$questionId'),
+        headers: {
+          'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(
+            context,
+            data['message'] ?? l10n.failedToLoadStudyAnswers,
+          ),
+        );
+      }
+
+      final list = data['data'] as List? ?? [];
+      return list.map((item) => StudyAnswer.fromJson(item)).toList();
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.failedToLoadStudyAnswers);
+    }
+  }
+
+  Future<int> createStudyAnswer(
+    BuildContext context, {
+    required int questionId,
+    required String body,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/study.php?action=answer'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode({
+          'question_id': questionId,
+          'body': body,
+        }),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200 && response.statusCode != 201) {
+        throw ApiException(
+          _mapServerError(
+            context,
+            data['message'] ?? l10n.failedToCreateStudyAnswer,
+          ),
+        );
+      }
+
+      return int.parse(data['data']['id'].toString());
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.failedToCreateStudyAnswer);
+    }
+  }
+
+  Future<void> markStudyAnswerAsBest(
+    BuildContext context, {
+    required int answerId,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/study.php?action=best'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode({
+          'answer_id': answerId,
+        }),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(
+            context,
+            data['message'] ?? l10n.failedToSelectBestAnswer,
+          ),
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.failedToSelectBestAnswer);
     }
   }
 

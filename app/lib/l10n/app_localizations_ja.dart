@@ -350,6 +350,42 @@ class AppLocalizationsJa extends AppLocalizations {
   String get questionCreatedAt => '作成日時';
 
   @override
+  String get studyAnswers => '回答';
+
+  @override
+  String get noStudyAnswers => 'まだ回答がありません。';
+
+  @override
+  String get answerInputHint => '回答を書く...';
+
+  @override
+  String get answerBodyRequired => '回答は必須です';
+
+  @override
+  String get answerBodyTooLong => '回答は5000文字以内で入力してください';
+
+  @override
+  String get failedToLoadStudyAnswers => '回答の読み込みに失敗しました';
+
+  @override
+  String get failedToCreateStudyAnswer => '回答の作成に失敗しました';
+
+  @override
+  String get failedToSelectBestAnswer => 'ベストアンサーの選定に失敗しました';
+
+  @override
+  String get markAsBest => 'ベストにする';
+
+  @override
+  String get bestAnswerLabel => 'Best';
+
+  @override
+  String get bestAnswerSelectedSuccess => 'ベストアンサーを選定しました';
+
+  @override
+  String get bestAnswerAlreadySelected => 'すでにベストアンサーが選定されています';
+
+  @override
   String get studyComingSoon => '準備中';
 
   @override
@@ -363,6 +399,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get role => '役割';
+
+  @override
+  String get totalPoints => '累計ポイント';
 
   @override
   String get cancel => 'キャンセル';

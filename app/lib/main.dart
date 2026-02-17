@@ -17,7 +17,7 @@ void main() async {
 
   final prefs = await SharedPreferences.getInstance();
   final apiClient = ApiClient();
-  
+
   await Future.wait([
     apiClient.initialize(),
     initializeDateFormatting('en'),

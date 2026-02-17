@@ -165,6 +165,54 @@
   "@questionCreatedAt": {
     "description": "質問作成日時のラベル"
   },
+  "studyAnswers": "回答",
+  "@studyAnswers": {
+    "description": "質問詳細で表示する回答セクションのタイトル"
+  },
+  "noStudyAnswers": "まだ回答がありません。",
+  "@noStudyAnswers": {
+    "description": "回答が存在しない場合のメッセージ"
+  },
+  "answerInputHint": "回答を書く...",
+  "@answerInputHint": {
+    "description": "回答入力欄のヒントテキスト"
+  },
+  "answerBodyRequired": "回答は必須です",
+  "@answerBodyRequired": {
+    "description": "回答本文が空の場合のバリデーションエラー"
+  },
+  "answerBodyTooLong": "回答は5000文字以内で入力してください",
+  "@answerBodyTooLong": {
+    "description": "回答本文が長すぎる場合のバリデーションエラー"
+  },
+  "failedToLoadStudyAnswers": "回答の読み込みに失敗しました",
+  "@failedToLoadStudyAnswers": {
+    "description": "回答一覧の読み込みに失敗した場合のエラーメッセージ"
+  },
+  "failedToCreateStudyAnswer": "回答の作成に失敗しました",
+  "@failedToCreateStudyAnswer": {
+    "description": "回答作成に失敗した場合のエラーメッセージ"
+  },
+  "failedToSelectBestAnswer": "ベストアンサーの選定に失敗しました",
+  "@failedToSelectBestAnswer": {
+    "description": "ベストアンサー選定に失敗した場合のエラーメッセージ"
+  },
+  "markAsBest": "ベストにする",
+  "@markAsBest": {
+    "description": "回答をベストにするボタンのテキスト"
+  },
+  "bestAnswerLabel": "Best",
+  "@bestAnswerLabel": {
+    "description": "ベスト回答に表示するラベル"
+  },
+  "bestAnswerSelectedSuccess": "ベストアンサーを選定しました",
+  "@bestAnswerSelectedSuccess": {
+    "description": "ベストアンサー選定成功時のメッセージ"
+  },
+  "bestAnswerAlreadySelected": "すでにベストアンサーが選定されています",
+  "@bestAnswerAlreadySelected": {
+    "description": "ベストアンサーが既に存在する場合のエラーメッセージ"
+  },
   "studyComingSoon": "準備中",
   "@studyComingSoon": {
     "description": "学習ページに表示するプレースホルダータイトル"
@@ -184,6 +232,10 @@
   "role": "役割",
   "@role": {
     "description": "ユーザーの役割表示用のラベル"
+  },
+  "totalPoints": "累計ポイント",
+  "@totalPoints": {
+    "description": "ユーザーの累計ポイント表示用ラベル"
   },
   "cancel": "キャンセル",
   "@cancel": {
