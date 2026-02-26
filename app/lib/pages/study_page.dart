@@ -480,139 +480,161 @@ class _StudyPageState extends State<StudyPage> {
                           itemBuilder: (context, index) {
                             final question = _questions![index];
                             final statusColor = _statusColor(question.status);
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 6),
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(16),
-                                onTap: () => _openQuestionDetail(question),
-                                child: Container(
-                                  padding: const EdgeInsets.all(14),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .background
-                                        .withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimary
-                                          .withOpacity(0.25),
-                                    ),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        question.title,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onPrimary,
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                      if (question.mediaUrls.isNotEmpty) ...[
-                                        const SizedBox(height: 10),
-                                        ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          child: Image.network(
-                                            question.mediaUrls.first,
-                                            height: 140,
-                                            width: double.infinity,
-                                            fit: BoxFit.cover,
+                            return LayoutBuilder(
+                              builder: (context, constraints) {
+                                final maxWidth = constraints.maxWidth;
+                                final width = maxWidth > 600 ? 600.0 : maxWidth;
+                                return Center(
+                                  child: SizedBox(
+                                    width: width,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 6),
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(16),
+                                        onTap: () =>
+                                            _openQuestionDetail(question),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(14),
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .background
+                                                .withOpacity(0.2),
+                                            borderRadius:
+                                                BorderRadius.circular(16),
+                                            border: Border.all(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onPrimary
+                                                  .withOpacity(0.25),
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                      const SizedBox(height: 10),
-                                      Wrap(
-                                        spacing: 8,
-                                        runSpacing: 8,
-                                        children: [
-                                          ...question.tags.map(
-                                            (tag) => Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                horizontal: 10,
-                                                vertical: 5,
-                                              ),
-                                              decoration: BoxDecoration(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onPrimary
-                                                    .withOpacity(0.16),
-                                                borderRadius:
-                                                    BorderRadius.circular(999),
-                                              ),
-                                              child: Text(
-                                                tag,
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                question.title,
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
                                                   color: Theme.of(context)
                                                       .colorScheme
                                                       .onPrimary,
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 17,
+                                                  fontWeight: FontWeight.w700,
                                                 ),
                                               ),
-                                            ),
-                                          ),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 10,
-                                              vertical: 5,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color:
-                                                  statusColor.withOpacity(0.22),
-                                              borderRadius:
-                                                  BorderRadius.circular(999),
-                                            ),
-                                            child: Text(
-                                              _statusText(
-                                                  l10n, question.status),
-                                              style: TextStyle(
-                                                color: statusColor,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w700,
+                                              if (question
+                                                  .mediaUrls.isNotEmpty) ...[
+                                                const SizedBox(height: 10),
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  child: Image.network(
+                                                    question.mediaUrls.first,
+                                                    height: 140,
+                                                    width: double.infinity,
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                ),
+                                              ],
+                                              const SizedBox(height: 10),
+                                              Wrap(
+                                                spacing: 8,
+                                                runSpacing: 8,
+                                                children: [
+                                                  ...question.tags.map(
+                                                    (tag) => Container(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                        horizontal: 10,
+                                                        vertical: 5,
+                                                      ),
+                                                      decoration: BoxDecoration(
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .onPrimary
+                                                            .withOpacity(0.16),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(999),
+                                                      ),
+                                                      child: Text(
+                                                        tag,
+                                                        style: TextStyle(
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .colorScheme
+                                                                  .onPrimary,
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Container(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 5,
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      color: statusColor
+                                                          .withOpacity(0.22),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              999),
+                                                    ),
+                                                    child: Text(
+                                                      _statusText(l10n,
+                                                          question.status),
+                                                      style: TextStyle(
+                                                        color: statusColor,
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                            ),
+                                              const SizedBox(height: 8),
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.access_time,
+                                                    size: 14,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onPrimary
+                                                        .withOpacity(0.75),
+                                                  ),
+                                                  const SizedBox(width: 4),
+                                                  Text(
+                                                    question.getTimeAgo(),
+                                                    style: TextStyle(
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .onPrimary
+                                                          .withOpacity(0.75),
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
                                           ),
-                                        ],
+                                        ),
                                       ),
-                                      const SizedBox(height: 8),
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.access_time,
-                                            size: 14,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onPrimary
-                                                .withOpacity(0.75),
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            question.getTimeAgo(),
-                                            style: TextStyle(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onPrimary
-                                                  .withOpacity(0.75),
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                                    ),
                                   ),
-                                ),
-                              ),
+                                );
+                              },
                             );
                           },
                         );
