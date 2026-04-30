@@ -139,8 +139,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get failedToLoadInstitutions => '教育機関の読み込みに失敗しました';
 
   @override
-  String errorDetailsText(
-      Object errorType, Object errorFile, Object errorLine, Object stackTrace) {
+  String errorDetailsText(Object errorType, Object errorFile, Object errorLine, Object stackTrace) {
     return '詳細:\n$errorType at $errorFile:$errorLine\n\nスタックトレース:\n$stackTrace';
   }
 
@@ -440,6 +439,159 @@ class AppLocalizationsJa extends AppLocalizations {
   String get studyFeature => '学習';
 
   @override
+  String get studyQuestions => '質問一覧';
+
+  @override
+  String get createQuestion => '質問を作成';
+
+  @override
+  String get questionBody => '質問本文';
+
+  @override
+  String get questionCategory => 'カテゴリ';
+
+  @override
+  String get questionTags => 'タグ';
+
+  @override
+  String get questionTagsHint => 'タグを入力（例: 物理）';
+
+  @override
+  String get addTag => '追加';
+
+  @override
+  String get postQuestion => '質問を投稿';
+
+  @override
+  String get studySearchHint => 'タイトル/本文/タグで検索...';
+
+  @override
+  String get studyFilterTitle => '質問フィルタ';
+
+  @override
+  String get studyFilterCategory => 'カテゴリ';
+
+  @override
+  String get studyFilterTag => 'タグ';
+
+  @override
+  String get studyFilterUnresolvedOnly => '未解決のみ';
+
+  @override
+  String get studyFilterApply => '適用';
+
+  @override
+  String get studyFilterReset => 'リセット';
+
+  @override
+  String get studySortNewest => '新着';
+
+  @override
+  String get studySortAnswers => '回答数';
+
+  @override
+  String get studySortUnresolvedFirst => '未解決優先';
+
+  @override
+  String get noStudyQuestions => 'まだ質問がありません。';
+
+  @override
+  String get failedToLoadStudyQuestions => '質問の読み込みに失敗しました';
+
+  @override
+  String get failedToLoadStudyQuestionDetail => '質問詳細の読み込みに失敗しました';
+
+  @override
+  String get failedToCreateStudyQuestion => '質問の作成に失敗しました';
+
+  @override
+  String get questionDetails => '質問詳細';
+
+  @override
+  String get questionCategoryRequired => 'カテゴリは必須です';
+
+  @override
+  String get questionCategoryTooLong => 'カテゴリは100文字以内で入力してください';
+
+  @override
+  String get questionTagsRequired => 'タグを1つ以上入力してください';
+
+  @override
+  String get questionTagsTooMany => 'タグは最大5つまでです';
+
+  @override
+  String get questionTagTooLong => '各タグは30文字以内で入力してください';
+
+  @override
+  String get questionStatusOpen => '未解決';
+
+  @override
+  String get questionStatusResolved => '解決済み';
+
+  @override
+  String get questionAuthor => '投稿者';
+
+  @override
+  String get questionCreatedAt => '作成日時';
+
+  @override
+  String get studyAnswers => '回答';
+
+  @override
+  String get noStudyAnswers => 'まだ回答がありません。';
+
+  @override
+  String get answerInputHint => '回答を書く...';
+
+  @override
+  String get answerBodyRequired => '回答は必須です';
+
+  @override
+  String get answerBodyTooLong => '回答は5000文字以内で入力してください';
+
+  @override
+  String get failedToLoadStudyAnswers => '回答の読み込みに失敗しました';
+
+  @override
+  String get failedToCreateStudyAnswer => '回答の作成に失敗しました';
+
+  @override
+  String get failedToSelectBestAnswer => 'ベストアンサーの選定に失敗しました';
+
+  @override
+  String get markAsBest => 'ベストにする';
+
+  @override
+  String get bestAnswerLabel => 'Best';
+
+  @override
+  String get bestAnswerSelectedSuccess => 'ベストアンサーを選定しました';
+
+  @override
+  String get bestAnswerAlreadySelected => 'すでにベストアンサーが選定されています';
+
+  @override
+  String get studyRanking => 'ランキング';
+
+  @override
+  String get studyRankingMyRank => '自分の順位';
+
+  @override
+  String get studyRankingUnranked => 'ランク外';
+
+  @override
+  String get noStudyRanking => 'ランキングデータがまだありません。';
+
+  @override
+  String get failedToLoadStudyRanking => 'ランキングの読み込みに失敗しました';
+
+  @override
+  String get studyComingSoon => '準備中';
+
+  @override
+  String get studyComingSoonDescription => 'Study Q&A機能は現在開発中です。';
+
+  @override
   String get feed => '掲示板';
 
   @override
@@ -447,6 +599,27 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get role => '役割';
+
+  @override
+  String get totalPoints => '累計ポイント';
+
+  @override
+  String get studyBadge => 'バッジ';
+
+  @override
+  String get studyBadgeNone => 'なし';
+
+  @override
+  String get studyBadgeBronze => 'ブロンズ';
+
+  @override
+  String get studyBadgeSilver => 'シルバー';
+
+  @override
+  String get studyBadgeGold => 'ゴールド';
+
+  @override
+  String get studyBadgePlatinum => 'プラチナ';
 
   @override
   String get cancel => 'キャンセル';

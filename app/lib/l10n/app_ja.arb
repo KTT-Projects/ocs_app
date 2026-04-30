@@ -154,6 +154,210 @@
   "@studyFeature": {
     "description": "学習セクションのタイトル"
   },
+  "studyQuestions": "質問一覧",
+  "@studyQuestions": {
+    "description": "学習質問一覧画面のタイトル"
+  },
+  "createQuestion": "質問を作成",
+  "@createQuestion": {
+    "description": "質問作成画面のタイトル"
+  },
+  "questionBody": "質問本文",
+  "@questionBody": {
+    "description": "質問本文入力欄のヒント"
+  },
+  "questionCategory": "カテゴリ",
+  "@questionCategory": {
+    "description": "カテゴリ入力欄のヒント"
+  },
+  "questionTags": "タグ",
+  "@questionTags": {
+    "description": "質問タグ入力欄のラベル"
+  },
+  "questionTagsHint": "タグを入力（例: 物理）",
+  "@questionTagsHint": {
+    "description": "単一タグ入力欄のヒント"
+  },
+  "addTag": "追加",
+  "@addTag": {
+    "description": "タグをリストに追加するボタンのテキスト"
+  },
+  "postQuestion": "質問を投稿",
+  "@postQuestion": {
+    "description": "質問投稿ボタンのテキスト"
+  },
+  "studySearchHint": "タイトル/本文/タグで検索...",
+  "@studySearchHint": {
+    "description": "学習質問検索ボックスのプレースホルダー"
+  },
+  "studyFilterTitle": "質問フィルタ",
+  "@studyFilterTitle": {
+    "description": "学習質問フィルターダイアログのタイトル"
+  },
+  "studyFilterCategory": "カテゴリ",
+  "@studyFilterCategory": {
+    "description": "学習質問フィルターのカテゴリ項目ラベル"
+  },
+  "studyFilterTag": "タグ",
+  "@studyFilterTag": {
+    "description": "学習質問フィルターのタグ項目ラベル"
+  },
+  "studyFilterUnresolvedOnly": "未解決のみ",
+  "@studyFilterUnresolvedOnly": {
+    "description": "未解決のみ表示するトグルのラベル"
+  },
+  "studyFilterApply": "適用",
+  "@studyFilterApply": {
+    "description": "学習質問フィルター適用ボタン"
+  },
+  "studyFilterReset": "リセット",
+  "@studyFilterReset": {
+    "description": "学習質問フィルターリセットボタン"
+  },
+  "studySortNewest": "新着",
+  "@studySortNewest": {
+    "description": "学習質問の新着順ソートラベル"
+  },
+  "studySortAnswers": "回答数",
+  "@studySortAnswers": {
+    "description": "学習質問の回答数順ソートラベル"
+  },
+  "studySortUnresolvedFirst": "未解決優先",
+  "@studySortUnresolvedFirst": {
+    "description": "学習質問の未解決優先ソートラベル"
+  },
+  "noStudyQuestions": "まだ質問がありません。",
+  "@noStudyQuestions": {
+    "description": "質問が存在しない場合のメッセージ"
+  },
+  "failedToLoadStudyQuestions": "質問の読み込みに失敗しました",
+  "@failedToLoadStudyQuestions": {
+    "description": "質問一覧の読み込みに失敗した場合のエラーメッセージ"
+  },
+  "failedToLoadStudyQuestionDetail": "質問詳細の読み込みに失敗しました",
+  "@failedToLoadStudyQuestionDetail": {
+    "description": "質問詳細の読み込みに失敗した場合のエラーメッセージ"
+  },
+  "failedToCreateStudyQuestion": "質問の作成に失敗しました",
+  "@failedToCreateStudyQuestion": {
+    "description": "質問作成に失敗した場合のエラーメッセージ"
+  },
+  "questionDetails": "質問詳細",
+  "@questionDetails": {
+    "description": "質問詳細画面のタイトル"
+  },
+  "questionCategoryRequired": "カテゴリは必須です",
+  "@questionCategoryRequired": {
+    "description": "カテゴリ未入力時のバリデーションエラー"
+  },
+  "questionCategoryTooLong": "カテゴリは100文字以内で入力してください",
+  "@questionCategoryTooLong": {
+    "description": "カテゴリが長すぎる場合のバリデーションエラー"
+  },
+  "questionTagsRequired": "タグを1つ以上入力してください",
+  "@questionTagsRequired": {
+    "description": "タグ未入力時のバリデーションエラー"
+  },
+  "questionTagsTooMany": "タグは最大5つまでです",
+  "@questionTagsTooMany": {
+    "description": "タグを入力しすぎた場合のバリデーションエラー"
+  },
+  "questionTagTooLong": "各タグは30文字以内で入力してください",
+  "@questionTagTooLong": {
+    "description": "各タグが長すぎる場合のバリデーションエラー"
+  },
+  "questionStatusOpen": "未解決",
+  "@questionStatusOpen": {
+    "description": "質問ステータス（未解決）"
+  },
+  "questionStatusResolved": "解決済み",
+  "@questionStatusResolved": {
+    "description": "質問ステータス（解決済み）"
+  },
+  "questionAuthor": "投稿者",
+  "@questionAuthor": {
+    "description": "質問投稿者のラベル"
+  },
+  "questionCreatedAt": "作成日時",
+  "@questionCreatedAt": {
+    "description": "質問作成日時のラベル"
+  },
+  "studyAnswers": "回答",
+  "@studyAnswers": {
+    "description": "質問詳細で表示する回答セクションのタイトル"
+  },
+  "noStudyAnswers": "まだ回答がありません。",
+  "@noStudyAnswers": {
+    "description": "回答が存在しない場合のメッセージ"
+  },
+  "answerInputHint": "回答を書く...",
+  "@answerInputHint": {
+    "description": "回答入力欄のヒントテキスト"
+  },
+  "answerBodyRequired": "回答は必須です",
+  "@answerBodyRequired": {
+    "description": "回答本文が空の場合のバリデーションエラー"
+  },
+  "answerBodyTooLong": "回答は5000文字以内で入力してください",
+  "@answerBodyTooLong": {
+    "description": "回答本文が長すぎる場合のバリデーションエラー"
+  },
+  "failedToLoadStudyAnswers": "回答の読み込みに失敗しました",
+  "@failedToLoadStudyAnswers": {
+    "description": "回答一覧の読み込みに失敗した場合のエラーメッセージ"
+  },
+  "failedToCreateStudyAnswer": "回答の作成に失敗しました",
+  "@failedToCreateStudyAnswer": {
+    "description": "回答作成に失敗した場合のエラーメッセージ"
+  },
+  "failedToSelectBestAnswer": "ベストアンサーの選定に失敗しました",
+  "@failedToSelectBestAnswer": {
+    "description": "ベストアンサー選定に失敗した場合のエラーメッセージ"
+  },
+  "markAsBest": "ベストにする",
+  "@markAsBest": {
+    "description": "回答をベストにするボタンのテキスト"
+  },
+  "bestAnswerLabel": "Best",
+  "@bestAnswerLabel": {
+    "description": "ベスト回答に表示するラベル"
+  },
+  "bestAnswerSelectedSuccess": "ベストアンサーを選定しました",
+  "@bestAnswerSelectedSuccess": {
+    "description": "ベストアンサー選定成功時のメッセージ"
+  },
+  "bestAnswerAlreadySelected": "すでにベストアンサーが選定されています",
+  "@bestAnswerAlreadySelected": {
+    "description": "ベストアンサーが既に存在する場合のエラーメッセージ"
+  },
+  "studyRanking": "ランキング",
+  "@studyRanking": {
+    "description": "学習ポイントランキング画面のタイトル"
+  },
+  "studyRankingMyRank": "自分の順位",
+  "@studyRankingMyRank": {
+    "description": "現在ログイン中ユーザーの順位セクションラベル"
+  },
+  "studyRankingUnranked": "ランク外",
+  "@studyRankingUnranked": {
+    "description": "まだ順位がついていない場合の表示"
+  },
+  "noStudyRanking": "ランキングデータがまだありません。",
+  "@noStudyRanking": {
+    "description": "ランキングが空のときのメッセージ"
+  },
+  "failedToLoadStudyRanking": "ランキングの読み込みに失敗しました",
+  "@failedToLoadStudyRanking": {
+    "description": "ランキング読み込み失敗時のエラーメッセージ"
+  },
+  "studyComingSoon": "準備中",
+  "@studyComingSoon": {
+    "description": "学習ページに表示するプレースホルダータイトル"
+  },
+  "studyComingSoonDescription": "Study Q&A機能は現在開発中です。",
+  "@studyComingSoonDescription": {
+    "description": "学習ページに表示するプレースホルダー説明文"
+  },
   "feed": "掲示板",
   "@feed": {
     "description": "掲示板セクションのタイトル"
@@ -165,6 +369,34 @@
   "role": "役割",
   "@role": {
     "description": "ユーザーの役割表示用のラベル"
+  },
+  "totalPoints": "累計ポイント",
+  "@totalPoints": {
+    "description": "ユーザーの累計ポイント表示用ラベル"
+  },
+  "studyBadge": "バッジ",
+  "@studyBadge": {
+    "description": "学習バッジ表示のラベル"
+  },
+  "studyBadgeNone": "なし",
+  "@studyBadgeNone": {
+    "description": "バッジ未獲得時の表示"
+  },
+  "studyBadgeBronze": "ブロンズ",
+  "@studyBadgeBronze": {
+    "description": "ブロンズバッジ名"
+  },
+  "studyBadgeSilver": "シルバー",
+  "@studyBadgeSilver": {
+    "description": "シルバーバッジ名"
+  },
+  "studyBadgeGold": "ゴールド",
+  "@studyBadgeGold": {
+    "description": "ゴールドバッジ名"
+  },
+  "studyBadgePlatinum": "プラチナ",
+  "@studyBadgePlatinum": {
+    "description": "プラチナバッジ名"
   },
   "cancel": "キャンセル",
   "@cancel": {

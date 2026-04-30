@@ -42,7 +42,7 @@ class _HomePageState extends State<HomePage> {
         FeedsPage(apiClient: widget.apiClient),
         const Center(child: Text('Events')),
         VolunteerPage(apiClient: widget.apiClient),
-        const Center(child: Text('Study')),
+        StudyPage(apiClient: widget.apiClient),
         ProfilePage(apiClient: widget.apiClient),
       ];
       WidgetsBinding.instance.addPostFrameCallback((_) {

@@ -580,6 +580,210 @@
   "@studyFeature": {
     "description": "Title for the study section"
   },
+  "studyQuestions": "Study Questions",
+  "@studyQuestions": {
+    "description": "Title for the Study question list"
+  },
+  "createQuestion": "Create Question",
+  "@createQuestion": {
+    "description": "Title for the create question screen"
+  },
+  "questionBody": "Question body",
+  "@questionBody": {
+    "description": "Hint label for question body input"
+  },
+  "questionCategory": "Category",
+  "@questionCategory": {
+    "description": "Hint label for question category input"
+  },
+  "questionTags": "Tags",
+  "@questionTags": {
+    "description": "Label for question tags input"
+  },
+  "questionTagsHint": "Enter a tag (e.g. Physics)",
+  "@questionTagsHint": {
+    "description": "Hint label for single question tag input"
+  },
+  "addTag": "Add",
+  "@addTag": {
+    "description": "Button text to add a tag to the tag list"
+  },
+  "postQuestion": "Post Question",
+  "@postQuestion": {
+    "description": "Button text to submit a question"
+  },
+  "studySearchHint": "Search title/body/tag...",
+  "@studySearchHint": {
+    "description": "Placeholder for study question search input"
+  },
+  "studyFilterTitle": "Filter Questions",
+  "@studyFilterTitle": {
+    "description": "Title for study filter dialog"
+  },
+  "studyFilterCategory": "Category",
+  "@studyFilterCategory": {
+    "description": "Category field label in study filter dialog"
+  },
+  "studyFilterTag": "Tag",
+  "@studyFilterTag": {
+    "description": "Tag field label in study filter dialog"
+  },
+  "studyFilterUnresolvedOnly": "Unresolved only",
+  "@studyFilterUnresolvedOnly": {
+    "description": "Toggle label to show only unresolved questions"
+  },
+  "studyFilterApply": "Apply",
+  "@studyFilterApply": {
+    "description": "Apply button text in study filter dialog"
+  },
+  "studyFilterReset": "Reset",
+  "@studyFilterReset": {
+    "description": "Reset button text in study filter dialog"
+  },
+  "studySortNewest": "Newest",
+  "@studySortNewest": {
+    "description": "Sort option for newest study questions"
+  },
+  "studySortAnswers": "Most Answers",
+  "@studySortAnswers": {
+    "description": "Sort option for study questions by answer count"
+  },
+  "studySortUnresolvedFirst": "Unresolved First",
+  "@studySortUnresolvedFirst": {
+    "description": "Sort option to prioritize unresolved study questions"
+  },
+  "noStudyQuestions": "No questions yet.",
+  "@noStudyQuestions": {
+    "description": "Message shown when no study questions exist"
+  },
+  "failedToLoadStudyQuestions": "Failed to load questions",
+  "@failedToLoadStudyQuestions": {
+    "description": "Error message when study questions cannot be loaded"
+  },
+  "failedToLoadStudyQuestionDetail": "Failed to load question detail",
+  "@failedToLoadStudyQuestionDetail": {
+    "description": "Error message when a study question detail cannot be loaded"
+  },
+  "failedToCreateStudyQuestion": "Failed to create question",
+  "@failedToCreateStudyQuestion": {
+    "description": "Error message when a study question cannot be created"
+  },
+  "questionDetails": "Question Details",
+  "@questionDetails": {
+    "description": "Title for study question details screen"
+  },
+  "questionCategoryRequired": "Category is required",
+  "@questionCategoryRequired": {
+    "description": "Validation error when category is empty"
+  },
+  "questionCategoryTooLong": "Category must be less than 100 characters",
+  "@questionCategoryTooLong": {
+    "description": "Validation error when category exceeds max length"
+  },
+  "questionTagsRequired": "At least one tag is required",
+  "@questionTagsRequired": {
+    "description": "Validation error when no tags are entered"
+  },
+  "questionTagsTooMany": "You can add up to 5 tags",
+  "@questionTagsTooMany": {
+    "description": "Validation error when too many tags are entered"
+  },
+  "questionTagTooLong": "Each tag must be 30 characters or less",
+  "@questionTagTooLong": {
+    "description": "Validation error when a tag exceeds max length"
+  },
+  "questionStatusOpen": "Open",
+  "@questionStatusOpen": {
+    "description": "Question status label for open"
+  },
+  "questionStatusResolved": "Resolved",
+  "@questionStatusResolved": {
+    "description": "Question status label for resolved"
+  },
+  "questionAuthor": "Author",
+  "@questionAuthor": {
+    "description": "Label for question author"
+  },
+  "questionCreatedAt": "Created",
+  "@questionCreatedAt": {
+    "description": "Label for question creation date"
+  },
+  "studyAnswers": "Answers",
+  "@studyAnswers": {
+    "description": "Section title for study answers"
+  },
+  "noStudyAnswers": "No answers yet.",
+  "@noStudyAnswers": {
+    "description": "Message shown when a question has no answers"
+  },
+  "answerInputHint": "Write your answer...",
+  "@answerInputHint": {
+    "description": "Hint text for answer input field"
+  },
+  "answerBodyRequired": "Answer is required",
+  "@answerBodyRequired": {
+    "description": "Validation error when answer body is empty"
+  },
+  "answerBodyTooLong": "Answer must be less than 5000 characters",
+  "@answerBodyTooLong": {
+    "description": "Validation error when answer body is too long"
+  },
+  "failedToLoadStudyAnswers": "Failed to load answers",
+  "@failedToLoadStudyAnswers": {
+    "description": "Error message when study answers cannot be loaded"
+  },
+  "failedToCreateStudyAnswer": "Failed to create answer",
+  "@failedToCreateStudyAnswer": {
+    "description": "Error message when creating answer fails"
+  },
+  "failedToSelectBestAnswer": "Failed to select best answer",
+  "@failedToSelectBestAnswer": {
+    "description": "Error message when selecting best answer fails"
+  },
+  "markAsBest": "Mark as Best",
+  "@markAsBest": {
+    "description": "Action button text to mark an answer as best"
+  },
+  "bestAnswerLabel": "Best",
+  "@bestAnswerLabel": {
+    "description": "Badge label shown on best answer"
+  },
+  "bestAnswerSelectedSuccess": "Best answer selected",
+  "@bestAnswerSelectedSuccess": {
+    "description": "Success message when a best answer is selected"
+  },
+  "bestAnswerAlreadySelected": "Best answer already selected",
+  "@bestAnswerAlreadySelected": {
+    "description": "Error message when trying to select best answer twice"
+  },
+  "studyRanking": "Ranking",
+  "@studyRanking": {
+    "description": "Title for study points ranking page"
+  },
+  "studyRankingMyRank": "Your Rank",
+  "@studyRankingMyRank": {
+    "description": "Label for current user's rank section"
+  },
+  "studyRankingUnranked": "Unranked",
+  "@studyRankingUnranked": {
+    "description": "Text shown when user is not ranked yet"
+  },
+  "noStudyRanking": "No ranking data yet.",
+  "@noStudyRanking": {
+    "description": "Message shown when ranking list is empty"
+  },
+  "failedToLoadStudyRanking": "Failed to load ranking",
+  "@failedToLoadStudyRanking": {
+    "description": "Error message when study ranking cannot be loaded"
+  },
+  "studyComingSoon": "Coming soon",
+  "@studyComingSoon": {
+    "description": "Placeholder title shown on the Study page"
+  },
+  "studyComingSoonDescription": "Study Q&A is currently under development.",
+  "@studyComingSoonDescription": {
+    "description": "Placeholder description shown on the Study page"
+  },
   "feed": "Feed",
   "@feed": {
     "description": "Title for the feed section"
@@ -591,6 +795,34 @@
   "role": "Role",
   "@role": {
     "description": "Label for user role display"
+  },
+  "totalPoints": "Total Points",
+  "@totalPoints": {
+    "description": "Label for user's cumulative points"
+  },
+  "studyBadge": "Badge",
+  "@studyBadge": {
+    "description": "Label for study badge display"
+  },
+  "studyBadgeNone": "No Badge",
+  "@studyBadgeNone": {
+    "description": "Label when user has no study badge yet"
+  },
+  "studyBadgeBronze": "Bronze",
+  "@studyBadgeBronze": {
+    "description": "Bronze study badge name"
+  },
+  "studyBadgeSilver": "Silver",
+  "@studyBadgeSilver": {
+    "description": "Silver study badge name"
+  },
+  "studyBadgeGold": "Gold",
+  "@studyBadgeGold": {
+    "description": "Gold study badge name"
+  },
+  "studyBadgePlatinum": "Platinum",
+  "@studyBadgePlatinum": {
+    "description": "Platinum study badge name"
   },
   "cancel": "Cancel",
   "@cancel": {

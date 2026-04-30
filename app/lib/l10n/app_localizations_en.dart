@@ -9,8 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get checkSpamJunk =>
-      'Please check your spam/junk folder if you don\'t see the email in your inbox';
+  String get checkSpamJunk => 'Please check your spam/junk folder if you don\'t see the email in your inbox';
 
   @override
   String get resendOtp => 'Resend Code';
@@ -107,8 +106,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get enterVerificationCode =>
-      'Please enter the 6-digit code to verify your account:';
+  String get enterVerificationCode => 'Please enter the 6-digit code to verify your account:';
 
   @override
   String get enterSixDigitCode => 'Enter 6-digit code';
@@ -141,8 +139,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get failedToLoadInstitutions => 'Failed to load institutions';
 
   @override
-  String errorDetailsText(
-      Object errorType, Object errorFile, Object errorLine, Object stackTrace) {
+  String errorDetailsText(Object errorType, Object errorFile, Object errorLine, Object stackTrace) {
     return 'Details:\n$errorType at $errorFile:$errorLine\n\nStack trace:\n$stackTrace';
   }
 
@@ -165,8 +162,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backToRegistration => 'Back to Registration';
 
   @override
-  String get invalidOrExpiredOtp =>
-      'Invalid or expired verification code. Please request a new code.';
+  String get invalidOrExpiredOtp => 'Invalid or expired verification code. Please request a new code.';
 
   @override
   String welcomeUser(Object name) {
@@ -204,8 +200,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get displayNameRequired => 'Display name is required';
 
   @override
-  String get displayNameTooLong =>
-      'Display name must be less than 30 characters';
+  String get displayNameTooLong => 'Display name must be less than 30 characters';
 
   @override
   String get communityFeatures => 'Community Features';
@@ -394,33 +389,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newCommunityCenter => 'New Community Center Opening';
 
   @override
-  String get communityCenterDesc =>
-      'The new community center will open next week with various facilities.';
+  String get communityCenterDesc => 'The new community center will open next week with various facilities.';
 
   @override
   String get beachCleanup => 'Beach Cleanup Event';
 
   @override
-  String get beachCleanupDesc =>
-      'Join us for the monthly beach cleanup activity.';
+  String get beachCleanupDesc => 'Join us for the monthly beach cleanup activity.';
 
   @override
   String get summerFestival => 'Summer Festival Planning';
 
   @override
-  String get summerFestivalDesc =>
-      'Planning meeting for this year\'s summer festival.';
+  String get summerFestivalDesc => 'Planning meeting for this year\'s summer festival.';
 
   @override
   String get resetPasswordTitle => 'Reset Password';
 
   @override
-  String get resetPasswordSubtitle =>
-      'Enter your email to receive reset instructions';
+  String get resetPasswordSubtitle => 'Enter your email to receive reset instructions';
 
   @override
-  String get resetPasswordSent =>
-      'Password reset instructions sent to your email';
+  String get resetPasswordSent => 'Password reset instructions sent to your email';
 
   @override
   String get resetPasswordFailed => 'Failed to reset password';
@@ -450,6 +440,159 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studyFeature => 'Study';
 
   @override
+  String get studyQuestions => 'Study Questions';
+
+  @override
+  String get createQuestion => 'Create Question';
+
+  @override
+  String get questionBody => 'Question body';
+
+  @override
+  String get questionCategory => 'Category';
+
+  @override
+  String get questionTags => 'Tags';
+
+  @override
+  String get questionTagsHint => 'Enter a tag (e.g. Physics)';
+
+  @override
+  String get addTag => 'Add';
+
+  @override
+  String get postQuestion => 'Post Question';
+
+  @override
+  String get studySearchHint => 'Search title/body/tag...';
+
+  @override
+  String get studyFilterTitle => 'Filter Questions';
+
+  @override
+  String get studyFilterCategory => 'Category';
+
+  @override
+  String get studyFilterTag => 'Tag';
+
+  @override
+  String get studyFilterUnresolvedOnly => 'Unresolved only';
+
+  @override
+  String get studyFilterApply => 'Apply';
+
+  @override
+  String get studyFilterReset => 'Reset';
+
+  @override
+  String get studySortNewest => 'Newest';
+
+  @override
+  String get studySortAnswers => 'Most Answers';
+
+  @override
+  String get studySortUnresolvedFirst => 'Unresolved First';
+
+  @override
+  String get noStudyQuestions => 'No questions yet.';
+
+  @override
+  String get failedToLoadStudyQuestions => 'Failed to load questions';
+
+  @override
+  String get failedToLoadStudyQuestionDetail => 'Failed to load question detail';
+
+  @override
+  String get failedToCreateStudyQuestion => 'Failed to create question';
+
+  @override
+  String get questionDetails => 'Question Details';
+
+  @override
+  String get questionCategoryRequired => 'Category is required';
+
+  @override
+  String get questionCategoryTooLong => 'Category must be less than 100 characters';
+
+  @override
+  String get questionTagsRequired => 'At least one tag is required';
+
+  @override
+  String get questionTagsTooMany => 'You can add up to 5 tags';
+
+  @override
+  String get questionTagTooLong => 'Each tag must be 30 characters or less';
+
+  @override
+  String get questionStatusOpen => 'Open';
+
+  @override
+  String get questionStatusResolved => 'Resolved';
+
+  @override
+  String get questionAuthor => 'Author';
+
+  @override
+  String get questionCreatedAt => 'Created';
+
+  @override
+  String get studyAnswers => 'Answers';
+
+  @override
+  String get noStudyAnswers => 'No answers yet.';
+
+  @override
+  String get answerInputHint => 'Write your answer...';
+
+  @override
+  String get answerBodyRequired => 'Answer is required';
+
+  @override
+  String get answerBodyTooLong => 'Answer must be less than 5000 characters';
+
+  @override
+  String get failedToLoadStudyAnswers => 'Failed to load answers';
+
+  @override
+  String get failedToCreateStudyAnswer => 'Failed to create answer';
+
+  @override
+  String get failedToSelectBestAnswer => 'Failed to select best answer';
+
+  @override
+  String get markAsBest => 'Mark as Best';
+
+  @override
+  String get bestAnswerLabel => 'Best';
+
+  @override
+  String get bestAnswerSelectedSuccess => 'Best answer selected';
+
+  @override
+  String get bestAnswerAlreadySelected => 'Best answer already selected';
+
+  @override
+  String get studyRanking => 'Ranking';
+
+  @override
+  String get studyRankingMyRank => 'Your Rank';
+
+  @override
+  String get studyRankingUnranked => 'Unranked';
+
+  @override
+  String get noStudyRanking => 'No ranking data yet.';
+
+  @override
+  String get failedToLoadStudyRanking => 'Failed to load ranking';
+
+  @override
+  String get studyComingSoon => 'Coming soon';
+
+  @override
+  String get studyComingSoonDescription => 'Study Q&A is currently under development.';
+
+  @override
   String get feed => 'Feed';
 
   @override
@@ -457,6 +600,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get role => 'Role';
+
+  @override
+  String get totalPoints => 'Total Points';
+
+  @override
+  String get studyBadge => 'Badge';
+
+  @override
+  String get studyBadgeNone => 'No Badge';
+
+  @override
+  String get studyBadgeBronze => 'Bronze';
+
+  @override
+  String get studyBadgeSilver => 'Silver';
+
+  @override
+  String get studyBadgeGold => 'Gold';
+
+  @override
+  String get studyBadgePlatinum => 'Platinum';
 
   @override
   String get cancel => 'Cancel';
@@ -510,8 +674,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get feedIdRequired => 'Feed ID is required';
 
   @override
-  String get feedIdInvalid =>
-      'Only lowercase letters, numbers, and underscores allowed';
+  String get feedIdInvalid => 'Only lowercase letters, numbers, and underscores allowed';
 
   @override
   String get descriptionRequired => 'Description is required';
@@ -526,8 +689,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addImage => 'Add Image';
 
   @override
-  String get feedIdHelperText =>
-      'Only lowercase letters, numbers, and underscores';
+  String get feedIdHelperText => 'Only lowercase letters, numbers, and underscores';
 
   @override
   String get postTitle => 'Title';
@@ -580,8 +742,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectNewAdmin => '';
 
   @override
-  String get confirmDeleteFeed =>
-      'No other members remain. Leaving will delete this feed. Continue?';
+  String get confirmDeleteFeed => 'No other members remain. Leaving will delete this feed. Continue?';
 
   @override
   String get ok => 'OK';
@@ -623,8 +784,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get contentTooLong => 'Content must be less than 5000 characters';
 
   @override
-  String get descriptionTooLong =>
-      'Description must be less than 1000 characters';
+  String get descriptionTooLong => 'Description must be less than 1000 characters';
 
   @override
   String get rulesTooLong => 'Rules must be less than 1000 characters';

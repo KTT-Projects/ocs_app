@@ -62,8 +62,7 @@ import 'app_localizations_ja.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale)
-      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -71,8 +70,7 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -84,8 +82,7 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
-      <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
@@ -354,8 +351,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Details:\n{errorType} at {errorFile}:{errorLine}\n\nStack trace:\n{stackTrace}'**
-  String errorDetailsText(
-      Object errorType, Object errorFile, Object errorLine, Object stackTrace);
+  String errorDetailsText(Object errorType, Object errorFile, Object errorLine, Object stackTrace);
 
   /// Text for unknown error type
   ///
@@ -939,6 +935,312 @@ abstract class AppLocalizations {
   /// **'Study'**
   String get studyFeature;
 
+  /// Title for the Study question list
+  ///
+  /// In en, this message translates to:
+  /// **'Study Questions'**
+  String get studyQuestions;
+
+  /// Title for the create question screen
+  ///
+  /// In en, this message translates to:
+  /// **'Create Question'**
+  String get createQuestion;
+
+  /// Hint label for question body input
+  ///
+  /// In en, this message translates to:
+  /// **'Question body'**
+  String get questionBody;
+
+  /// Hint label for question category input
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get questionCategory;
+
+  /// Label for question tags input
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get questionTags;
+
+  /// Hint label for single question tag input
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a tag (e.g. Physics)'**
+  String get questionTagsHint;
+
+  /// Button text to add a tag to the tag list
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get addTag;
+
+  /// Button text to submit a question
+  ///
+  /// In en, this message translates to:
+  /// **'Post Question'**
+  String get postQuestion;
+
+  /// Placeholder for study question search input
+  ///
+  /// In en, this message translates to:
+  /// **'Search title/body/tag...'**
+  String get studySearchHint;
+
+  /// Title for study filter dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Filter Questions'**
+  String get studyFilterTitle;
+
+  /// Category field label in study filter dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get studyFilterCategory;
+
+  /// Tag field label in study filter dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Tag'**
+  String get studyFilterTag;
+
+  /// Toggle label to show only unresolved questions
+  ///
+  /// In en, this message translates to:
+  /// **'Unresolved only'**
+  String get studyFilterUnresolvedOnly;
+
+  /// Apply button text in study filter dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get studyFilterApply;
+
+  /// Reset button text in study filter dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get studyFilterReset;
+
+  /// Sort option for newest study questions
+  ///
+  /// In en, this message translates to:
+  /// **'Newest'**
+  String get studySortNewest;
+
+  /// Sort option for study questions by answer count
+  ///
+  /// In en, this message translates to:
+  /// **'Most Answers'**
+  String get studySortAnswers;
+
+  /// Sort option to prioritize unresolved study questions
+  ///
+  /// In en, this message translates to:
+  /// **'Unresolved First'**
+  String get studySortUnresolvedFirst;
+
+  /// Message shown when no study questions exist
+  ///
+  /// In en, this message translates to:
+  /// **'No questions yet.'**
+  String get noStudyQuestions;
+
+  /// Error message when study questions cannot be loaded
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load questions'**
+  String get failedToLoadStudyQuestions;
+
+  /// Error message when a study question detail cannot be loaded
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load question detail'**
+  String get failedToLoadStudyQuestionDetail;
+
+  /// Error message when a study question cannot be created
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create question'**
+  String get failedToCreateStudyQuestion;
+
+  /// Title for study question details screen
+  ///
+  /// In en, this message translates to:
+  /// **'Question Details'**
+  String get questionDetails;
+
+  /// Validation error when category is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Category is required'**
+  String get questionCategoryRequired;
+
+  /// Validation error when category exceeds max length
+  ///
+  /// In en, this message translates to:
+  /// **'Category must be less than 100 characters'**
+  String get questionCategoryTooLong;
+
+  /// Validation error when no tags are entered
+  ///
+  /// In en, this message translates to:
+  /// **'At least one tag is required'**
+  String get questionTagsRequired;
+
+  /// Validation error when too many tags are entered
+  ///
+  /// In en, this message translates to:
+  /// **'You can add up to 5 tags'**
+  String get questionTagsTooMany;
+
+  /// Validation error when a tag exceeds max length
+  ///
+  /// In en, this message translates to:
+  /// **'Each tag must be 30 characters or less'**
+  String get questionTagTooLong;
+
+  /// Question status label for open
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get questionStatusOpen;
+
+  /// Question status label for resolved
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved'**
+  String get questionStatusResolved;
+
+  /// Label for question author
+  ///
+  /// In en, this message translates to:
+  /// **'Author'**
+  String get questionAuthor;
+
+  /// Label for question creation date
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get questionCreatedAt;
+
+  /// Section title for study answers
+  ///
+  /// In en, this message translates to:
+  /// **'Answers'**
+  String get studyAnswers;
+
+  /// Message shown when a question has no answers
+  ///
+  /// In en, this message translates to:
+  /// **'No answers yet.'**
+  String get noStudyAnswers;
+
+  /// Hint text for answer input field
+  ///
+  /// In en, this message translates to:
+  /// **'Write your answer...'**
+  String get answerInputHint;
+
+  /// Validation error when answer body is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Answer is required'**
+  String get answerBodyRequired;
+
+  /// Validation error when answer body is too long
+  ///
+  /// In en, this message translates to:
+  /// **'Answer must be less than 5000 characters'**
+  String get answerBodyTooLong;
+
+  /// Error message when study answers cannot be loaded
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load answers'**
+  String get failedToLoadStudyAnswers;
+
+  /// Error message when creating answer fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create answer'**
+  String get failedToCreateStudyAnswer;
+
+  /// Error message when selecting best answer fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to select best answer'**
+  String get failedToSelectBestAnswer;
+
+  /// Action button text to mark an answer as best
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as Best'**
+  String get markAsBest;
+
+  /// Badge label shown on best answer
+  ///
+  /// In en, this message translates to:
+  /// **'Best'**
+  String get bestAnswerLabel;
+
+  /// Success message when a best answer is selected
+  ///
+  /// In en, this message translates to:
+  /// **'Best answer selected'**
+  String get bestAnswerSelectedSuccess;
+
+  /// Error message when trying to select best answer twice
+  ///
+  /// In en, this message translates to:
+  /// **'Best answer already selected'**
+  String get bestAnswerAlreadySelected;
+
+  /// Title for study points ranking page
+  ///
+  /// In en, this message translates to:
+  /// **'Ranking'**
+  String get studyRanking;
+
+  /// Label for current user's rank section
+  ///
+  /// In en, this message translates to:
+  /// **'Your Rank'**
+  String get studyRankingMyRank;
+
+  /// Text shown when user is not ranked yet
+  ///
+  /// In en, this message translates to:
+  /// **'Unranked'**
+  String get studyRankingUnranked;
+
+  /// Message shown when ranking list is empty
+  ///
+  /// In en, this message translates to:
+  /// **'No ranking data yet.'**
+  String get noStudyRanking;
+
+  /// Error message when study ranking cannot be loaded
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load ranking'**
+  String get failedToLoadStudyRanking;
+
+  /// Placeholder title shown on the Study page
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get studyComingSoon;
+
+  /// Placeholder description shown on the Study page
+  ///
+  /// In en, this message translates to:
+  /// **'Study Q&A is currently under development.'**
+  String get studyComingSoonDescription;
+
   /// Title for the feed section
   ///
   /// In en, this message translates to:
@@ -956,6 +1258,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Role'**
   String get role;
+
+  /// Label for user's cumulative points
+  ///
+  /// In en, this message translates to:
+  /// **'Total Points'**
+  String get totalPoints;
+
+  /// Label for study badge display
+  ///
+  /// In en, this message translates to:
+  /// **'Badge'**
+  String get studyBadge;
+
+  /// Label when user has no study badge yet
+  ///
+  /// In en, this message translates to:
+  /// **'No Badge'**
+  String get studyBadgeNone;
+
+  /// Bronze study badge name
+  ///
+  /// In en, this message translates to:
+  /// **'Bronze'**
+  String get studyBadgeBronze;
+
+  /// Silver study badge name
+  ///
+  /// In en, this message translates to:
+  /// **'Silver'**
+  String get studyBadgeSilver;
+
+  /// Gold study badge name
+  ///
+  /// In en, this message translates to:
+  /// **'Gold'**
+  String get studyBadgeGold;
+
+  /// Platinum study badge name
+  ///
+  /// In en, this message translates to:
+  /// **'Platinum'**
+  String get studyBadgePlatinum;
 
   /// Text for cancel button
   ///
@@ -1720,8 +2064,7 @@ abstract class AppLocalizations {
   String get listTab;
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -1730,25 +2073,25 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en', 'ja'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en', 'ja'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+
+
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en':
-      return AppLocalizationsEn();
-    case 'ja':
-      return AppLocalizationsJa();
+    case 'en': return AppLocalizationsEn();
+    case 'ja': return AppLocalizationsJa();
   }
 
   throw FlutterError(
-      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-      'an issue with the localizations generation tool. Please file an issue '
-      'on GitHub with a reproducible sample app and the gen-l10n configuration '
-      'that was used.');
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.'
+  );
 }

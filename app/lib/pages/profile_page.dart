@@ -8,6 +8,7 @@ import 'dart:io';
 import '../providers/language_provider.dart';
 import '../widgets/language_toggle.dart';
 import '../services/api_client.dart';
+import '../utils/study_badge.dart';
 import '../widgets/glassmorphic_ui.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -34,7 +35,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _pickImage(BuildContext context) async {
     try {
-      final XFile? image = await _imagePicker.pickImage(source: ImageSource.gallery);
+      final XFile? image =
+          await _imagePicker.pickImage(source: ImageSource.gallery);
       if (image != null && mounted) {
         setState(() {
           _isUploadingAvatar = true;
@@ -66,7 +68,8 @@ class _ProfilePageState extends State<ProfilePage> {
               }
               return;
             }
-            avatarUrl = await widget.apiClient.uploadAvatar(context, image.path);
+            avatarUrl =
+                await widget.apiClient.uploadAvatar(context, image.path);
           } catch (e) {
             if (mounted) {
               GlassmorphicUI.showGlassSnackBar(
@@ -125,7 +128,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
       if (mounted) {
         // Ensure absolute avatar URL for all platforms
-        if (profile != null && profile['avatar'] != null && profile['avatar'].toString().startsWith('/')) {
+        if (profile != null &&
+            profile['avatar'] != null &&
+            profile['avatar'].toString().startsWith('/')) {
           profile['avatar'] = 'https://ocs.kttprojects.com' + profile['avatar'];
         }
         setState(() {
@@ -150,8 +155,8 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12.0),
@@ -213,10 +218,16 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Container(
                       width: isSmallScreen ? maxWidth - 32 : 400,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .background
+                            .withOpacity(0.2),
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onPrimary
+                              .withOpacity(0.3),
                         ),
                         boxShadow: [
                           BoxShadow(
@@ -234,13 +245,17 @@ class _ProfilePageState extends State<ProfilePage> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               GestureDetector(
-                                onTap: _isUploadingAvatar ? null : () => _pickImage(context),
+                                onTap: _isUploadingAvatar
+                                    ? null
+                                    : () => _pickImage(context),
                                 child: Stack(
                                   alignment: Alignment.center,
                                   children: [
                                     CircleAvatar(
                                       radius: 50,
-                                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                                      backgroundColor: Theme.of(context)
+                                          .colorScheme
+                                          .secondary,
                                       child: _profile!['avatar'] != null
                                           ? ClipOval(
                                               child: Image.network(
@@ -254,7 +269,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                               _profile!['name']?[0] ?? '?',
                                               style: TextStyle(
                                                 fontSize: 32,
-                                                color: Theme.of(context).colorScheme.onSecondary,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSecondary,
                                               ),
                                             ),
                                     ),
@@ -267,13 +284,17 @@ class _ProfilePageState extends State<ProfilePage> {
                                         child: Container(
                                           padding: const EdgeInsets.all(4),
                                           decoration: BoxDecoration(
-                                            color: Theme.of(context).colorScheme.secondary,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .secondary,
                                             shape: BoxShape.circle,
                                           ),
                                           child: Icon(
                                             Icons.camera_alt,
                                             size: 20,
-                                            color: Theme.of(context).colorScheme.onSecondary,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSecondary,
                                           ),
                                         ),
                                       ),
@@ -284,14 +305,22 @@ class _ProfilePageState extends State<ProfilePage> {
                               Text(
                                 _profile!['email'] ?? '',
                                 style: TextStyle(
-                                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimary
+                                      .withOpacity(0.8),
                                 ),
                               ),
                               const SizedBox(height: 24),
                               Text(
                                 _profile!['name'] ?? l10n.noName,
-                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                      color: Theme.of(context).colorScheme.onPrimary,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary,
                                       fontWeight: FontWeight.bold,
                                     ),
                               ),
@@ -318,21 +347,28 @@ class _ProfilePageState extends State<ProfilePage> {
                               _buildInfoRow(
                                 context,
                                 l10n.selectInstitution,
-                                _getLocalizedInstitutionName(_profile!['institution'] ?? ''),
+                                _getLocalizedInstitutionName(
+                                    _profile!['institution'] ?? ''),
                                 onEdit: () async {
                                   try {
-                                    final selectedInstitutionId = await _selectInstitution();
+                                    final selectedInstitutionId =
+                                        await _selectInstitution();
                                     if (selectedInstitutionId != null) {
-                                      final selectedInst = _institutions?.firstWhere(
-                                        (inst) => inst['id'].toString() == selectedInstitutionId,
+                                      final selectedInst =
+                                          _institutions?.firstWhere(
+                                        (inst) =>
+                                            inst['id'].toString() ==
+                                            selectedInstitutionId,
                                       );
                                       await widget.apiClient.updateProfile(
                                         context,
-                                        institutionId: int.parse(selectedInstitutionId),
+                                        institutionId:
+                                            int.parse(selectedInstitutionId),
                                       );
                                       if (mounted && selectedInst != null) {
                                         setState(() {
-                                          _profile!['institution'] = selectedInst['name'];
+                                          _profile!['institution'] =
+                                              selectedInst['name'];
                                         });
                                       }
                                     }
@@ -358,14 +394,30 @@ class _ProfilePageState extends State<ProfilePage> {
                               _buildInfoRow(
                                 context,
                                 l10n.role,
-                                (_profile!['role'] as String).substring(0, 1).toUpperCase() + (_profile!['role'] as String).substring(1),
+                                (_profile!['role'] as String)
+                                        .substring(0, 1)
+                                        .toUpperCase() +
+                                    (_profile!['role'] as String).substring(1),
+                              ),
+                              const SizedBox(height: 12),
+                              _buildInfoRow(
+                                context,
+                                l10n.totalPoints,
+                                _formatPoints(_profile!['total_points']),
+                              ),
+                              const SizedBox(height: 12),
+                              _buildInfoRow(
+                                context,
+                                l10n.studyBadge,
+                                _resolveBadge(l10n).label,
                               ),
                               const SizedBox(height: 24),
                               SwitchListTile(
                                 title: Text(
                                   l10n.allowDirectMessages,
                                   style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimary,
+                                    color:
+                                        Theme.of(context).colorScheme.onPrimary,
                                   ),
                                 ),
                                 value: _profile!['allow_dm'] ?? false,
@@ -390,16 +442,22 @@ class _ProfilePageState extends State<ProfilePage> {
                                     }
                                   }
                                 },
-                                activeColor: Theme.of(context).colorScheme.secondary,
+                                activeColor:
+                                    Theme.of(context).colorScheme.secondary,
                               ),
                               const SizedBox(height: 32),
                               ElevatedButton.icon(
                                 icon: Icon(Icons.logout),
                                 label: Text(l10n.logout),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Theme.of(context).colorScheme.errorContainer,
-                                  foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
-                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                  backgroundColor: Theme.of(context)
+                                      .colorScheme
+                                      .errorContainer,
+                                  foregroundColor: Theme.of(context)
+                                      .colorScheme
+                                      .onErrorContainer,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 24, vertical: 12),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
@@ -433,13 +491,25 @@ class _ProfilePageState extends State<ProfilePage> {
     return grade.toString();
   }
 
+  String _formatPoints(dynamic points) {
+    final value = int.tryParse(points?.toString() ?? '') ?? 0;
+    return value.toString();
+  }
+
+  StudyBadgeInfo _resolveBadge(AppLocalizations l10n) {
+    final points =
+        int.tryParse(_profile?['total_points']?.toString() ?? '') ?? 0;
+    return StudyBadgePolicy.resolve(l10n, points);
+  }
+
   String _getLocalizedInstitutionName(String fullName) {
     final parts = fullName.split(' / ');
     final isJapanese = Localizations.localeOf(context).languageCode == 'ja';
     return parts.length > 1 ? (isJapanese ? parts[1] : parts[0]) : fullName;
   }
 
-  Widget _buildInfoRow(BuildContext context, String label, String value, {VoidCallback? onEdit}) {
+  Widget _buildInfoRow(BuildContext context, String label, String value,
+      {VoidCallback? onEdit}) {
     return InkWell(
       onTap: onEdit,
       child: Row(
@@ -615,15 +685,19 @@ class _ProfilePageState extends State<ProfilePage> {
                         child: SingleChildScrollView(
                           child: Column(
                             children: _institutions?.map((institution) {
-                                  final name = _getLocalizedInstitutionName(institution['name']);
+                                  final name = _getLocalizedInstitutionName(
+                                      institution['name']);
                                   return ListTile(
                                     title: Text(
                                       name,
                                       style: TextStyle(
-                                        color: Theme.of(context).colorScheme.onPrimary,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimary,
                                       ),
                                     ),
-                                    onTap: () => Navigator.pop(context, institution['id'].toString()),
+                                    onTap: () => Navigator.pop(
+                                        context, institution['id'].toString()),
                                   );
                                 }).toList() ??
                                 [],
@@ -641,7 +715,8 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Future<void> _editField(String title, String initialValue, Function(String) onSave) async {
+  Future<void> _editField(
+      String title, String initialValue, Function(String) onSave) async {
     final l10n = AppLocalizations.of(context)!;
 
     if (title == l10n.grade) {
@@ -698,7 +773,10 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.1),
+                            fillColor: Theme.of(context)
+                                .colorScheme
+                                .onPrimary
+                                .withOpacity(0.1),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide.none,
@@ -706,7 +784,10 @@ class _ProfilePageState extends State<ProfilePage> {
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(
-                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimary
+                                    .withOpacity(0.3),
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
@@ -715,13 +796,20 @@ class _ProfilePageState extends State<ProfilePage> {
                                 color: Theme.of(context).colorScheme.onPrimary,
                               ),
                             ),
-                            helperText: title == l10n.grade ? l10n.gradeInputHint : null,
+                            helperText: title == l10n.grade
+                                ? l10n.gradeInputHint
+                                : null,
                             helperStyle: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimary
+                                  .withOpacity(0.7),
                             ),
                           ),
                           maxLines: title == l10n.bio ? 3 : 1,
-                          textInputAction: title == l10n.bio ? TextInputAction.newline : TextInputAction.done,
+                          textInputAction: title == l10n.bio
+                              ? TextInputAction.newline
+                              : TextInputAction.done,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               if (title == l10n.displayName) {
@@ -733,7 +821,8 @@ class _ProfilePageState extends State<ProfilePage> {
                               }
                               return l10n.displayNameRequired;
                             }
-                            if (title == l10n.grade && value.toUpperCase() != 'OB') {
+                            if (title == l10n.grade &&
+                                value.toUpperCase() != 'OB') {
                               final grade = int.tryParse(value);
                               if (grade == null || grade < 1 || grade > 6) {
                                 return l10n.invalidGrade;
@@ -752,15 +841,20 @@ class _ProfilePageState extends State<ProfilePage> {
                             child: Text(
                               l10n.cancel,
                               style: TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimary
+                                    .withOpacity(0.7),
                               ),
                             ),
                           ),
                           const SizedBox(width: 8),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).colorScheme.secondary,
-                              foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.secondary,
+                              foregroundColor:
+                                  Theme.of(context).colorScheme.onSecondary,
                               elevation: 0,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -769,7 +863,8 @@ class _ProfilePageState extends State<ProfilePage> {
                             onPressed: () async {
                               if (formKey.currentState!.validate()) {
                                 String value = controller.text;
-                                if (title == l10n.grade && value.toUpperCase() == 'OB') {
+                                if (title == l10n.grade &&
+                                    value.toUpperCase() == 'OB') {
                                   value = '99';
                                 }
                                 Navigator.pop(context);
