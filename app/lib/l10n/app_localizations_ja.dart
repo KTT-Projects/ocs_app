@@ -139,7 +139,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get failedToLoadInstitutions => '教育機関の読み込みに失敗しました';
 
   @override
-  String errorDetailsText(Object errorType, Object errorFile, Object errorLine, Object stackTrace) {
+  String errorDetailsText(
+      Object errorType, Object errorFile, Object errorLine, Object stackTrace) {
     return '詳細:\n$errorType at $errorFile:$errorLine\n\nスタックトレース:\n$stackTrace';
   }
 
