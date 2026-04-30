@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:math' as math;
 import '../l10n/app_localizations.dart';
 import '../models/volunteer_opportunity.dart';
 import '../services/api_client.dart';
@@ -10,7 +11,6 @@ import '../widgets/volunteer_sort_dialog.dart';
 import '../widgets/volunteer_filter_dialog.dart';
 import 'create_volunteer_opportunity_page.dart';
 import 'volunteer_opportunity_details_page.dart';
-import 'my_volunteer_activities_page.dart';
 import '../pages/enhanced_volunteer_schedule_page.dart';
 
 class VolunteerPage extends StatefulWidget {
@@ -51,8 +51,8 @@ class _VolunteerPageState extends State<VolunteerPage> {
   }
 
   void _startPeriodicRefresh() {
-    // Refresh every 30 seconds for new opportunities, like feeds
-    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+    // Refresh every 10 seconds for new opportunities, like feeds
+    _refreshTimer = Timer.periodic(const Duration(seconds: 10), (_) {
       _loadNewOpportunities();
     });
   }
@@ -92,7 +92,7 @@ class _VolunteerPageState extends State<VolunteerPage> {
 
       if (mounted) {
         setState(() {
-          _opportunities = opportunities;
+          _opportunities = opportunities.map(_applyReflectionStatus).toList();
           _error = null;
           _isLoading = false;
         });
@@ -116,29 +116,45 @@ class _VolunteerPageState extends State<VolunteerPage> {
       );
 
       if (mounted) {
+        final normalized =
+            newOpportunities.map(_applyReflectionStatus).toList();
         setState(() {
           // Initialize or only update if there are changes
           if (_opportunities == null) {
-            _opportunities = newOpportunities;
+            _opportunities = normalized;
             return;
           }
           bool hasChanges = false;
-          if (newOpportunities.length != _opportunities!.length) {
+          if (normalized.length != _opportunities!.length) {
             hasChanges = true;
           } else {
-            for (int i = 0; i < newOpportunities.length; i++) {
-              if (i < _opportunities!.length && (newOpportunities[i].status != _opportunities![i].status || newOpportunities[i].participantCount != _opportunities![i].participantCount || newOpportunities[i].isParticipant != _opportunities![i].isParticipant || newOpportunities[i].participantStatus != _opportunities![i].participantStatus)) {
+            for (int i = 0; i < normalized.length; i++) {
+              if (i < _opportunities!.length &&
+                  (normalized[i].status != _opportunities![i].status ||
+                      normalized[i].participantCount !=
+                          _opportunities![i].participantCount ||
+                      normalized[i].isParticipant !=
+                          _opportunities![i].isParticipant ||
+                      normalized[i].participantStatus !=
+                          _opportunities![i].participantStatus)) {
                 hasChanges = true;
                 break;
               }
             }
           }
-          if (hasChanges) _opportunities = newOpportunities;
+          if (hasChanges) _opportunities = normalized;
         });
       }
     } catch (e) {
       // Silently ignore errors during background refresh to avoid disrupting the user
     }
+  }
+
+  VolunteerOpportunity _applyReflectionStatus(VolunteerOpportunity o) {
+    if (o.reflectionCount > 0 && o.status != 'completed') {
+      return o.copyWith(status: 'completed');
+    }
+    return o;
   }
 
   void _openOpportunityDetails(VolunteerOpportunity opportunity) {
@@ -162,17 +178,6 @@ class _VolunteerPageState extends State<VolunteerPage> {
         ),
       ),
     ).then((_) => _loadNewOpportunities());
-  }
-
-  void _openMyActivities() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MyVolunteerActivitiesPage(
-          apiClient: widget.apiClient,
-        ),
-      ),
-    );
   }
 
   void _openSchedule() {
@@ -215,6 +220,7 @@ class _VolunteerPageState extends State<VolunteerPage> {
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -263,21 +269,27 @@ class _VolunteerPageState extends State<VolunteerPage> {
                     for (final entry in [
                       {'icon': Icons.filter_list, 'onTap': _showFilterDialog},
                       {'icon': Icons.sort, 'onTap': _showSortDialog},
-                      {'icon': Icons.history, 'onTap': _openMyActivities},
                       {'icon': Icons.calendar_today, 'onTap': _openSchedule},
                     ]) ...[
                       Container(
                         margin: const EdgeInsets.symmetric(horizontal: 4),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .background
+                              .withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimary
+                                .withOpacity(0.3),
                           ),
                         ),
                         child: IconButton(
                           iconSize: 20,
-                          icon: Icon(entry['icon'] as IconData, color: Theme.of(context).colorScheme.onPrimary),
+                          icon: Icon(entry['icon'] as IconData,
+                              color: Theme.of(context).colorScheme.onPrimary),
                           onPressed: entry['onTap'] as void Function()?,
                         ),
                       ),
@@ -324,6 +336,17 @@ class _VolunteerPageState extends State<VolunteerPage> {
 
   Widget _buildBody() {
     final l10n = AppLocalizations.of(context)!;
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+    const floatingButtonBottomOffset = 32.0;
+    const floatingButtonHeight = 52.0;
+    const bottomNavHeight = 80.0; // 60px bar + 20px bottom offset in HomePage
+    const listBottomSpacing = 24.0;
+    final bottomOverlayClearance = math.max(
+      bottomNavHeight,
+      floatingButtonBottomOffset + floatingButtonHeight,
+    );
+    final listBottomPadding =
+        bottomInset + bottomOverlayClearance + listBottomSpacing;
 
     if (_isLoading) {
       return Center(
@@ -361,24 +384,21 @@ class _VolunteerPageState extends State<VolunteerPage> {
             Icon(
               Icons.volunteer_activism_outlined,
               size: 64,
-              color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
+              color: Theme.of(context)
+                  .colorScheme
+                  .onPrimary
+                  .withValues(alpha: 0.7),
             ),
             const SizedBox(height: 16),
             Text(
               l10n.noVolunteerOpportunities,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onPrimary
+                    .withValues(alpha: 0.7),
                 fontSize: 18,
               ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _openCreateOpportunity,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.secondary,
-                foregroundColor: Colors.white,
-              ),
-              child: Text(l10n.createOpportunity),
             ),
           ],
         ),
@@ -389,12 +409,12 @@ class _VolunteerPageState extends State<VolunteerPage> {
       padding: EdgeInsets.only(
         left: 8,
         right: 8,
-        bottom: MediaQuery.of(context).padding.bottom + 24,
+        bottom: listBottomPadding,
       ),
       child: ListView.builder(
         padding: const EdgeInsets.only(
           top: 8,
-          bottom: 56,
+          bottom: 8,
         ),
         itemCount: _opportunities!.length,
         itemBuilder: (context, index) {
@@ -403,6 +423,7 @@ class _VolunteerPageState extends State<VolunteerPage> {
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: VolunteerOpportunityListItem(
               opportunity: opportunity,
+              showFullDetails: true,
               apiClient: widget.apiClient,
               onTap: () => _openOpportunityDetails(opportunity),
               onOpportunityUpdated: (updatedOpportunity) {

@@ -8,14 +8,19 @@ import '../l10n/app_localizations.dart';
 import '../models/volunteer_attachment.dart';
 import '../models/volunteer_opportunity.dart';
 import '../models/volunteer_participant.dart';
+import '../models/volunteer_reflection.dart';
+import 'full_screen_image_page.dart';
+import 'volunteer_reflection_admin_page.dart';
 import '../services/api_client.dart';
 import '../widgets/glassmorphic_ui.dart';
+import 'package:intl/intl.dart';
 
 class VolunteerAdminPage extends StatefulWidget {
   final ApiClient apiClient;
   final VolunteerOpportunity opportunity;
 
-  const VolunteerAdminPage({super.key, required this.apiClient, required this.opportunity});
+  const VolunteerAdminPage(
+      {super.key, required this.apiClient, required this.opportunity});
 
   @override
   State<VolunteerAdminPage> createState() => _VolunteerAdminPageState();
@@ -30,9 +35,13 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
   bool _didRequestAttachments = false;
   bool _loadingAttachments = true;
   bool _uploadingAttachment = false;
+  bool _didLoadReflection = false;
+  bool _loadingReflection = true;
   int? _currentUserId;
   List<VolunteerParticipant> _participants = [];
   List<VolunteerAttachment> _attachments = [];
+  VolunteerReflection? _latestReflection;
+  List<VolunteerReflectionImage> _reflectionImages = [];
 
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
@@ -69,11 +78,16 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
       _didRequestAttachments = true;
       _loadAttachments();
     }
+    if (!_didLoadReflection) {
+      _didLoadReflection = true;
+      _loadReflectionPreview();
+    }
   }
 
   Future<void> _loadParticipants() async {
     try {
-      final list = await widget.apiClient.getVolunteerParticipants(context, _opportunity.id);
+      final list = await widget.apiClient
+          .getVolunteerParticipants(context, _opportunity.id);
       if (mounted) {
         setState(() {
           _participants = list;
@@ -85,6 +99,32 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
         setState(() => _loadingParticipants = false);
         GlassmorphicUI.showGlassSnackBar(context, e.toString(), isError: true);
       }
+    }
+  }
+
+  Future<void> _loadReflectionPreview() async {
+    try {
+      setState(() => _loadingReflection = true);
+      final list = await widget.apiClient
+          .getVolunteerReflections(context, _opportunity.id);
+      if (!mounted) return;
+      final latest = list.isNotEmpty ? list.first : null;
+      setState(() {
+        _latestReflection = latest;
+        _reflectionImages = latest?.images ?? [];
+        _loadingReflection = false;
+        if (latest != null) {
+          _opportunity = _opportunity.copyWith(
+            reflectionCount: 1,
+            latestReflectionAt: latest.createdAt,
+            latestReflectionTitle: latest.title,
+            latestReflectionExcerpt: latest.body,
+            status: 'completed',
+          );
+        }
+      });
+    } catch (_) {
+      if (mounted) setState(() => _loadingReflection = false);
     }
   }
 
@@ -104,7 +144,8 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
   Future<void> _loadAttachments() async {
     try {
       setState(() => _loadingAttachments = true);
-      final list = await widget.apiClient.getVolunteerAttachments(context, _opportunity.id);
+      final list = await widget.apiClient
+          .getVolunteerAttachments(context, _opportunity.id);
       if (mounted) {
         setState(() {
           _attachments = list;
@@ -137,11 +178,15 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
 
       for (final picked in result.files) {
         if (!kIsWeb && (picked.path == null || picked.path!.isEmpty)) {
-          GlassmorphicUI.showGlassSnackBar(context, 'Could not read file path for ${picked.name}', isError: true);
+          GlassmorphicUI.showGlassSnackBar(
+              context, 'Could not read file path for ${picked.name}',
+              isError: true);
           continue;
         }
         if (kIsWeb && picked.bytes == null) {
-          GlassmorphicUI.showGlassSnackBar(context, 'Could not read file bytes for ${picked.name}', isError: true);
+          GlassmorphicUI.showGlassSnackBar(
+              context, 'Could not read file bytes for ${picked.name}',
+              isError: true);
           continue;
         }
 
@@ -161,13 +206,17 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
               _opportunity = _opportunity.copyWith(
                 attachments: [attachment, ..._opportunity.attachments],
                 attachmentCount: _opportunity.attachmentCount + 1,
-                coverAttachmentUrl: attachment.isImage ? attachment.fileUrl : _opportunity.coverAttachmentUrl,
+                coverAttachmentUrl: attachment.isImage
+                    ? attachment.fileUrl
+                    : _opportunity.coverAttachmentUrl,
               );
             });
           }
         } catch (e) {
           if (mounted) {
-            GlassmorphicUI.showGlassSnackBar(context, 'Failed to upload ${picked.name}: $e', isError: true);
+            GlassmorphicUI.showGlassSnackBar(
+                context, 'Failed to upload ${picked.name}: $e',
+                isError: true);
           }
         }
       }
@@ -177,7 +226,8 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
         GlassmorphicUI.showGlassSnackBar(context, 'Attachments updated');
       }
     } catch (e) {
-      if (mounted) GlassmorphicUI.showGlassSnackBar(context, e.toString(), isError: true);
+      if (mounted)
+        GlassmorphicUI.showGlassSnackBar(context, e.toString(), isError: true);
     }
   }
 
@@ -189,6 +239,8 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
         return 'image/jpeg';
       case 'png':
         return 'image/png';
+      case 'webp':
+        return 'image/webp';
       case 'pdf':
         return 'application/pdf';
       default:
@@ -198,7 +250,8 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
 
   Future<void> _deleteAttachment(VolunteerAttachment attachment) async {
     try {
-      await widget.apiClient.deleteVolunteerAttachment(context, attachmentId: attachment.id);
+      await widget.apiClient
+          .deleteVolunteerAttachment(context, attachmentId: attachment.id);
       if (mounted) {
         setState(() {
           _attachments.removeWhere((a) => a.id == attachment.id);
@@ -210,7 +263,8 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
         GlassmorphicUI.showGlassSnackBar(context, 'Saved');
       }
     } catch (e) {
-      if (mounted) GlassmorphicUI.showGlassSnackBar(context, e.toString(), isError: true);
+      if (mounted)
+        GlassmorphicUI.showGlassSnackBar(context, e.toString(), isError: true);
     }
   }
 
@@ -223,7 +277,9 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
         title: _titleController.text.trim(),
         description: _descController.text.trim(),
         location: _locationController.text.trim(),
-        requiredParticipants: _requiredCtrl.text.isEmpty ? null : int.tryParse(_requiredCtrl.text),
+        requiredParticipants: _requiredCtrl.text.isEmpty
+            ? null
+            : int.tryParse(_requiredCtrl.text),
       );
       if (mounted) {
         setState(() {
@@ -231,10 +287,13 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
             title: _titleController.text.trim(),
             description: _descController.text.trim(),
             location: _locationController.text.trim(),
-            requiredParticipants: _requiredCtrl.text.isEmpty ? null : int.tryParse(_requiredCtrl.text),
+            requiredParticipants: _requiredCtrl.text.isEmpty
+                ? null
+                : int.tryParse(_requiredCtrl.text),
           );
           _saving = false;
         });
+        Navigator.pop(context, _opportunity);
         GlassmorphicUI.showGlassSnackBar(context, 'Saved');
       }
     } catch (e) {
@@ -254,11 +313,13 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
         role: role,
       );
       if (mounted) {
-        GlassmorphicUI.showGlassSnackBar(context, AppLocalizations.of(context)!.participantStatusUpdated);
+        GlassmorphicUI.showGlassSnackBar(
+            context, AppLocalizations.of(context)!.participantStatusUpdated);
         _loadParticipants();
       }
     } catch (e) {
-      if (mounted) GlassmorphicUI.showGlassSnackBar(context, e.toString(), isError: true);
+      if (mounted)
+        GlassmorphicUI.showGlassSnackBar(context, e.toString(), isError: true);
     }
   }
 
@@ -271,11 +332,13 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
         status: status,
       );
       if (mounted) {
-        GlassmorphicUI.showGlassSnackBar(context, AppLocalizations.of(context)!.participantStatusUpdated);
+        GlassmorphicUI.showGlassSnackBar(
+            context, AppLocalizations.of(context)!.participantStatusUpdated);
         _loadParticipants();
       }
     } catch (e) {
-      if (mounted) GlassmorphicUI.showGlassSnackBar(context, e.toString(), isError: true);
+      if (mounted)
+        GlassmorphicUI.showGlassSnackBar(context, e.toString(), isError: true);
     }
   }
 
@@ -295,7 +358,10 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.secondary],
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.secondary
+              ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -304,27 +370,30 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
         Scaffold(
           backgroundColor: Colors.transparent,
           body: Column(
-                  children: [
-                    // Glassy header matching feed/profile style
-                    Container(
-                      padding: EdgeInsets.only(
-                        top: MediaQuery.of(context).padding.top + 8,
+            children: [
+              // Glassy header matching feed/profile style
+              Container(
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 8,
                   left: 12,
                   right: 12,
                   bottom: 12,
                 ),
-                    child: Row(
-                      children: [
-                        // Back button
-                        _headerIconButton(
-                          icon: Icons.close,
-                          onPressed: () => Navigator.pop(context, _opportunity),
-                        ),
-                        const SizedBox(width: 12),
+                child: Row(
+                  children: [
+                    // Back button
+                    _headerIconButton(
+                      icon: Icons.close,
+                      onPressed: () => Navigator.pop(context, _opportunity),
+                    ),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         AppLocalizations.of(context)!.volunteerManageTitle,
-                        style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700),
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -358,6 +427,8 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
                           _buildDetailsCard(context),
                           const SizedBox(height: 16),
                           _buildAttachmentsCard(context),
+                          const SizedBox(height: 16),
+                          _buildReflectionShortcut(context),
                           const SizedBox(height: 16),
                           _buildParticipantsCard(context),
                           const SizedBox(height: 100),
@@ -407,9 +478,13 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
 
   bool _isSelfWithoutBackupAdmin(VolunteerParticipant participant) {
     if (_currentUserId == null) return false;
-    if (participant.userId != _currentUserId || participant.role != 'admin') return false;
+    if (participant.userId != _currentUserId || participant.role != 'admin')
+      return false;
     final hasAnotherAdmin = _participants.any(
-      (p) => p.userId != participant.userId && p.role == 'admin' && p.status != 'cancelled',
+      (p) =>
+          p.userId != participant.userId &&
+          p.role == 'admin' &&
+          p.status != 'cancelled',
     );
     return !hasAnotherAdmin;
   }
@@ -428,7 +503,9 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.background.withOpacity(0.2),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3)),
+            border: Border.all(
+                color:
+                    Theme.of(context).colorScheme.onPrimary.withOpacity(0.3)),
           ),
           child: child,
         ),
@@ -445,7 +522,8 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.background.withOpacity(0.25),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.25)),
+        border: Border.all(
+            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.25)),
       ),
       child: IconButton(
         icon: child ??
@@ -465,7 +543,7 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Activity details',
+            l10n.activityDetails,
             style: TextStyle(
               color: Theme.of(context).colorScheme.onPrimary,
               fontSize: 18,
@@ -476,21 +554,28 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
           const SizedBox(height: 12),
           _buildTextField(l10n.opportunityTitle, _titleController),
           const SizedBox(height: 12),
-          _buildTextField(l10n.opportunityDescription, _descController, maxLines: 3),
+          _buildTextField(l10n.opportunityDescription, _descController,
+              maxLines: 3),
           const SizedBox(height: 12),
           _buildTextField(l10n.opportunityLocation, _locationController),
           const SizedBox(height: 12),
-          _buildTextField(l10n.volunteerRequiredParticipantsOptional, _requiredCtrl, keyboardType: TextInputType.number),
+          _buildTextField(
+              l10n.volunteerRequiredParticipantsOptional, _requiredCtrl,
+              keyboardType: TextInputType.number),
         ],
       ),
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController ctrl, {int maxLines = 1, TextInputType? keyboardType}) {
+  Widget _buildTextField(String label, TextEditingController ctrl,
+      {int maxLines = 1, TextInputType? keyboardType}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.85))),
+        Text(label,
+            style: TextStyle(
+                color:
+                    Theme.of(context).colorScheme.onPrimary.withOpacity(0.85))),
         const SizedBox(height: 6),
         TextField(
           controller: ctrl,
@@ -500,14 +585,24 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
           decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.25)),
+              borderSide: BorderSide(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onPrimary
+                      .withOpacity(0.25)),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.25)),
+              borderSide: BorderSide(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onPrimary
+                      .withOpacity(0.25)),
             ),
             focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.6)),
+              borderSide: BorderSide(
+                  color:
+                      Theme.of(context).colorScheme.onPrimary.withOpacity(0.6)),
               borderRadius: BorderRadius.circular(12),
             ),
           ),
@@ -517,6 +612,16 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
   }
 
   Future<void> _openAttachment(VolunteerAttachment attachment) async {
+    if (attachment.isImage) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => FullScreenImagePage(imageUrl: attachment.fileUrl),
+        ),
+      );
+      return;
+    }
+
     final uri = Uri.parse(attachment.fileUrl);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -531,8 +636,11 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
           Row(
             children: [
               Text(
-                'Attachments',
-                style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 18, fontWeight: FontWeight.bold),
+                AppLocalizations.of(context)!.attachments,
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold),
               ),
               const Spacer(),
               TextButton.icon(
@@ -541,12 +649,16 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
                     ? SizedBox(
                         width: 16,
                         height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Theme.of(context).colorScheme.onPrimary),
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Theme.of(context).colorScheme.onPrimary),
                       )
-                    : Icon(Icons.attach_file, color: Theme.of(context).colorScheme.onPrimary),
+                    : Icon(Icons.attach_file,
+                        color: Theme.of(context).colorScheme.onPrimary),
                 label: Text(
                   _uploadingAttachment ? 'Uploading...' : 'Add file',
-                  style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                  style:
+                      TextStyle(color: Theme.of(context).colorScheme.onPrimary),
                 ),
               ),
             ],
@@ -556,13 +668,16 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
             Padding(
               padding: const EdgeInsets.all(12),
               child: Center(
-                child: CircularProgressIndicator(color: Theme.of(context).colorScheme.onPrimary),
+                child: CircularProgressIndicator(
+                    color: Theme.of(context).colorScheme.onPrimary),
               ),
             )
           else if (_attachments.isEmpty)
             Text(
               'No attachments yet',
-              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8)),
+              style: TextStyle(
+                  color:
+                      Theme.of(context).colorScheme.onPrimary.withOpacity(0.8)),
             )
           else
             Wrap(
@@ -576,9 +691,16 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
                     width: 170,
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.background.withOpacity(0.12),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .background
+                          .withOpacity(0.12),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.12)),
+                      border: Border.all(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onPrimary
+                              .withOpacity(0.12)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -586,15 +708,18 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
                         if (a.isImage)
                           ClipRRect(
                             borderRadius: BorderRadius.circular(10),
-                            child: Image.network(
-                              a.fileUrl,
-                              width: double.infinity,
-                              height: 90,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Container(
+                            child: Hero(
+                              tag: a.fileUrl,
+                              child: Image.network(
+                                a.fileUrl,
+                                width: double.infinity,
                                 height: 90,
-                                color: Colors.white24,
-                                child: const Icon(Icons.broken_image),
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  height: 90,
+                                  color: Colors.white24,
+                                  child: const Icon(Icons.broken_image),
+                                ),
                               ),
                             ),
                           )
@@ -602,12 +727,17 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
                           Container(
                             height: 90,
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.background.withOpacity(0.18),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .background
+                                  .withOpacity(0.18),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Center(
                               child: Icon(
-                                a.isPdf ? Icons.picture_as_pdf : Icons.insert_drive_file,
+                                a.isPdf
+                                    ? Icons.picture_as_pdf
+                                    : Icons.insert_drive_file,
                                 color: Theme.of(context).colorScheme.onPrimary,
                                 size: 32,
                               ),
@@ -618,13 +748,16 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
                           a.fileName,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                              fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 4),
                         Align(
                           alignment: Alignment.centerRight,
                           child: IconButton(
-                            icon: Icon(Icons.delete_outline, color: Colors.red[300]),
+                            icon: Icon(Icons.delete_outline,
+                                color: Colors.red[300]),
                             onPressed: () => _deleteAttachment(a),
                           ),
                         ),
@@ -634,6 +767,160 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
                 );
               }).toList(),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReflectionShortcut(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final dateText = _latestReflection?.createdAt != null
+        ? DateFormat.yMMMd(Localizations.localeOf(context).languageCode)
+            .format(_latestReflection!.createdAt)
+        : null;
+    return _glassPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.auto_stories,
+                  color: Theme.of(context).colorScheme.onPrimary),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.reflectionBodyLabel,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      l10n.manageReflections,
+                      style: TextStyle(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onPrimary
+                            .withOpacity(0.75),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  final updated = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => VolunteerReflectionAdminPage(
+                        apiClient: widget.apiClient,
+                        opportunity: _opportunity,
+                      ),
+                    ),
+                  );
+                  if (mounted) {
+                    if (updated is VolunteerOpportunity) {
+                      setState(() => _opportunity = updated);
+                    }
+                    _loadReflectionPreview();
+                  }
+                },
+                icon: const Icon(Icons.edit_note),
+                label: Text(l10n.manage),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.secondary,
+                  foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+              )
+            ],
+          ),
+          const SizedBox(height: 10),
+          if (_loadingReflection)
+            Center(
+              child: SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+              ),
+            )
+          else if (_latestReflection == null)
+            Text(
+              l10n.noReflectionsYet,
+              style: TextStyle(
+                color:
+                    Theme.of(context).colorScheme.onPrimary.withOpacity(0.85),
+              ),
+            )
+          else ...[
+            Text(
+              _latestReflection!.title.isNotEmpty
+                  ? _latestReflection!.title
+                  : l10n.recentReflection,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            if (dateText != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 2, bottom: 4),
+                child: Text(
+                  dateText,
+                  style: TextStyle(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onPrimary
+                        .withOpacity(0.7),
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            Text(
+              _latestReflection!.body,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color:
+                    Theme.of(context).colorScheme.onPrimary.withOpacity(0.85),
+              ),
+            ),
+            if (_reflectionImages.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _reflectionImages
+                    .take(6)
+                    .map(
+                      (img) => ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          img.fileUrl,
+                          width: 52,
+                          height: 52,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            width: 52,
+                            height: 52,
+                            color: Colors.white24,
+                            child: const Icon(Icons.broken_image, size: 16),
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ],
+          ],
         ],
       ),
     );
@@ -649,7 +936,10 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
         children: [
           Text(
             l10n.volunteerParticipants,
-            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimary,
+                fontSize: 18,
+                fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           if (_loadingParticipants)
@@ -662,17 +952,30 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
               ),
             )
           else if (_participants.isEmpty)
-            Text(l10n.noVolunteerActivities, style: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8)))
+            Text(l10n.noVolunteerActivities,
+                style: TextStyle(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onPrimary
+                        .withOpacity(0.8)))
           else ...[
             if (pending.isNotEmpty) ...[
-              Text(l10n.volunteerApplied, style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.w700)),
+              Text(l10n.volunteerApplied,
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               ...pending.map((p) => _buildPendingRow(context, p)),
               const SizedBox(height: 12),
-              Divider(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.2)),
+              Divider(
+                  color:
+                      Theme.of(context).colorScheme.onPrimary.withOpacity(0.2)),
               const SizedBox(height: 12),
             ],
-            Text(l10n.volunteerParticipants, style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.w700)),
+            Text(l10n.volunteerParticipants,
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
             ...others.map((p) => _buildParticipantRow(context, p)).toList(),
           ],
@@ -688,30 +991,48 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.background.withOpacity(0.12),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.12)),
+        border: Border.all(
+            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.12)),
       ),
       child: Row(
         children: [
           CircleAvatar(
             radius: 16,
-            backgroundColor: Theme.of(context).colorScheme.background.withOpacity(0.25),
+            backgroundColor:
+                Theme.of(context).colorScheme.background.withOpacity(0.25),
             child: p.userAvatar != null
-                ? ClipOval(child: Image.network(p.userAvatar!, width: 32, height: 32, fit: BoxFit.cover))
-                : Icon(Icons.person, color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7), size: 16),
+                ? ClipOval(
+                    child: Image.network(p.userAvatar!,
+                        width: 32, height: 32, fit: BoxFit.cover))
+                : Icon(Icons.person,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onPrimary
+                        .withOpacity(0.7),
+                    size: 16),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(p.userName, style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold)),
+                Text(p.userName,
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        fontWeight: FontWeight.bold)),
                 Container(
                   margin: const EdgeInsets.only(top: 4),
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.background.withOpacity(0.16),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .background
+                        .withOpacity(0.16),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: _participantStatusColor(p.status).withOpacity(0.7)),
+                    border: Border.all(
+                        color:
+                            _participantStatusColor(p.status).withOpacity(0.7)),
                   ),
                   child: Text(
                     _participantStatusLabel(context, p.status),
@@ -727,7 +1048,12 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
                       '${AppLocalizations.of(context)!.hoursCompleted}: ${p.hoursCompleted!.toStringAsFixed(1)}',
-                      style: TextStyle(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7), fontSize: 12),
+                      style: TextStyle(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onPrimary
+                              .withOpacity(0.7),
+                          fontSize: 12),
                     ),
                   ),
               ],
@@ -746,7 +1072,8 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.background.withOpacity(0.14),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.15)),
+        border: Border.all(
+            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.15)),
       ),
       child: Column(
         children: [
@@ -754,24 +1081,38 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
             children: [
               CircleAvatar(
                 radius: 16,
-                backgroundColor: Theme.of(context).colorScheme.background.withOpacity(0.25),
+                backgroundColor:
+                    Theme.of(context).colorScheme.background.withOpacity(0.25),
                 child: p.userAvatar != null
-                    ? ClipOval(child: Image.network(p.userAvatar!, width: 32, height: 32, fit: BoxFit.cover))
-                    : Icon(Icons.person, color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7), size: 16),
+                    ? ClipOval(
+                        child: Image.network(p.userAvatar!,
+                            width: 32, height: 32, fit: BoxFit.cover))
+                    : Icon(Icons.person,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onPrimary
+                            .withOpacity(0.7),
+                        size: 16),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   p.userName,
-                  style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontWeight: FontWeight.bold),
                 ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.background.withOpacity(0.18),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .background
+                      .withOpacity(0.18),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.orangeAccent.withOpacity(0.7)),
+                  border:
+                      Border.all(color: Colors.orangeAccent.withOpacity(0.7)),
                 ),
                 child: Text(
                   AppLocalizations.of(context)!.volunteerApplied,
@@ -796,7 +1137,8 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
                   ),
                 ),
               ),
@@ -810,7 +1152,8 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
                     backgroundColor: Colors.red,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
                   ),
                 ),
               ),
@@ -827,18 +1170,23 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
     final roleButton = ElevatedButton.icon(
       onPressed: isLocked ? null : () => _openRoleSelector(context, p),
       icon: const Icon(Icons.manage_accounts, size: 18),
-      label: Text(roleLabel, style: const TextStyle(fontWeight: FontWeight.w700)),
+      label:
+          Text(roleLabel, style: const TextStyle(fontWeight: FontWeight.w700)),
       style: ElevatedButton.styleFrom(
-        backgroundColor: Theme.of(context).colorScheme.background.withOpacity(0.18),
+        backgroundColor:
+            Theme.of(context).colorScheme.background.withOpacity(0.18),
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3)),
+          side: BorderSide(
+              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3)),
         ),
         elevation: 0,
-        disabledBackgroundColor: Theme.of(context).colorScheme.background.withOpacity(0.12),
-        disabledForegroundColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.5),
+        disabledBackgroundColor:
+            Theme.of(context).colorScheme.background.withOpacity(0.12),
+        disabledForegroundColor:
+            Theme.of(context).colorScheme.onPrimary.withOpacity(0.5),
       ),
     );
 
@@ -865,7 +1213,8 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
     }
   }
 
-  Future<void> _openRoleSelector(BuildContext context, VolunteerParticipant p) async {
+  Future<void> _openRoleSelector(
+      BuildContext context, VolunteerParticipant p) async {
     if (_isSelfWithoutBackupAdmin(p)) {
       GlassmorphicUI.showGlassSnackBar(
         context,
@@ -876,9 +1225,18 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
     }
 
     final roles = [
-      {'value': 'member', 'label': AppLocalizations.of(context)!.volunteerRoleMember},
-      {'value': 'coordinator', 'label': AppLocalizations.of(context)!.volunteerRoleCoordinator},
-      {'value': 'admin', 'label': AppLocalizations.of(context)!.volunteerRoleAdmin},
+      {
+        'value': 'member',
+        'label': AppLocalizations.of(context)!.volunteerRoleMember
+      },
+      {
+        'value': 'coordinator',
+        'label': AppLocalizations.of(context)!.volunteerRoleCoordinator
+      },
+      {
+        'value': 'admin',
+        'label': AppLocalizations.of(context)!.volunteerRoleAdmin
+      },
     ];
     final current = p.role ?? 'member';
 
@@ -908,7 +1266,8 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
                 borderRadius: BorderRadius.circular(12),
                 onTap: () => Navigator.of(context).pop(role['value'] as String),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   child: Row(
                     children: [
                       Expanded(

@@ -1359,6 +1359,156 @@ abstract class AppLocalizations {
   /// **'Organizer'**
   String get organizer;
 
+  /// Section title for volunteer attachments
+  ///
+  /// In en, this message translates to:
+  /// **'Attachments'**
+  String get attachments;
+
+  /// Section title for volunteer reflections
+  ///
+  /// In en, this message translates to:
+  /// **'Reflections'**
+  String get volunteerReflections;
+
+  /// Label for the most recent reflection
+  ///
+  /// In en, this message translates to:
+  /// **'Recent reflection'**
+  String get recentReflection;
+
+  /// Badge text for new reflection
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get newReflection;
+
+  /// Button to read the entire reflection
+  ///
+  /// In en, this message translates to:
+  /// **'Read full reflection'**
+  String get readFullReflection;
+
+  /// Button to manage reflections
+  ///
+  /// In en, this message translates to:
+  /// **'Manage reflections'**
+  String get manageReflections;
+
+  /// CTA for sharing a reflection
+  ///
+  /// In en, this message translates to:
+  /// **'Share reflection'**
+  String get shareReflection;
+
+  /// Empty state when no reflections exist
+  ///
+  /// In en, this message translates to:
+  /// **'No reflections yet'**
+  String get noReflectionsYet;
+
+  /// Helper text for reflections empty state
+  ///
+  /// In en, this message translates to:
+  /// **'Admins can post a recap with photos so participants can look back.'**
+  String get noReflectionsHint;
+
+  /// Button text to save a reflection
+  ///
+  /// In en, this message translates to:
+  /// **'Save reflection'**
+  String get saveReflection;
+
+  /// Button text to update an existing reflection
+  ///
+  /// In en, this message translates to:
+  /// **'Update reflection'**
+  String get updateReflection;
+
+  /// Label for reflection headline field
+  ///
+  /// In en, this message translates to:
+  /// **'Headline'**
+  String get reflectionTitleLabel;
+
+  /// Label for reflection body field
+  ///
+  /// In en, this message translates to:
+  /// **'Reflection'**
+  String get reflectionBodyLabel;
+
+  /// Validation message when reflection body is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Please write a reflection before saving.'**
+  String get reflectionBodyRequired;
+
+  /// Toast when reflection is saved
+  ///
+  /// In en, this message translates to:
+  /// **'Reflection saved'**
+  String get reflectionSaved;
+
+  /// Hint to save reflection before uploading images
+  ///
+  /// In en, this message translates to:
+  /// **'Save the reflection before adding photos.'**
+  String get saveReflectionFirst;
+
+  /// Label for reflection images section
+  ///
+  /// In en, this message translates to:
+  /// **'Reflection images'**
+  String get reflectionImages;
+
+  /// Fallback body when creating a reflection automatically
+  ///
+  /// In en, this message translates to:
+  /// **'This activity is now complete. Great job, everyone!'**
+  String get reflectionAutoBody;
+
+  /// Message when reflection has no images
+  ///
+  /// In en, this message translates to:
+  /// **'No reflection images yet'**
+  String get noReflectionImages;
+
+  /// Toast when reflection image uploaded
+  ///
+  /// In en, this message translates to:
+  /// **'Image added'**
+  String get reflectionImageUploaded;
+
+  /// Toast when reflection image removed
+  ///
+  /// In en, this message translates to:
+  /// **'Image removed'**
+  String get reflectionImageRemoved;
+
+  /// Button to add photos to reflections
+  ///
+  /// In en, this message translates to:
+  /// **'Add photos'**
+  String get addPhotos;
+
+  /// Label for draft reflection
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get draft;
+
+  /// Section title for volunteer activity details
+  ///
+  /// In en, this message translates to:
+  /// **'Activity details'**
+  String get activityDetails;
+
+  /// Generic manage button label for volunteer opportunities
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get manage;
+
   /// Button text to manage volunteer opportunity
   ///
   /// In en, this message translates to:
@@ -1430,6 +1580,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'UNKNOWN'**
   String get statusUnknown;
+
+  /// Localized label for admin role
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get roleAdmin;
+
+  /// Localized label for coordinator role
+  ///
+  /// In en, this message translates to:
+  /// **'Coordinator'**
+  String get roleCoordinator;
+
+  /// Localized label for member role
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get roleMember;
 
   /// Unit abbreviation for hours
   ///
@@ -1508,6 +1676,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Leave empty for unlimited'**
   String get leaveEmptyForUnlimited;
+
+  /// Short optional badge shown next to section titles
+  ///
+  /// In en, this message translates to:
+  /// **'(Optional)'**
+  String get optionalLabel;
+
+  /// Call to action for adding volunteer attachment files
+  ///
+  /// In en, this message translates to:
+  /// **'Add files'**
+  String get addFiles;
+
+  /// Helper text shown below the volunteer attachments picker
+  ///
+  /// In en, this message translates to:
+  /// **'Images or PDFs to share extra details.'**
+  String get attachmentsHelperText;
+
+  /// Attachment file size shown in kilobytes
+  ///
+  /// In en, this message translates to:
+  /// **'{size} KB'**
+  String fileSizeKilobytes(int size);
+
+  /// Error message when uploading a volunteer attachment fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to upload {fileName}: {error}'**
+  String failedToUploadFile(String fileName, String error);
 
   /// Text for calendar tab
   ///

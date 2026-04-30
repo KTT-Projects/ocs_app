@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'dart:async';
+import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../models/feed.dart';
 import '../services/api_client.dart';
@@ -21,6 +22,9 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
   String? _error;
   List<Map<String, dynamic>>? _members;
   static const String _hostUrl = 'https://ocs.kttprojects.com';
+  Timer? _refreshTimer;
+  bool _isFetchingMembers = false;
+  static final Map<int, List<Map<String, dynamic>>> _memberCache = {};
 
   Widget _buildAvatar({
     required String? imageUrl,
@@ -66,11 +70,37 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadMembers());
+    if (_memberCache.containsKey(widget.feed.id)) {
+      _members = _memberCache[widget.feed.id];
+      _isLoadingMembers = false;
+    }
+    _startPeriodicRefresh();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadMembers(showLoading: _members == null));
   }
 
-  Future<void> _loadMembers() async {
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startPeriodicRefresh() {
+    _refreshTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      _loadMembers(showLoading: false);
+    });
+  }
+
+  Future<void> _loadMembers({bool showLoading = true}) async {
+    if (_isFetchingMembers) return;
+    _isFetchingMembers = true;
     try {
+      if (showLoading) {
+        setState(() {
+          _isLoadingMembers = true;
+          _error = null;
+        });
+      }
+
       final members = await widget.apiClient.getFeedMembers(
         context,
         widget.feed.id,
@@ -78,14 +108,17 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
       if (!mounted) return;
       setState(() {
         _members = members;
-        _isLoadingMembers = false;
+        if (showLoading) _isLoadingMembers = false;
       });
+      _memberCache[widget.feed.id] = members;
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = e.toString();
-        _isLoadingMembers = false;
+        _error = showLoading ? e.toString() : _error;
+        if (showLoading) _isLoadingMembers = false;
       });
+    } finally {
+      _isFetchingMembers = false;
     }
   }
 

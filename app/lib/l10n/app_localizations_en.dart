@@ -666,6 +666,84 @@ class AppLocalizationsEn extends AppLocalizations {
   String get organizer => 'Organizer';
 
   @override
+  String get attachments => 'Attachments';
+
+  @override
+  String get volunteerReflections => 'Reflections';
+
+  @override
+  String get recentReflection => 'Recent reflection';
+
+  @override
+  String get newReflection => 'New';
+
+  @override
+  String get readFullReflection => 'Read full reflection';
+
+  @override
+  String get manageReflections => 'Manage reflections';
+
+  @override
+  String get shareReflection => 'Share reflection';
+
+  @override
+  String get noReflectionsYet => 'No reflections yet';
+
+  @override
+  String get noReflectionsHint =>
+      'Admins can post a recap with photos so participants can look back.';
+
+  @override
+  String get saveReflection => 'Save reflection';
+
+  @override
+  String get updateReflection => 'Update reflection';
+
+  @override
+  String get reflectionTitleLabel => 'Headline';
+
+  @override
+  String get reflectionBodyLabel => 'Reflection';
+
+  @override
+  String get reflectionBodyRequired =>
+      'Please write a reflection before saving.';
+
+  @override
+  String get reflectionSaved => 'Reflection saved';
+
+  @override
+  String get saveReflectionFirst => 'Save the reflection before adding photos.';
+
+  @override
+  String get reflectionImages => 'Reflection images';
+
+  @override
+  String get reflectionAutoBody =>
+      'This activity is now complete. Great job, everyone!';
+
+  @override
+  String get noReflectionImages => 'No reflection images yet';
+
+  @override
+  String get reflectionImageUploaded => 'Image added';
+
+  @override
+  String get reflectionImageRemoved => 'Image removed';
+
+  @override
+  String get addPhotos => 'Add photos';
+
+  @override
+  String get draft => 'Draft';
+
+  @override
+  String get activityDetails => 'Activity details';
+
+  @override
+  String get manage => 'Manage';
+
+  @override
   String get manageVolunteerOpportunity => 'Manage Opportunity';
 
   @override
@@ -700,6 +778,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statusUnknown => 'UNKNOWN';
+
+  @override
+  String get roleAdmin => 'Admin';
+
+  @override
+  String get roleCoordinator => 'Coordinator';
+
+  @override
+  String get roleMember => 'Member';
 
   @override
   String get hoursUnit => 'h';
@@ -740,6 +827,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leaveEmptyForUnlimited => 'Leave empty for unlimited';
+
+  @override
+  String get optionalLabel => '(Optional)';
+
+  @override
+  String get addFiles => 'Add files';
+
+  @override
+  String get attachmentsHelperText => 'Images or PDFs to share extra details.';
+
+  @override
+  String fileSizeKilobytes(int size) {
+    return '$size KB';
+  }
+
+  @override
+  String failedToUploadFile(String fileName, String error) {
+    return 'Failed to upload $fileName: $error';
+  }
 
   @override
   String get calendarTab => 'Calendar';

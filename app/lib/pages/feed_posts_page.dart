@@ -32,10 +32,16 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
   bool _didLoadPosts = false;
 
   Timer? _refreshTimer;
+  bool _isFetching = false;
+  static final Map<int, List<FeedPost>> _postsCache = {};
 
   @override
   void initState() {
     super.initState();
+    if (_postsCache.containsKey(widget.feed.id)) {
+      _posts = _postsCache[widget.feed.id];
+      _isLoading = false;
+    }
     _startPeriodicRefresh();
   }
 
@@ -46,9 +52,9 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
   }
 
   void _startPeriodicRefresh() {
-    // Refresh every 5 seconds
-    _refreshTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      _loadPosts();
+    // Refresh every 10 seconds
+    _refreshTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      _loadPosts(showLoading: false);
     });
   }
 
@@ -57,16 +63,20 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
     super.didChangeDependencies();
     if (!_didLoadPosts) {
       _didLoadPosts = true;
-      _loadPosts();
+      _loadPosts(showLoading: _posts == null);
     }
   }
 
-  Future<void> _loadPosts() async {
+  Future<void> _loadPosts({bool showLoading = true}) async {
+    if (_isFetching) return;
+    _isFetching = true;
     try {
-      setState(() {
-        _isLoading = true;
-        _error = null;
-      });
+      if (showLoading) {
+        setState(() {
+          _isLoading = true;
+          _error = null;
+        });
+      }
 
       final posts = await widget.apiClient.getFeedPosts(
         context,
@@ -77,16 +87,19 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
       if (mounted) {
         setState(() {
           _posts = posts;
-          _isLoading = false;
+          if (showLoading) _isLoading = false;
         });
       }
+      _postsCache[widget.feed.id] = posts;
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = e.toString();
-          _isLoading = false;
+          _error = showLoading ? e.toString() : _error;
+          if (showLoading) _isLoading = false;
         });
       }
+    } finally {
+      _isFetching = false;
     }
   }
 

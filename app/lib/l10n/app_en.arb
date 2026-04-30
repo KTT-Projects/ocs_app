@@ -871,6 +871,106 @@
   "@organizer": {
     "description": "Label for volunteer opportunity organizer"
   },
+  "attachments": "Attachments",
+  "@attachments": {
+    "description": "Section title for volunteer attachments"
+  },
+  "volunteerReflections": "Reflections",
+  "@volunteerReflections": {
+    "description": "Section title for volunteer reflections"
+  },
+  "recentReflection": "Recent reflection",
+  "@recentReflection": {
+    "description": "Label for the most recent reflection"
+  },
+  "newReflection": "New",
+  "@newReflection": {
+    "description": "Badge text for new reflection"
+  },
+  "readFullReflection": "Read full reflection",
+  "@readFullReflection": {
+    "description": "Button to read the entire reflection"
+  },
+  "manageReflections": "Manage reflections",
+  "@manageReflections": {
+    "description": "Button to manage reflections"
+  },
+  "shareReflection": "Share reflection",
+  "@shareReflection": {
+    "description": "CTA for sharing a reflection"
+  },
+  "noReflectionsYet": "No reflections yet",
+  "@noReflectionsYet": {
+    "description": "Empty state when no reflections exist"
+  },
+  "noReflectionsHint": "Admins can post a recap with photos so participants can look back.",
+  "@noReflectionsHint": {
+    "description": "Helper text for reflections empty state"
+  },
+  "saveReflection": "Save reflection",
+  "@saveReflection": {
+    "description": "Button text to save a reflection"
+  },
+  "updateReflection": "Update reflection",
+  "@updateReflection": {
+    "description": "Button text to update an existing reflection"
+  },
+  "reflectionTitleLabel": "Headline",
+  "@reflectionTitleLabel": {
+    "description": "Label for reflection headline field"
+  },
+  "reflectionBodyLabel": "Reflection",
+  "@reflectionBodyLabel": {
+    "description": "Label for reflection body field"
+  },
+  "reflectionBodyRequired": "Please write a reflection before saving.",
+  "@reflectionBodyRequired": {
+    "description": "Validation message when reflection body is empty"
+  },
+  "reflectionSaved": "Reflection saved",
+  "@reflectionSaved": {
+    "description": "Toast when reflection is saved"
+  },
+  "saveReflectionFirst": "Save the reflection before adding photos.",
+  "@saveReflectionFirst": {
+    "description": "Hint to save reflection before uploading images"
+  },
+  "reflectionImages": "Reflection images",
+  "@reflectionImages": {
+    "description": "Label for reflection images section"
+  },
+  "reflectionAutoBody": "This activity is now complete. Great job, everyone!",
+  "@reflectionAutoBody": {
+    "description": "Fallback body when creating a reflection automatically"
+  },
+  "noReflectionImages": "No reflection images yet",
+  "@noReflectionImages": {
+    "description": "Message when reflection has no images"
+  },
+  "reflectionImageUploaded": "Image added",
+  "@reflectionImageUploaded": {
+    "description": "Toast when reflection image uploaded"
+  },
+  "reflectionImageRemoved": "Image removed",
+  "@reflectionImageRemoved": {
+    "description": "Toast when reflection image removed"
+  },
+  "addPhotos": "Add photos",
+  "@addPhotos": {
+    "description": "Button to add photos to reflections"
+  },
+  "draft": "Draft",
+  "@draft": {
+    "description": "Label for draft reflection"
+  },
+  "activityDetails": "Activity details",
+  "@activityDetails": {
+    "description": "Section title for volunteer activity details"
+  },
+  "manage": "Manage",
+  "@manage": {
+    "description": "Generic manage button label for volunteer opportunities"
+  },
   "manageVolunteerOpportunity": "Manage Opportunity",
   "@manageVolunteerOpportunity": {
     "description": "Button text to manage volunteer opportunity"
@@ -916,6 +1016,18 @@
     "description": "Text for tomorrow's date"
   },
   "statusUnknown": "UNKNOWN",
+  "roleAdmin": "Admin",
+  "@roleAdmin": {
+    "description": "Localized label for admin role"
+  },
+  "roleCoordinator": "Coordinator",
+  "@roleCoordinator": {
+    "description": "Localized label for coordinator role"
+  },
+  "roleMember": "Member",
+  "@roleMember": {
+    "description": "Localized label for member role"
+  },
   "@statusUnknown": {
     "description": "Text for unknown volunteer status"
   },
@@ -970,6 +1082,39 @@
   "leaveEmptyForUnlimited": "Leave empty for unlimited",
   "@leaveEmptyForUnlimited": {
     "description": "Hint text for optional fields with no limit"
+  },
+  "optionalLabel": "(Optional)",
+  "@optionalLabel": {
+    "description": "Short optional badge shown next to section titles"
+  },
+  "addFiles": "Add files",
+  "@addFiles": {
+    "description": "Call to action for adding volunteer attachment files"
+  },
+  "attachmentsHelperText": "Images or PDFs to share extra details.",
+  "@attachmentsHelperText": {
+    "description": "Helper text shown below the volunteer attachments picker"
+  },
+  "fileSizeKilobytes": "{size} KB",
+  "@fileSizeKilobytes": {
+    "description": "Attachment file size shown in kilobytes",
+    "placeholders": {
+      "size": {
+        "type": "int"
+      }
+    }
+  },
+  "failedToUploadFile": "Failed to upload {fileName}: {error}",
+  "@failedToUploadFile": {
+    "description": "Error message when uploading a volunteer attachment fails",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "calendarTab": "Calendar",
   "@calendarTab": {

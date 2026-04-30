@@ -1,4 +1,5 @@
 import 'volunteer_attachment.dart';
+import 'volunteer_reflection.dart';
 
 const String _hostUrl = 'https://ocs.kttprojects.com';
 
@@ -21,13 +22,19 @@ class VolunteerOpportunity {
   final bool isFull;
   final int? spotsRemaining;
   final bool isParticipant;
-  final String? participantStatus; // 'applied', 'approved', 'completed', 'cancelled'
+  final String?
+      participantStatus; // 'applied', 'approved', 'completed', 'cancelled'
   final String? participantRole; // 'member', 'coordinator', 'admin'
   final double? hoursCompleted;
   final bool? certificateIssued;
   final int attachmentCount;
   final String? coverAttachmentUrl;
   final List<VolunteerAttachment> attachments;
+  final int reflectionCount;
+  final DateTime? latestReflectionAt;
+  final String? latestReflectionTitle;
+  final String? latestReflectionExcerpt;
+  final List<VolunteerReflectionImage> latestReflectionImages;
 
   VolunteerOpportunity({
     required this.id,
@@ -55,6 +62,11 @@ class VolunteerOpportunity {
     this.attachmentCount = 0,
     this.coverAttachmentUrl,
     this.attachments = const [],
+    this.reflectionCount = 0,
+    this.latestReflectionAt,
+    this.latestReflectionTitle,
+    this.latestReflectionExcerpt,
+    this.latestReflectionImages = const [],
   });
 
   factory VolunteerOpportunity.fromJson(Map<String, dynamic> json) {
@@ -63,7 +75,8 @@ class VolunteerOpportunity {
       avatarUrl = '$_hostUrl$avatarUrl';
     }
 
-    final dateStr = json['date'] ?? json['start_date']; // Support both formats during migration
+    final dateStr = json['date'] ??
+        json['start_date']; // Support both formats during migration
     final date = DateTime.parse(dateStr);
 
     final startTimeStr = json['start_time'];
@@ -108,6 +121,15 @@ class VolunteerOpportunity {
       return value == true || value == 1 || value == '1';
     }
 
+    DateTime? _parseDateTime(dynamic value) {
+      if (value == null) return null;
+      try {
+        return DateTime.parse(value.toString());
+      } catch (_) {
+        return null;
+      }
+    }
+
     final parsedSpots = _parseIntNullable(json['spots_remaining']);
 
     int attachmentCount = _parseInt(json['attachment_count'], defaultValue: 0);
@@ -119,11 +141,20 @@ class VolunteerOpportunity {
     List<VolunteerAttachment> attachments = [];
     if (json['attachments'] is List) {
       attachments = (json['attachments'] as List)
-          .map((a) => VolunteerAttachment.fromJson(Map<String, dynamic>.from(a), _hostUrl))
+          .map((a) => VolunteerAttachment.fromJson(
+              Map<String, dynamic>.from(a), _hostUrl))
           .toList();
       if (attachmentCount == 0) {
         attachmentCount = attachments.length;
       }
+    }
+
+    List<VolunteerReflectionImage> latestReflectionImages = [];
+    if (json['latest_reflection_images'] is List) {
+      latestReflectionImages = (json['latest_reflection_images'] as List)
+          .map((img) =>
+              VolunteerReflectionImage.fromJson(Map<String, dynamic>.from(img)))
+          .toList();
     }
 
     return VolunteerOpportunity(
@@ -152,6 +183,11 @@ class VolunteerOpportunity {
       attachmentCount: attachmentCount,
       coverAttachmentUrl: coverAttachmentUrl,
       attachments: attachments,
+      reflectionCount: _parseInt(json['reflection_count'], defaultValue: 0),
+      latestReflectionAt: _parseDateTime(json['latest_reflection_at']),
+      latestReflectionTitle: json['latest_reflection_title'],
+      latestReflectionExcerpt: json['latest_reflection_excerpt'],
+      latestReflectionImages: latestReflectionImages,
     );
   }
 
@@ -165,8 +201,12 @@ class VolunteerOpportunity {
       'organizer_avatar': organizerAvatar,
       'location': location,
       'date': date.toIso8601String(),
-      'start_time': startTime != null ? '${startTime!.hour.toString().padLeft(2, '0')}:${startTime!.minute.toString().padLeft(2, '0')}' : null,
-      'end_time': endTime != null ? '${endTime!.hour.toString().padLeft(2, '0')}:${endTime!.minute.toString().padLeft(2, '0')}' : null,
+      'start_time': startTime != null
+          ? '${startTime!.hour.toString().padLeft(2, '0')}:${startTime!.minute.toString().padLeft(2, '0')}'
+          : null,
+      'end_time': endTime != null
+          ? '${endTime!.hour.toString().padLeft(2, '0')}:${endTime!.minute.toString().padLeft(2, '0')}'
+          : null,
       'required_participants': requiredParticipants,
       'status': status,
       'created_at': createdAt.toIso8601String(),
@@ -181,16 +221,34 @@ class VolunteerOpportunity {
       'certificate_issued': certificateIssued,
       'attachment_count': attachmentCount,
       'cover_attachment_url': coverAttachmentUrl,
-      'attachments': attachments.map((a) => {
-            'id': a.id,
-            'opportunity_id': a.opportunityId,
-            'file_name': a.fileName,
-            'file_url': a.fileUrl,
-            'mime_type': a.mimeType,
-            'file_size': a.fileSize,
-            'uploaded_by': a.uploadedBy,
-            'created_at': a.createdAt.toIso8601String(),
-          }).toList(),
+      'attachments': attachments
+          .map((a) => {
+                'id': a.id,
+                'opportunity_id': a.opportunityId,
+                'file_name': a.fileName,
+                'file_url': a.fileUrl,
+                'mime_type': a.mimeType,
+                'file_size': a.fileSize,
+                'uploaded_by': a.uploadedBy,
+                'created_at': a.createdAt.toIso8601String(),
+              })
+          .toList(),
+      'reflection_count': reflectionCount,
+      'latest_reflection_at': latestReflectionAt?.toIso8601String(),
+      'latest_reflection_title': latestReflectionTitle,
+      'latest_reflection_excerpt': latestReflectionExcerpt,
+      'latest_reflection_images': latestReflectionImages
+          .map((img) => {
+                'id': img.id,
+                'reflection_id': img.reflectionId,
+                'file_name': img.fileName,
+                'file_url': img.fileUrl,
+                'mime_type': img.mimeType,
+                'file_size': img.fileSize,
+                'uploaded_by': img.uploadedBy,
+                'created_at': img.createdAt.toIso8601String(),
+              })
+          .toList(),
     };
   }
 
@@ -220,6 +278,11 @@ class VolunteerOpportunity {
     int? attachmentCount,
     String? coverAttachmentUrl,
     List<VolunteerAttachment>? attachments,
+    int? reflectionCount,
+    DateTime? latestReflectionAt,
+    String? latestReflectionTitle,
+    String? latestReflectionExcerpt,
+    List<VolunteerReflectionImage>? latestReflectionImages,
   }) {
     return VolunteerOpportunity(
       id: id ?? this.id,
@@ -247,6 +310,14 @@ class VolunteerOpportunity {
       attachmentCount: attachmentCount ?? this.attachmentCount,
       coverAttachmentUrl: coverAttachmentUrl ?? this.coverAttachmentUrl,
       attachments: attachments ?? this.attachments,
+      reflectionCount: reflectionCount ?? this.reflectionCount,
+      latestReflectionAt: latestReflectionAt ?? this.latestReflectionAt,
+      latestReflectionTitle:
+          latestReflectionTitle ?? this.latestReflectionTitle,
+      latestReflectionExcerpt:
+          latestReflectionExcerpt ?? this.latestReflectionExcerpt,
+      latestReflectionImages:
+          latestReflectionImages ?? this.latestReflectionImages,
     );
   }
 
@@ -256,9 +327,13 @@ class VolunteerOpportunity {
   bool get isCancelled => status == 'cancelled';
 
   bool get canApply {
-    final fullByCount = requiredParticipants != null && participantCount >= requiredParticipants!;
+    final fullByCount = requiredParticipants != null &&
+        participantCount >= requiredParticipants!;
     final fullByFlag = isFull || spotsRemaining == 0;
-    return isOpen && (!isParticipant || participantStatus == 'cancelled') && !fullByCount && !fullByFlag;
+    return isOpen &&
+        (!isParticipant || participantStatus == 'cancelled') &&
+        !fullByCount &&
+        !fullByFlag;
   }
 
   bool isOrganizer(int userId) => organizerId == userId;
@@ -267,14 +342,17 @@ class VolunteerOpportunity {
   bool get isOngoing {
     if (startTime == null || endTime == null) return false;
     final now = DateTime.now();
-    final todayStart = DateTime(date.year, date.month, date.day, startTime!.hour, startTime!.minute);
-    final todayEnd = DateTime(date.year, date.month, date.day, endTime!.hour, endTime!.minute);
+    final todayStart = DateTime(
+        date.year, date.month, date.day, startTime!.hour, startTime!.minute);
+    final todayEnd = DateTime(
+        date.year, date.month, date.day, endTime!.hour, endTime!.minute);
     return now.isAfter(todayStart) && now.isBefore(todayEnd);
   }
 
   bool get isPast {
     if (endTime == null) return date.isBefore(DateTime.now());
-    final todayEnd = DateTime(date.year, date.month, date.day, endTime!.hour, endTime!.minute);
+    final todayEnd = DateTime(
+        date.year, date.month, date.day, endTime!.hour, endTime!.minute);
     return todayEnd.isBefore(DateTime.now());
   }
 
@@ -295,5 +373,6 @@ class VolunteerOpportunity {
 
   // Permissions (client can add organizer checks separately)
   bool get canManageDetails => participantRole == 'admin';
-  bool get canManageParticipants => participantRole == 'admin' || participantRole == 'coordinator';
+  bool get canManageParticipants =>
+      participantRole == 'admin' || participantRole == 'coordinator';
 }

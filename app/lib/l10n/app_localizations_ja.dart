@@ -652,6 +652,81 @@ class AppLocalizationsJa extends AppLocalizations {
   String get organizer => '主催者';
 
   @override
+  String get attachments => '添付ファイル';
+
+  @override
+  String get volunteerReflections => '活動レポート';
+
+  @override
+  String get recentReflection => '最新の振り返り';
+
+  @override
+  String get newReflection => '新着';
+
+  @override
+  String get readFullReflection => '全文を見る';
+
+  @override
+  String get manageReflections => 'レポートを管理';
+
+  @override
+  String get shareReflection => '振り返りを投稿';
+
+  @override
+  String get noReflectionsYet => 'まだレポートはありません';
+
+  @override
+  String get noReflectionsHint => '管理者が写真付きで活動の振り返りを投稿できます。';
+
+  @override
+  String get saveReflection => '振り返りを保存';
+
+  @override
+  String get updateReflection => '振り返りを更新';
+
+  @override
+  String get reflectionTitleLabel => '見出し';
+
+  @override
+  String get reflectionBodyLabel => '振り返り';
+
+  @override
+  String get reflectionBodyRequired => '内容を入力してください。';
+
+  @override
+  String get reflectionSaved => '振り返りを保存しました';
+
+  @override
+  String get saveReflectionFirst => '写真を追加する前に保存してください。';
+
+  @override
+  String get reflectionImages => 'レポートの写真';
+
+  @override
+  String get reflectionAutoBody => '活動が完了しました。お疲れさまでした！';
+
+  @override
+  String get noReflectionImages => '写真はまだありません';
+
+  @override
+  String get reflectionImageUploaded => '画像を追加しました';
+
+  @override
+  String get reflectionImageRemoved => '画像を削除しました';
+
+  @override
+  String get addPhotos => '写真を追加';
+
+  @override
+  String get draft => '下書き';
+
+  @override
+  String get activityDetails => '活動詳細';
+
+  @override
+  String get manage => '管理';
+
+  @override
   String get manageVolunteerOpportunity => '募集管理';
 
   @override
@@ -686,6 +761,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get statusUnknown => '不明';
+
+  @override
+  String get roleAdmin => '管理者';
+
+  @override
+  String get roleCoordinator => 'コーディネーター';
+
+  @override
+  String get roleMember => 'メンバー';
 
   @override
   String get hoursUnit => '時間';
@@ -725,6 +809,25 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get leaveEmptyForUnlimited => '空欄の場合は無制限';
+
+  @override
+  String get optionalLabel => '（任意）';
+
+  @override
+  String get addFiles => 'ファイルを追加';
+
+  @override
+  String get attachmentsHelperText => '画像またはPDFを追加して詳細を共有できます。';
+
+  @override
+  String fileSizeKilobytes(int size) {
+    return '$size KB';
+  }
+
+  @override
+  String failedToUploadFile(String fileName, String error) {
+    return '$fileName のアップロードに失敗しました: $error';
+  }
 
   @override
   String get calendarTab => 'カレンダー';

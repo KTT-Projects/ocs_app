@@ -67,8 +67,8 @@ class _FeedsPageState extends State<FeedsPage> {
   }
 
   void _startPeriodicRefresh() {
-    // Refresh every 5 seconds
-    _refreshTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+    // Refresh every 10 seconds
+    _refreshTimer = Timer.periodic(const Duration(seconds: 10), (_) {
       _refreshJoinedFeeds();
       _loadPosts();
     });

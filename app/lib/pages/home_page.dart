@@ -32,11 +32,19 @@ class _HomePageState extends State<HomePage> {
   Map<String, dynamic>? _profile;
   bool _initialized = false;
   int _currentIndex = 0;
+  late final List<Widget> _pages;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
+      _pages = [
+        FeedsPage(apiClient: widget.apiClient),
+        const Center(child: Text('Events')),
+        VolunteerPage(apiClient: widget.apiClient),
+        const Center(child: Text('Study')),
+        ProfilePage(apiClient: widget.apiClient),
+      ];
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           _loadProfile();
@@ -74,17 +82,13 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> pages = [
-      FeedsPage(apiClient: widget.apiClient),
-      const Center(child: Text('Events')),
-      VolunteerPage(apiClient: widget.apiClient),
-      const Center(child: Text('Study')),
-      ProfilePage(apiClient: widget.apiClient),
-    ];
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      body: pages[_currentIndex],
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _pages,
+      ),
       extendBody: true,
       bottomNavigationBar: CircleNavBar(
         activeIcons: [

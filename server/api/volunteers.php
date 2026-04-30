@@ -57,7 +57,7 @@ class VolunteerController
       $userId = null;
       if (isset($headers['Authorization'])) {
         $token = str_replace('Bearer ', '', $headers['Authorization']);
-        $decoded = $this->validateJWT($token);
+        $decoded = $this->auth->decodeJWT($token);
         if (!$decoded) {
           Response::error('Invalid or expired token', 401);
           return;
@@ -82,6 +82,8 @@ class VolunteerController
             $this->downloadCertificate($userId);
           } else if ($action === 'attachments') {
             $this->getVolunteerAttachments($userId);
+          } else if ($action === 'reflections') {
+            $this->getVolunteerReflections($userId);
           }
           break;
         case 'POST':
@@ -99,11 +101,19 @@ class VolunteerController
             $this->uploadVolunteerAttachment($userId);
           } else if ($action === 'delete_attachment') {
             $this->deleteVolunteerAttachment($userId);
+          } else if ($action === 'create_reflection') {
+            $this->createVolunteerReflection($userId);
+          } else if ($action === 'upload_reflection_image') {
+            $this->uploadReflectionImage($userId);
+          } else if ($action === 'delete_reflection_image') {
+            $this->deleteReflectionImage($userId);
           }
           break;
         case 'PATCH':
           if ($action === 'update') {
             $this->updateVolunteerOpportunity($userId);
+          } else if ($action === 'update_reflection') {
+            $this->updateVolunteerReflection($userId);
           }
           break;
         default:
@@ -111,30 +121,6 @@ class VolunteerController
       }
     } catch (Exception $e) {
       Response::error($e->getMessage(), 500);
-    }
-  }
-
-  private function validateJWT($token)
-  {
-    try {
-      // Simple JWT validation - in production use a proper JWT library
-      $parts = explode('.', $token);
-      if (count($parts) !== 3) {
-        return false;
-      }
-      
-      $payload = json_decode(base64_decode($parts[1]), true);
-      if (!$payload || !isset($payload['user_id']) || !isset($payload['exp'])) {
-        return false;
-      }
-      
-      if ($payload['exp'] < time()) {
-        return false;
-      }
-      
-      return $payload;
-    } catch (Exception $e) {
-      return false;
     }
   }
 
@@ -273,6 +259,35 @@ class VolunteerController
             ORDER BY va2.created_at DESC 
             LIMIT 1
           ) as cover_attachment_url,
+          (SELECT COUNT(*) FROM volunteer_reflections vr WHERE vr.opportunity_id = vo.id) as reflection_count,
+          (
+            SELECT vr.id
+            FROM volunteer_reflections vr
+            WHERE vr.opportunity_id = vo.id
+            ORDER BY vr.created_at DESC
+            LIMIT 1
+          ) as latest_reflection_id,
+          (
+            SELECT vr.created_at 
+            FROM volunteer_reflections vr 
+            WHERE vr.opportunity_id = vo.id 
+            ORDER BY vr.created_at DESC 
+            LIMIT 1
+          ) as latest_reflection_at,
+          (
+            SELECT vr.title 
+            FROM volunteer_reflections vr 
+            WHERE vr.opportunity_id = vo.id 
+            ORDER BY vr.created_at DESC 
+            LIMIT 1
+          ) as latest_reflection_title,
+          (
+            SELECT SUBSTRING(vr.body, 1, 160) 
+            FROM volunteer_reflections vr 
+            WHERE vr.opportunity_id = vo.id 
+            ORDER BY vr.created_at DESC 
+            LIMIT 1
+          ) as latest_reflection_excerpt,
           CASE WHEN vp_user.user_id IS NOT NULL THEN 1 ELSE 0 END as is_participant,
           vp_user.status as participant_status,
           vp_user.hours_completed,
@@ -321,6 +336,10 @@ class VolunteerController
       $stmt->execute($params);
       $opportunities = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+      foreach ($opportunities as &$opportunity) {
+        $this->attachLatestReflectionImages($opportunity);
+      }
+
       Response::success($opportunities);
     } catch (Exception $e) {
       Response::error('Failed to fetch volunteer opportunities: ' . $e->getMessage(), 500);
@@ -355,6 +374,35 @@ class VolunteerController
             ORDER BY va2.created_at DESC 
             LIMIT 1
           ) as cover_attachment_url,
+          (SELECT COUNT(*) FROM volunteer_reflections vr WHERE vr.opportunity_id = vo.id) as reflection_count,
+          (
+            SELECT vr.id
+            FROM volunteer_reflections vr
+            WHERE vr.opportunity_id = vo.id
+            ORDER BY vr.created_at DESC
+            LIMIT 1
+          ) as latest_reflection_id,
+          (
+            SELECT vr.created_at 
+            FROM volunteer_reflections vr 
+            WHERE vr.opportunity_id = vo.id 
+            ORDER BY vr.created_at DESC 
+            LIMIT 1
+          ) as latest_reflection_at,
+          (
+            SELECT vr.title 
+            FROM volunteer_reflections vr 
+            WHERE vr.opportunity_id = vo.id 
+            ORDER BY vr.created_at DESC 
+            LIMIT 1
+          ) as latest_reflection_title,
+          (
+            SELECT SUBSTRING(vr.body, 1, 160) 
+            FROM volunteer_reflections vr 
+            WHERE vr.opportunity_id = vo.id 
+            ORDER BY vr.created_at DESC 
+            LIMIT 1
+          ) as latest_reflection_excerpt,
           1 as is_participant,
           vp.status as participant_status,
           vp.hours_completed,
@@ -380,6 +428,10 @@ class VolunteerController
       $stmt = $this->conn->prepare($query);
       $stmt->execute($params);
       $opportunities = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+      foreach ($opportunities as &$opportunity) {
+        $this->attachLatestReflectionImages($opportunity);
+      }
 
       Response::success($opportunities);
     } catch (Exception $e) {
@@ -419,6 +471,35 @@ class VolunteerController
             ORDER BY va2.created_at DESC 
             LIMIT 1
           ) as cover_attachment_url,
+          (SELECT COUNT(*) FROM volunteer_reflections vr WHERE vr.opportunity_id = vo.id) as reflection_count,
+          (
+            SELECT vr.id
+            FROM volunteer_reflections vr
+            WHERE vr.opportunity_id = vo.id
+            ORDER BY vr.created_at DESC
+            LIMIT 1
+          ) as latest_reflection_id,
+          (
+            SELECT vr.created_at 
+            FROM volunteer_reflections vr 
+            WHERE vr.opportunity_id = vo.id 
+            ORDER BY vr.created_at DESC 
+            LIMIT 1
+          ) as latest_reflection_at,
+          (
+            SELECT vr.title 
+            FROM volunteer_reflections vr 
+            WHERE vr.opportunity_id = vo.id 
+            ORDER BY vr.created_at DESC 
+            LIMIT 1
+          ) as latest_reflection_title,
+          (
+            SELECT SUBSTRING(vr.body, 1, 160) 
+            FROM volunteer_reflections vr 
+            WHERE vr.opportunity_id = vo.id 
+            ORDER BY vr.created_at DESC 
+            LIMIT 1
+          ) as latest_reflection_excerpt,
           CASE WHEN vp_user.user_id IS NOT NULL THEN 1 ELSE 0 END as is_participant,
           vp_user.status as participant_status,
           vp_user.hours_completed,
@@ -444,6 +525,7 @@ class VolunteerController
 
       $attachments = $this->fetchAttachments($id);
       $opportunity['attachments'] = $attachments;
+      $this->attachLatestReflectionImages($opportunity);
 
       Response::success($opportunity);
     } catch (Exception $e) {
@@ -950,6 +1032,329 @@ class VolunteerController
       Response::success(null, 'Attachment deleted');
     } catch (Exception $e) {
       Response::error('Failed to delete attachment: ' . $e->getMessage(), 500);
+    }
+  }
+
+  private function fetchReflectionImages($reflectionId)
+  {
+    $query = "SELECT id, reflection_id, file_name, file_url, mime_type, file_size, uploaded_by, created_at FROM volunteer_reflection_images WHERE reflection_id = ? ORDER BY created_at DESC";
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute([$reflectionId]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+
+  private function attachLatestReflectionImages(&$opportunity)
+  {
+    $latestReflectionId = isset($opportunity['latest_reflection_id']) ? intval($opportunity['latest_reflection_id']) : 0;
+    $opportunity['latest_reflection_images'] = $latestReflectionId > 0
+      ? $this->fetchReflectionImages($latestReflectionId)
+      : [];
+    unset($opportunity['latest_reflection_id']);
+  }
+
+  private function canManageReflections($userId, $opportunityId)
+  {
+    return $this->userHasAnyRole($userId, $opportunityId, ['admin']);
+  }
+
+  public function getVolunteerReflections($userId)
+  {
+    try {
+      if (!isset($_GET['opportunity_id'])) {
+        Response::error('Opportunity ID is required', 400);
+        return;
+      }
+
+      $opportunityId = intval($_GET['opportunity_id']);
+      $query = "
+        SELECT vr.*, up.display_name as author_name, up.avatar_url as author_avatar
+        FROM volunteer_reflections vr
+        LEFT JOIN user_profiles up ON vr.created_by = up.user_id
+        WHERE vr.opportunity_id = ?
+        ORDER BY vr.created_at DESC
+      ";
+      $stmt = $this->conn->prepare($query);
+      $stmt->execute([$opportunityId]);
+      $reflections = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+      foreach ($reflections as &$reflection) {
+        $reflection['images'] = $this->fetchReflectionImages($reflection['id']);
+      }
+
+      Response::success($reflections);
+    } catch (Exception $e) {
+      Response::error('Failed to fetch reflections: ' . $e->getMessage(), 500);
+    }
+  }
+
+  public function createVolunteerReflection($userId)
+  {
+    try {
+      $input = json_decode(file_get_contents('php://input'), true);
+
+      if (!isset($input['opportunity_id']) || !isset($input['body'])) {
+        Response::error('Opportunity ID and body are required', 400);
+        return;
+      }
+
+      $opportunityId = intval($input['opportunity_id']);
+      $title = isset($input['title']) && trim($input['title']) !== '' ? trim($input['title']) : 'Reflection';
+      $body = trim($input['body']);
+
+      if (empty($body)) {
+        Response::error('Reflection cannot be empty', 400);
+        return;
+      }
+
+      if (!$this->canManageReflections($userId, $opportunityId)) {
+        Response::error('Permission denied', 403);
+        return;
+      }
+
+      $insert = "INSERT INTO volunteer_reflections (opportunity_id, title, body, created_by) VALUES (?, ?, ?, ?)";
+      $stmt = $this->conn->prepare($insert);
+      $stmt->execute([$opportunityId, $title, $body, $userId]);
+      $reflectionId = $this->conn->lastInsertId();
+
+      $profileStmt = $this->conn->prepare("SELECT display_name, avatar_url FROM user_profiles WHERE user_id = ?");
+      $profileStmt->execute([$userId]);
+      $profile = $profileStmt->fetch(PDO::FETCH_ASSOC);
+
+      $reflection = [
+        'id' => intval($reflectionId),
+        'opportunity_id' => $opportunityId,
+        'title' => $title,
+        'body' => $body,
+        'created_by' => $userId,
+        'author_name' => $profile['display_name'] ?? null,
+        'author_avatar' => $profile['avatar_url'] ?? null,
+        'created_at' => date('Y-m-d H:i:s'),
+        'updated_at' => date('Y-m-d H:i:s'),
+        'images' => []
+      ];
+
+      // Mark opportunity as completed when a reflection is posted
+      $statusUpdate = $this->conn->prepare("UPDATE volunteer_opportunities SET status = 'completed', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status != 'completed'");
+      $statusUpdate->execute([$opportunityId]);
+
+      Response::success($reflection, 'Reflection created');
+    } catch (Exception $e) {
+      Response::error('Failed to create reflection: ' . $e->getMessage(), 500);
+    }
+  }
+
+  public function updateVolunteerReflection($userId)
+  {
+    try {
+      $input = json_decode(file_get_contents('php://input'), true);
+
+      if (!isset($input['reflection_id'])) {
+        Response::error('Reflection ID is required', 400);
+        return;
+      }
+
+      $reflectionId = intval($input['reflection_id']);
+
+      $check = $this->conn->prepare("SELECT opportunity_id FROM volunteer_reflections WHERE id = ?");
+      $check->execute([$reflectionId]);
+      $reflection = $check->fetch(PDO::FETCH_ASSOC);
+
+      if (!$reflection) {
+        Response::error('Reflection not found', 404);
+        return;
+      }
+
+      $opportunityId = intval($reflection['opportunity_id']);
+
+      if (!$this->canManageReflections($userId, $opportunityId)) {
+        Response::error('Permission denied', 403);
+        return;
+      }
+
+      $fields = [];
+      $params = [];
+
+      if (isset($input['title'])) {
+        $fields[] = "title = ?";
+        $params[] = trim($input['title']);
+      }
+
+      if (isset($input['body'])) {
+        $body = trim($input['body']);
+        if (empty($body)) {
+          Response::error('Reflection cannot be empty', 400);
+          return;
+        }
+        $fields[] = "body = ?";
+        $params[] = $body;
+      }
+
+      if (empty($fields)) {
+        Response::error('No fields to update', 400);
+        return;
+      }
+
+      $fields[] = "updated_at = CURRENT_TIMESTAMP";
+      $params[] = $reflectionId;
+
+      $update = "UPDATE volunteer_reflections SET " . implode(', ', $fields) . " WHERE id = ?";
+      $stmt = $this->conn->prepare($update);
+      $stmt->execute($params);
+
+      $refetch = $this->conn->prepare("
+        SELECT vr.*, up.display_name as author_name, up.avatar_url as author_avatar
+        FROM volunteer_reflections vr
+        LEFT JOIN user_profiles up ON vr.created_by = up.user_id
+        WHERE vr.id = ?
+      ");
+      $refetch->execute([$reflectionId]);
+      $updated = $refetch->fetch(PDO::FETCH_ASSOC);
+      $updated['images'] = $this->fetchReflectionImages($reflectionId);
+
+      // Ensure the opportunity is marked completed once a reflection exists
+      $statusUpdate = $this->conn->prepare("UPDATE volunteer_opportunities SET status = 'completed', updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+      $statusUpdate->execute([$opportunityId]);
+
+      Response::success($updated, 'Reflection updated');
+    } catch (Exception $e) {
+      Response::error('Failed to update reflection: ' . $e->getMessage(), 500);
+    }
+  }
+
+  public function uploadReflectionImage($userId)
+  {
+    try {
+      if (!isset($_GET['reflection_id'])) {
+        Response::error('Reflection ID is required', 400);
+        return;
+      }
+
+      $reflectionId = intval($_GET['reflection_id']);
+
+      $check = $this->conn->prepare("SELECT opportunity_id FROM volunteer_reflections WHERE id = ?");
+      $check->execute([$reflectionId]);
+      $reflection = $check->fetch(PDO::FETCH_ASSOC);
+
+      if (!$reflection) {
+        Response::error('Reflection not found', 404);
+        return;
+      }
+
+      $opportunityId = intval($reflection['opportunity_id']);
+
+      if (!$this->canManageReflections($userId, $opportunityId)) {
+        Response::error('Permission denied', 403);
+        return;
+      }
+
+      if (!isset($_FILES['image'])) {
+        Response::error('No file provided', 400);
+        return;
+      }
+
+      $file = $_FILES['image'];
+      if ($file['error'] !== UPLOAD_ERR_OK) {
+        Response::error('File upload failed', 400);
+        return;
+      }
+
+      if ($file['size'] > 8 * 1024 * 1024) {
+        Response::error('File too large. Max 8MB allowed.', 400);
+        return;
+      }
+
+      $finfo = finfo_open(FILEINFO_MIME_TYPE);
+      $mimeType = finfo_file($finfo, $file['tmp_name']);
+      finfo_close($finfo);
+
+      $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!in_array($mimeType, $allowedTypes)) {
+        Response::error('Invalid file type. Only JPG, PNG, and WEBP are allowed.', 400);
+        return;
+      }
+
+      $uploadDir = __DIR__ . '/../uploads/volunteer_reflections/';
+      if (!file_exists($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+      }
+
+      $extension = 'jpg';
+      if ($mimeType === 'image/png') $extension = 'png';
+      else if ($mimeType === 'image/webp') $extension = 'webp';
+
+      $filename = uniqid('vol_reflect_') . '.' . $extension;
+      $filepath = $uploadDir . $filename;
+
+      if (!move_uploaded_file($file['tmp_name'], $filepath)) {
+        Response::error('Failed to save file', 500);
+        return;
+      }
+
+      $fileUrl = '/uploads/volunteer_reflections/' . $filename;
+
+      $insert = "INSERT INTO volunteer_reflection_images (reflection_id, file_name, file_url, mime_type, file_size, uploaded_by) VALUES (?, ?, ?, ?, ?, ?)";
+      $stmt = $this->conn->prepare($insert);
+      $stmt->execute([$reflectionId, $file['name'], $fileUrl, $mimeType, $file['size'], $userId]);
+      $imageId = $this->conn->lastInsertId();
+
+      $image = [
+        'id' => intval($imageId),
+        'reflection_id' => $reflectionId,
+        'file_name' => $file['name'],
+        'file_url' => $fileUrl,
+        'mime_type' => $mimeType,
+        'file_size' => intval($file['size']),
+        'uploaded_by' => $userId,
+        'created_at' => date('Y-m-d H:i:s')
+      ];
+
+      Response::success($image, 'Reflection image uploaded');
+    } catch (Exception $e) {
+      Response::error('Failed to upload reflection image: ' . $e->getMessage(), 500);
+    }
+  }
+
+  public function deleteReflectionImage($userId)
+  {
+    try {
+      if (!isset($_POST['image_id'])) {
+        Response::error('Image ID is required', 400);
+        return;
+      }
+
+      $imageId = intval($_POST['image_id']);
+
+      $query = "
+        SELECT vri.reflection_id, vri.file_url, vr.opportunity_id
+        FROM volunteer_reflection_images vri
+        JOIN volunteer_reflections vr ON vri.reflection_id = vr.id
+        WHERE vri.id = ?
+      ";
+      $stmt = $this->conn->prepare($query);
+      $stmt->execute([$imageId]);
+      $image = $stmt->fetch(PDO::FETCH_ASSOC);
+
+      if (!$image) {
+        Response::error('Image not found', 404);
+        return;
+      }
+
+      if (!$this->canManageReflections($userId, intval($image['opportunity_id']))) {
+        Response::error('Permission denied', 403);
+        return;
+      }
+
+      $delete = $this->conn->prepare("DELETE FROM volunteer_reflection_images WHERE id = ?");
+      $delete->execute([$imageId]);
+
+      $path = __DIR__ . '/../' . ltrim($image['file_url'], '/');
+      if (file_exists($path)) {
+        unlink($path);
+      }
+
+      Response::success(null, 'Reflection image deleted');
+    } catch (Exception $e) {
+      Response::error('Failed to delete reflection image: ' . $e->getMessage(), 500);
     }
   }
 

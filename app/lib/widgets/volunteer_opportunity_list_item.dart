@@ -4,8 +4,10 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:ui';
 import '../models/volunteer_opportunity.dart';
+import '../models/volunteer_reflection.dart';
 import '../pages/volunteer_opportunity_details_page.dart';
 import '../pages/volunteer_admin_page.dart';
+import '../pages/volunteer_reflection_view_page.dart';
 import '../services/api_client.dart';
 import '../l10n/app_localizations.dart';
 import '../widgets/glassmorphic_ui.dart';
@@ -22,7 +24,7 @@ class VolunteerOpportunityListItem extends StatelessWidget {
     Key? key,
     required this.opportunity,
     this.onTap,
-    this.showFullDetails = false,
+    this.showFullDetails = true,
     this.showDescription = true,
     this.apiClient,
     this.onOpportunityUpdated,
@@ -59,6 +61,37 @@ class VolunteerOpportunityListItem extends StatelessWidget {
     }
   }
 
+  String _getParticipantStatusText(BuildContext context, String status) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (status) {
+      case 'applied':
+        return l10n.volunteerApplied;
+      case 'approved':
+        return l10n.volunteerApproved;
+      case 'completed':
+        return l10n.volunteerCompleted;
+      case 'cancelled':
+        return l10n.volunteerCancelled;
+      default:
+        return status;
+    }
+  }
+
+  Color _getParticipantStatusColor(String status) {
+    switch (status) {
+      case 'applied':
+        return Colors.orange;
+      case 'approved':
+        return Colors.green;
+      case 'completed':
+        return Colors.blue;
+      case 'cancelled':
+        return Colors.grey;
+      default:
+        return Colors.blueGrey;
+    }
+  }
+
   String _formatDate(BuildContext context, DateTime date) {
     final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
@@ -71,7 +104,8 @@ class VolunteerOpportunityListItem extends StatelessWidget {
     } else if (inputDate == tomorrow) {
       return l10n.tomorrow;
     } else {
-      return DateFormat.Md(Localizations.localeOf(context).languageCode).format(date);
+      return DateFormat.Md(Localizations.localeOf(context).languageCode)
+          .format(date);
     }
   }
 
@@ -95,7 +129,8 @@ class VolunteerOpportunityListItem extends StatelessWidget {
       return l10n.opportunityFilled;
     }
 
-    final remaining = opportunity.spotsRemaining ?? (opportunity.requiredParticipants! - opportunity.participantCount);
+    final remaining = opportunity.spotsRemaining ??
+        (opportunity.requiredParticipants! - opportunity.participantCount);
     final safeRemaining = remaining < 0 ? 0 : remaining;
     return l10n.volunteerSpotsRemaining(safeRemaining);
   }
@@ -117,20 +152,68 @@ class VolunteerOpportunityListItem extends StatelessWidget {
     }
   }
 
+  Widget _buildStatusChip(
+    BuildContext context, {
+    required Color borderColor,
+    required IconData icon,
+    required String label,
+    Color? iconColor,
+  }) {
+    final resolvedIconColor = (iconColor ?? borderColor).withOpacity(0.9);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.background.withOpacity(0.18),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: borderColor,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: resolvedIconColor, size: 16),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimary,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final computedStatus =
+        opportunity.reflectionCount > 0 ? 'completed' : opportunity.status;
     final timeRange = _formatTimeRange(opportunity);
     final l10n = AppLocalizations.of(context)!;
     final availabilityColor = _availabilityColor(context);
-    final statusColor = _getStatusColor(context, opportunity.status);
-    final buttonShape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(24));
+    final statusColor = _getStatusColor(context, computedStatus);
+    final participantStatusValue = opportunity.participantStatus;
+    final participantStatusText =
+        opportunity.isParticipant && participantStatusValue != null
+            ? _getParticipantStatusText(context, participantStatusValue)
+            : null;
+    final participantStatusColor = participantStatusText != null
+        ? _getParticipantStatusColor(participantStatusValue!)
+        : null;
+    final canApply = computedStatus == 'open' && opportunity.canApply;
+    final buttonShape =
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(24));
     final viewDetailsStyle = TextButton.styleFrom(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       shape: buttonShape,
       minimumSize: const Size(0, 44),
     );
     final manageButtonStyle = OutlinedButton.styleFrom(
-      side: BorderSide(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.4)),
+      side: BorderSide(
+          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.4)),
       shape: buttonShape,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       minimumSize: const Size(0, 44),
@@ -161,10 +244,14 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                 width: width,
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+                  color:
+                      Theme.of(context).colorScheme.background.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onPrimary
+                        .withOpacity(0.3),
                   ),
                 ),
                 child: Column(
@@ -180,50 +267,28 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                                 child: Text(
                                   opportunity.title,
                                   style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimary,
+                                    color:
+                                        Theme.of(context).colorScheme.onPrimary,
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),
-                              if (showFullDetails)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.background.withOpacity(0.18),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: statusColor,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.event_available, color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.9), size: 16),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        _getStatusText(context, opportunity.status),
-                                        style: TextStyle(
-                                          color: Theme.of(context).colorScheme.onPrimary,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
                             ],
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 10),
                           Row(
                             children: [
-                              if (opportunity.organizerAvatar != null && opportunity.organizerAvatar!.isNotEmpty)
+                              if (opportunity.organizerAvatar != null &&
+                                  opportunity.organizerAvatar!.isNotEmpty)
                                 Container(
                                   width: 20,
                                   height: 20,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     image: DecorationImage(
-                                      image: NetworkImage(opportunity.organizerAvatar!),
+                                      image: NetworkImage(
+                                          opportunity.organizerAvatar!),
                                       fit: BoxFit.cover,
                                     ),
                                   ),
@@ -234,12 +299,18 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                                   height: 20,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimary
+                                        .withOpacity(0.3),
                                   ),
                                   child: Icon(
                                     Icons.person,
                                     size: 12,
-                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimary
+                                        .withOpacity(0.7),
                                   ),
                                 ),
                               const SizedBox(width: 6),
@@ -247,25 +318,66 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                                 child: Text(
                                   opportunity.organizerName ?? l10n.organizer,
                                   style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimary
+                                        .withOpacity(0.7),
                                     fontSize: 14,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
+                              if (showFullDetails)
+                                Flexible(
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Wrap(
+                                      spacing: 6,
+                                      runSpacing: 6,
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.center,
+                                      alignment: WrapAlignment.end,
+                                      children: [
+                                        _buildStatusChip(
+                                          context,
+                                          borderColor: statusColor,
+                                          icon: Icons.event_available,
+                                          label: _getStatusText(
+                                              context, computedStatus),
+                                        ),
+                                        if (participantStatusText != null &&
+                                            participantStatusColor != null)
+                                          _buildStatusChip(
+                                            context,
+                                            borderColor: participantStatusColor,
+                                            icon: Icons.verified_user,
+                                            label: participantStatusText,
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                             ],
                           ),
                           const SizedBox(height: 12),
                           if (opportunity.attachmentCount > 0) ...[
                             Row(
                               children: [
-                                Icon(Icons.attachment, size: 16, color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)),
+                                Icon(Icons.attachment,
+                                    size: 16,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimary
+                                        .withOpacity(0.7)),
                                 const SizedBox(width: 6),
                                 Text(
                                   '${opportunity.attachmentCount} attachment${opportunity.attachmentCount == 1 ? '' : 's'}',
                                   style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimary
+                                        .withOpacity(0.7),
                                     fontSize: 13,
                                   ),
                                 ),
@@ -278,7 +390,8 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                                       width: 32,
                                       height: 32,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                                      errorBuilder: (_, __, ___) =>
+                                          const SizedBox.shrink(),
                                     ),
                                   ),
                                 ],
@@ -286,11 +399,15 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                             ),
                             const SizedBox(height: 8),
                           ],
-                          if (showDescription && opportunity.description.isNotEmpty) ...[
+                          if (showDescription &&
+                              opportunity.description.isNotEmpty) ...[
                             Linkify(
                               text: opportunity.description,
                               style: TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimary
+                                    .withOpacity(0.8),
                                 fontSize: 14,
                               ),
                               linkStyle: TextStyle(
@@ -307,7 +424,10 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                             children: [
                               Icon(
                                 Icons.location_on,
-                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimary
+                                    .withOpacity(0.7),
                                 size: 16,
                               ),
                               const SizedBox(width: 4),
@@ -315,7 +435,10 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                                 child: Text(
                                   opportunity.location,
                                   style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimary
+                                        .withOpacity(0.7),
                                     fontSize: 14,
                                   ),
                                 ),
@@ -323,11 +446,22 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 8),
+                          if (opportunity.reflectionCount > 0) ...[
+                            _ReflectionPreviewCard(
+                              opportunity: opportunity,
+                              apiClient: apiClient,
+                              onOpportunityUpdated: onOpportunityUpdated,
+                            ),
+                            const SizedBox(height: 8),
+                          ],
                           Row(
                             children: [
                               Icon(
                                 Icons.people_alt,
-                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimary
+                                    .withOpacity(0.7),
                                 size: 16,
                               ),
                               const SizedBox(width: 4),
@@ -336,22 +470,32 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                                     ? '${opportunity.participantCount}/${opportunity.requiredParticipants}'
                                     : '${opportunity.participantCount} ${l10n.volunteerParticipants}',
                                 style: TextStyle(
-                                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimary
+                                      .withOpacity(0.7),
                                   fontSize: 14,
                                 ),
                               ),
                               const Spacer(),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 6),
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.background.withOpacity(0.16),
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .background
+                                      .withOpacity(0.16),
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: availabilityColor.withOpacity(0.8)),
+                                  border: Border.all(
+                                      color:
+                                          availabilityColor.withOpacity(0.8)),
                                 ),
                                 child: Text(
                                   _availabilityLabel(context),
                                   style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimary,
+                                    color:
+                                        Theme.of(context).colorScheme.onPrimary,
                                     fontWeight: FontWeight.w700,
                                     fontSize: 12,
                                   ),
@@ -364,14 +508,20 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                             children: [
                               Icon(
                                 Icons.calendar_today,
-                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimary
+                                    .withOpacity(0.7),
                                 size: 16,
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 _formatDate(context, opportunity.date),
                                 style: TextStyle(
-                                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimary
+                                      .withOpacity(0.7),
                                   fontSize: 14,
                                 ),
                               ),
@@ -379,14 +529,20 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                                 const SizedBox(width: 16),
                                 Icon(
                                   Icons.access_time,
-                                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimary
+                                      .withOpacity(0.7),
                                   size: 16,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   timeRange,
                                   style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimary
+                                        .withOpacity(0.7),
                                     fontSize: 14,
                                   ),
                                 ),
@@ -394,23 +550,7 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.people,
-                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                size: 16,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                opportunity.requiredParticipants != null ? '${opportunity.participantCount}/${opportunity.requiredParticipants}' : opportunity.participantCount.toString(),
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
+                          const SizedBox(height: 8),
                         ],
                       ),
                     ),
@@ -418,7 +558,10 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.background.withOpacity(0.08),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .background
+                              .withOpacity(0.08),
                           borderRadius: const BorderRadius.only(
                             bottomLeft: Radius.circular(24),
                             bottomRight: Radius.circular(24),
@@ -434,7 +577,8 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) => VolunteerOpportunityDetailsPage(
+                                            builder: (context) =>
+                                                VolunteerOpportunityDetailsPage(
                                               apiClient: apiClient!,
                                               opportunity: opportunity,
                                             ),
@@ -448,11 +592,16 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                                 style: viewDetailsStyle,
                                 child: Text(
                                   l10n.viewDetails,
-                                  style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                  style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary),
                                 ),
                               ),
                             ),
-                            if ((opportunity.participantRole == 'admin' || opportunity.participantRole == 'coordinator')) ...[
+                            if ((opportunity.participantRole == 'admin' ||
+                                opportunity.participantRole ==
+                                    'coordinator')) ...[
                               const SizedBox(width: 8),
                               OutlinedButton.icon(
                                 onPressed: () async {
@@ -465,23 +614,34 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                                       ),
                                     ),
                                   );
-                                  if (updated is VolunteerOpportunity && onOpportunityUpdated != null) {
+                                  if (updated is VolunteerOpportunity &&
+                                      onOpportunityUpdated != null) {
                                     onOpportunityUpdated!(updated);
                                   }
                                 },
-                                icon: Icon(Icons.admin_panel_settings, color: Theme.of(context).colorScheme.onPrimary),
-                                label: Text('Manage', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
+                                icon: Icon(Icons.admin_panel_settings,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimary),
+                                label: Text('Manage',
+                                    style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimary)),
                                 style: manageButtonStyle,
                               ),
                             ],
-                            if (opportunity.isParticipant && opportunity.participantStatus == 'applied') ...[
+                            if (opportunity.isParticipant &&
+                                opportunity.participantStatus == 'applied') ...[
                               const SizedBox(width: 8),
                               TextButton(
                                 onPressed: () async {
                                   try {
-                                    await apiClient!.cancelVolunteerApplication(context, opportunity.id);
+                                    await apiClient!.cancelVolunteerApplication(
+                                        context, opportunity.id);
 
-                                    final updatedOpportunity = opportunity.copyWith(
+                                    final updatedOpportunity =
+                                        opportunity.copyWith(
                                       participantStatus: 'cancelled',
                                       isParticipant: true,
                                     );
@@ -504,18 +664,25 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                                 style: cancelButtonStyle,
                                 child: Text(
                                   l10n.cancelApplication,
-                                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                                  style: TextStyle(
+                                      color:
+                                          Theme.of(context).colorScheme.error),
                                 ),
                               ),
                             ],
-                            if (opportunity.isParticipant && opportunity.participantStatus == 'cancelled') ...[
+                            if (opportunity.isParticipant &&
+                                opportunity.participantStatus ==
+                                    'cancelled') ...[
                               const SizedBox(width: 8),
                               ElevatedButton(
                                 onPressed: () async {
                                   try {
-                                    await apiClient!.applyToVolunteerOpportunity(context, opportunity.id);
+                                    await apiClient!
+                                        .applyToVolunteerOpportunity(
+                                            context, opportunity.id);
 
-                                    final updatedOpportunity = opportunity.copyWith(
+                                    final updatedOpportunity =
+                                        opportunity.copyWith(
                                       participantStatus: 'applied',
                                       isParticipant: true,
                                     );
@@ -539,21 +706,26 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                                 child: Text(
                                   l10n.reapply,
                                   style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onSecondary,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSecondary,
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),
                             ],
-                            if (!opportunity.isParticipant && opportunity.canApply) ...[
+                            if (!opportunity.isParticipant && canApply) ...[
                               const SizedBox(width: 8),
                               ElevatedButton(
                                 onPressed: () async {
                                   try {
-                                    await apiClient!.applyToVolunteerOpportunity(context, opportunity.id);
+                                    await apiClient!
+                                        .applyToVolunteerOpportunity(
+                                            context, opportunity.id);
 
-                                    final updatedOpportunity = opportunity.copyWith(
+                                    final updatedOpportunity =
+                                        opportunity.copyWith(
                                       participantStatus: 'applied',
                                       isParticipant: true,
                                     );
@@ -577,7 +749,9 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                                 child: Text(
                                   l10n.volunteerApply,
                                   style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onSecondary,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSecondary,
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -594,7 +768,8 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => VolunteerOpportunityDetailsPage(
+                                  builder: (context) =>
+                                      VolunteerOpportunityDetailsPage(
                                     opportunity: opportunity,
                                     apiClient: ApiClient(),
                                   ),
@@ -614,6 +789,318 @@ class VolunteerOpportunityListItem extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _ReflectionPreviewCard extends StatefulWidget {
+  final VolunteerOpportunity opportunity;
+  final ApiClient? apiClient;
+  final Function(VolunteerOpportunity)? onOpportunityUpdated;
+
+  const _ReflectionPreviewCard({
+    required this.opportunity,
+    required this.apiClient,
+    required this.onOpportunityUpdated,
+  });
+
+  @override
+  State<_ReflectionPreviewCard> createState() => _ReflectionPreviewCardState();
+}
+
+class _ReflectionPreviewCardState extends State<_ReflectionPreviewCard> {
+  late String _title;
+  late String _excerpt;
+  late List<VolunteerReflectionImage> _images;
+  bool _didRequestPreview = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _syncFromOpportunity();
+  }
+
+  @override
+  void didUpdateWidget(covariant _ReflectionPreviewCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.opportunity != widget.opportunity) {
+      _syncFromOpportunity();
+      _didRequestPreview = false;
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadPreviewIfNeeded();
+  }
+
+  void _syncFromOpportunity() {
+    _title = widget.opportunity.latestReflectionTitle ?? '';
+    _excerpt = widget.opportunity.latestReflectionExcerpt ?? '';
+    _images = widget.opportunity.latestReflectionImages;
+  }
+
+  bool get _shouldFetchPreview {
+    if (_didRequestPreview || widget.apiClient == null) return false;
+    if (widget.opportunity.reflectionCount <= 0) return false;
+    final hasImages = _images.any((img) => img.isImage);
+    return !hasImages;
+  }
+
+  Future<void> _loadPreviewIfNeeded() async {
+    if (!_shouldFetchPreview) return;
+    _didRequestPreview = true;
+
+    try {
+      final reflections = await widget.apiClient!
+          .getVolunteerReflections(context, widget.opportunity.id);
+      if (!mounted || reflections.isEmpty) return;
+
+      final latest = reflections.first;
+      final updatedOpportunity = widget.opportunity.copyWith(
+        latestReflectionTitle: latest.title,
+        latestReflectionExcerpt: latest.body,
+        latestReflectionAt: latest.createdAt,
+        latestReflectionImages: latest.images,
+      );
+
+      setState(() {
+        _title = latest.title;
+        _excerpt = latest.body;
+        _images = latest.images;
+      });
+
+      widget.onOpportunityUpdated?.call(updatedOpportunity);
+    } catch (_) {
+      // Keep the existing card text if preview hydration fails.
+    }
+  }
+
+  Future<void> _openReflectionView() async {
+    if (widget.apiClient == null) return;
+
+    final updated = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => VolunteerReflectionViewPage(
+          apiClient: widget.apiClient!,
+          opportunity: widget.opportunity.copyWith(
+            latestReflectionTitle: _title,
+            latestReflectionExcerpt: _excerpt,
+            latestReflectionImages: _images,
+          ),
+        ),
+      ),
+    );
+
+    if (updated is VolunteerOpportunity &&
+        widget.onOpportunityUpdated != null) {
+      widget.onOpportunityUpdated!(updated);
+    }
+  }
+
+  Widget _buildReflectionImageTile({
+    required String imageUrl,
+    required BorderRadius borderRadius,
+    int? overlayCount,
+  }) {
+    return ClipRRect(
+      borderRadius: borderRadius,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.network(
+            imageUrl,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => Container(
+              color: Colors.white24,
+              alignment: Alignment.center,
+              child: const Icon(Icons.broken_image, size: 18),
+            ),
+          ),
+          if (overlayCount != null && overlayCount > 0)
+            Container(
+              color: Colors.black.withOpacity(0.45),
+              alignment: Alignment.center,
+              child: Text(
+                '+$overlayCount',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReflectionMediaPreview() {
+    final images = _images.where((img) => img.isImage).toList(growable: false);
+    if (images.isEmpty) return const SizedBox.shrink();
+
+    final previewImages = images.take(3).toList(growable: false);
+    final extraCount = images.length - previewImages.length;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final useHighlightLayout =
+            constraints.maxWidth >= 420 && previewImages.length > 1;
+
+        if (!useHighlightLayout) {
+          return SizedBox(
+            height: 88,
+            child: Row(
+              children: previewImages.asMap().entries.map((entry) {
+                final index = entry.key;
+                final img = entry.value;
+                return Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      right: index == previewImages.length - 1 ? 0 : 8,
+                    ),
+                    child: _buildReflectionImageTile(
+                      imageUrl: img.fileUrl,
+                      borderRadius: BorderRadius.circular(12),
+                      overlayCount:
+                          index == previewImages.length - 1 ? extraCount : null,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          );
+        }
+
+        return SizedBox(
+          height: 138,
+          child: Row(
+            children: [
+              Expanded(
+                flex: 7,
+                child: _buildReflectionImageTile(
+                  imageUrl: previewImages.first.fileUrl,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 4,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: _buildReflectionImageTile(
+                        imageUrl: previewImages[1].fileUrl,
+                        borderRadius: BorderRadius.circular(14),
+                        overlayCount:
+                            previewImages.length == 2 ? extraCount : null,
+                      ),
+                    ),
+                    if (previewImages.length > 2) ...[
+                      const SizedBox(height: 8),
+                      Expanded(
+                        child: _buildReflectionImageTile(
+                          imageUrl: previewImages[2].fileUrl,
+                          borderRadius: BorderRadius.circular(14),
+                          overlayCount: extraCount,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final hasImages = _images.any((img) => img.isImage);
+    final title = _title.trim().isNotEmpty ? _title : l10n.recentReflection;
+    final excerpt = _excerpt.trim();
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: widget.apiClient == null ? null : _openReflectionView,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.background.withOpacity(0.14),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.15),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.auto_stories,
+                  size: 16,
+                  color:
+                      Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    l10n.reflectionBodyLabel,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  size: 18,
+                  color:
+                      Theme.of(context).colorScheme.onPrimary.withOpacity(0.55),
+                ),
+              ],
+            ),
+            if (hasImages) ...[
+              const SizedBox(height: 10),
+              _buildReflectionMediaPreview(),
+            ],
+            SizedBox(height: hasImages ? 10 : 6),
+            Text(
+              title,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimary,
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (excerpt.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  excerpt,
+                  maxLines: hasImages ? 3 : 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onPrimary
+                        .withOpacity(0.85),
+                    height: 1.35,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
