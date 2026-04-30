@@ -234,6 +234,143 @@ class AppLocalizationsJa extends AppLocalizations {
   String get volunteerDescription => 'ボランティア活動の機会を探す';
 
   @override
+  String get volunteerOpportunities => 'ボランティア募集';
+
+  @override
+  String get myVolunteerActivities => '私の活動';
+
+  @override
+  String get createOpportunity => '募集を作成';
+
+  @override
+  String get opportunityTitle => 'タイトル';
+
+  @override
+  String get opportunityDescription => '説明';
+
+  @override
+  String get opportunityLocation => '場所';
+
+  @override
+  String get volunteerStartDate => '開始日';
+
+  @override
+  String get volunteerEndDate => '終了日';
+
+  @override
+  String get requiredParticipants => '必要参加者数';
+
+  @override
+  String get volunteerApply => '応募';
+
+  @override
+  String get volunteerApplied => '応募済み';
+
+  @override
+  String get volunteerApproved => '承認済み';
+
+  @override
+  String get volunteerCompleted => '完了';
+
+  @override
+  String get volunteerCancelled => 'キャンセル';
+
+  @override
+  String get opportunityOpen => '募集中';
+
+  @override
+  String get opportunityFilled => '定員満了';
+
+  @override
+  String get volunteerParticipants => '参加者';
+
+  @override
+  String get volunteerRoleMember => 'メンバー';
+
+  @override
+  String get volunteerRoleCoordinator => 'コーディネーター';
+
+  @override
+  String get volunteerRoleAdmin => '管理者';
+
+  @override
+  String get volunteerManageTitle => 'ボランティア管理';
+
+  @override
+  String get volunteerRequiredParticipantsOptional => '必要参加者数（任意）';
+
+  @override
+  String volunteerSpotsRemaining(int count) {
+    return '残り$count枠';
+  }
+
+  @override
+  String get volunteerNoLimit => '定員なし';
+
+  @override
+  String get volunteerOrganizer => '主催者';
+
+  @override
+  String get save => '保存';
+
+  @override
+  String get volunteerHistory => 'ボランティア履歴';
+
+  @override
+  String get downloadCertificate => '証明書をダウンロード';
+
+  @override
+  String get hoursCompleted => '完了時間';
+
+  @override
+  String get certificateIssued => '証明書発行済み';
+
+  @override
+  String get noVolunteerOpportunities => 'ボランティア募集がありません';
+
+  @override
+  String get noVolunteerActivities => 'ボランティア活動がありません';
+
+  @override
+  String get viewDetails => '詳細を見る';
+
+  @override
+  String get cancelApplication => 'キャンセル';
+
+  @override
+  String get certificateButton => '証明書';
+
+  @override
+  String get applicationCancelled => '申請がキャンセルされました';
+
+  @override
+  String get certificateDownloaded => '証明書のダウンロードが完了しました！';
+
+  @override
+  String get filterByVolunteerStatus => 'ステータスで絞り込み';
+
+  @override
+  String get sortVolunteerBy => '並び替え';
+
+  @override
+  String get volunteerNewest => '新しい順';
+
+  @override
+  String get volunteerOldest => '古い順';
+
+  @override
+  String get volunteerUpcoming => '予定';
+
+  @override
+  String get volunteerOngoing => '進行中';
+
+  @override
+  String get volunteerPast => '過去';
+
+  @override
+  String get allVolunteerStatuses => 'すべてのステータス';
+
+  @override
   String get localNews => '地域ニュース・更新情報';
 
   @override
@@ -428,16 +565,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get leaveFeed => 'フィードを離脱';
 
   @override
-  String get selectNewAdmin => '新しい管理者を選択';
+  String get selectNewAdmin => '';
 
   @override
   String get confirmDeleteFeed => '他にメンバーがいないため、離脱するとこのフィードは削除されます。続行しますか？';
 
   @override
   String get ok => 'OK';
-
-  @override
-  String get save => '保存';
 
   @override
   String get searchFeeds => 'フィードを検索...';
@@ -491,7 +625,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get failedToLoadFeedMembers => 'メンバーの読み込みに失敗しました';
 
   @override
-  String get currentAdmin => '現在の管理者';
+  String get currentAdmin => '管理者';
 
   @override
   String get change => '変更';
@@ -507,4 +641,197 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get showLess => '閉じる';
+
+  @override
+  String get myVolunteerSchedule => 'ボランティア予定';
+
+  @override
+  String get createVolunteerOpportunity => '新規作成';
+
+  @override
+  String get organizer => '主催者';
+
+  @override
+  String get attachments => '添付ファイル';
+
+  @override
+  String get volunteerReflections => '活動レポート';
+
+  @override
+  String get recentReflection => '最新の振り返り';
+
+  @override
+  String get newReflection => '新着';
+
+  @override
+  String get readFullReflection => '全文を見る';
+
+  @override
+  String get manageReflections => 'レポートを管理';
+
+  @override
+  String get shareReflection => '振り返りを投稿';
+
+  @override
+  String get noReflectionsYet => 'まだレポートはありません';
+
+  @override
+  String get noReflectionsHint => '管理者が写真付きで活動の振り返りを投稿できます。';
+
+  @override
+  String get saveReflection => '振り返りを保存';
+
+  @override
+  String get updateReflection => '振り返りを更新';
+
+  @override
+  String get reflectionTitleLabel => '見出し';
+
+  @override
+  String get reflectionBodyLabel => '振り返り';
+
+  @override
+  String get reflectionBodyRequired => '内容を入力してください。';
+
+  @override
+  String get reflectionSaved => '振り返りを保存しました';
+
+  @override
+  String get saveReflectionFirst => '写真を追加する前に保存してください。';
+
+  @override
+  String get reflectionImages => 'レポートの写真';
+
+  @override
+  String get reflectionAutoBody => '活動が完了しました。お疲れさまでした！';
+
+  @override
+  String get noReflectionImages => '写真はまだありません';
+
+  @override
+  String get reflectionImageUploaded => '画像を追加しました';
+
+  @override
+  String get reflectionImageRemoved => '画像を削除しました';
+
+  @override
+  String get addPhotos => '写真を追加';
+
+  @override
+  String get draft => '下書き';
+
+  @override
+  String get activityDetails => '活動詳細';
+
+  @override
+  String get manage => '管理';
+
+  @override
+  String get manageVolunteerOpportunity => '募集管理';
+
+  @override
+  String get approveParticipant => '承認';
+
+  @override
+  String get rejectParticipant => '拒否';
+
+  @override
+  String get editOpportunity => '募集編集';
+
+  @override
+  String get participants => '参加者';
+
+  @override
+  String get startTime => '開始時間';
+
+  @override
+  String get endTime => '終了時間';
+
+  @override
+  String get date => '日付';
+
+  @override
+  String get reapply => '再応募';
+
+  @override
+  String get today => '今日';
+
+  @override
+  String get tomorrow => '明日';
+
+  @override
+  String get statusUnknown => '不明';
+
+  @override
+  String get roleAdmin => '管理者';
+
+  @override
+  String get roleCoordinator => 'コーディネーター';
+
+  @override
+  String get roleMember => 'メンバー';
+
+  @override
+  String get hoursUnit => '時間';
+
+  @override
+  String get participantStatusUpdated => '参加者のステータスが更新されました';
+
+  @override
+  String get pleaseSelectDate => '日付を選択してください';
+
+  @override
+  String get pleaseSelectTimes => '開始時間と終了時間を選択してください';
+
+  @override
+  String get volunteerOpportunityCreated => 'ボランティア募集が正常に作成されました！';
+
+  @override
+  String get enterOpportunityTitle => '募集タイトルを入力してください';
+
+  @override
+  String get describeOpportunity => 'ボランティア募集の説明を入力してください';
+
+  @override
+  String get enterLocation => '場所を入力してください';
+
+  @override
+  String get locationRequired => '場所は必須です';
+
+  @override
+  String get eventDate => 'イベント日';
+
+  @override
+  String get selectDate => '日付を選択';
+
+  @override
+  String get selectTime => '時間を選択';
+
+  @override
+  String get leaveEmptyForUnlimited => '空欄の場合は無制限';
+
+  @override
+  String get optionalLabel => '（任意）';
+
+  @override
+  String get addFiles => 'ファイルを追加';
+
+  @override
+  String get attachmentsHelperText => '画像またはPDFを追加して詳細を共有できます。';
+
+  @override
+  String fileSizeKilobytes(int size) {
+    return '$size KB';
+  }
+
+  @override
+  String failedToUploadFile(String fileName, String error) {
+    return '$fileName のアップロードに失敗しました: $error';
+  }
+
+  @override
+  String get calendarTab => 'カレンダー';
+
+  @override
+  String get listTab => 'リスト';
 }

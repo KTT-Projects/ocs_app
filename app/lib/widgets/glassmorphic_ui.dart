@@ -86,15 +86,51 @@ class GlassmorphicUI {
                 border: Border.all(
                   color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
               ),
               child: child,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  static Widget buildAppBarIconButton({
+    required BuildContext context,
+    IconData? icon,
+    Widget? child,
+    VoidCallback? onPressed,
+    double size = 40,
+    EdgeInsetsGeometry margin = const EdgeInsets.all(8),
+  }) {
+    final Widget content = child ??
+        Icon(
+          icon,
+          color: Theme.of(context).colorScheme.onPrimary,
+          size: 20,
+        );
+
+    return Padding(
+      padding: margin,
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+              ),
+            ),
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              constraints: BoxConstraints.tightFor(width: size, height: size),
+              splashRadius: size / 2,
+              onPressed: onPressed,
+              icon: content,
             ),
           ),
         ),

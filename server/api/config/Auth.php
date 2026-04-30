@@ -4,6 +4,8 @@ class Auth
   private $conn;
   private $table_name = "users";
   private $secret_key = "kttProjects2024SecretKey"; // Hardcoded secret key
+  private $issuer = "ocs_app_backend";
+  private $audience = "ocs_app_clients";
   private $jwt_expiration = 86400; // 24 hours in seconds
 
   public function __construct($db)
@@ -14,6 +16,16 @@ class Auth
   private function base64url_encode($data)
   {
     return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+  }
+
+  private function base64url_decode($data)
+  {
+    $data = strtr($data, '-_', '+/');
+    $padding = strlen($data) % 4;
+    if ($padding) {
+      $data .= str_repeat('=', 4 - $padding);
+    }
+    return base64_decode($data);
   }
 
   public function generateJWT($user_id, $email, $role_id)
@@ -27,6 +39,8 @@ class Auth
       'user_id' => $user_id,
       'email' => $email,
       'role_id' => $role_id,
+      'iss' => $this->issuer,
+      'aud' => $this->audience,
       'exp' => time() + $this->jwt_expiration,
       'iat' => time()
     ]);
@@ -44,6 +58,51 @@ class Auth
     $base64UrlSignature = $this->base64url_encode($signature);
 
     return $base64UrlHeader . "." . $base64UrlPayload . "." . $base64UrlSignature;
+  }
+
+  public function decodeJWT($token)
+  {
+    $parts = explode('.', $token);
+    if (count($parts) !== 3) {
+      return false;
+    }
+
+    [$encodedHeader, $encodedPayload, $encodedSignature] = $parts;
+
+    $header = json_decode($this->base64url_decode($encodedHeader), true);
+    $payload = json_decode($this->base64url_decode($encodedPayload), true);
+    $signatureProvided = $this->base64url_decode($encodedSignature);
+
+    if (!$header || !$payload || $signatureProvided === false) {
+      return false;
+    }
+
+    if (($header['typ'] ?? '') !== 'JWT' || ($header['alg'] ?? '') !== 'HS256') {
+      return false;
+    }
+
+    if (!isset($payload['user_id'])) {
+      return false;
+    }
+
+    $expectedSignature = hash_hmac('sha256', $encodedHeader . "." . $encodedPayload, $this->secret_key, true);
+    if (!hash_equals($expectedSignature, $signatureProvided)) {
+      return false;
+    }
+
+    if (!isset($payload['exp']) || $payload['exp'] < time()) {
+      return false;
+    }
+
+    if (isset($payload['nbf']) && time() < $payload['nbf']) {
+      return false;
+    }
+
+    if (($payload['iss'] ?? null) !== $this->issuer || ($payload['aud'] ?? null) !== $this->audience) {
+      return false;
+    }
+
+    return $payload;
   }
 
   public function validatePassword($input, $stored_hash)

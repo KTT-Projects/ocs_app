@@ -32,11 +32,19 @@ class _HomePageState extends State<HomePage> {
   Map<String, dynamic>? _profile;
   bool _initialized = false;
   int _currentIndex = 0;
+  late final List<Widget> _pages;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
+      _pages = [
+        FeedsPage(apiClient: widget.apiClient),
+        const Center(child: Text('Events')),
+        VolunteerPage(apiClient: widget.apiClient),
+        const Center(child: Text('Study')),
+        ProfilePage(apiClient: widget.apiClient),
+      ];
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           _loadProfile();
@@ -74,17 +82,13 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> pages = [
-      FeedsPage(apiClient: widget.apiClient),
-      const Center(child: Text('Events')),
-      const Center(child: Text('Volunteer')),
-      const Center(child: Text('Study')),
-      ProfilePage(apiClient: widget.apiClient),
-    ];
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      body: pages[_currentIndex],
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _pages,
+      ),
       extendBody: true,
       bottomNavigationBar: CircleNavBar(
         activeIcons: [
@@ -95,47 +99,11 @@ class _HomePageState extends State<HomePage> {
           Icon(Icons.account_circle, color: Colors.white, size: 28),
         ],
         inactiveIcons: [
-          Column(children: [
-            Icon(Icons.feed_outlined, color: Colors.white, size: 28),
-            Text(l10n.feed,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold))
-          ]),
-          Column(children: [
-            Icon(Icons.event_note_outlined, color: Colors.white, size: 28),
-            Text(l10n.eventsFeature,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold))
-          ]),
-          Column(children: [
-            Icon(Icons.volunteer_activism_outlined,
-                color: Colors.white, size: 28),
-            Text(l10n.volunteerFeature,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold))
-          ]),
-          Column(children: [
-            Icon(Icons.school_outlined, color: Colors.white, size: 28),
-            Text(l10n.studyFeature,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold))
-          ]),
-          Column(children: [
-            Icon(Icons.account_circle, color: Colors.white, size: 28),
-            Text(l10n.profile,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold))
-          ]),
+          Column(children: [Icon(Icons.feed_outlined, color: Colors.white, size: 28), Text(l10n.feed, style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))]),
+          Column(children: [Icon(Icons.event_note_outlined, color: Colors.white, size: 28), Text(l10n.eventsFeature, style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))]),
+          Column(children: [Icon(Icons.volunteer_activism_outlined, color: Colors.white, size: 28), Text(l10n.volunteerFeature, style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))]),
+          Column(children: [Icon(Icons.school_outlined, color: Colors.white, size: 28), Text(l10n.studyFeature, style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))]),
+          Column(children: [Icon(Icons.account_circle, color: Colors.white, size: 28), Text(l10n.profile, style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))]),
         ],
         color: Theme.of(context).colorScheme.background.withOpacity(0.2),
         // circleColor: Theme.of(context).colorScheme.secondary,

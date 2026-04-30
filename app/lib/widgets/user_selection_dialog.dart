@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class UserSelectionDialog extends StatelessWidget {
-  final String title;
+  final String? title;
   final List<Map<String, dynamic>> users;
   final Function(Map<String, dynamic>) onUserSelected;
 
@@ -18,16 +18,17 @@ class UserSelectionDialog extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-          child: Text(
-            title,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onPrimary,
-              fontSize: 18,
+        if (title != null && title!.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+            child: Text(
+              title!,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimary,
+                fontSize: 18,
+              ),
             ),
           ),
-        ),
         Container(
           constraints: BoxConstraints(
             maxHeight: MediaQuery.of(context).size.height * 0.5,

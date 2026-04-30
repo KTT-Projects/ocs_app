@@ -531,6 +531,276 @@ abstract class AppLocalizations {
   /// **'Find volunteering opportunities'**
   String get volunteerDescription;
 
+  /// Title for volunteer opportunities list
+  ///
+  /// In en, this message translates to:
+  /// **'Volunteer Opportunities'**
+  String get volunteerOpportunities;
+
+  /// Title for user's volunteer activities
+  ///
+  /// In en, this message translates to:
+  /// **'My Activities'**
+  String get myVolunteerActivities;
+
+  /// Button text to create new volunteer opportunity
+  ///
+  /// In en, this message translates to:
+  /// **'Create Opportunity'**
+  String get createOpportunity;
+
+  /// Label for opportunity title field
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get opportunityTitle;
+
+  /// Label for opportunity description field
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get opportunityDescription;
+
+  /// Label for opportunity location field
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get opportunityLocation;
+
+  /// Label for volunteer start date field
+  ///
+  /// In en, this message translates to:
+  /// **'Start Date'**
+  String get volunteerStartDate;
+
+  /// Label for volunteer end date field
+  ///
+  /// In en, this message translates to:
+  /// **'End Date'**
+  String get volunteerEndDate;
+
+  /// Label for required participants field
+  ///
+  /// In en, this message translates to:
+  /// **'Required Participants'**
+  String get requiredParticipants;
+
+  /// Button text to apply for volunteer opportunity
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get volunteerApply;
+
+  /// Status text when user has applied for volunteer
+  ///
+  /// In en, this message translates to:
+  /// **'Applied'**
+  String get volunteerApplied;
+
+  /// Status text when user is approved for volunteer
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get volunteerApproved;
+
+  /// Status text when volunteer activity is completed
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get volunteerCompleted;
+
+  /// Status text when volunteer activity is cancelled
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get volunteerCancelled;
+
+  /// Status text for open volunteer opportunities
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get opportunityOpen;
+
+  /// Status text for filled volunteer opportunities
+  ///
+  /// In en, this message translates to:
+  /// **'Filled'**
+  String get opportunityFilled;
+
+  /// Label for volunteer participants
+  ///
+  /// In en, this message translates to:
+  /// **'Participants'**
+  String get volunteerParticipants;
+
+  /// Label for member role
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get volunteerRoleMember;
+
+  /// Label for coordinator role
+  ///
+  /// In en, this message translates to:
+  /// **'Coordinator'**
+  String get volunteerRoleCoordinator;
+
+  /// Label for admin role
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get volunteerRoleAdmin;
+
+  /// Title for manage volunteer page
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Volunteer'**
+  String get volunteerManageTitle;
+
+  /// Optional required participants field label
+  ///
+  /// In en, this message translates to:
+  /// **'Required participants (Optional)'**
+  String get volunteerRequiredParticipantsOptional;
+
+  /// Capacity label showing how many volunteer spots remain
+  ///
+  /// In en, this message translates to:
+  /// **'{count} spots left'**
+  String volunteerSpotsRemaining(int count);
+
+  /// Label for volunteer opportunities that have no capacity limit
+  ///
+  /// In en, this message translates to:
+  /// **'No capacity limit'**
+  String get volunteerNoLimit;
+
+  /// Label for volunteer opportunity organizer
+  ///
+  /// In en, this message translates to:
+  /// **'Organizer'**
+  String get volunteerOrganizer;
+
+  /// Save button
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// Title for volunteer history page
+  ///
+  /// In en, this message translates to:
+  /// **'Volunteer History'**
+  String get volunteerHistory;
+
+  /// Button text to download volunteer certificate
+  ///
+  /// In en, this message translates to:
+  /// **'Download Certificate'**
+  String get downloadCertificate;
+
+  /// Label for completed volunteer hours
+  ///
+  /// In en, this message translates to:
+  /// **'Hours Completed'**
+  String get hoursCompleted;
+
+  /// Text when certificate is issued
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate Issued'**
+  String get certificateIssued;
+
+  /// Message when no volunteer opportunities are found
+  ///
+  /// In en, this message translates to:
+  /// **'No volunteer opportunities available'**
+  String get noVolunteerOpportunities;
+
+  /// Message when user has no volunteer activities
+  ///
+  /// In en, this message translates to:
+  /// **'No volunteer activities yet'**
+  String get noVolunteerActivities;
+
+  /// Button text to view details
+  ///
+  /// In en, this message translates to:
+  /// **'View Details'**
+  String get viewDetails;
+
+  /// Button text to cancel application
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelApplication;
+
+  /// Button text for certificate
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate'**
+  String get certificateButton;
+
+  /// Message when application is cancelled
+  ///
+  /// In en, this message translates to:
+  /// **'Application cancelled'**
+  String get applicationCancelled;
+
+  /// Message when certificate is downloaded
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate downloaded successfully!'**
+  String get certificateDownloaded;
+
+  /// Filter option label for volunteer status
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by Status'**
+  String get filterByVolunteerStatus;
+
+  /// Sort option label for volunteers
+  ///
+  /// In en, this message translates to:
+  /// **'Sort by'**
+  String get sortVolunteerBy;
+
+  /// Sort option for newest volunteer opportunities
+  ///
+  /// In en, this message translates to:
+  /// **'Newest'**
+  String get volunteerNewest;
+
+  /// Sort option for oldest volunteer opportunities
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest'**
+  String get volunteerOldest;
+
+  /// Filter option for upcoming volunteer opportunities
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get volunteerUpcoming;
+
+  /// Filter option for ongoing volunteer opportunities
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing'**
+  String get volunteerOngoing;
+
+  /// Filter option for past volunteer opportunities
+  ///
+  /// In en, this message translates to:
+  /// **'Past'**
+  String get volunteerPast;
+
+  /// Filter option to show all volunteer statuses
+  ///
+  /// In en, this message translates to:
+  /// **'All Statuses'**
+  String get allVolunteerStatuses;
+
   /// Title for the local news section
   ///
   /// In en, this message translates to:
@@ -918,7 +1188,7 @@ abstract class AppLocalizations {
   /// Dialog title when choosing a new admin
   ///
   /// In en, this message translates to:
-  /// **'Select new admin'**
+  /// **''**
   String get selectNewAdmin;
 
   /// Confirmation message shown to the last admin before deleting a feed
@@ -932,12 +1202,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'OK'**
   String get ok;
-
-  /// Save button
-  ///
-  /// In en, this message translates to:
-  /// **'Save'**
-  String get save;
 
   /// Placeholder for search feeds input
   ///
@@ -1044,7 +1308,7 @@ abstract class AppLocalizations {
   /// Label for current feed admin
   ///
   /// In en, this message translates to:
-  /// **'Current admin'**
+  /// **'Admin'**
   String get currentAdmin;
 
   /// Button label to change selection
@@ -1076,6 +1340,384 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Show less'**
   String get showLess;
+
+  /// Title for volunteer schedule page
+  ///
+  /// In en, this message translates to:
+  /// **'My Volunteer Schedule'**
+  String get myVolunteerSchedule;
+
+  /// Button text to create new volunteer opportunity
+  ///
+  /// In en, this message translates to:
+  /// **'Create New'**
+  String get createVolunteerOpportunity;
+
+  /// Label for volunteer opportunity organizer
+  ///
+  /// In en, this message translates to:
+  /// **'Organizer'**
+  String get organizer;
+
+  /// Section title for volunteer attachments
+  ///
+  /// In en, this message translates to:
+  /// **'Attachments'**
+  String get attachments;
+
+  /// Section title for volunteer reflections
+  ///
+  /// In en, this message translates to:
+  /// **'Reflections'**
+  String get volunteerReflections;
+
+  /// Label for the most recent reflection
+  ///
+  /// In en, this message translates to:
+  /// **'Recent reflection'**
+  String get recentReflection;
+
+  /// Badge text for new reflection
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get newReflection;
+
+  /// Button to read the entire reflection
+  ///
+  /// In en, this message translates to:
+  /// **'Read full reflection'**
+  String get readFullReflection;
+
+  /// Button to manage reflections
+  ///
+  /// In en, this message translates to:
+  /// **'Manage reflections'**
+  String get manageReflections;
+
+  /// CTA for sharing a reflection
+  ///
+  /// In en, this message translates to:
+  /// **'Share reflection'**
+  String get shareReflection;
+
+  /// Empty state when no reflections exist
+  ///
+  /// In en, this message translates to:
+  /// **'No reflections yet'**
+  String get noReflectionsYet;
+
+  /// Helper text for reflections empty state
+  ///
+  /// In en, this message translates to:
+  /// **'Admins can post a recap with photos so participants can look back.'**
+  String get noReflectionsHint;
+
+  /// Button text to save a reflection
+  ///
+  /// In en, this message translates to:
+  /// **'Save reflection'**
+  String get saveReflection;
+
+  /// Button text to update an existing reflection
+  ///
+  /// In en, this message translates to:
+  /// **'Update reflection'**
+  String get updateReflection;
+
+  /// Label for reflection headline field
+  ///
+  /// In en, this message translates to:
+  /// **'Headline'**
+  String get reflectionTitleLabel;
+
+  /// Label for reflection body field
+  ///
+  /// In en, this message translates to:
+  /// **'Reflection'**
+  String get reflectionBodyLabel;
+
+  /// Validation message when reflection body is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Please write a reflection before saving.'**
+  String get reflectionBodyRequired;
+
+  /// Toast when reflection is saved
+  ///
+  /// In en, this message translates to:
+  /// **'Reflection saved'**
+  String get reflectionSaved;
+
+  /// Hint to save reflection before uploading images
+  ///
+  /// In en, this message translates to:
+  /// **'Save the reflection before adding photos.'**
+  String get saveReflectionFirst;
+
+  /// Label for reflection images section
+  ///
+  /// In en, this message translates to:
+  /// **'Reflection images'**
+  String get reflectionImages;
+
+  /// Fallback body when creating a reflection automatically
+  ///
+  /// In en, this message translates to:
+  /// **'This activity is now complete. Great job, everyone!'**
+  String get reflectionAutoBody;
+
+  /// Message when reflection has no images
+  ///
+  /// In en, this message translates to:
+  /// **'No reflection images yet'**
+  String get noReflectionImages;
+
+  /// Toast when reflection image uploaded
+  ///
+  /// In en, this message translates to:
+  /// **'Image added'**
+  String get reflectionImageUploaded;
+
+  /// Toast when reflection image removed
+  ///
+  /// In en, this message translates to:
+  /// **'Image removed'**
+  String get reflectionImageRemoved;
+
+  /// Button to add photos to reflections
+  ///
+  /// In en, this message translates to:
+  /// **'Add photos'**
+  String get addPhotos;
+
+  /// Label for draft reflection
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get draft;
+
+  /// Section title for volunteer activity details
+  ///
+  /// In en, this message translates to:
+  /// **'Activity details'**
+  String get activityDetails;
+
+  /// Generic manage button label for volunteer opportunities
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get manage;
+
+  /// Button text to manage volunteer opportunity
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Opportunity'**
+  String get manageVolunteerOpportunity;
+
+  /// Button text to approve volunteer participant
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get approveParticipant;
+
+  /// Button text to reject volunteer participant
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get rejectParticipant;
+
+  /// Button text to edit volunteer opportunity
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Opportunity'**
+  String get editOpportunity;
+
+  /// Label for volunteer opportunity participants
+  ///
+  /// In en, this message translates to:
+  /// **'Participants'**
+  String get participants;
+
+  /// Label for volunteer start time
+  ///
+  /// In en, this message translates to:
+  /// **'Start Time'**
+  String get startTime;
+
+  /// Label for volunteer end time
+  ///
+  /// In en, this message translates to:
+  /// **'End Time'**
+  String get endTime;
+
+  /// Label for volunteer date
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get date;
+
+  /// Button text to reapply for volunteer opportunity
+  ///
+  /// In en, this message translates to:
+  /// **'Reapply'**
+  String get reapply;
+
+  /// Text for today's date
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// Text for tomorrow's date
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get tomorrow;
+
+  /// Text for unknown volunteer status
+  ///
+  /// In en, this message translates to:
+  /// **'UNKNOWN'**
+  String get statusUnknown;
+
+  /// Localized label for admin role
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get roleAdmin;
+
+  /// Localized label for coordinator role
+  ///
+  /// In en, this message translates to:
+  /// **'Coordinator'**
+  String get roleCoordinator;
+
+  /// Localized label for member role
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get roleMember;
+
+  /// Unit abbreviation for hours
+  ///
+  /// In en, this message translates to:
+  /// **'h'**
+  String get hoursUnit;
+
+  /// Message when participant status is updated
+  ///
+  /// In en, this message translates to:
+  /// **'Participant status updated'**
+  String get participantStatusUpdated;
+
+  /// Error message when no date is selected
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a date'**
+  String get pleaseSelectDate;
+
+  /// Error message when start/end times are not selected
+  ///
+  /// In en, this message translates to:
+  /// **'Please select start and end times'**
+  String get pleaseSelectTimes;
+
+  /// Success message when volunteer opportunity is created
+  ///
+  /// In en, this message translates to:
+  /// **'Volunteer opportunity created successfully!'**
+  String get volunteerOpportunityCreated;
+
+  /// Hint text for opportunity title field
+  ///
+  /// In en, this message translates to:
+  /// **'Enter opportunity title'**
+  String get enterOpportunityTitle;
+
+  /// Hint text for opportunity description field
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the volunteer opportunity'**
+  String get describeOpportunity;
+
+  /// Hint text for location field
+  ///
+  /// In en, this message translates to:
+  /// **'Enter location'**
+  String get enterLocation;
+
+  /// Validation message for required location field
+  ///
+  /// In en, this message translates to:
+  /// **'Location is required'**
+  String get locationRequired;
+
+  /// Label for event date field
+  ///
+  /// In en, this message translates to:
+  /// **'Event Date'**
+  String get eventDate;
+
+  /// Placeholder text for date selection
+  ///
+  /// In en, this message translates to:
+  /// **'Select date'**
+  String get selectDate;
+
+  /// Placeholder text for time selection
+  ///
+  /// In en, this message translates to:
+  /// **'Select time'**
+  String get selectTime;
+
+  /// Hint text for optional fields with no limit
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty for unlimited'**
+  String get leaveEmptyForUnlimited;
+
+  /// Short optional badge shown next to section titles
+  ///
+  /// In en, this message translates to:
+  /// **'(Optional)'**
+  String get optionalLabel;
+
+  /// Call to action for adding volunteer attachment files
+  ///
+  /// In en, this message translates to:
+  /// **'Add files'**
+  String get addFiles;
+
+  /// Helper text shown below the volunteer attachments picker
+  ///
+  /// In en, this message translates to:
+  /// **'Images or PDFs to share extra details.'**
+  String get attachmentsHelperText;
+
+  /// Attachment file size shown in kilobytes
+  ///
+  /// In en, this message translates to:
+  /// **'{size} KB'**
+  String fileSizeKilobytes(int size);
+
+  /// Error message when uploading a volunteer attachment fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to upload {fileName}: {error}'**
+  String failedToUploadFile(String fileName, String error);
+
+  /// Text for calendar tab
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get calendarTab;
+
+  /// Text for list tab
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get listTab;
 }
 
 class _AppLocalizationsDelegate

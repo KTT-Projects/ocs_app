@@ -37,7 +37,7 @@ class FeedController
       $userId = null;
       if (isset($headers['Authorization'])) {
         $token = str_replace('Bearer ', '', $headers['Authorization']);
-        $decoded = $this->validateJWT($token);
+        $decoded = $this->auth->decodeJWT($token);
         if (!$decoded) {
           Response::error('Invalid or expired token', 401);
           return;
@@ -1101,51 +1101,6 @@ class FeedController
       $this->conn->rollBack();
       throw $e;
     }
-  }
-
-  private function validateJWT($token)
-  {
-    $parts = explode('.', $token);
-    if (count($parts) !== 3) {
-      return false;
-    }
-
-    $header = $this->base64url_decode($parts[0]);
-    $payload = $this->base64url_decode($parts[1]);
-    $signatureProvided = $this->base64url_decode($parts[2]);
-
-    $headerData = json_decode($header, true);
-    $payloadData = json_decode($payload, true);
-
-    // Verify header
-    if (!isset($headerData['typ']) || $headerData['typ'] !== 'JWT' || !isset($headerData['alg']) || $headerData['alg'] !== 'HS256') {
-      return false;
-    }
-
-    // Verify expiration
-    if (!isset($payloadData['exp']) || $payloadData['exp'] < time()) {
-      return false;
-    }
-
-    // Verify signature using the original encoded header and payload parts
-    $secret_key = "kttProjects2024SecretKey"; // Should match Auth class
-    $signatureCheck = hash_hmac('sha256', $parts[0] . "." . $parts[1], $secret_key, true);
-
-    if (!hash_equals($signatureProvided, $signatureCheck)) {
-      return false;
-    }
-
-    return $payloadData;
-  }
-
-  private function base64url_decode($data)
-  {
-    $data = strtr($data, '-_', '+/');
-    $remainder = strlen($data) % 4;
-    if ($remainder) {
-      $data .= str_repeat('=', 4 - $remainder);
-    }
-    return base64_decode($data);
   }
 
   private function calculateScore($postId)
