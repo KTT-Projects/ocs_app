@@ -139,40 +139,16 @@ class _CreateFeedPageState extends State<CreateFeedPage> {
             color: Theme.of(context).colorScheme.onPrimary,
           ),
         ),
-        leading: Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-            ),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: IconButton(
-              icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onPrimary),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
+        leading: GlassmorphicUI.buildAppBarIconButton(
+          context: context,
+          icon: Icons.close,
+          onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          Container(
-            margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-              ),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: IconButton(
-                icon: Icon(Icons.check, color: Theme.of(context).colorScheme.onPrimary),
-                onPressed: _isLoading ? null : _submitFeed,
-              ),
-            ),
+          GlassmorphicUI.buildAppBarIconButton(
+            context: context,
+            icon: Icons.check,
+            onPressed: _isLoading ? null : _submitFeed,
           ),
         ],
       ),

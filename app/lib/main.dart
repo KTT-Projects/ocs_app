@@ -10,7 +10,6 @@ import 'providers/language_provider.dart';
 import 'package:ocs_app/pages/main_page.dart';
 import 'package:ocs_app/pages/login_page.dart'; // Import LoginPage
 import 'package:flutter/services.dart';
-import 'l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,7 +37,7 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   final ApiClient apiClient;
-  
+
   const MyApp({
     super.key,
     required this.apiClient,
@@ -72,7 +71,7 @@ class MyApp extends StatelessWidget {
             colorScheme: ColorScheme.fromSeed(
               seedColor: const Color(0xFF04143A),
               primary: const Color(0xFF04143A),
-              background: const Color(0xFFF1F6F8),
+              surface: const Color(0xFFF1F6F8),
               secondary: const Color(0xFFA2BFF6),
               onPrimary: Colors.white,
               onSecondary: Colors.black,
@@ -84,7 +83,7 @@ class MyApp extends StatelessWidget {
               seedColor: const Color(0xFF04143A),
               brightness: Brightness.dark,
               primary: const Color(0xFF04143A),
-              background: const Color(0xFF121212),
+              surface: const Color(0xFF121212),
               secondary: const Color(0xFFA2BFF6),
               onPrimary: Colors.white,
               onSecondary: Colors.black,

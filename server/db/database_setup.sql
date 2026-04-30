@@ -287,8 +287,9 @@ CREATE TABLE
     description TEXT,
     organizer_id INT NOT NULL,
     location VARCHAR(255),
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
+    date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
     required_participants INT,
     status ENUM ('open', 'filled', 'completed', 'cancelled') DEFAULT 'open',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -309,6 +310,23 @@ CREATE TABLE
     PRIMARY KEY (opportunity_id, user_id),
     FOREIGN KEY (opportunity_id) REFERENCES volunteer_opportunities (id),
     FOREIGN KEY (user_id) REFERENCES users (id)
+  );
+
+-- Volunteer attachments (images/PDFs shared with activities)
+CREATE TABLE
+  volunteer_attachments (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    opportunity_id INT NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    file_url VARCHAR(255) NOT NULL,
+    mime_type VARCHAR(100) NOT NULL,
+    file_size INT,
+    uploaded_by INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (opportunity_id) REFERENCES volunteer_opportunities (id),
+    FOREIGN KEY (uploaded_by) REFERENCES users (id),
+    INDEX idx_volunteer_attachments_opportunity (opportunity_id),
+    INDEX idx_volunteer_attachments_user (uploaded_by)
   );
 
 -- Q&A questions
@@ -466,7 +484,7 @@ CREATE INDEX idx_comments_post ON comments (post_id);
 
 CREATE INDEX idx_events_date ON events (start_datetime);
 
-CREATE INDEX idx_volunteer_date ON volunteer_opportunities (start_date);
+CREATE INDEX idx_volunteer_date ON volunteer_opportunities (date);
 
 CREATE INDEX idx_notifications_user ON notifications (user_id, is_read);
 

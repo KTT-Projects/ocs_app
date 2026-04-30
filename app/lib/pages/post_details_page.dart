@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'dart:async';
+import 'package:flutter/material.dart';
 import '../models/feed_post.dart';
 import '../models/comment.dart';
 import '../services/api_client.dart';
@@ -23,10 +24,25 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
   String? _error;
   List<Comment>? _comments;
   final _controller = TextEditingController();
+  Timer? _refreshTimer;
+  bool _isFetching = false;
+  static final Map<int, List<Comment>> _commentsCache = {};
 
   @override
   void initState() {
     super.initState();
+    if (_commentsCache.containsKey(widget.post.id)) {
+      _comments = _commentsCache[widget.post.id];
+      _isLoading = false;
+    }
+    _startPeriodicRefresh();
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -37,26 +53,43 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
     }
   }
 
-  Future<void> _loadComments() async {
+  void _startPeriodicRefresh() {
+    _refreshTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      _loadComments(showLoading: false);
+    });
+  }
+
+  Future<void> _loadComments({bool showLoading = true}) async {
+    if (_isFetching) return;
+    _isFetching = true;
+    if (_isLoading && !showLoading) {
+      _isFetching = false;
+      return;
+    }
     try {
-      setState(() {
-        _isLoading = true;
-        _error = null;
-      });
+      if (showLoading) {
+        setState(() {
+          _isLoading = true;
+          _error = null;
+        });
+      }
       final comments = await widget.apiClient.getComments(context, widget.post.id);
       if (mounted) {
         setState(() {
           _comments = comments;
-          _isLoading = false;
+          if (showLoading) _isLoading = false;
         });
       }
+      _commentsCache[widget.post.id] = comments;
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = e.toString();
-          _isLoading = false;
+          _error = showLoading ? e.toString() : _error;
+          if (showLoading) _isLoading = false;
         });
       }
+    } finally {
+      _isFetching = false;
     }
   }
 
@@ -83,11 +116,6 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
   }
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
   void _openUserProfile(int userId) {
     Navigator.push(
       context,
@@ -149,22 +177,10 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-            ),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: IconButton(
-              icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
+        leading: GlassmorphicUI.buildAppBarIconButton(
+          context: context,
+          icon: Icons.arrow_back,
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Stack(

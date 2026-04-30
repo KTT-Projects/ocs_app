@@ -215,18 +215,10 @@ class DiscoverFeedSection extends StatelessWidget {
                         (a, b) => b.updatedAt.compareTo(a.updatedAt),
                       );
                     }
-
                     if (searchQuery.isNotEmpty) {
                       final query = searchQuery.toLowerCase();
-                      final titleMatches = filteredFeeds
-                          .where((feed) =>
-                              feed.displayName.toLowerCase().contains(query))
-                          .toList();
-                      final descriptionMatches = filteredFeeds
-                          .where((feed) =>
-                              !titleMatches.contains(feed) &&
-                              feed.description.toLowerCase().contains(query))
-                          .toList();
+                      final titleMatches = filteredFeeds.where((feed) => feed.displayName.toLowerCase().contains(query)).toList();
+                      final descriptionMatches = filteredFeeds.where((feed) => !titleMatches.contains(feed) && feed.description.toLowerCase().contains(query)).toList();
                       filteredFeeds = [...titleMatches, ...descriptionMatches];
                     }
                     if (filteredFeeds.isEmpty) {
@@ -246,9 +238,7 @@ class DiscoverFeedSection extends StatelessWidget {
                         return FeedListItem(
                           feed: filteredFeeds[index],
                           onJoin: () => onJoinFeed(filteredFeeds[index]),
-                          onTap: onFeedTap == null
-                              ? null
-                              : () => onFeedTap!(filteredFeeds[index]),
+                          onTap: onFeedTap == null ? null : () => onFeedTap!(filteredFeeds[index]),
                         );
                       },
                     );
