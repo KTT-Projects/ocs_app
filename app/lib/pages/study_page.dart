@@ -201,6 +201,8 @@ class _StudyPageState extends State<StudyPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final mediaQuery = MediaQuery.of(context);
+    final listBottomPadding = mediaQuery.padding.bottom + 108;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -219,6 +221,7 @@ class _StudyPageState extends State<StudyPage> {
             ),
           ),
           SafeArea(
+            bottom: false,
             child: Column(
               children: [
                 Padding(
@@ -475,7 +478,12 @@ class _StudyPageState extends State<StudyPage> {
 
                         return ListView.builder(
                           physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.fromLTRB(12, 8, 12, 96),
+                          padding: EdgeInsets.fromLTRB(
+                            12,
+                            8,
+                            12,
+                            listBottomPadding,
+                          ),
                           itemCount: _questions!.length,
                           itemBuilder: (context, index) {
                             final question = _questions![index];

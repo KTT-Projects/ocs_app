@@ -19,6 +19,7 @@ class VolunteerController
   private $auth;
   private $conn;
   private $allowedRoles = ['member','coordinator','admin'];
+  private $allowedOpportunityTypes = ['volunteer','event'];
 
   public function __construct()
   {
@@ -44,6 +45,12 @@ class VolunteerController
     } catch (Exception $e) {
       return false;
     }
+  }
+
+  private function getRequestedOpportunityType()
+  {
+    $type = $_GET['type'] ?? $_GET['opportunity_type'] ?? 'volunteer';
+    return in_array($type, $this->allowedOpportunityTypes) ? $type : 'volunteer';
   }
 
   public function handleRequest()
@@ -235,6 +242,7 @@ class VolunteerController
       $status = isset($_GET['status']) ? $_GET['status'] : null;
       $sort = isset($_GET['sort']) ? $_GET['sort'] : 'newest';
       $search = isset($_GET['search']) ? $_GET['search'] : null;
+      $opportunityType = $this->getRequestedOpportunityType();
 
       $query = "
         SELECT 
@@ -298,10 +306,10 @@ class VolunteerController
         LEFT JOIN volunteer_participants vp ON vo.id = vp.opportunity_id AND vp.status != 'cancelled'
         LEFT JOIN volunteer_attachments va ON vo.id = va.opportunity_id
         LEFT JOIN volunteer_participants vp_user ON vo.id = vp_user.opportunity_id AND vp_user.user_id = ?
-        WHERE 1=1
+        WHERE vo.opportunity_type = ?
       ";
 
-      $params = [$userId];
+      $params = [$userId, $opportunityType];
 
       if ($status) {
         $query .= " AND vo.status = ?";
@@ -350,6 +358,7 @@ class VolunteerController
   {
     try {
       $status = isset($_GET['status']) ? $_GET['status'] : null;
+      $opportunityType = $this->getRequestedOpportunityType();
 
       $query = "
         SELECT 
@@ -413,10 +422,10 @@ class VolunteerController
         INNER JOIN volunteer_participants vp ON vo.id = vp.opportunity_id AND vp.user_id = ?
         LEFT JOIN volunteer_participants vp_all ON vo.id = vp_all.opportunity_id AND vp_all.status != 'cancelled'
         LEFT JOIN volunteer_attachments va ON vo.id = va.opportunity_id
-        WHERE 1=1
+        WHERE vo.opportunity_type = ?
       ";
 
-      $params = [$userId];
+      $params = [$userId, $opportunityType];
 
       if ($status) {
         $query .= " AND vp.status = ?";
@@ -552,6 +561,9 @@ class VolunteerController
       $startTime = $input['start_time'];
       $endTime = $input['end_time'];
       $requiredParticipants = isset($input['required_participants']) ? intval($input['required_participants']) : null;
+      $opportunityType = isset($input['opportunity_type']) && in_array($input['opportunity_type'], $this->allowedOpportunityTypes)
+        ? $input['opportunity_type']
+        : 'volunteer';
 
       if (empty($title) || empty($description) || empty($location)) {
         Response::error('Title, description, and location cannot be empty', 400);
@@ -581,13 +593,13 @@ class VolunteerController
 
       $query = "
         INSERT INTO volunteer_opportunities 
-        (title, description, organizer_id, location, date, start_time, end_time, required_participants, status) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'open')
+        (title, description, organizer_id, location, date, start_time, end_time, required_participants, status, opportunity_type) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'open', ?)
       ";
 
       $stmt = $this->conn->prepare($query);
       $result = $stmt->execute([
-        $title, $description, $userId, $location, $date, $startTime, $endTime, $requiredParticipants
+        $title, $description, $userId, $location, $date, $startTime, $endTime, $requiredParticipants, $opportunityType
       ]);
 
       if ($result) {

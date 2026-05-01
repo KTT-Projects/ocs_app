@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import '../l10n/app_localizations.dart';
+import '../models/opportunity_experience.dart';
 import '../models/volunteer_opportunity.dart';
 import '../services/api_client.dart';
 import '../widgets/volunteer_opportunity_list_item.dart';
@@ -15,10 +16,12 @@ import '../pages/enhanced_volunteer_schedule_page.dart';
 
 class VolunteerPage extends StatefulWidget {
   final ApiClient apiClient;
+  final OpportunityExperience experience;
 
   const VolunteerPage({
     super.key,
     required this.apiClient,
+    this.experience = OpportunityExperience.volunteer,
   });
 
   @override
@@ -88,6 +91,7 @@ class _VolunteerPageState extends State<VolunteerPage> {
         context,
         status: _statusFilter,
         sort: _sortBy,
+        opportunityType: widget.experience.apiType,
       );
 
       if (mounted) {
@@ -113,6 +117,7 @@ class _VolunteerPageState extends State<VolunteerPage> {
         context,
         sort: _sortBy,
         status: _statusFilter,
+        opportunityType: widget.experience.apiType,
       );
 
       if (mounted) {
@@ -164,6 +169,7 @@ class _VolunteerPageState extends State<VolunteerPage> {
         builder: (context) => VolunteerOpportunityDetailsPage(
           apiClient: widget.apiClient,
           opportunity: opportunity,
+          experience: widget.experience,
         ),
       ),
     ).then((_) => _loadNewOpportunities());
@@ -175,6 +181,7 @@ class _VolunteerPageState extends State<VolunteerPage> {
       MaterialPageRoute(
         builder: (context) => CreateVolunteerOpportunityPage(
           apiClient: widget.apiClient,
+          experience: widget.experience,
         ),
       ),
     ).then((_) => _loadNewOpportunities());
@@ -186,6 +193,7 @@ class _VolunteerPageState extends State<VolunteerPage> {
       MaterialPageRoute(
         builder: (context) => EnhancedVolunteerSchedulePage(
           apiClient: widget.apiClient,
+          experience: widget.experience,
         ),
       ),
     );
@@ -317,7 +325,7 @@ class _VolunteerPageState extends State<VolunteerPage> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        l10n.createVolunteerOpportunity,
+                        widget.experience.createAction(context),
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onPrimary,
                         ),
@@ -382,7 +390,7 @@ class _VolunteerPageState extends State<VolunteerPage> {
               ),
             ),
             Icon(
-              Icons.volunteer_activism_outlined,
+              widget.experience.emptyIcon,
               size: 64,
               color: Theme.of(context)
                   .colorScheme
@@ -391,7 +399,7 @@ class _VolunteerPageState extends State<VolunteerPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              l10n.noVolunteerOpportunities,
+              widget.experience.noOpportunities(context),
               style: TextStyle(
                 color: Theme.of(context)
                     .colorScheme
@@ -406,15 +414,14 @@ class _VolunteerPageState extends State<VolunteerPage> {
     }
 
     return Padding(
-      padding: EdgeInsets.only(
+      padding: const EdgeInsets.only(
         left: 8,
         right: 8,
-        bottom: listBottomPadding,
       ),
       child: ListView.builder(
-        padding: const EdgeInsets.only(
+        padding: EdgeInsets.only(
           top: 8,
-          bottom: 8,
+          bottom: listBottomPadding,
         ),
         itemCount: _opportunities!.length,
         itemBuilder: (context, index) {
@@ -423,6 +430,7 @@ class _VolunteerPageState extends State<VolunteerPage> {
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: VolunteerOpportunityListItem(
               opportunity: opportunity,
+              experience: widget.experience,
               showFullDetails: true,
               apiClient: widget.apiClient,
               onTap: () => _openOpportunityDetails(opportunity),

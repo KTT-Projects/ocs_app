@@ -283,6 +283,7 @@ CREATE TABLE
 CREATE TABLE
   volunteer_opportunities (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    opportunity_type ENUM ('volunteer', 'event') NOT NULL DEFAULT 'volunteer',
     title VARCHAR(255) NOT NULL,
     description TEXT,
     organizer_id INT NOT NULL,
@@ -485,6 +486,10 @@ CREATE INDEX idx_comments_post ON comments (post_id);
 CREATE INDEX idx_events_date ON events (start_datetime);
 
 CREATE INDEX idx_volunteer_date ON volunteer_opportunities (date);
+
+CREATE INDEX idx_volunteer_opportunity_type ON volunteer_opportunities (opportunity_type);
+
+CREATE INDEX idx_volunteer_type_date ON volunteer_opportunities (opportunity_type, date);
 
 CREATE INDEX idx_notifications_user ON notifications (user_id, is_read);
 

@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/app_localizations.dart';
+import '../models/opportunity_experience.dart';
 import '../models/volunteer_opportunity.dart';
 import '../models/volunteer_reflection.dart';
 import '../services/api_client.dart';
@@ -15,11 +16,13 @@ import 'full_screen_image_page.dart';
 class VolunteerReflectionViewPage extends StatefulWidget {
   final ApiClient apiClient;
   final VolunteerOpportunity opportunity;
+  final OpportunityExperience experience;
 
   const VolunteerReflectionViewPage({
     super.key,
     required this.apiClient,
     required this.opportunity,
+    this.experience = OpportunityExperience.volunteer,
   });
 
   @override

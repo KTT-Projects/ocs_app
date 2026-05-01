@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
+import '../models/opportunity_experience.dart';
 import '../services/api_client.dart';
 import '../utils/layout_constants.dart';
 import '../widgets/glassmorphic_ui.dart';
@@ -11,10 +12,12 @@ import 'package:flutter/foundation.dart';
 
 class CreateVolunteerOpportunityPage extends StatefulWidget {
   final ApiClient apiClient;
+  final OpportunityExperience experience;
 
   const CreateVolunteerOpportunityPage({
     super.key,
     required this.apiClient,
+    this.experience = OpportunityExperience.volunteer,
   });
 
   @override
@@ -224,6 +227,7 @@ class _CreateVolunteerOpportunityPageState
         startTime: startDateTime,
         endTime: endDateTime,
         requiredParticipants: requiredParticipants,
+        opportunityType: widget.experience.apiType,
       );
 
       if (!mounted) return;
@@ -244,7 +248,8 @@ class _CreateVolunteerOpportunityPageState
             context,
             AppLocalizations.of(
               context,
-            )!.failedToUploadFile(file.name, e.toString()),
+            )!
+                .failedToUploadFile(file.name, e.toString()),
             isError: true,
           );
         }
@@ -253,7 +258,7 @@ class _CreateVolunteerOpportunityPageState
       if (mounted) {
         GlassmorphicUI.showGlassSnackBar(
           context,
-          AppLocalizations.of(context)!.volunteerOpportunityCreated,
+          widget.experience.createdMessage(context),
         );
         Navigator.pop(context);
       }
@@ -613,7 +618,7 @@ class _CreateVolunteerOpportunityPageState
               onPressed: () => Navigator.pop(context),
             ),
             title: Text(
-              l10n.createOpportunity,
+              widget.experience.createPageTitle(context),
               style: TextStyle(
                 color: colorScheme.onPrimary,
                 fontWeight: FontWeight.w700,
@@ -644,7 +649,7 @@ class _CreateVolunteerOpportunityPageState
                             _buildSectionTitle(
                               context,
                               icon: Icons.edit_outlined,
-                              title: l10n.opportunityTitle,
+                              title: widget.experience.titleLabel(context),
                             ),
                             const SizedBox(height: 18),
                             TextFormField(
@@ -652,7 +657,7 @@ class _CreateVolunteerOpportunityPageState
                               style: TextStyle(color: colorScheme.onPrimary),
                               decoration: _buildInputDecoration(
                                 context,
-                                hintText: l10n.enterOpportunityTitle,
+                                hintText: widget.experience.titleHint(context),
                                 prefixIcon: Icon(
                                   Icons.title_rounded,
                                   color:
@@ -669,7 +674,7 @@ class _CreateVolunteerOpportunityPageState
                             ),
                             const SizedBox(height: 18),
                             Text(
-                              l10n.opportunityDescription,
+                              widget.experience.descriptionLabel(context),
                               style: TextStyle(
                                 color: colorScheme.onPrimary,
                                 fontSize: 15,
@@ -683,7 +688,8 @@ class _CreateVolunteerOpportunityPageState
                               maxLines: 5,
                               decoration: _buildInputDecoration(
                                 context,
-                                hintText: l10n.describeOpportunity,
+                                hintText:
+                                    widget.experience.descriptionHint(context),
                                 prefixIcon: Padding(
                                   padding: const EdgeInsets.only(bottom: 76),
                                   child: Icon(
@@ -702,7 +708,7 @@ class _CreateVolunteerOpportunityPageState
                             ),
                             const SizedBox(height: 18),
                             Text(
-                              l10n.opportunityLocation,
+                              widget.experience.locationLabel(context),
                               style: TextStyle(
                                 color: colorScheme.onPrimary,
                                 fontSize: 15,
@@ -810,7 +816,8 @@ class _CreateVolunteerOpportunityPageState
                             _buildSectionTitle(
                               context,
                               icon: Icons.group_outlined,
-                              title: l10n.requiredParticipants,
+                              title: widget.experience
+                                  .requiredParticipantsLabel(context),
                               trailing: l10n.optionalLabel,
                             ),
                             const SizedBox(height: 18),
@@ -930,7 +937,7 @@ class _CreateVolunteerOpportunityPageState
                                   ),
                                 )
                               : Text(
-                                  l10n.createOpportunity,
+                                  widget.experience.createPageTitle(context),
                                   style: TextStyle(
                                     color: colorScheme.onSecondary,
                                     fontSize: 16,

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../models/opportunity_experience.dart';
 import '../models/volunteer_opportunity.dart';
 import '../models/volunteer_reflection.dart';
 import '../services/api_client.dart';
@@ -13,11 +14,13 @@ import '../widgets/glassmorphic_ui.dart';
 class VolunteerReflectionAdminPage extends StatefulWidget {
   final ApiClient apiClient;
   final VolunteerOpportunity opportunity;
+  final OpportunityExperience experience;
 
   const VolunteerReflectionAdminPage({
     super.key,
     required this.apiClient,
     required this.opportunity,
+    this.experience = OpportunityExperience.volunteer,
   });
 
   @override

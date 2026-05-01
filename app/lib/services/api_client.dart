@@ -1605,11 +1605,13 @@ class ApiClient extends ChangeNotifier {
     String? status,
     String? sort,
     String? search,
+    String opportunityType = 'volunteer',
   }) async {
     final l10n = AppLocalizations.of(context)!;
     try {
       String query = 'volunteers.php?action=list';
       List<String> params = [];
+      params.add('type=$opportunityType');
       if (status != null) params.add('status=$status');
       if (sort != null) params.add('sort=$sort');
       if (search != null) params.add('search=${Uri.encodeComponent(search)}');
@@ -1648,10 +1650,12 @@ class ApiClient extends ChangeNotifier {
   Future<List<VolunteerOpportunity>> getMyVolunteerOpportunities(
     BuildContext context, {
     String? status,
+    String opportunityType = 'volunteer',
   }) async {
     final l10n = AppLocalizations.of(context)!;
     try {
-      String query = 'volunteers.php?action=my_opportunities';
+      String query =
+          'volunteers.php?action=my_opportunities&type=$opportunityType';
       if (status != null) query += '&status=$status';
 
       final response = await http.get(
@@ -1721,6 +1725,7 @@ class ApiClient extends ChangeNotifier {
     required DateTime startTime,
     required DateTime endTime,
     int? requiredParticipants,
+    String opportunityType = 'volunteer',
   }) async {
     final l10n = AppLocalizations.of(context)!;
     try {
@@ -1741,6 +1746,7 @@ class ApiClient extends ChangeNotifier {
               '${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}:00',
           if (requiredParticipants != null)
             'required_participants': requiredParticipants,
+          'opportunity_type': opportunityType,
         }),
       );
 
