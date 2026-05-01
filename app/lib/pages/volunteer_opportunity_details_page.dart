@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/app_localizations.dart';
+import '../models/opportunity_experience.dart';
 import '../models/volunteer_attachment.dart';
 import '../models/volunteer_opportunity.dart';
 import '../models/volunteer_participant.dart';
@@ -19,11 +20,13 @@ import 'volunteer_reflection_view_page.dart';
 class VolunteerOpportunityDetailsPage extends StatefulWidget {
   final ApiClient apiClient;
   final VolunteerOpportunity opportunity;
+  final OpportunityExperience experience;
 
   const VolunteerOpportunityDetailsPage({
     super.key,
     required this.apiClient,
     required this.opportunity,
+    this.experience = OpportunityExperience.volunteer,
   });
 
   @override
@@ -187,6 +190,7 @@ class _VolunteerOpportunityDetailsPageState
   }
 
   Future<void> _applyToOpportunity() async {
+    final appliedMessage = widget.experience.applied(context);
     try {
       setState(() => _isLoading = true);
       await widget.apiClient
@@ -215,7 +219,7 @@ class _VolunteerOpportunityDetailsPageState
 
         GlassmorphicUI.showGlassSnackBar(
           context,
-          AppLocalizations.of(context)!.volunteerApplied,
+          appliedMessage,
         );
 
         _loadParticipants();
@@ -341,7 +345,7 @@ class _VolunteerOpportunityDetailsPageState
   String _availabilityLabel() {
     final l10n = AppLocalizations.of(context)!;
     if (_opportunity.requiredParticipants == null) {
-      return l10n.volunteerNoLimit;
+      return widget.experience.unlimited(context);
     }
     if (_opportunity.isFull || _opportunity.spotsRemaining == 0) {
       return l10n.opportunityFilled;
@@ -349,7 +353,7 @@ class _VolunteerOpportunityDetailsPageState
     final remaining = _opportunity.spotsRemaining ??
         (_opportunity.requiredParticipants! - _opportunity.participantCount);
     final safeRemaining = remaining < 0 ? 0 : remaining;
-    return l10n.volunteerSpotsRemaining(safeRemaining);
+    return widget.experience.spotsRemaining(context, safeRemaining);
   }
 
   Color _availabilityColor() {
@@ -366,7 +370,7 @@ class _VolunteerOpportunityDetailsPageState
     final l10n = AppLocalizations.of(context)!;
     switch (status) {
       case 'applied':
-        return l10n.volunteerApplied;
+        return widget.experience.applied(context);
       case 'approved':
         return l10n.volunteerApproved;
       case 'completed':
@@ -431,6 +435,7 @@ class _VolunteerOpportunityDetailsPageState
         builder: (context) => VolunteerReflectionViewPage(
           apiClient: widget.apiClient,
           opportunity: _opportunity,
+          experience: widget.experience,
         ),
       ),
     );
@@ -667,7 +672,7 @@ class _VolunteerOpportunityDetailsPageState
             ),
           ),
           child: Text(
-            l10n.volunteerApply,
+            widget.experience.apply(context),
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSecondary,
               fontWeight: FontWeight.bold,
@@ -692,7 +697,7 @@ class _VolunteerOpportunityDetailsPageState
               child: Center(
                 child: Text(
                   _opportunity.participantStatus == 'applied'
-                      ? l10n.volunteerApplied
+                      ? widget.experience.applied(context)
                       : _opportunity.participantStatus == 'approved'
                           ? l10n.volunteerApproved
                           : _opportunity.participantStatus == 'completed'
@@ -755,7 +760,7 @@ class _VolunteerOpportunityDetailsPageState
         ),
       ),
       child: Text(
-        l10n.volunteerApply,
+        widget.experience.apply(context),
         style: TextStyle(
           color: Theme.of(context).colorScheme.onSecondary,
           fontWeight: FontWeight.bold,
@@ -1000,7 +1005,8 @@ class _VolunteerOpportunityDetailsPageState
                                               ),
                                               const SizedBox(width: 8),
                                               Text(
-                                                l10n.volunteerParticipants,
+                                                widget.experience
+                                                    .participants(context),
                                                 style: TextStyle(
                                                   color: Theme.of(context)
                                                       .colorScheme
@@ -1127,6 +1133,7 @@ class _VolunteerOpportunityDetailsPageState
                                                     VolunteerAdminPage(
                                                   apiClient: widget.apiClient,
                                                   opportunity: _opportunity,
+                                                  experience: widget.experience,
                                                 ),
                                               ),
                                             );
@@ -1358,7 +1365,7 @@ class _VolunteerOpportunityDetailsPageState
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '${l10n.volunteerParticipants} (${_participants!.length})',
+                                    '${widget.experience.participants(context)} (${_participants!.length})',
                                     style: TextStyle(
                                       color: Theme.of(context)
                                           .colorScheme

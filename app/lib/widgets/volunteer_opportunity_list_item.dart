@@ -3,6 +3,7 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:ui';
+import '../models/opportunity_experience.dart';
 import '../models/volunteer_opportunity.dart';
 import '../models/volunteer_reflection.dart';
 import '../pages/volunteer_opportunity_details_page.dart';
@@ -18,6 +19,7 @@ class VolunteerOpportunityListItem extends StatelessWidget {
   final bool showFullDetails;
   final bool showDescription;
   final ApiClient? apiClient;
+  final OpportunityExperience experience;
   final Function(VolunteerOpportunity)? onOpportunityUpdated;
 
   const VolunteerOpportunityListItem({
@@ -27,6 +29,7 @@ class VolunteerOpportunityListItem extends StatelessWidget {
     this.showFullDetails = true,
     this.showDescription = true,
     this.apiClient,
+    this.experience = OpportunityExperience.volunteer,
     this.onOpportunityUpdated,
   }) : super(key: key);
 
@@ -65,7 +68,7 @@ class VolunteerOpportunityListItem extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     switch (status) {
       case 'applied':
-        return l10n.volunteerApplied;
+        return experience.applied(context);
       case 'approved':
         return l10n.volunteerApproved;
       case 'completed':
@@ -122,7 +125,7 @@ class VolunteerOpportunityListItem extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     if (opportunity.requiredParticipants == null) {
-      return l10n.volunteerNoLimit;
+      return experience.unlimited(context);
     }
 
     if (opportunity.isFull || opportunity.spotsRemaining == 0) {
@@ -132,7 +135,7 @@ class VolunteerOpportunityListItem extends StatelessWidget {
     final remaining = opportunity.spotsRemaining ??
         (opportunity.requiredParticipants! - opportunity.participantCount);
     final safeRemaining = remaining < 0 ? 0 : remaining;
-    return l10n.volunteerSpotsRemaining(safeRemaining);
+    return experience.spotsRemaining(context, safeRemaining);
   }
 
   Color _availabilityColor(BuildContext context) {
@@ -450,6 +453,7 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                             _ReflectionPreviewCard(
                               opportunity: opportunity,
                               apiClient: apiClient,
+                              experience: experience,
                               onOpportunityUpdated: onOpportunityUpdated,
                             ),
                             const SizedBox(height: 8),
@@ -468,7 +472,7 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                               Text(
                                 opportunity.requiredParticipants != null
                                     ? '${opportunity.participantCount}/${opportunity.requiredParticipants}'
-                                    : '${opportunity.participantCount} ${l10n.volunteerParticipants}',
+                                    : '${opportunity.participantCount} ${experience.participants(context)}',
                                 style: TextStyle(
                                   color: Theme.of(context)
                                       .colorScheme
@@ -581,6 +585,7 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                                                 VolunteerOpportunityDetailsPage(
                                               apiClient: apiClient!,
                                               opportunity: opportunity,
+                                              experience: experience,
                                             ),
                                           ),
                                         ).then((_) {
@@ -611,6 +616,7 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                                       builder: (context) => VolunteerAdminPage(
                                         apiClient: apiClient!,
                                         opportunity: opportunity,
+                                        experience: experience,
                                       ),
                                     ),
                                   );
@@ -623,7 +629,7 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                                     color: Theme.of(context)
                                         .colorScheme
                                         .onPrimary),
-                                label: Text('Manage',
+                                label: Text(experience.manage(context),
                                     style: TextStyle(
                                         color: Theme.of(context)
                                             .colorScheme
@@ -676,6 +682,8 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                               const SizedBox(width: 8),
                               ElevatedButton(
                                 onPressed: () async {
+                                  final appliedMessage =
+                                      experience.applied(context);
                                   try {
                                     await apiClient!
                                         .applyToVolunteerOpportunity(
@@ -692,7 +700,7 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                                     }
                                     GlassmorphicUI.showGlassSnackBar(
                                       context,
-                                      l10n.volunteerApplied,
+                                      appliedMessage,
                                     );
                                   } catch (e) {
                                     GlassmorphicUI.showGlassSnackBar(
@@ -719,6 +727,8 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                               const SizedBox(width: 8),
                               ElevatedButton(
                                 onPressed: () async {
+                                  final appliedMessage =
+                                      experience.applied(context);
                                   try {
                                     await apiClient!
                                         .applyToVolunteerOpportunity(
@@ -735,7 +745,7 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                                     }
                                     GlassmorphicUI.showGlassSnackBar(
                                       context,
-                                      l10n.volunteerApplied,
+                                      appliedMessage,
                                     );
                                   } catch (e) {
                                     GlassmorphicUI.showGlassSnackBar(
@@ -747,7 +757,7 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                                 },
                                 style: secondaryButtonStyle,
                                 child: Text(
-                                  l10n.volunteerApply,
+                                  experience.apply(context),
                                   style: TextStyle(
                                     color: Theme.of(context)
                                         .colorScheme
@@ -772,6 +782,7 @@ class VolunteerOpportunityListItem extends StatelessWidget {
                                       VolunteerOpportunityDetailsPage(
                                     opportunity: opportunity,
                                     apiClient: ApiClient(),
+                                    experience: experience,
                                   ),
                                 ),
                               );
@@ -796,11 +807,13 @@ class VolunteerOpportunityListItem extends StatelessWidget {
 class _ReflectionPreviewCard extends StatefulWidget {
   final VolunteerOpportunity opportunity;
   final ApiClient? apiClient;
+  final OpportunityExperience experience;
   final Function(VolunteerOpportunity)? onOpportunityUpdated;
 
   const _ReflectionPreviewCard({
     required this.opportunity,
     required this.apiClient,
+    required this.experience,
     required this.onOpportunityUpdated,
   });
 
@@ -885,6 +898,7 @@ class _ReflectionPreviewCardState extends State<_ReflectionPreviewCard> {
       MaterialPageRoute(
         builder: (context) => VolunteerReflectionViewPage(
           apiClient: widget.apiClient!,
+          experience: widget.experience,
           opportunity: widget.opportunity.copyWith(
             latestReflectionTitle: _title,
             latestReflectionExcerpt: _excerpt,

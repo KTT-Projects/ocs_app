@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
+import '../models/opportunity_experience.dart';
 import '../models/volunteer_attachment.dart';
 import '../models/volunteer_opportunity.dart';
 import '../models/volunteer_participant.dart';
@@ -18,9 +19,14 @@ import 'package:intl/intl.dart';
 class VolunteerAdminPage extends StatefulWidget {
   final ApiClient apiClient;
   final VolunteerOpportunity opportunity;
+  final OpportunityExperience experience;
 
-  const VolunteerAdminPage(
-      {super.key, required this.apiClient, required this.opportunity});
+  const VolunteerAdminPage({
+    super.key,
+    required this.apiClient,
+    required this.opportunity,
+    this.experience = OpportunityExperience.volunteer,
+  });
 
   @override
   State<VolunteerAdminPage> createState() => _VolunteerAdminPageState();
@@ -552,12 +558,15 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
           ),
           // Keep consistent with other pages using outlined text fields.
           const SizedBox(height: 12),
-          _buildTextField(l10n.opportunityTitle, _titleController),
+          _buildTextField(
+              widget.experience.titleLabel(context), _titleController),
           const SizedBox(height: 12),
-          _buildTextField(l10n.opportunityDescription, _descController,
+          _buildTextField(
+              widget.experience.descriptionLabel(context), _descController,
               maxLines: 3),
           const SizedBox(height: 12),
-          _buildTextField(l10n.opportunityLocation, _locationController),
+          _buildTextField(
+              widget.experience.locationLabel(context), _locationController),
           const SizedBox(height: 12),
           _buildTextField(
               l10n.volunteerRequiredParticipantsOptional, _requiredCtrl,
@@ -819,6 +828,7 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
                       builder: (context) => VolunteerReflectionAdminPage(
                         apiClient: widget.apiClient,
                         opportunity: _opportunity,
+                        experience: widget.experience,
                       ),
                     ),
                   );
@@ -935,7 +945,7 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            l10n.volunteerParticipants,
+            widget.experience.participants(context),
             style: TextStyle(
                 color: Theme.of(context).colorScheme.onPrimary,
                 fontSize: 18,
@@ -972,7 +982,7 @@ class _VolunteerAdminPageState extends State<VolunteerAdminPage> {
                       Theme.of(context).colorScheme.onPrimary.withOpacity(0.2)),
               const SizedBox(height: 12),
             ],
-            Text(l10n.volunteerParticipants,
+            Text(widget.experience.participants(context),
                 style: TextStyle(
                     color: Theme.of(context).colorScheme.onPrimary,
                     fontWeight: FontWeight.w700)),

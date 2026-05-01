@@ -171,7 +171,12 @@ class _FeedsPageState extends State<FeedsPage> {
           final List<Feed> updated = [];
           for (final feed in feedMap.values) {
             final existing = _feeds!.firstWhere((f) => f.id == feed.id);
-            if (existing.isMember != feed.isMember || existing.displayName != feed.displayName || existing.description != feed.description || existing.rules != feed.rules || existing.iconUrl != feed.iconUrl || existing.role != feed.role) {
+            if (existing.isMember != feed.isMember ||
+                existing.displayName != feed.displayName ||
+                existing.description != feed.description ||
+                existing.rules != feed.rules ||
+                existing.iconUrl != feed.iconUrl ||
+                existing.role != feed.role) {
               changed = true;
               updated.add(feed);
             } else {
@@ -182,7 +187,9 @@ class _FeedsPageState extends State<FeedsPage> {
             setState(() {
               _feeds = updated;
               if (_selectedFeed != null) {
-                final updatedSelected = updated.firstWhere((f) => f.id == _selectedFeed!.id, orElse: () => _selectedFeed!);
+                final updatedSelected = updated.firstWhere(
+                    (f) => f.id == _selectedFeed!.id,
+                    orElse: () => _selectedFeed!);
                 _selectedFeed = updatedSelected;
               }
             });
@@ -361,8 +368,11 @@ class _FeedsPageState extends State<FeedsPage> {
         context,
         _selectedFeed!.id,
       );
-      myId = int.parse((await widget.apiClient.getProfile(context))['id'].toString());
-      if (members.length == 1 && int.parse(members[0]['id'].toString()) == myId && (members[0]['role'] == 'admin')) {
+      myId = int.parse(
+          (await widget.apiClient.getProfile(context))['id'].toString());
+      if (members.length == 1 &&
+          int.parse(members[0]['id'].toString()) == myId &&
+          (members[0]['role'] == 'admin')) {
         final confirmed = await GlassmorphicUI.showDialog<bool>(
           context: context,
           width: 320,
@@ -399,8 +409,11 @@ class _FeedsPageState extends State<FeedsPage> {
             context,
             _selectedFeed!.id,
           );
-          myId ??= int.parse((await widget.apiClient.getProfile(context))['id'].toString());
-          final selectable = members!.where((m) => int.parse(m['id'].toString()) != myId).toList();
+          myId ??= int.parse(
+              (await widget.apiClient.getProfile(context))['id'].toString());
+          final selectable = members!
+              .where((m) => int.parse(m['id'].toString()) != myId)
+              .toList();
           if (selectable.isEmpty) {
             final confirmed = await GlassmorphicUI.showDialog<bool>(
               context: context,
@@ -418,7 +431,8 @@ class _FeedsPageState extends State<FeedsPage> {
             continue;
           }
 
-          final selected = await GlassmorphicUI.showDialog<Map<String, dynamic>>(
+          final selected =
+              await GlassmorphicUI.showDialog<Map<String, dynamic>>(
             context: context,
             width: 320,
             child: UserSelectionDialog(
@@ -452,8 +466,10 @@ class _FeedsPageState extends State<FeedsPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final joinedFeeds = _feeds?.where((feed) => feed.isMember).toList() ?? [];
-    final availableFeeds = _feeds?.where((feed) => !feed.isMember).toList() ?? [];
-    _feedTabKeys.removeWhere((id, _) => !joinedFeeds.any((feed) => feed.id == id));
+    final availableFeeds =
+        _feeds?.where((feed) => !feed.isMember).toList() ?? [];
+    _feedTabKeys
+        .removeWhere((id, _) => !joinedFeeds.any((feed) => feed.id == id));
     final mediaQuery = MediaQuery.of(context);
     final contentTopPadding = mediaQuery.padding.top + 56;
 
@@ -507,7 +523,8 @@ class _FeedsPageState extends State<FeedsPage> {
                                 context: context,
                                 icon: Icons.explore,
                                 label: l10n.discover,
-                                selected: _selectedFeed == null && _sortBy == 'discover',
+                                selected: _selectedFeed == null &&
+                                    _sortBy == 'discover',
                                 onTap: () {
                                   setState(() {
                                     _selectedFeed = null;
@@ -522,7 +539,8 @@ class _FeedsPageState extends State<FeedsPage> {
                                 context: context,
                                 icon: Icons.home,
                                 label: l10n.home,
-                                selected: _selectedFeed == null && _sortBy != 'discover',
+                                selected: _selectedFeed == null &&
+                                    _sortBy != 'discover',
                                 onTap: () {
                                   setState(() {
                                     _selectedFeed = null;
@@ -533,7 +551,8 @@ class _FeedsPageState extends State<FeedsPage> {
                               );
                             } else {
                               final feed = joinedFeeds[index - 2];
-                              final key = _feedTabKeys.putIfAbsent(feed.id, () => GlobalKey());
+                              final key = _feedTabKeys.putIfAbsent(
+                                  feed.id, () => GlobalKey());
                               return KeyedSubtree(
                                 key: key,
                                 child: GlassmorphicUI.buildTab(
@@ -569,10 +588,16 @@ class _FeedsPageState extends State<FeedsPage> {
                       Container(
                         margin: const EdgeInsets.symmetric(horizontal: 4),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .background
+                              .withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimary
+                                .withOpacity(0.3),
                           ),
                         ),
                         child: ClipRRect(
@@ -584,12 +609,14 @@ class _FeedsPageState extends State<FeedsPage> {
                               color: Theme.of(context).colorScheme.onPrimary,
                             ),
                             onPressed: () async {
-                              final String? selected = await GlassmorphicUI.showDialog<String>(
+                              final String? selected =
+                                  await GlassmorphicUI.showDialog<String>(
                                 context: context,
                                 width: 320,
                                 child: SortMenuDialog(
                                   currentSort: _sortBy,
-                                  onSortChanged: (value) => Navigator.pop(context, value),
+                                  onSortChanged: (value) =>
+                                      Navigator.pop(context, value),
                                 ),
                               );
                               if (selected != null) {
@@ -605,10 +632,16 @@ class _FeedsPageState extends State<FeedsPage> {
                     Container(
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .background
+                            .withOpacity(0.2),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onPrimary
+                              .withOpacity(0.3),
                         ),
                       ),
                       child: ClipRRect(
@@ -628,7 +661,8 @@ class _FeedsPageState extends State<FeedsPage> {
                                   final feedId = await Navigator.push<int>(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => CreateFeedPage(apiClient: widget.apiClient),
+                                      builder: (context) => CreateFeedPage(
+                                          apiClient: widget.apiClient),
                                     ),
                                   );
                                   if (feedId != null && mounted) {
@@ -637,7 +671,10 @@ class _FeedsPageState extends State<FeedsPage> {
                                   }
                                 },
                                 onReorderFeeds: () async {
-                                  final joinedFeeds = _feeds?.where((feed) => feed.isMember).toList() ?? [];
+                                  final joinedFeeds = _feeds
+                                          ?.where((feed) => feed.isMember)
+                                          .toList() ??
+                                      [];
                                   await GlassmorphicUI.showDialog<void>(
                                     context: context,
                                     width: 360,
@@ -645,7 +682,9 @@ class _FeedsPageState extends State<FeedsPage> {
                                       feeds: joinedFeeds,
                                       onReorder: (reorderedFeeds) async {
                                         try {
-                                          final feedOrder = reorderedFeeds.map((feed) => feed.id).toList();
+                                          final feedOrder = reorderedFeeds
+                                              .map((feed) => feed.id)
+                                              .toList();
                                           await widget.apiClient.reorderFeeds(
                                             context,
                                             feedOrder: feedOrder,
@@ -664,13 +703,19 @@ class _FeedsPageState extends State<FeedsPage> {
                                     ),
                                   );
                                 },
-                                onFeedDetails: _selectedFeed != null && _selectedFeed!.isMember ? () => _openFeedDetails(_selectedFeed!) : null,
-                                onFeedSettings: _selectedFeed != null && _selectedFeed!.role == 'admin'
+                                onFeedDetails: _selectedFeed != null &&
+                                        _selectedFeed!.isMember
+                                    ? () => _openFeedDetails(_selectedFeed!)
+                                    : null,
+                                onFeedSettings: _selectedFeed != null &&
+                                        _selectedFeed!.role == 'admin'
                                     ? () async {
-                                        final changed = await Navigator.push<bool>(
+                                        final changed =
+                                            await Navigator.push<bool>(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) => FeedSettingsPage(
+                                            builder: (context) =>
+                                                FeedSettingsPage(
                                               apiClient: widget.apiClient,
                                               feed: _selectedFeed!,
                                             ),
@@ -682,7 +727,10 @@ class _FeedsPageState extends State<FeedsPage> {
                                         }
                                       }
                                     : null,
-                                onLeaveFeed: _selectedFeed != null && _selectedFeed!.isMember ? _leaveSelectedFeed : null,
+                                onLeaveFeed: _selectedFeed != null &&
+                                        _selectedFeed!.isMember
+                                    ? _leaveSelectedFeed
+                                    : null,
                               ),
                             );
                           },
@@ -723,8 +771,10 @@ class _FeedsPageState extends State<FeedsPage> {
                         label: Text(l10n.retry),
                         onPressed: _loadFeeds,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.errorContainer,
-                          foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.errorContainer,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.onErrorContainer,
                         ),
                       ),
                     ],
@@ -757,9 +807,11 @@ class _FeedsPageState extends State<FeedsPage> {
                               await widget.apiClient.joinFeed(context, feed.id);
                               if (mounted) {
                                 setState(() {
-                                  final index = _feeds!.indexWhere((f) => f.id == feed.id);
+                                  final index = _feeds!
+                                      .indexWhere((f) => f.id == feed.id);
                                   if (index != -1) {
-                                    final updated = _feeds![index].copyWith(isMember: true);
+                                    final updated =
+                                        _feeds![index].copyWith(isMember: true);
                                     _feeds!.removeAt(index);
                                     _feeds!.insert(0, updated);
                                   }
@@ -783,14 +835,14 @@ class _FeedsPageState extends State<FeedsPage> {
                       Padding(
                         padding: EdgeInsets.only(
                           top: contentTopPadding,
-                          bottom: MediaQuery.of(context).padding.bottom + 24,
                           left: 8,
                           right: 8,
                         ),
                         child: ListView(
-                          padding: const EdgeInsets.only(
+                          padding: EdgeInsets.only(
                             top: 0,
-                            bottom: 56,
+                            bottom:
+                                MediaQuery.of(context).padding.bottom + 108,
                           ),
                           children: [
                             if (_posts != null && _posts!.isNotEmpty) ...[
@@ -837,7 +889,8 @@ class _FeedsPageState extends State<FeedsPage> {
                               LayoutBuilder(
                                 builder: (context, constraints) {
                                   final maxWidth = constraints.maxWidth;
-                                  final width = maxWidth > 600 ? 600.0 : maxWidth;
+                                  final width =
+                                      maxWidth > 600 ? 600.0 : maxWidth;
                                   return Center(
                                     child: Container(
                                       width: width,
@@ -845,7 +898,9 @@ class _FeedsPageState extends State<FeedsPage> {
                                       child: Text(
                                         l10n.discoverMoreFeeds,
                                         style: TextStyle(
-                                          color: Theme.of(context).colorScheme.onPrimary,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onPrimary,
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -859,12 +914,15 @@ class _FeedsPageState extends State<FeedsPage> {
                                     feed: feed,
                                     onJoin: () async {
                                       try {
-                                        await widget.apiClient.joinFeed(context, feed.id);
+                                        await widget.apiClient
+                                            .joinFeed(context, feed.id);
                                         if (mounted) {
                                           setState(() {
-                                            final index = _feeds!.indexWhere((f) => f.id == feed.id);
+                                            final index = _feeds!.indexWhere(
+                                                (f) => f.id == feed.id);
                                             if (index != -1) {
-                                              final updated = _feeds![index].copyWith(isMember: true);
+                                              final updated = _feeds![index]
+                                                  .copyWith(isMember: true);
                                               _feeds!.removeAt(index);
                                               _feeds!.insert(0, updated);
                                             }
@@ -887,7 +945,8 @@ class _FeedsPageState extends State<FeedsPage> {
                           ],
                         ),
                       ),
-                    if (_selectedFeed != null || (_sortBy != 'discover' && _selectedFeed == null))
+                    if (_selectedFeed != null ||
+                        (_sortBy != 'discover' && _selectedFeed == null))
                       GlassmorphicUI.buildFloatingButton(
                         context: context,
                         child: Row(
@@ -900,7 +959,9 @@ class _FeedsPageState extends State<FeedsPage> {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              _selectedFeed != null ? l10n.newPost : l10n.newPostTo,
+                              _selectedFeed != null
+                                  ? l10n.newPost
+                                  : l10n.newPostTo,
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.onPrimary,
                               ),

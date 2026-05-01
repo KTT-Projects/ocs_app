@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
+import '../models/opportunity_experience.dart';
 import '../models/volunteer_opportunity.dart';
 import '../services/api_client.dart';
 import 'volunteer_opportunity_details_page.dart';
@@ -10,10 +11,12 @@ import '../widgets/glassmorphic_ui.dart';
 
 class EnhancedVolunteerSchedulePage extends StatefulWidget {
   final ApiClient apiClient;
+  final OpportunityExperience experience;
 
   const EnhancedVolunteerSchedulePage({
     super.key,
     required this.apiClient,
+    this.experience = OpportunityExperience.volunteer,
   });
 
   @override
@@ -81,6 +84,7 @@ class _EnhancedVolunteerSchedulePageState
       final opportunities = await widget.apiClient.getMyVolunteerOpportunities(
         context,
         status: null, // Get all my opportunities
+        opportunityType: widget.experience.apiType,
       );
 
       if (mounted) {
@@ -122,6 +126,7 @@ class _EnhancedVolunteerSchedulePageState
         builder: (context) => VolunteerOpportunityDetailsPage(
           apiClient: widget.apiClient,
           opportunity: opportunity,
+          experience: widget.experience,
         ),
       ),
     );
