@@ -296,8 +296,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get volunteerManageTitle => 'Manage Volunteer';
 
   @override
-  String get volunteerRequiredParticipantsOptional =>
-      'Required participants (Optional)';
+  String get volunteerRequiredParticipantsOptional => 'Required participants (Optional)';
 
   @override
   String volunteerSpotsRemaining(int count) {
@@ -850,8 +849,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noReflectionsYet => 'No reflections yet';
 
   @override
-  String get noReflectionsHint =>
-      'Admins can post a recap with photos so participants can look back.';
+  String get noReflectionsHint => 'Admins can post a recap with photos so participants can look back.';
 
   @override
   String get saveReflection => 'Save reflection';
@@ -866,8 +864,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reflectionBodyLabel => 'Reflection';
 
   @override
-  String get reflectionBodyRequired =>
-      'Please write a reflection before saving.';
+  String get reflectionBodyRequired => 'Please write a reflection before saving.';
 
   @override
   String get reflectionSaved => 'Reflection saved';
@@ -879,8 +876,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reflectionImages => 'Reflection images';
 
   @override
-  String get reflectionAutoBody =>
-      'This activity is now complete. Great job, everyone!';
+  String get reflectionAutoBody => 'This activity is now complete. Great job, everyone!';
 
   @override
   String get noReflectionImages => 'No reflection images yet';
@@ -961,8 +957,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseSelectTimes => 'Please select start and end times';
 
   @override
-  String get volunteerOpportunityCreated =>
-      'Volunteer opportunity created successfully!';
+  String get volunteerOpportunityCreated => 'Volunteer opportunity created successfully!';
 
   @override
   String get enterOpportunityTitle => 'Enter opportunity title';
