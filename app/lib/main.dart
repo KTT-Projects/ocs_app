@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +8,7 @@ import 'package:ocs_app/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'services/api_client.dart';
+import 'services/app_notification_service.dart';
 import 'providers/language_provider.dart';
 import 'package:ocs_app/pages/main_page.dart';
 import 'package:ocs_app/pages/login_page.dart'; // Import LoginPage
@@ -28,6 +31,13 @@ void main() async {
       providers: [
         ChangeNotifierProvider(
           create: (_) => LanguageProvider(prefs),
+        ),
+        ChangeNotifierProvider(
+          create: (_) {
+            final service = AppNotificationService(apiClient: apiClient);
+            unawaited(service.initialize());
+            return service;
+          },
         ),
       ],
       child: MyApp(apiClient: apiClient),

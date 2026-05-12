@@ -12,12 +12,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once 'config/Database.php';
 require_once 'config/Auth.php';
 require_once 'config/Response.php';
+require_once 'config/PushNotificationService.php';
 
 class StudyController
 {
   private $db;
   private $auth;
   private $conn;
+  private $push;
   private $hasQuestionMediaTable = null;
   private const BEST_ANSWER_POINTS = 50;
   private const BEST_ANSWER_EVENT_TYPE = 'BEST_ANSWER';
@@ -30,6 +32,7 @@ class StudyController
     $this->db = new Database();
     $this->conn = $this->db->getConnection();
     $this->auth = new Auth($this->conn);
+    $this->push = new PushNotificationService($this->conn);
   }
 
   public function handleRequest()
@@ -476,6 +479,7 @@ class StudyController
     $stmt->execute();
     $questionId = intval($this->conn->lastInsertId());
     $this->insertQuestionMedia($questionId, $mediaUrls);
+    $this->notifyStudyQuestionCreated($userId, $questionId, $title);
 
     Response::success(['id' => $questionId], 'Question created successfully');
   }
@@ -504,11 +508,12 @@ class StudyController
       return;
     }
 
-    $checkQuery = "SELECT id FROM study_questions WHERE id = :question_id LIMIT 1";
+    $checkQuery = "SELECT id, author_user_id, title FROM study_questions WHERE id = :question_id LIMIT 1";
     $checkStmt = $this->conn->prepare($checkQuery);
     $checkStmt->bindValue(':question_id', $questionId, PDO::PARAM_INT);
     $checkStmt->execute();
-    if (!$checkStmt->fetch(PDO::FETCH_ASSOC)) {
+    $question = $checkStmt->fetch(PDO::FETCH_ASSOC);
+    if (!$question) {
       Response::error('Question not found', 404);
       return;
     }
@@ -520,8 +525,10 @@ class StudyController
     $stmt->bindValue(':author_user_id', $userId, PDO::PARAM_INT);
     $stmt->bindValue(':body', $body);
     $stmt->execute();
+    $answerId = intval($this->conn->lastInsertId());
+    $this->notifyStudyAnswerCreated($userId, $question, $answerId);
 
-    Response::success(['id' => $this->conn->lastInsertId()], 'Answer created successfully');
+    Response::success(['id' => $answerId], 'Answer created successfully');
   }
 
   private function uploadQuestionMedia($userId)
@@ -587,7 +594,8 @@ class StudyController
       $targetQuery = "SELECT sa.id AS answer_id,
                              sa.question_id,
                              sa.author_user_id AS answer_author_user_id,
-                             sq.author_user_id AS question_author_user_id
+                             sq.author_user_id AS question_author_user_id,
+                             sq.title AS question_title
                       FROM study_answers sa
                       JOIN study_questions sq ON sq.id = sa.question_id
                       WHERE sa.id = :answer_id
@@ -650,6 +658,13 @@ class StudyController
       $ledgerStmt->execute();
 
       $this->conn->commit();
+      $this->notifyBestAnswerSelected(
+        $userId,
+        $answerAuthorUserId,
+        $questionId,
+        $answerId,
+        $target['question_title'] ?? 'your question'
+      );
       Response::success(null, 'Best answer selected successfully');
     } catch (Exception $e) {
       if ($this->conn->inTransaction()) {
@@ -681,6 +696,61 @@ class StudyController
       return null;
     }
     return intval($decoded['user_id']);
+  }
+
+  private function notifyStudyQuestionCreated($actorUserId, $questionId, $questionTitle)
+  {
+    try {
+      $recipients = $this->push->getActiveUserIdsExcept($actorUserId);
+      $actorName = $this->push->getDisplayName($actorUserId);
+      $this->push->sendToUsers($recipients, 'study_question', "$actorName asked a question", $questionTitle, [
+        'type' => 'study_question',
+        'entity_type' => 'study_question',
+        'entity_id' => $questionId,
+        'question_id' => $questionId,
+        'route' => 'study_question_details'
+      ], $actorUserId);
+    } catch (Exception $e) {
+      error_log('Failed to enqueue study question push notification: ' . $e->getMessage());
+    }
+  }
+
+  private function notifyStudyAnswerCreated($actorUserId, array $question, $answerId)
+  {
+    try {
+      $questionAuthorId = intval($question['author_user_id']);
+      if ($questionAuthorId === intval($actorUserId)) return;
+
+      $actorName = $this->push->getDisplayName($actorUserId);
+      $this->push->sendToUsers([$questionAuthorId], 'study_answer', "$actorName answered your question", $question['title'] ?? 'Study question', [
+        'type' => 'study_answer',
+        'entity_type' => 'study_question',
+        'entity_id' => intval($question['id']),
+        'question_id' => intval($question['id']),
+        'answer_id' => $answerId,
+        'route' => 'study_question_details'
+      ], $actorUserId);
+    } catch (Exception $e) {
+      error_log('Failed to enqueue study answer push notification: ' . $e->getMessage());
+    }
+  }
+
+  private function notifyBestAnswerSelected($actorUserId, $answerAuthorUserId, $questionId, $answerId, $questionTitle)
+  {
+    try {
+      if (intval($answerAuthorUserId) === intval($actorUserId)) return;
+
+      $this->push->sendToUsers([intval($answerAuthorUserId)], 'study_best_answer', 'Your answer was selected', $questionTitle, [
+        'type' => 'study_best_answer',
+        'entity_type' => 'study_question',
+        'entity_id' => $questionId,
+        'question_id' => $questionId,
+        'answer_id' => $answerId,
+        'route' => 'study_question_details'
+      ], $actorUserId);
+    } catch (Exception $e) {
+      error_log('Failed to enqueue best-answer push notification: ' . $e->getMessage());
+    }
   }
 
   private function stringLength($value)

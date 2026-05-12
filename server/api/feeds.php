@@ -12,18 +12,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once 'config/Database.php';
 require_once 'config/Auth.php';
 require_once 'config/Response.php';
+require_once 'config/PushNotificationService.php';
 
 class FeedController
 {
   private $db;
   private $auth;
   private $conn;
+  private $push;
 
   public function __construct()
   {
     $this->db = new Database();
     $this->conn = $this->db->getConnection();
     $this->auth = new Auth($this->conn);
+    $this->push = new PushNotificationService($this->conn);
   }
 
   public function handleRequest()
@@ -958,6 +961,7 @@ class FeedController
     $scoreStmt->bindParam(':score', $score);
     $scoreStmt->bindParam(':post_id', $postId);
     $scoreStmt->execute();
+    $this->notifyFeedPostCreated($userId, intval($data['feed_id']), intval($postId), $data['title']);
     Response::success(['id' => $postId], 'Post created successfully');
   }
 
@@ -1012,6 +1016,12 @@ class FeedController
     $scoreStmt->bindParam(':score', $score);
     $scoreStmt->bindParam(':post_id', $postId);
     $scoreStmt->execute();
+    $this->notifyFeedCommentCreated(
+      $userId,
+      $postId,
+      intval($commentId),
+      isset($data['parent_comment_id']) ? intval($data['parent_comment_id']) : null
+    );
     Response::success(['id' => $commentId], 'Comment created successfully');
   }
 
@@ -1123,6 +1133,78 @@ class FeedController
     $seconds = strtotime($post['created_at']) - $epoch;
 
     return round($sign * $order + $seconds / 45000, 7);
+  }
+
+  private function notifyFeedPostCreated($actorUserId, $feedId, $postId, $postTitle)
+  {
+    try {
+      $feedStmt = $this->conn->prepare("SELECT display_name FROM feeds WHERE id = :feed_id LIMIT 1");
+      $feedStmt->bindValue(':feed_id', $feedId, PDO::PARAM_INT);
+      $feedStmt->execute();
+      $feedName = $feedStmt->fetchColumn() ?: 'a feed';
+
+      $membersStmt = $this->conn->prepare("SELECT user_id FROM feed_members WHERE feed_id = :feed_id AND user_id != :actor_user_id");
+      $membersStmt->bindValue(':feed_id', $feedId, PDO::PARAM_INT);
+      $membersStmt->bindValue(':actor_user_id', $actorUserId, PDO::PARAM_INT);
+      $membersStmt->execute();
+      $recipients = array_map('intval', $membersStmt->fetchAll(PDO::FETCH_COLUMN));
+
+      $actorName = $this->push->getDisplayName($actorUserId);
+      $this->push->sendToUsers($recipients, 'feed_post', "$actorName posted in $feedName", $postTitle, [
+        'type' => 'feed_post',
+        'entity_type' => 'feed_post',
+        'entity_id' => $postId,
+        'feed_id' => $feedId,
+        'route' => 'post_details'
+      ], $actorUserId);
+    } catch (Exception $e) {
+      error_log('Failed to enqueue feed post push notification: ' . $e->getMessage());
+    }
+  }
+
+  private function notifyFeedCommentCreated($actorUserId, $postId, $commentId, $parentCommentId = null)
+  {
+    try {
+      $postStmt = $this->conn->prepare(
+        "SELECT fp.user_id, fp.feed_id, fp.title, f.display_name AS feed_display_name
+         FROM feed_posts fp
+         JOIN feeds f ON f.id = fp.feed_id
+         WHERE fp.id = :post_id
+         LIMIT 1"
+      );
+      $postStmt->bindValue(':post_id', $postId, PDO::PARAM_INT);
+      $postStmt->execute();
+      $post = $postStmt->fetch(PDO::FETCH_ASSOC);
+      if (!$post) return;
+
+      $recipients = [];
+      $postAuthorId = intval($post['user_id']);
+      if ($postAuthorId !== intval($actorUserId)) {
+        $recipients[] = $postAuthorId;
+      }
+
+      if ($parentCommentId !== null) {
+        $parentStmt = $this->conn->prepare("SELECT user_id FROM comments WHERE id = :comment_id LIMIT 1");
+        $parentStmt->bindValue(':comment_id', $parentCommentId, PDO::PARAM_INT);
+        $parentStmt->execute();
+        $parentAuthorId = intval($parentStmt->fetchColumn());
+        if ($parentAuthorId > 0 && $parentAuthorId !== intval($actorUserId)) {
+          $recipients[] = $parentAuthorId;
+        }
+      }
+
+      $actorName = $this->push->getDisplayName($actorUserId);
+      $this->push->sendToUsers($recipients, 'feed_comment', "$actorName commented on a post", $post['title'], [
+        'type' => 'feed_comment',
+        'entity_type' => 'feed_post',
+        'entity_id' => $postId,
+        'comment_id' => $commentId,
+        'feed_id' => intval($post['feed_id']),
+        'route' => 'post_details'
+      ], $actorUserId);
+    } catch (Exception $e) {
+      error_log('Failed to enqueue feed comment push notification: ' . $e->getMessage());
+    }
   }
 }
 

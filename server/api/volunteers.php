@@ -12,12 +12,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once 'config/Database.php';
 require_once 'config/Auth.php';
 require_once 'config/Response.php';
+require_once 'config/PushNotificationService.php';
 
 class VolunteerController
 {
   private $db;
   private $auth;
   private $conn;
+  private $push;
   private $allowedRoles = ['member','coordinator','admin'];
   private $allowedOpportunityTypes = ['volunteer','event'];
 
@@ -26,6 +28,7 @@ class VolunteerController
     $this->db = new Database();
     $this->conn = $this->db->getConnection();
     $this->auth = new Auth($this->conn);
+    $this->push = new PushNotificationService($this->conn);
   }
 
   private function userHasAnyRole($userId, $opportunityId, $roles)
@@ -616,6 +619,7 @@ class VolunteerController
           error_log('Failed to add organizer as participant: ' . $e->getMessage());
         }
 
+        $this->notifyOpportunityCreated($userId, intval($opportunityId), $title, $opportunityType, $location);
         Response::success(['id' => $opportunityId, 'message' => 'Volunteer opportunity created successfully']);
       } else {
         Response::error('Failed to create volunteer opportunity', 500);
@@ -638,7 +642,7 @@ class VolunteerController
       $opportunityId = intval($input['opportunity_id']);
 
       // Check if opportunity exists and is open
-      $checkQuery = "SELECT status, required_participants FROM volunteer_opportunities WHERE id = ?";
+      $checkQuery = "SELECT status, required_participants, organizer_id, title, opportunity_type FROM volunteer_opportunities WHERE id = ?";
       $checkStmt = $this->conn->prepare($checkQuery);
       $checkStmt->execute([$opportunityId]);
       $opportunity = $checkStmt->fetch(PDO::FETCH_ASSOC);
@@ -700,6 +704,7 @@ class VolunteerController
       }
 
       if ($result) {
+        $this->notifyOpportunityApplication($userId, $opportunityId, $opportunity);
         Response::success(['message' => 'Application submitted successfully']);
       } else {
         Response::error('Failed to submit application', 500);
@@ -749,6 +754,51 @@ class VolunteerController
       }
     } catch (Exception $e) {
       Response::error('Failed to cancel application: ' . $e->getMessage(), 500);
+    }
+  }
+
+  private function notifyOpportunityCreated($actorUserId, $opportunityId, $title, $opportunityType, $location)
+  {
+    try {
+      $recipients = $this->push->getActiveUserIdsExcept($actorUserId);
+      $actorName = $this->push->getDisplayName($actorUserId);
+      $isEvent = $opportunityType === 'event';
+      $notificationTitle = $isEvent ? "$actorName created an event" : "$actorName created a volunteer opportunity";
+
+      $this->push->sendToUsers($recipients, $isEvent ? 'event_created' : 'volunteer_created', $notificationTitle, $title, [
+        'type' => $isEvent ? 'event_created' : 'volunteer_created',
+        'entity_type' => 'volunteer_opportunity',
+        'entity_id' => $opportunityId,
+        'opportunity_id' => $opportunityId,
+        'opportunity_type' => $opportunityType,
+        'location' => $location,
+        'route' => 'volunteer_opportunity_details'
+      ], $actorUserId);
+    } catch (Exception $e) {
+      error_log('Failed to enqueue opportunity push notification: ' . $e->getMessage());
+    }
+  }
+
+  private function notifyOpportunityApplication($actorUserId, $opportunityId, array $opportunity)
+  {
+    try {
+      $organizerId = intval($opportunity['organizer_id'] ?? 0);
+      if ($organizerId <= 0 || $organizerId === intval($actorUserId)) return;
+
+      $actorName = $this->push->getDisplayName($actorUserId);
+      $isEvent = ($opportunity['opportunity_type'] ?? 'volunteer') === 'event';
+      $notificationTitle = $isEvent ? "$actorName joined your event" : "$actorName applied to your opportunity";
+
+      $this->push->sendToUsers([$organizerId], $isEvent ? 'event_application' : 'volunteer_application', $notificationTitle, $opportunity['title'] ?? 'Opportunity', [
+        'type' => $isEvent ? 'event_application' : 'volunteer_application',
+        'entity_type' => 'volunteer_opportunity',
+        'entity_id' => $opportunityId,
+        'opportunity_id' => $opportunityId,
+        'opportunity_type' => $opportunity['opportunity_type'] ?? 'volunteer',
+        'route' => 'volunteer_opportunity_details'
+      ], $actorUserId);
+    } catch (Exception $e) {
+      error_log('Failed to enqueue opportunity application push notification: ' . $e->getMessage());
     }
   }
 
