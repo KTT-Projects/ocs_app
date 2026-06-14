@@ -41,7 +41,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       if (!mounted) return;
       if (profile['avatar'] != null &&
           profile['avatar'].toString().startsWith('/')) {
-        profile['avatar'] = 'https://ocs.kttprojects.com' + profile['avatar'];
+        profile['avatar'] = 'https://kamilander.com' + profile['avatar'];
       }
       setState(() {
         _profile = profile;

@@ -12,7 +12,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once 'config/Database.php';
 require_once 'config/Auth.php';
 require_once 'config/Response.php';
-require_once 'config/PushNotificationService.php';
+require_once 'config/ModerationService.php';
+
+$pushNotificationServicePath = __DIR__ . '/config/PushNotificationService.php';
+if (file_exists($pushNotificationServicePath)) {
+  require_once $pushNotificationServicePath;
+}
+
+if (!class_exists('PushNotificationService')) {
+  class PushNotificationService
+  {
+    public function __construct($db) {}
+    public function getActiveUserIdsExcept($excludedUserId) { return []; }
+    public function getDisplayName($userId) { return 'Someone'; }
+    public function sendToUsers(array $userIds, $type, $title, $body, array $data = [], $actorUserId = null)
+    {
+      return ['queued' => 0, 'sent' => 0, 'failed' => 0, 'skipped' => 0];
+    }
+  }
+}
 
 class VolunteerController
 {
@@ -20,6 +38,7 @@ class VolunteerController
   private $auth;
   private $conn;
   private $push;
+  private $moderation;
   private $allowedRoles = ['member','coordinator','admin'];
   private $allowedOpportunityTypes = ['volunteer','event'];
 
@@ -29,6 +48,7 @@ class VolunteerController
     $this->conn = $this->db->getConnection();
     $this->auth = new Auth($this->conn);
     $this->push = new PushNotificationService($this->conn);
+    $this->moderation = new ModerationService($this->conn);
   }
 
   private function userHasAnyRole($userId, $opportunityId, $roles)
@@ -159,20 +179,27 @@ class VolunteerController
 
       $updateFields = [];
       $params = [];
+      $textUpdates = [];
 
       if (isset($input['title'])) {
         $updateFields[] = "title = ?";
-        $params[] = trim($input['title']);
+        $value = trim($input['title']);
+        $params[] = $value;
+        $textUpdates['title'] = $value;
       }
 
       if (isset($input['description'])) {
         $updateFields[] = "description = ?";
-        $params[] = trim($input['description']);
+        $value = trim($input['description']);
+        $params[] = $value;
+        $textUpdates['description'] = $value;
       }
 
       if (isset($input['location'])) {
         $updateFields[] = "location = ?";
-        $params[] = trim($input['location']);
+        $value = trim($input['location']);
+        $params[] = $value;
+        $textUpdates['location'] = $value;
       }
 
       // optional: date and time updates
@@ -222,6 +249,27 @@ class VolunteerController
         return;
       }
 
+      $moderationResult = null;
+      if (!empty($textUpdates)) {
+        $moderationResult = $this->moderation->moderateText(
+          $userId,
+          'volunteer_opportunity',
+          $textUpdates,
+          ['opportunity_id' => $opportunityId]
+        );
+        if ($moderationResult['decision'] === 'blocked') {
+          Response::error($moderationResult['message'], 400, ['reasons' => $moderationResult['reasons']]);
+          return;
+        }
+        if ($moderationResult['status'] === 'pending') {
+          $updateFields[] = "moderation_status = ?";
+          $params[] = $moderationResult['status'];
+          $updateFields[] = "moderation_reason = ?";
+          $params[] = !empty($moderationResult['reasons']) ? implode(',', $moderationResult['reasons']) : null;
+          $updateFields[] = "moderated_at = CURRENT_TIMESTAMP";
+        }
+      }
+
       $updateFields[] = "updated_at = CURRENT_TIMESTAMP";
       $params[] = $opportunityId;
 
@@ -230,7 +278,15 @@ class VolunteerController
       $result = $stmt->execute($params);
 
       if ($result) {
-        Response::success(['message' => 'Volunteer opportunity updated successfully']);
+        if ($moderationResult && $this->moderation->shouldRecordAutomaticCase($moderationResult)) {
+          $this->moderation->recordAutomaticCase('volunteer_opportunity', $opportunityId, $userId, $moderationResult);
+        }
+        Response::success([
+          'message' => $moderationResult && $moderationResult['status'] === 'pending'
+            ? 'Volunteer opportunity update submitted for review'
+            : 'Volunteer opportunity updated successfully',
+          'moderation_status' => $moderationResult ? $moderationResult['status'] : null,
+        ]);
       } else {
         Response::error('Failed to update volunteer opportunity', 500);
       }
@@ -270,11 +326,12 @@ class VolunteerController
             ORDER BY va2.created_at DESC 
             LIMIT 1
           ) as cover_attachment_url,
-          (SELECT COUNT(*) FROM volunteer_reflections vr WHERE vr.opportunity_id = vo.id) as reflection_count,
+          (SELECT COUNT(*) FROM volunteer_reflections vr WHERE vr.opportunity_id = vo.id AND vr.moderation_status = 'approved') as reflection_count,
           (
             SELECT vr.id
             FROM volunteer_reflections vr
             WHERE vr.opportunity_id = vo.id
+              AND vr.moderation_status = 'approved'
             ORDER BY vr.created_at DESC
             LIMIT 1
           ) as latest_reflection_id,
@@ -282,6 +339,7 @@ class VolunteerController
             SELECT vr.created_at 
             FROM volunteer_reflections vr 
             WHERE vr.opportunity_id = vo.id 
+              AND vr.moderation_status = 'approved'
             ORDER BY vr.created_at DESC 
             LIMIT 1
           ) as latest_reflection_at,
@@ -289,6 +347,7 @@ class VolunteerController
             SELECT vr.title 
             FROM volunteer_reflections vr 
             WHERE vr.opportunity_id = vo.id 
+              AND vr.moderation_status = 'approved'
             ORDER BY vr.created_at DESC 
             LIMIT 1
           ) as latest_reflection_title,
@@ -296,6 +355,7 @@ class VolunteerController
             SELECT SUBSTRING(vr.body, 1, 160) 
             FROM volunteer_reflections vr 
             WHERE vr.opportunity_id = vo.id 
+              AND vr.moderation_status = 'approved'
             ORDER BY vr.created_at DESC 
             LIMIT 1
           ) as latest_reflection_excerpt,
@@ -310,6 +370,7 @@ class VolunteerController
         LEFT JOIN volunteer_attachments va ON vo.id = va.opportunity_id
         LEFT JOIN volunteer_participants vp_user ON vo.id = vp_user.opportunity_id AND vp_user.user_id = ?
         WHERE vo.opportunity_type = ?
+          AND vo.moderation_status = 'approved'
       ";
 
       $params = [$userId, $opportunityType];
@@ -386,11 +447,12 @@ class VolunteerController
             ORDER BY va2.created_at DESC 
             LIMIT 1
           ) as cover_attachment_url,
-          (SELECT COUNT(*) FROM volunteer_reflections vr WHERE vr.opportunity_id = vo.id) as reflection_count,
+          (SELECT COUNT(*) FROM volunteer_reflections vr WHERE vr.opportunity_id = vo.id AND vr.moderation_status = 'approved') as reflection_count,
           (
             SELECT vr.id
             FROM volunteer_reflections vr
             WHERE vr.opportunity_id = vo.id
+              AND vr.moderation_status = 'approved'
             ORDER BY vr.created_at DESC
             LIMIT 1
           ) as latest_reflection_id,
@@ -398,6 +460,7 @@ class VolunteerController
             SELECT vr.created_at 
             FROM volunteer_reflections vr 
             WHERE vr.opportunity_id = vo.id 
+              AND vr.moderation_status = 'approved'
             ORDER BY vr.created_at DESC 
             LIMIT 1
           ) as latest_reflection_at,
@@ -405,6 +468,7 @@ class VolunteerController
             SELECT vr.title 
             FROM volunteer_reflections vr 
             WHERE vr.opportunity_id = vo.id 
+              AND vr.moderation_status = 'approved'
             ORDER BY vr.created_at DESC 
             LIMIT 1
           ) as latest_reflection_title,
@@ -412,6 +476,7 @@ class VolunteerController
             SELECT SUBSTRING(vr.body, 1, 160) 
             FROM volunteer_reflections vr 
             WHERE vr.opportunity_id = vo.id 
+              AND vr.moderation_status = 'approved'
             ORDER BY vr.created_at DESC 
             LIMIT 1
           ) as latest_reflection_excerpt,
@@ -426,6 +491,7 @@ class VolunteerController
         LEFT JOIN volunteer_participants vp_all ON vo.id = vp_all.opportunity_id AND vp_all.status != 'cancelled'
         LEFT JOIN volunteer_attachments va ON vo.id = va.opportunity_id
         WHERE vo.opportunity_type = ?
+          AND vo.moderation_status = 'approved'
       ";
 
       $params = [$userId, $opportunityType];
@@ -483,11 +549,12 @@ class VolunteerController
             ORDER BY va2.created_at DESC 
             LIMIT 1
           ) as cover_attachment_url,
-          (SELECT COUNT(*) FROM volunteer_reflections vr WHERE vr.opportunity_id = vo.id) as reflection_count,
+          (SELECT COUNT(*) FROM volunteer_reflections vr WHERE vr.opportunity_id = vo.id AND vr.moderation_status = 'approved') as reflection_count,
           (
             SELECT vr.id
             FROM volunteer_reflections vr
             WHERE vr.opportunity_id = vo.id
+              AND vr.moderation_status = 'approved'
             ORDER BY vr.created_at DESC
             LIMIT 1
           ) as latest_reflection_id,
@@ -495,6 +562,7 @@ class VolunteerController
             SELECT vr.created_at 
             FROM volunteer_reflections vr 
             WHERE vr.opportunity_id = vo.id 
+              AND vr.moderation_status = 'approved'
             ORDER BY vr.created_at DESC 
             LIMIT 1
           ) as latest_reflection_at,
@@ -502,6 +570,7 @@ class VolunteerController
             SELECT vr.title 
             FROM volunteer_reflections vr 
             WHERE vr.opportunity_id = vo.id 
+              AND vr.moderation_status = 'approved'
             ORDER BY vr.created_at DESC 
             LIMIT 1
           ) as latest_reflection_title,
@@ -509,6 +578,7 @@ class VolunteerController
             SELECT SUBSTRING(vr.body, 1, 160) 
             FROM volunteer_reflections vr 
             WHERE vr.opportunity_id = vo.id 
+              AND vr.moderation_status = 'approved'
             ORDER BY vr.created_at DESC 
             LIMIT 1
           ) as latest_reflection_excerpt,
@@ -523,6 +593,7 @@ class VolunteerController
         LEFT JOIN volunteer_attachments va ON vo.id = va.opportunity_id
         LEFT JOIN volunteer_participants vp_user ON vo.id = vp_user.opportunity_id AND vp_user.user_id = ?
         WHERE vo.id = ?
+          AND vo.moderation_status = 'approved'
         GROUP BY vo.id
       ";
 
@@ -594,19 +665,42 @@ class VolunteerController
         return;
       }
 
+      $moderationResult = $this->moderation->moderateText($userId, 'volunteer_opportunity', [
+        'title' => $title,
+        'description' => $description,
+        'location' => $location,
+      ]);
+      if ($moderationResult['decision'] === 'blocked') {
+        Response::error($moderationResult['message'], 400, ['reasons' => $moderationResult['reasons']]);
+        return;
+      }
+      $moderationStatus = $moderationResult['status'];
+      $moderationReason = !empty($moderationResult['reasons']) ? implode(',', $moderationResult['reasons']) : null;
+
       $query = "
         INSERT INTO volunteer_opportunities 
-        (title, description, organizer_id, location, date, start_time, end_time, required_participants, status, opportunity_type) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'open', ?)
+        (title, description, organizer_id, location, date, start_time, end_time, required_participants, status, opportunity_type, moderation_status, moderation_reason, moderated_at) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'open', ?, ?, ?, CURRENT_TIMESTAMP)
       ";
 
       $stmt = $this->conn->prepare($query);
       $result = $stmt->execute([
-        $title, $description, $userId, $location, $date, $startTime, $endTime, $requiredParticipants, $opportunityType
+        $title,
+        $description,
+        $userId,
+        $location,
+        $date,
+        $startTime,
+        $endTime,
+        $requiredParticipants,
+        $opportunityType,
+        $moderationStatus,
+        $moderationReason
       ]);
 
       if ($result) {
         $opportunityId = $this->conn->lastInsertId();
+        $this->moderation->recordAutomaticCase('volunteer_opportunity', intval($opportunityId), $userId, $moderationResult);
 
         // Automatically add the creator as a participant with approved status
         try {
@@ -619,8 +713,16 @@ class VolunteerController
           error_log('Failed to add organizer as participant: ' . $e->getMessage());
         }
 
-        $this->notifyOpportunityCreated($userId, intval($opportunityId), $title, $opportunityType, $location);
-        Response::success(['id' => $opportunityId, 'message' => 'Volunteer opportunity created successfully']);
+        if ($moderationStatus === 'approved') {
+          $this->notifyOpportunityCreated($userId, intval($opportunityId), $title, $opportunityType, $location);
+        }
+        Response::success([
+          'id' => $opportunityId,
+          'message' => $moderationStatus === 'pending'
+            ? 'Volunteer opportunity submitted for review'
+            : 'Volunteer opportunity created successfully',
+          'moderation_status' => $moderationStatus,
+        ]);
       } else {
         Response::error('Failed to create volunteer opportunity', 500);
       }
@@ -642,7 +744,7 @@ class VolunteerController
       $opportunityId = intval($input['opportunity_id']);
 
       // Check if opportunity exists and is open
-      $checkQuery = "SELECT status, required_participants, organizer_id, title, opportunity_type FROM volunteer_opportunities WHERE id = ?";
+      $checkQuery = "SELECT status, required_participants, organizer_id, title, opportunity_type FROM volunteer_opportunities WHERE id = ? AND moderation_status = 'approved'";
       $checkStmt = $this->conn->prepare($checkQuery);
       $checkStmt->execute([$opportunityId]);
       $opportunity = $checkStmt->fetch(PDO::FETCH_ASSOC);
@@ -1133,6 +1235,7 @@ class VolunteerController
         FROM volunteer_reflections vr
         LEFT JOIN user_profiles up ON vr.created_by = up.user_id
         WHERE vr.opportunity_id = ?
+          AND vr.moderation_status = 'approved'
         ORDER BY vr.created_at DESC
       ";
       $stmt = $this->conn->prepare($query);
@@ -1173,10 +1276,22 @@ class VolunteerController
         return;
       }
 
-      $insert = "INSERT INTO volunteer_reflections (opportunity_id, title, body, created_by) VALUES (?, ?, ?, ?)";
+      $moderationResult = $this->moderation->moderateText($userId, 'volunteer_reflection', [
+        'title' => $title,
+        'body' => $body,
+      ], ['opportunity_id' => $opportunityId]);
+      if ($moderationResult['decision'] === 'blocked') {
+        Response::error($moderationResult['message'], 400, ['reasons' => $moderationResult['reasons']]);
+        return;
+      }
+      $moderationStatus = $moderationResult['status'];
+      $moderationReason = !empty($moderationResult['reasons']) ? implode(',', $moderationResult['reasons']) : null;
+
+      $insert = "INSERT INTO volunteer_reflections (opportunity_id, title, body, created_by, moderation_status, moderation_reason, moderated_at) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)";
       $stmt = $this->conn->prepare($insert);
-      $stmt->execute([$opportunityId, $title, $body, $userId]);
+      $stmt->execute([$opportunityId, $title, $body, $userId, $moderationStatus, $moderationReason]);
       $reflectionId = $this->conn->lastInsertId();
+      $this->moderation->recordAutomaticCase('volunteer_reflection', intval($reflectionId), $userId, $moderationResult);
 
       $profileStmt = $this->conn->prepare("SELECT display_name, avatar_url FROM user_profiles WHERE user_id = ?");
       $profileStmt->execute([$userId]);
@@ -1195,11 +1310,14 @@ class VolunteerController
         'images' => []
       ];
 
-      // Mark opportunity as completed when a reflection is posted
-      $statusUpdate = $this->conn->prepare("UPDATE volunteer_opportunities SET status = 'completed', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status != 'completed'");
-      $statusUpdate->execute([$opportunityId]);
+      if ($moderationStatus === 'approved') {
+        // Mark opportunity as completed when a visible reflection is posted.
+        $statusUpdate = $this->conn->prepare("UPDATE volunteer_opportunities SET status = 'completed', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status != 'completed'");
+        $statusUpdate->execute([$opportunityId]);
+      }
 
-      Response::success($reflection, 'Reflection created');
+      $reflection['moderation_status'] = $moderationStatus;
+      Response::success($reflection, $moderationStatus === 'pending' ? 'Reflection submitted for review' : 'Reflection created');
     } catch (Exception $e) {
       Response::error('Failed to create reflection: ' . $e->getMessage(), 500);
     }
@@ -1235,10 +1353,13 @@ class VolunteerController
 
       $fields = [];
       $params = [];
+      $textUpdates = [];
 
       if (isset($input['title'])) {
         $fields[] = "title = ?";
-        $params[] = trim($input['title']);
+        $value = trim($input['title']);
+        $params[] = $value;
+        $textUpdates['title'] = $value;
       }
 
       if (isset($input['body'])) {
@@ -1249,11 +1370,33 @@ class VolunteerController
         }
         $fields[] = "body = ?";
         $params[] = $body;
+        $textUpdates['body'] = $body;
       }
 
       if (empty($fields)) {
         Response::error('No fields to update', 400);
         return;
+      }
+
+      $moderationResult = null;
+      if (!empty($textUpdates)) {
+        $moderationResult = $this->moderation->moderateText(
+          $userId,
+          'volunteer_reflection',
+          $textUpdates,
+          ['reflection_id' => $reflectionId, 'opportunity_id' => $opportunityId]
+        );
+        if ($moderationResult['decision'] === 'blocked') {
+          Response::error($moderationResult['message'], 400, ['reasons' => $moderationResult['reasons']]);
+          return;
+        }
+        if ($moderationResult['status'] === 'pending') {
+          $fields[] = "moderation_status = ?";
+          $params[] = $moderationResult['status'];
+          $fields[] = "moderation_reason = ?";
+          $params[] = !empty($moderationResult['reasons']) ? implode(',', $moderationResult['reasons']) : null;
+          $fields[] = "moderated_at = CURRENT_TIMESTAMP";
+        }
       }
 
       $fields[] = "updated_at = CURRENT_TIMESTAMP";
@@ -1262,6 +1405,9 @@ class VolunteerController
       $update = "UPDATE volunteer_reflections SET " . implode(', ', $fields) . " WHERE id = ?";
       $stmt = $this->conn->prepare($update);
       $stmt->execute($params);
+      if ($moderationResult && $this->moderation->shouldRecordAutomaticCase($moderationResult)) {
+        $this->moderation->recordAutomaticCase('volunteer_reflection', $reflectionId, $userId, $moderationResult);
+      }
 
       $refetch = $this->conn->prepare("
         SELECT vr.*, up.display_name as author_name, up.avatar_url as author_avatar
@@ -1273,11 +1419,13 @@ class VolunteerController
       $updated = $refetch->fetch(PDO::FETCH_ASSOC);
       $updated['images'] = $this->fetchReflectionImages($reflectionId);
 
-      // Ensure the opportunity is marked completed once a reflection exists
-      $statusUpdate = $this->conn->prepare("UPDATE volunteer_opportunities SET status = 'completed', updated_at = CURRENT_TIMESTAMP WHERE id = ?");
-      $statusUpdate->execute([$opportunityId]);
+      if (!$moderationResult || $moderationResult['status'] === 'approved') {
+        // Ensure the opportunity is marked completed once a visible reflection exists.
+        $statusUpdate = $this->conn->prepare("UPDATE volunteer_opportunities SET status = 'completed', updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+        $statusUpdate->execute([$opportunityId]);
+      }
 
-      Response::success($updated, 'Reflection updated');
+      Response::success($updated, $moderationResult && $moderationResult['status'] === 'pending' ? 'Reflection update submitted for review' : 'Reflection updated');
     } catch (Exception $e) {
       Response::error('Failed to update reflection: ' . $e->getMessage(), 500);
     }

@@ -8,6 +8,7 @@ import '../services/api_client.dart';
 import '../widgets/create_post_dialog.dart';
 import '../widgets/glassmorphic_ui.dart';
 import '../widgets/post_list_item.dart';
+import '../widgets/report_content_dialog.dart';
 import 'post_details_page.dart';
 import 'user_profile_page.dart';
 
@@ -160,6 +161,34 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
     );
   }
 
+  Future<void> _reportContent(String entityType, int entityId) async {
+    final result = await GlassmorphicUI.showDialog<ReportContentResult>(
+      context: context,
+      width: 360,
+      child: const ReportContentDialog(),
+    );
+    if (result == null || !mounted) return;
+
+    try {
+      await widget.apiClient.reportContent(
+        context,
+        entityType: entityType,
+        entityId: entityId,
+        reason: result.reason,
+        details: result.details,
+      );
+      if (!mounted) return;
+      GlassmorphicUI.showGlassSnackBar(context, 'Report submitted');
+    } catch (e) {
+      if (!mounted) return;
+      GlassmorphicUI.showGlassSnackBar(
+        context,
+        e.toString(),
+        isError: true,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -265,8 +294,10 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
                     label: Text(l10n.retry),
                     onPressed: _loadPosts,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.errorContainer,
-                      foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
+                      backgroundColor:
+                          Theme.of(context).colorScheme.errorContainer,
+                      foregroundColor:
+                          Theme.of(context).colorScheme.onErrorContainer,
                     ),
                   ),
                 ],
@@ -274,12 +305,14 @@ class _FeedPostsPageState extends State<FeedPostsPage> {
             )
           else if (_posts != null)
             ListView.builder(
-padding: EdgeInsets.only(
-  top: MediaQuery.of(context).padding.top + AppBar().preferredSize.height + 8,
-  bottom: 8,
-  left: 8,
-  right: 8,
-),
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top +
+                    AppBar().preferredSize.height +
+                    8,
+                bottom: 8,
+                left: 8,
+                right: 8,
+              ),
               itemCount: _posts!.length,
               itemBuilder: (context, index) {
                 final post = _posts![index];
@@ -287,6 +320,7 @@ padding: EdgeInsets.only(
                   post: post,
                   onVote: _vote,
                   onUserTap: _openUserProfile,
+                  onReport: (post) => _reportContent('feed_post', post.id),
                   onComments: (p) {
                     Navigator.push(
                       context,

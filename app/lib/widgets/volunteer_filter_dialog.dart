@@ -23,7 +23,9 @@ class VolunteerFilterMenuItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: Container(
         decoration: BoxDecoration(
-          color: selected ? Theme.of(context).colorScheme.secondary : Colors.transparent,
+          color: selected
+              ? Theme.of(context).colorScheme.secondary
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: InkWell(
@@ -37,13 +39,17 @@ class VolunteerFilterMenuItem extends StatelessWidget {
                 Icon(
                   icon,
                   size: 16,
-                  color: selected ? Theme.of(context).colorScheme.onSecondary : Theme.of(context).colorScheme.onPrimary,
+                  color: selected
+                      ? Theme.of(context).colorScheme.onSecondary
+                      : Theme.of(context).colorScheme.onPrimary,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   label,
                   style: TextStyle(
-                    color: selected ? Theme.of(context).colorScheme.onSecondary : Theme.of(context).colorScheme.onPrimary,
+                    color: selected
+                        ? Theme.of(context).colorScheme.onSecondary
+                        : Theme.of(context).colorScheme.onPrimary,
                   ),
                 ),
               ],
@@ -57,13 +63,23 @@ class VolunteerFilterMenuItem extends StatelessWidget {
 
 class VolunteerFilterDialog extends StatelessWidget {
   final String? currentFilter;
+  final String? currentTypeFilter;
+  final bool showTypeFilter;
   final Function(String?) onFilterChanged;
+  final Function(String?)? onTypeFilterChanged;
 
   const VolunteerFilterDialog({
     super.key,
     required this.currentFilter,
+    this.currentTypeFilter,
+    this.showTypeFilter = false,
     required this.onFilterChanged,
+    this.onTypeFilterChanged,
   });
+
+  String _localized(BuildContext context, String en, String ja) {
+    return Localizations.localeOf(context).languageCode == 'ja' ? ja : en;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,6 +126,40 @@ class VolunteerFilterDialog extends StatelessWidget {
           selected: currentFilter == 'completed',
           onTap: () => onFilterChanged('completed'),
         ),
+        if (showTypeFilter && onTypeFilterChanged != null) ...[
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+            child: Text(
+              _localized(context, 'Filter by type', '種類で絞り込み'),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimary,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          VolunteerFilterMenuItem(
+            value: null,
+            label: _localized(context, 'All types', 'すべての種類'),
+            icon: Icons.all_inclusive,
+            selected: currentTypeFilter == null,
+            onTap: () => onTypeFilterChanged!(null),
+          ),
+          VolunteerFilterMenuItem(
+            value: 'event',
+            label: l10n.eventsFeature,
+            icon: Icons.event_note,
+            selected: currentTypeFilter == 'event',
+            onTap: () => onTypeFilterChanged!('event'),
+          ),
+          VolunteerFilterMenuItem(
+            value: 'volunteer',
+            label: _localized(context, 'Volunteering', 'ボランティア'),
+            icon: Icons.volunteer_activism,
+            selected: currentTypeFilter == 'volunteer',
+            onTap: () => onTypeFilterChanged!('volunteer'),
+          ),
+        ],
         const SizedBox(height: 16),
       ],
     );

@@ -11,7 +11,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once 'config/Database.php';
 require_once 'config/Auth.php';
 require_once 'config/Response.php';
-require_once 'config/PushNotificationService.php';
+
+$pushNotificationServicePath = __DIR__ . '/config/PushNotificationService.php';
+if (file_exists($pushNotificationServicePath)) {
+  require_once $pushNotificationServicePath;
+}
+
+if (!class_exists('PushNotificationService')) {
+  class PushNotificationService
+  {
+    public function __construct($db) {}
+    public function isConfigured() { return false; }
+    public function listDevices($userId) { return []; }
+    public function registerDevice($userId, $platform, $token, $deviceId = null, $appVersion = null, $locale = null)
+    {
+      return ['token_hash' => null, 'platform' => $platform];
+    }
+    public function unregisterDevice($userId, $token = null, $deviceId = null) { return 0; }
+    public function getNotificationPreferences($userId) { return []; }
+    public function saveNotificationPreferences($userId, array $preferences) { return $preferences; }
+    public static function notificationPreferenceCategories() { return []; }
+    public function sendToUsers(array $userIds, $type, $title, $body, array $data = [], $actorUserId = null)
+    {
+      return ['queued' => 0, 'sent' => 0, 'failed' => 0, 'skipped' => 0];
+    }
+    public function flushPending($limit = 50)
+    {
+      return ['sent' => 0, 'failed' => 0, 'skipped' => 0, 'pending' => 0];
+    }
+  }
+}
 
 class PushNotificationController
 {
@@ -48,6 +77,9 @@ class PushNotificationController
             'devices' => $this->push->listDevices($userId)
           ], 'Push devices retrieved successfully');
           return;
+        } else if ($action === 'preferences') {
+          $this->getPreferences($userId);
+          return;
         }
         Response::error('Invalid action', 400);
         return;
@@ -62,6 +94,8 @@ class PushNotificationController
         $this->registerDevice($userId);
       } else if ($action === 'unregister') {
         $this->unregisterDevice($userId);
+      } else if ($action === 'preferences') {
+        $this->savePreferences($userId);
       } else if ($action === 'test') {
         $this->sendTest($userId);
       } else {
@@ -111,6 +145,34 @@ class PushNotificationController
     Response::success(['disabled' => $count], 'Push device unregistered successfully');
   }
 
+  private function getPreferences($userId)
+  {
+    Response::success([
+      'categories' => PushNotificationService::notificationPreferenceCategories(),
+      'preferences' => $this->push->getNotificationPreferences($userId)
+    ], 'Notification preferences retrieved successfully');
+  }
+
+  private function savePreferences($userId)
+  {
+    $data = json_decode(file_get_contents('php://input'), true);
+    if (!is_array($data)) {
+      Response::error('Invalid input format', 400);
+      return;
+    }
+
+    $preferences = $data['preferences'] ?? null;
+    if (!is_array($preferences)) {
+      Response::error('Notification preferences are required', 400);
+      return;
+    }
+
+    Response::success([
+      'categories' => PushNotificationService::notificationPreferenceCategories(),
+      'preferences' => $this->push->saveNotificationPreferences($userId, $preferences)
+    ], 'Notification preferences saved successfully');
+  }
+
   private function sendTest($userId)
   {
     $data = json_decode(file_get_contents('php://input'), true);
@@ -130,7 +192,7 @@ class PushNotificationController
 
   private function flushPending()
   {
-    $secret = getenv('PUSH_FLUSH_SECRET');
+    $secret = getenv('PUSH_FLUSH_SECRET') ?: ($this->pushConfig('PUSH_FLUSH_SECRET') ?? null);
     if ($secret) {
       $headers = getallheaders();
       $provided = $headers['X-Push-Secret'] ?? $headers['x-push-secret'] ?? ($_GET['secret'] ?? '');
@@ -173,6 +235,24 @@ class PushNotificationController
       return null;
     }
     return $decoded;
+  }
+
+  private function pushConfig($key)
+  {
+    $paths = [
+      dirname(__DIR__, 3) . '/.config/ocs/push.php',
+      getenv('HOME') ? rtrim(getenv('HOME'), '/') . '/.config/ocs/push.php' : null
+    ];
+
+    foreach ($paths as $path) {
+      if ($path && is_readable($path)) {
+        $config = include $path;
+        if (is_array($config) && array_key_exists($key, $config)) {
+          return $config[$key];
+        }
+      }
+    }
+    return null;
   }
 }
 

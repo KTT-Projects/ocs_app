@@ -12,7 +12,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once 'config/Database.php';
 require_once 'config/Auth.php';
 require_once 'config/Response.php';
-require_once 'config/PushNotificationService.php';
+require_once 'config/ModerationService.php';
+
+$pushNotificationServicePath = __DIR__ . '/config/PushNotificationService.php';
+if (file_exists($pushNotificationServicePath)) {
+  require_once $pushNotificationServicePath;
+}
+
+if (!class_exists('PushNotificationService')) {
+  class PushNotificationService
+  {
+    public function __construct($db) {}
+    public function getActiveUserIdsExcept($excludedUserId) { return []; }
+    public function getDisplayName($userId) { return 'Someone'; }
+    public function sendToUsers(array $userIds, $type, $title, $body, array $data = [], $actorUserId = null)
+    {
+      return ['queued' => 0, 'sent' => 0, 'failed' => 0, 'skipped' => 0];
+    }
+  }
+}
 
 class FeedController
 {
@@ -20,6 +38,7 @@ class FeedController
   private $auth;
   private $conn;
   private $push;
+  private $moderation;
 
   public function __construct()
   {
@@ -27,6 +46,7 @@ class FeedController
     $this->conn = $this->db->getConnection();
     $this->auth = new Auth($this->conn);
     $this->push = new PushNotificationService($this->conn);
+    $this->moderation = new ModerationService($this->conn);
   }
 
   public function handleRequest()
@@ -118,13 +138,13 @@ class FeedController
                   f.created_at,
                   GREATEST(
                     f.updated_at,
-                    IFNULL((SELECT MAX(fp2.created_at) FROM feed_posts fp2 WHERE fp2.feed_id = f.id), f.updated_at),
-                    IFNULL((SELECT MAX(c.created_at) FROM comments c JOIN feed_posts fp3 ON c.post_id = fp3.id WHERE fp3.feed_id = f.id), f.updated_at)
+                    IFNULL((SELECT MAX(fp2.created_at) FROM feed_posts fp2 WHERE fp2.feed_id = f.id AND fp2.moderation_status = 'approved'), f.updated_at),
+                    IFNULL((SELECT MAX(c.created_at) FROM comments c JOIN feed_posts fp3 ON c.post_id = fp3.id WHERE fp3.feed_id = f.id AND fp3.moderation_status = 'approved' AND c.moderation_status = 'approved'), f.updated_at)
                   ) AS updated_at,
                   COUNT(DISTINCT fm1.user_id) as member_count,
                   COUNT(DISTINCT fp.id) as post_count,
-                  (SELECT MAX(fp2.created_at) FROM feed_posts fp2 WHERE fp2.feed_id = f.id) AS last_post_at,
-                  (SELECT MAX(c.created_at) FROM comments c JOIN feed_posts fp3 ON c.post_id = fp3.id WHERE fp3.feed_id = f.id) AS last_comment_at";
+                  (SELECT MAX(fp2.created_at) FROM feed_posts fp2 WHERE fp2.feed_id = f.id AND fp2.moderation_status = 'approved') AS last_post_at,
+                  (SELECT MAX(c.created_at) FROM comments c JOIN feed_posts fp3 ON c.post_id = fp3.id WHERE fp3.feed_id = f.id AND fp3.moderation_status = 'approved' AND c.moderation_status = 'approved') AS last_comment_at";
     if ($userId !== null) {
       $query .= ", EXISTS(SELECT 1 FROM feed_members fm2 WHERE fm2.feed_id = f.id AND fm2.user_id = :user_id) as is_member";
     } else {
@@ -132,7 +152,8 @@ class FeedController
     }
     $query .= " FROM feeds f
                   LEFT JOIN feed_members fm1 ON f.id = fm1.feed_id
-                  LEFT JOIN feed_posts fp ON f.id = fp.feed_id";
+                  LEFT JOIN feed_posts fp ON f.id = fp.feed_id AND fp.moderation_status = 'approved'
+                WHERE f.moderation_status = 'approved'";
     $query .= " GROUP BY f.id";
     if ($sort === 'activity') {
       $query .= " ORDER BY updated_at DESC";
@@ -175,8 +196,9 @@ class FeedController
                   FROM feeds f
                   JOIN feed_members fm2 ON f.id = fm2.feed_id AND fm2.user_id = :user_id
                   LEFT JOIN feed_members fm1 ON f.id = fm1.feed_id
-                  LEFT JOIN feed_posts fp ON f.id = fp.feed_id
+                  LEFT JOIN feed_posts fp ON f.id = fp.feed_id AND fp.moderation_status = 'approved'
                   WHERE f.id IN ($inClause)
+                    AND f.moderation_status = 'approved'
                   GROUP BY f.id";
       $stmt = $this->conn->prepare($query);
       $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
@@ -438,13 +460,14 @@ class FeedController
                   u.email,
                   up.display_name,
                   up.avatar_url,
-                  (SELECT COUNT(*) FROM comments WHERE post_id = fp.id) as comment_count,
+                  (SELECT COUNT(*) FROM comments WHERE post_id = fp.id AND moderation_status = 'approved') as comment_count,
                   fv.vote_type AS user_vote
                   FROM feed_posts fp
                   JOIN users u ON fp.user_id = u.id
                   JOIN user_profiles up ON u.id = up.user_id
                   LEFT JOIN feed_votes fv ON fv.post_id = fp.id AND fv.user_id = :user_id
-                  WHERE fp.feed_id = :feed_id";
+                  WHERE fp.feed_id = :feed_id
+                    AND fp.moderation_status = 'approved'";
 
     if ($sort === 'default') {
       $query .= " AND (fp.upvotes - fp.downvotes) >= -5 ORDER BY fp.score DESC";
@@ -504,7 +527,7 @@ class FeedController
                   u.email,
                   up.display_name,
                   up.avatar_url,
-                  (SELECT COUNT(*) FROM comments WHERE post_id = fp.id) as comment_count,
+                  (SELECT COUNT(*) FROM comments WHERE post_id = fp.id AND moderation_status = 'approved') as comment_count,
                   fv.vote_type AS user_vote
                   FROM feed_posts fp
                   JOIN feeds f ON fp.feed_id = f.id
@@ -512,7 +535,9 @@ class FeedController
                   JOIN user_profiles up ON u.id = up.user_id
                   LEFT JOIN feed_votes fv ON fv.post_id = fp.id AND fv.user_id = :user_id
                   JOIN feed_members fm ON f.id = fm.feed_id
-                  WHERE fm.user_id = :user_id";
+                  WHERE fm.user_id = :user_id
+                    AND fp.moderation_status = 'approved'
+                    AND f.moderation_status = 'approved'";
 
     if ($sort === 'default') {
       $query .= " AND (fp.upvotes - fp.downvotes) >= -5 ORDER BY fp.score DESC";
@@ -569,9 +594,22 @@ class FeedController
       $displayName = $data['display_name'];
       $description = $data['description'];
       $rules = $data['rules'] ?? null;
+      $moderationResult = $this->moderation->moderateText($userId, 'feed', [
+        'display_name' => $displayName,
+        'description' => $description,
+        'rules' => $rules,
+      ]);
 
-      $query = "INSERT INTO feeds (name, display_name, description, created_by, rules) 
-                     VALUES (:name, :display_name, :description, :created_by, :rules)";
+      if ($moderationResult['decision'] === 'blocked') {
+        $this->conn->rollBack();
+        Response::error($moderationResult['message'], 400, ['reasons' => $moderationResult['reasons']]);
+        return;
+      }
+      $moderationStatus = $moderationResult['status'];
+      $moderationReason = !empty($moderationResult['reasons']) ? implode(',', $moderationResult['reasons']) : null;
+
+      $query = "INSERT INTO feeds (name, display_name, description, created_by, rules, moderation_status, moderation_reason, moderated_at) 
+                     VALUES (:name, :display_name, :description, :created_by, :rules, :moderation_status, :moderation_reason, CURRENT_TIMESTAMP)";
 
       $stmt = $this->conn->prepare($query);
       $stmt->bindParam(':name', $name);
@@ -579,9 +617,12 @@ class FeedController
       $stmt->bindParam(':description', $description);
       $stmt->bindParam(':created_by', $userId);
       $stmt->bindParam(':rules', $rules);
+      $stmt->bindParam(':moderation_status', $moderationStatus);
+      $stmt->bindParam(':moderation_reason', $moderationReason);
       $stmt->execute();
 
       $feedId = $this->conn->lastInsertId();
+      $this->moderation->recordAutomaticCase('feed', intval($feedId), $userId, $moderationResult);
 
       // Add creator as admin
       $query = "INSERT INTO feed_members (feed_id, user_id, role) 
@@ -607,7 +648,10 @@ class FeedController
       $updateOrderStmt->execute();
 
       $this->conn->commit();
-      Response::success(['id' => $feedId], 'Feed created successfully');
+      Response::success([
+        'id' => $feedId,
+        'moderation_status' => $moderationStatus,
+      ], $moderationStatus === 'pending' ? 'Feed submitted for review' : 'Feed created successfully');
     } catch (Exception $e) {
       $this->conn->rollBack();
       throw $e;
@@ -862,17 +906,37 @@ class FeedController
 
     $fields = [];
     $params = [':feed_id' => $feedId];
+    $textUpdates = [];
     if (isset($data['display_name'])) {
       $fields[] = 'display_name = :display_name';
       $params[':display_name'] = $data['display_name'];
+      $textUpdates['display_name'] = $data['display_name'];
     }
     if (isset($data['description'])) {
       $fields[] = 'description = :description';
       $params[':description'] = $data['description'];
+      $textUpdates['description'] = $data['description'];
     }
     if (array_key_exists('rules', $data)) {
       $fields[] = 'rules = :rules';
       $params[':rules'] = $data['rules'];
+      $textUpdates['rules'] = $data['rules'];
+    }
+
+    $moderationResult = null;
+    if (!empty($textUpdates)) {
+      $moderationResult = $this->moderation->moderateText($userId, 'feed', $textUpdates, ['feed_id' => $feedId]);
+      if ($moderationResult['decision'] === 'blocked') {
+        Response::error($moderationResult['message'], 400, ['reasons' => $moderationResult['reasons']]);
+        return;
+      }
+      if ($moderationResult['status'] === 'pending') {
+        $fields[] = 'moderation_status = :moderation_status';
+        $fields[] = 'moderation_reason = :moderation_reason';
+        $fields[] = 'moderated_at = CURRENT_TIMESTAMP';
+        $params[':moderation_status'] = $moderationResult['status'];
+        $params[':moderation_reason'] = !empty($moderationResult['reasons']) ? implode(',', $moderationResult['reasons']) : null;
+      }
     }
 
     if (!empty($fields)) {
@@ -887,6 +951,9 @@ class FeedController
         }
       }
       $stmt->execute();
+      if ($moderationResult && $this->moderation->shouldRecordAutomaticCase($moderationResult)) {
+        $this->moderation->recordAutomaticCase('feed', $feedId, $userId, $moderationResult);
+      }
     }
 
     if (isset($data['admin_id']) && intval($data['admin_id']) !== $userId) {
@@ -916,7 +983,9 @@ class FeedController
       $stmt->execute();
     }
 
-    Response::success(null, 'Feed updated successfully');
+    Response::success([
+      'moderation_status' => $moderationResult ? $moderationResult['status'] : null,
+    ], $moderationResult && $moderationResult['status'] === 'pending' ? 'Feed update submitted for review' : 'Feed updated successfully');
   }
 
   private function createPost($userId)
@@ -942,27 +1011,50 @@ class FeedController
       return;
     }
 
-    $query = "INSERT INTO feed_posts (feed_id, user_id, title, content, media_url, media_type) 
-                 VALUES (:feed_id, :user_id, :title, :content, :media_url, :media_type)";
+    $title = trim((string)$data['title']);
+    $content = trim((string)($data['content'] ?? ''));
+    $moderationResult = $this->moderation->moderateText($userId, 'feed_post', [
+      'title' => $title,
+      'content' => $content,
+    ], ['feed_id' => intval($data['feed_id'])]);
+
+    if ($moderationResult['decision'] === 'blocked') {
+      Response::error($moderationResult['message'], 400, ['reasons' => $moderationResult['reasons']]);
+      return;
+    }
+
+    $moderationStatus = $moderationResult['status'];
+    $moderationReason = !empty($moderationResult['reasons']) ? implode(',', $moderationResult['reasons']) : null;
+
+    $query = "INSERT INTO feed_posts (feed_id, user_id, title, content, media_url, media_type, moderation_status, moderation_reason, moderated_at) 
+                 VALUES (:feed_id, :user_id, :title, :content, :media_url, :media_type, :moderation_status, :moderation_reason, CURRENT_TIMESTAMP)";
 
     $stmt = $this->conn->prepare($query);
     $stmt->bindValue(':feed_id', $data['feed_id']);
     $stmt->bindValue(':user_id', $userId);
-    $stmt->bindValue(':title', $data['title']);
-    $stmt->bindValue(':content', $data['content'] ?? '');
+    $stmt->bindValue(':title', $title);
+    $stmt->bindValue(':content', $content);
     $stmt->bindValue(':media_url', $data['media_url'] ?? null);
     $stmt->bindValue(':media_type', $data['media_type'] ?? 'none');
+    $stmt->bindValue(':moderation_status', $moderationStatus);
+    $stmt->bindValue(':moderation_reason', $moderationReason);
     $stmt->execute();
 
     $postId = $this->conn->lastInsertId();
+    $this->moderation->recordAutomaticCase('feed_post', intval($postId), $userId, $moderationResult);
     // Calculate initial score based on creation time
     $score = $this->calculateScore($postId);
     $scoreStmt = $this->conn->prepare('UPDATE feed_posts SET score = :score WHERE id = :post_id');
     $scoreStmt->bindParam(':score', $score);
     $scoreStmt->bindParam(':post_id', $postId);
     $scoreStmt->execute();
-    $this->notifyFeedPostCreated($userId, intval($data['feed_id']), intval($postId), $data['title']);
-    Response::success(['id' => $postId], 'Post created successfully');
+    if ($moderationStatus === 'approved') {
+      $this->notifyFeedPostCreated($userId, intval($data['feed_id']), intval($postId), $title);
+    }
+    Response::success([
+      'id' => $postId,
+      'moderation_status' => $moderationStatus,
+    ], $moderationStatus === 'pending' ? 'Post submitted for review' : 'Post created successfully');
   }
 
   private function getComments($userId)
@@ -979,6 +1071,7 @@ class FeedController
                 JOIN users u ON c.user_id = u.id
                 JOIN user_profiles up ON u.id = up.user_id
                 WHERE c.post_id = :post_id
+                  AND c.moderation_status = 'approved'
                 ORDER BY c.created_at ASC";
 
     $stmt = $this->conn->prepare($query);
@@ -999,30 +1092,51 @@ class FeedController
     }
 
     $postId = intval($data['post_id']);
+    $content = trim((string)$data['content']);
 
-    $query = "INSERT INTO comments (post_id, user_id, parent_comment_id, content)
-                 VALUES (:post_id, :user_id, :parent_comment_id, :content)";
+    $moderationResult = $this->moderation->moderateText($userId, 'comment', [
+      'content' => $content,
+    ], ['post_id' => $postId]);
+
+    if ($moderationResult['decision'] === 'blocked') {
+      Response::error($moderationResult['message'], 400, ['reasons' => $moderationResult['reasons']]);
+      return;
+    }
+
+    $moderationStatus = $moderationResult['status'];
+    $moderationReason = !empty($moderationResult['reasons']) ? implode(',', $moderationResult['reasons']) : null;
+
+    $query = "INSERT INTO comments (post_id, user_id, parent_comment_id, content, moderation_status, moderation_reason, moderated_at)
+                 VALUES (:post_id, :user_id, :parent_comment_id, :content, :moderation_status, :moderation_reason, CURRENT_TIMESTAMP)";
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':post_id', $postId, PDO::PARAM_INT);
     $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
     $stmt->bindValue(':parent_comment_id', $data['parent_comment_id'] ?? null, PDO::PARAM_INT);
-    $stmt->bindParam(':content', $data['content']);
+    $stmt->bindParam(':content', $content);
+    $stmt->bindParam(':moderation_status', $moderationStatus);
+    $stmt->bindParam(':moderation_reason', $moderationReason);
     $stmt->execute();
 
     $commentId = $this->conn->lastInsertId();
+    $this->moderation->recordAutomaticCase('comment', intval($commentId), $userId, $moderationResult);
     // Recalculate post score to include new comment
     $score = $this->calculateScore($postId);
     $scoreStmt = $this->conn->prepare('UPDATE feed_posts SET score = :score WHERE id = :post_id');
     $scoreStmt->bindParam(':score', $score);
     $scoreStmt->bindParam(':post_id', $postId);
     $scoreStmt->execute();
-    $this->notifyFeedCommentCreated(
-      $userId,
-      $postId,
-      intval($commentId),
-      isset($data['parent_comment_id']) ? intval($data['parent_comment_id']) : null
-    );
-    Response::success(['id' => $commentId], 'Comment created successfully');
+    if ($moderationStatus === 'approved') {
+      $this->notifyFeedCommentCreated(
+        $userId,
+        $postId,
+        intval($commentId),
+        isset($data['parent_comment_id']) ? intval($data['parent_comment_id']) : null
+      );
+    }
+    Response::success([
+      'id' => $commentId,
+      'moderation_status' => $moderationStatus,
+    ], $moderationStatus === 'pending' ? 'Comment submitted for review' : 'Comment created successfully');
   }
 
   private function vote($userId)
@@ -1117,7 +1231,7 @@ class FeedController
   {
     // Get post data
     $query = "SELECT fp.created_at, fp.upvotes, fp.downvotes,
-                     (SELECT COUNT(*) FROM comments WHERE post_id = fp.id) as comment_count
+                     (SELECT COUNT(*) FROM comments WHERE post_id = fp.id AND moderation_status = 'approved') as comment_count
                      FROM feed_posts fp WHERE fp.id = :post_id";
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':post_id', $postId);

@@ -1,7 +1,8 @@
 import 'volunteer_attachment.dart';
 import 'volunteer_reflection.dart';
+import 'opportunity_experience.dart';
 
-const String _hostUrl = 'https://ocs.kttprojects.com';
+const String _hostUrl = 'https://kamilander.com';
 
 class VolunteerOpportunity {
   final int id;
@@ -35,6 +36,7 @@ class VolunteerOpportunity {
   final String? latestReflectionTitle;
   final String? latestReflectionExcerpt;
   final List<VolunteerReflectionImage> latestReflectionImages;
+  final String opportunityType;
 
   VolunteerOpportunity({
     required this.id,
@@ -67,6 +69,7 @@ class VolunteerOpportunity {
     this.latestReflectionTitle,
     this.latestReflectionExcerpt,
     this.latestReflectionImages = const [],
+    this.opportunityType = 'volunteer',
   });
 
   factory VolunteerOpportunity.fromJson(Map<String, dynamic> json) {
@@ -188,6 +191,8 @@ class VolunteerOpportunity {
       latestReflectionTitle: json['latest_reflection_title'],
       latestReflectionExcerpt: json['latest_reflection_excerpt'],
       latestReflectionImages: latestReflectionImages,
+      opportunityType:
+          json['opportunity_type'] == 'event' ? 'event' : 'volunteer',
     );
   }
 
@@ -249,6 +254,7 @@ class VolunteerOpportunity {
                 'created_at': img.createdAt.toIso8601String(),
               })
           .toList(),
+      'opportunity_type': opportunityType,
     };
   }
 
@@ -283,6 +289,7 @@ class VolunteerOpportunity {
     String? latestReflectionTitle,
     String? latestReflectionExcerpt,
     List<VolunteerReflectionImage>? latestReflectionImages,
+    String? opportunityType,
   }) {
     return VolunteerOpportunity(
       id: id ?? this.id,
@@ -318,8 +325,13 @@ class VolunteerOpportunity {
           latestReflectionExcerpt ?? this.latestReflectionExcerpt,
       latestReflectionImages:
           latestReflectionImages ?? this.latestReflectionImages,
+      opportunityType: opportunityType ?? this.opportunityType,
     );
   }
+
+  bool get isEvent => opportunityType == 'event';
+  OpportunityExperience get experience =>
+      isEvent ? OpportunityExperience.event : OpportunityExperience.volunteer;
 
   bool get isOpen => status == 'open';
   bool get isFilled => status == 'filled';

@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "ocs_app" "\0"
+            VALUE "FileDescription", "KamiLander" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "ocs_app" "\0"
+            VALUE "InternalName", "KamiLander" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "ocs_app.exe" "\0"
-            VALUE "ProductName", "ocs_app" "\0"
+            VALUE "OriginalFilename", "KamiLander.exe" "\0"
+            VALUE "ProductName", "KamiLander" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

@@ -3,8 +3,8 @@ class Mailer
 {
   private $from = "noreply@kttprojects.com";
   private $fromName = "Osakikamijima Student Community";
-  private $apiUrl = "https://ocs.kttprojects.com";
-  private $frontendUrl = "https://ocs.kttprojects.com";
+  private $apiUrl = "https://kamilander.com";
+  private $frontendUrl = "https://kamilander.com";
 
   public function sendVerificationEmail($to, $otp, $lang = 'en')
   {

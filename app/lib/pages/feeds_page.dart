@@ -13,6 +13,7 @@ import '../widgets/sort_menu_dialog.dart';
 import '../widgets/feed_selection_dialog.dart';
 import '../widgets/feed_menu_dialog.dart';
 import '../widgets/reorder_feeds_dialog.dart';
+import '../widgets/report_content_dialog.dart';
 import 'create_feed_page.dart';
 import 'feed_details_page.dart';
 import 'feed_settings_page.dart';
@@ -107,8 +108,8 @@ class _FeedsPageState extends State<FeedsPage> {
       // endpoint returns them in the user’s preferred order, so we need to
       // combine the two results manually.
       final results = await Future.wait([
-        widget.apiClient.getFeeds(context),
-        widget.apiClient.getJoinedFeeds(context),
+        _emptyListOnFailure(widget.apiClient.getFeeds(context)),
+        _emptyListOnFailure(widget.apiClient.getJoinedFeeds(context)),
       ]);
       if (mounted) {
         final nonJoinedFeeds = results[0];
@@ -133,7 +134,8 @@ class _FeedsPageState extends State<FeedsPage> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = e.toString();
+          _feeds = const <Feed>[];
+          _error = null;
           _isLoading = false;
         });
       }
@@ -143,8 +145,8 @@ class _FeedsPageState extends State<FeedsPage> {
   Future<void> _refreshJoinedFeeds() async {
     try {
       final results = await Future.wait([
-        widget.apiClient.getFeeds(context),
-        widget.apiClient.getJoinedFeeds(context),
+        _emptyListOnFailure(widget.apiClient.getFeeds(context)),
+        _emptyListOnFailure(widget.apiClient.getJoinedFeeds(context)),
       ]);
 
       if (mounted) {
@@ -201,6 +203,14 @@ class _FeedsPageState extends State<FeedsPage> {
     }
   }
 
+  Future<List<T>> _emptyListOnFailure<T>(Future<List<T>> future) async {
+    try {
+      return await future;
+    } catch (_) {
+      return <T>[];
+    }
+  }
+
   Future<void> _loadPosts() async {
     try {
       final posts = _selectedFeed == null
@@ -218,7 +228,12 @@ class _FeedsPageState extends State<FeedsPage> {
         });
       }
     } catch (e) {
-      print('Failed to load posts: $e');
+      if (mounted && _posts == null) {
+        setState(() {
+          _posts = const <FeedPost>[];
+          _error = null;
+        });
+      }
     }
   }
 
@@ -261,6 +276,34 @@ class _FeedsPageState extends State<FeedsPage> {
           isError: true,
         );
       }
+    }
+  }
+
+  Future<void> _reportContent(String entityType, int entityId) async {
+    final result = await GlassmorphicUI.showDialog<ReportContentResult>(
+      context: context,
+      width: 360,
+      child: const ReportContentDialog(),
+    );
+    if (result == null || !mounted) return;
+
+    try {
+      await widget.apiClient.reportContent(
+        context,
+        entityType: entityType,
+        entityId: entityId,
+        reason: result.reason,
+        details: result.details,
+      );
+      if (!mounted) return;
+      GlassmorphicUI.showGlassSnackBar(context, 'Report submitted');
+    } catch (e) {
+      if (!mounted) return;
+      GlassmorphicUI.showGlassSnackBar(
+        context,
+        e.toString(),
+        isError: true,
+      );
     }
   }
 
@@ -769,7 +812,10 @@ class _FeedsPageState extends State<FeedsPage> {
                       ElevatedButton.icon(
                         icon: const Icon(Icons.refresh),
                         label: Text(l10n.retry),
-                        onPressed: _loadFeeds,
+                        onPressed: () {
+                          _loadFeeds();
+                          _loadPosts();
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               Theme.of(context).colorScheme.errorContainer,
@@ -841,8 +887,7 @@ class _FeedsPageState extends State<FeedsPage> {
                         child: ListView(
                           padding: EdgeInsets.only(
                             top: 0,
-                            bottom:
-                                MediaQuery.of(context).padding.bottom + 108,
+                            bottom: MediaQuery.of(context).padding.bottom + 108,
                           ),
                           children: [
                             if (_posts != null && _posts!.isNotEmpty) ...[
@@ -869,6 +914,10 @@ class _FeedsPageState extends State<FeedsPage> {
                                     onFeedTap: _selectFeedById,
                                     showFeedName: _selectedFeed == null,
                                     onUserTap: _openUserProfile,
+                                    onReport: (post) => _reportContent(
+                                      'feed_post',
+                                      post.id,
+                                    ),
                                     onComments: (p) {
                                       Navigator.push(
                                         context,

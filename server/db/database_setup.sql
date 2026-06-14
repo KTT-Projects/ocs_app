@@ -8,12 +8,15 @@ SET
 SET
   utf8mb4;
 
--- Use existing database
-USE on294_ocs;
+-- Run this script while connected to the target application database.
 
 -- Drop existing tables if they exist
 DROP TABLE IF EXISTS notifications,
+moderation_actions,
+moderation_reports,
+moderation_cases,
 push_notifications,
+notification_preferences,
 push_devices,
 post_attachments,
 comments,
@@ -21,7 +24,11 @@ direct_messages,
 chat_group_members,
 group_messages,
 event_participants,
+volunteer_attachments,
 volunteer_participants,
+volunteer_reflection_images,
+volunteer_reflections,
+study_question_media,
 study_questions,
 study_answers,
 point_ledger,
@@ -98,6 +105,9 @@ CREATE TABLE
     avatar_url VARCHAR(255),
     contact_email VARCHAR(255),
     allow_dm BOOLEAN DEFAULT TRUE,
+    moderation_status ENUM ('approved', 'pending', 'hidden', 'blocked') NOT NULL DEFAULT 'approved',
+    moderation_reason VARCHAR(255) NULL,
+    moderated_at TIMESTAMP NULL DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users (id)
@@ -123,6 +133,20 @@ CREATE TABLE
     KEY idx_push_devices_user_enabled (user_id, enabled),
     KEY idx_push_devices_device (user_id, device_id),
     KEY idx_push_devices_platform (platform),
+    FOREIGN KEY (user_id) REFERENCES users (id)
+  );
+
+-- Notification preferences
+CREATE TABLE
+  notification_preferences (
+    user_id INT NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    in_app_enabled BOOLEAN DEFAULT TRUE,
+    push_enabled BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, category),
+    KEY idx_notification_preferences_category (category),
     FOREIGN KEY (user_id) REFERENCES users (id)
   );
 
@@ -186,6 +210,9 @@ CREATE TABLE
     rules TEXT,
     banner_url VARCHAR(255),
     icon_url VARCHAR(255),
+    moderation_status ENUM ('approved', 'pending', 'hidden', 'blocked') NOT NULL DEFAULT 'approved',
+    moderation_reason VARCHAR(255) NULL,
+    moderated_at TIMESTAMP NULL DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by) REFERENCES users (id)
@@ -218,6 +245,9 @@ CREATE TABLE
     score DOUBLE DEFAULT 0,
     is_pinned BOOLEAN DEFAULT FALSE,
     is_locked BOOLEAN DEFAULT FALSE,
+    moderation_status ENUM ('approved', 'pending', 'hidden', 'blocked') NOT NULL DEFAULT 'approved',
+    moderation_reason VARCHAR(255) NULL,
+    moderated_at TIMESTAMP NULL DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (feed_id) REFERENCES feeds (id),
@@ -247,6 +277,9 @@ CREATE TABLE
     upvotes INT DEFAULT 0,
     downvotes INT DEFAULT 0,
     score DOUBLE DEFAULT 0,
+    moderation_status ENUM ('approved', 'pending', 'hidden', 'blocked') NOT NULL DEFAULT 'approved',
+    moderation_reason VARCHAR(255) NULL,
+    moderated_at TIMESTAMP NULL DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (post_id) REFERENCES feed_posts (id),
@@ -346,6 +379,9 @@ CREATE TABLE
     end_time TIME NOT NULL,
     required_participants INT,
     status ENUM ('open', 'filled', 'completed', 'cancelled') DEFAULT 'open',
+    moderation_status ENUM ('approved', 'pending', 'hidden', 'blocked') NOT NULL DEFAULT 'approved',
+    moderation_reason VARCHAR(255) NULL,
+    moderated_at TIMESTAMP NULL DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (organizer_id) REFERENCES users (id)
@@ -357,6 +393,7 @@ CREATE TABLE
     opportunity_id INT NOT NULL,
     user_id INT NOT NULL,
     status ENUM ('applied', 'approved', 'completed', 'cancelled') DEFAULT 'applied',
+    role ENUM ('member', 'coordinator', 'admin') DEFAULT 'member',
     hours_completed DECIMAL(5, 2),
     certificate_issued BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -381,6 +418,38 @@ CREATE TABLE
     FOREIGN KEY (uploaded_by) REFERENCES users (id),
     INDEX idx_volunteer_attachments_opportunity (opportunity_id),
     INDEX idx_volunteer_attachments_user (uploaded_by)
+  );
+
+-- Volunteer reflections
+CREATE TABLE
+  volunteer_reflections (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    opportunity_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    body TEXT NOT NULL,
+    created_by INT NOT NULL,
+    moderation_status ENUM ('approved', 'pending', 'hidden', 'blocked') NOT NULL DEFAULT 'approved',
+    moderation_reason VARCHAR(255) NULL,
+    moderated_at TIMESTAMP NULL DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (opportunity_id) REFERENCES volunteer_opportunities (id),
+    FOREIGN KEY (created_by) REFERENCES users (id)
+  );
+
+-- Volunteer reflection images
+CREATE TABLE
+  volunteer_reflection_images (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    reflection_id INT NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    file_url VARCHAR(255) NOT NULL,
+    mime_type VARCHAR(100) NOT NULL,
+    file_size INT NULL,
+    uploaded_by INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (reflection_id) REFERENCES volunteer_reflections (id) ON DELETE CASCADE,
+    FOREIGN KEY (uploaded_by) REFERENCES users (id)
   );
 
 -- Q&A questions
@@ -409,6 +478,9 @@ CREATE TABLE
     media_url VARCHAR(255),
     category VARCHAR(300) NOT NULL,
     status ENUM ('open', 'resolved') DEFAULT 'open',
+    moderation_status ENUM ('approved', 'pending', 'hidden', 'blocked') NOT NULL DEFAULT 'approved',
+    moderation_reason VARCHAR(255) NULL,
+    moderated_at TIMESTAMP NULL DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (author_user_id) REFERENCES users (id)
@@ -422,6 +494,9 @@ CREATE TABLE
     author_user_id INT NOT NULL,
     body TEXT NOT NULL,
     is_best BOOLEAN DEFAULT FALSE,
+    moderation_status ENUM ('approved', 'pending', 'hidden', 'blocked') NOT NULL DEFAULT 'approved',
+    moderation_reason VARCHAR(255) NULL,
+    moderated_at TIMESTAMP NULL DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (question_id) REFERENCES study_questions (id),
@@ -511,6 +586,61 @@ CREATE TABLE
     FOREIGN KEY (user_id) REFERENCES users (id)
   );
 
+-- Moderation review queue
+CREATE TABLE
+  moderation_cases (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    entity_type VARCHAR(50) NOT NULL,
+    entity_id INT NOT NULL,
+    subject_user_id INT NULL,
+    reporter_user_id INT NULL,
+    source ENUM ('automatic', 'report', 'manual') NOT NULL DEFAULT 'automatic',
+    decision ENUM ('approved', 'pending', 'blocked') NOT NULL DEFAULT 'pending',
+    status ENUM ('pending', 'approved', 'hidden', 'blocked', 'dismissed') NOT NULL DEFAULT 'pending',
+    severity ENUM ('low', 'medium', 'high') NOT NULL DEFAULT 'low',
+    reason_codes TEXT NULL,
+    content_snapshot MEDIUMTEXT NULL,
+    provider VARCHAR(50) NULL,
+    provider_response MEDIUMTEXT NULL,
+    reviewed_by INT NULL,
+    reviewer_note TEXT NULL,
+    reviewed_at TIMESTAMP NULL DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (subject_user_id) REFERENCES users (id),
+    FOREIGN KEY (reporter_user_id) REFERENCES users (id),
+    FOREIGN KEY (reviewed_by) REFERENCES users (id)
+  );
+
+CREATE TABLE
+  moderation_reports (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    case_id BIGINT NOT NULL,
+    entity_type VARCHAR(50) NOT NULL,
+    entity_id INT NOT NULL,
+    reporter_user_id INT NOT NULL,
+    reason ENUM ('spam', 'harassment', 'hate', 'sexual', 'violence', 'self_harm', 'privacy', 'other') NOT NULL DEFAULT 'other',
+    details TEXT NULL,
+    status ENUM ('open', 'reviewed', 'dismissed') NOT NULL DEFAULT 'open',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_reporter_entity (reporter_user_id, entity_type, entity_id),
+    FOREIGN KEY (case_id) REFERENCES moderation_cases (id),
+    FOREIGN KEY (reporter_user_id) REFERENCES users (id)
+  );
+
+CREATE TABLE
+  moderation_actions (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    case_id BIGINT NOT NULL,
+    moderator_user_id INT NOT NULL,
+    action ENUM ('approve', 'restore', 'hide', 'block', 'dismiss') NOT NULL,
+    note TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (case_id) REFERENCES moderation_cases (id),
+    FOREIGN KEY (moderator_user_id) REFERENCES users (id)
+  );
+
 -- Insert default roles
 INSERT INTO
   roles (name, description)
@@ -534,7 +664,11 @@ CREATE INDEX idx_feed_posts_feed ON feed_posts (feed_id);
 
 CREATE INDEX idx_feed_posts_score ON feed_posts (score);
 
+CREATE INDEX idx_feed_posts_moderation_status ON feed_posts (moderation_status);
+
 CREATE INDEX idx_comments_post ON comments (post_id);
+
+CREATE INDEX idx_comments_moderation_status ON comments (moderation_status);
 
 CREATE INDEX idx_events_date ON events (start_datetime);
 
@@ -543,6 +677,22 @@ CREATE INDEX idx_volunteer_date ON volunteer_opportunities (date);
 CREATE INDEX idx_volunteer_opportunity_type ON volunteer_opportunities (opportunity_type);
 
 CREATE INDEX idx_volunteer_type_date ON volunteer_opportunities (opportunity_type, date);
+
+CREATE INDEX idx_volunteer_opportunities_moderation_status ON volunteer_opportunities (moderation_status);
+
+CREATE INDEX idx_volunteer_reflections_opportunity ON volunteer_reflections (opportunity_id);
+
+CREATE INDEX idx_volunteer_reflections_moderation_status ON volunteer_reflections (moderation_status);
+
+CREATE INDEX idx_study_questions_moderation_status ON study_questions (moderation_status);
+
+CREATE INDEX idx_study_answers_moderation_status ON study_answers (moderation_status);
+
+CREATE INDEX idx_moderation_cases_status_created ON moderation_cases (status, created_at);
+
+CREATE INDEX idx_moderation_cases_entity ON moderation_cases (entity_type, entity_id);
+
+CREATE INDEX idx_moderation_reports_case ON moderation_reports (case_id);
 
 CREATE INDEX idx_notifications_user ON notifications (user_id, is_read);
 

@@ -1,6 +1,6 @@
 # Push notifications
 
-The backend sends true background push notifications through Firebase Cloud Messaging HTTP v1. Clients should register their FCM token after login and unregister it on logout.
+The backend sends true background push notifications through Firebase Cloud Messaging HTTP v1. Clients register their FCM token after login and unregister it on logout.
 
 ## Database
 
@@ -39,3 +39,4 @@ Recommended cron:
 curl -fsS -H "X-Push-Secret: $PUSH_FLUSH_SECRET" "https://ocs.kttprojects.com/api/push_notifications.php?action=flush&limit=100"
 ```
 
+The Flutter client setup is documented in `app/FIREBASE_PUSH_SETUP.md`.

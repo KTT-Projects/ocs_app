@@ -2,6 +2,7 @@
 require_once 'config/Database.php';
 require_once 'config/Response.php';
 require_once 'config/Auth.php';
+require_once 'config/ModerationService.php';
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: *");
@@ -26,6 +27,7 @@ try {
   $database = new Database();
   $db = $database->getConnection();
   $auth = new Auth($db);
+  $moderation = new ModerationService($db);
 
   // Decode JWT token
   $token_parts = explode('.', $token);
@@ -166,6 +168,7 @@ try {
     $userUpdateFields = [];
     $profileParams = ['user_id' => $payload['user_id']];
     $userParams = ['user_id' => $payload['user_id']];
+    $textUpdates = [];
 
     if (isset($data['allow_dm'])) {
       $profileUpdateFields[] = "allow_dm = :allow_dm";
@@ -174,10 +177,12 @@ try {
     if (isset($data['display_name'])) {
       $profileUpdateFields[] = "display_name = :display_name";
       $profileParams['display_name'] = $data['display_name'];
+      $textUpdates['display_name'] = $data['display_name'];
     }
     if (isset($data['bio'])) {
       $profileUpdateFields[] = "bio = :bio";
       $profileParams['bio'] = $data['bio'];
+      $textUpdates['bio'] = $data['bio'];
     }
     if (isset($data['grade'])) {
       $userUpdateFields[] = "grade = :grade";
@@ -188,10 +193,33 @@ try {
       $userParams['institution_id'] = $data['institution_id'];
     }
 
+    $moderationResult = null;
+    if (!empty($textUpdates)) {
+      $moderationResult = $moderation->moderateText(
+        intval($payload['user_id']),
+        'user_profile',
+        $textUpdates,
+        ['profile_user_id' => intval($payload['user_id'])]
+      );
+      if ($moderationResult['decision'] === 'blocked') {
+        Response::error($moderationResult['message'], 400, ['reasons' => $moderationResult['reasons']]);
+      }
+      if ($moderationResult['status'] === 'pending') {
+        $profileUpdateFields[] = "moderation_status = :moderation_status";
+        $profileUpdateFields[] = "moderation_reason = :moderation_reason";
+        $profileUpdateFields[] = "moderated_at = CURRENT_TIMESTAMP";
+        $profileParams['moderation_status'] = $moderationResult['status'];
+        $profileParams['moderation_reason'] = !empty($moderationResult['reasons']) ? implode(',', $moderationResult['reasons']) : null;
+      }
+    }
+
     if (!empty($profileUpdateFields)) {
       $query = "UPDATE user_profiles SET " . implode(", ", $profileUpdateFields) . " WHERE user_id = :user_id";
       $stmt = $db->prepare($query);
       $stmt->execute($profileParams);
+      if ($moderationResult && $moderation->shouldRecordAutomaticCase($moderationResult)) {
+        $moderation->recordAutomaticCase('user_profile', intval($payload['user_id']), intval($payload['user_id']), $moderationResult);
+      }
     }
 
     if (!empty($userUpdateFields)) {

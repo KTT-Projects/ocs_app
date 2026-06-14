@@ -1,6 +1,6 @@
 {
-    "name": "ocs_app",
-    "short_name": "ocs_app",
+    "name": "KamiLander",
+    "short_name": "KamiLander",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

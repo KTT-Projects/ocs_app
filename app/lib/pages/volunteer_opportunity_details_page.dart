@@ -13,6 +13,7 @@ import '../models/volunteer_participant.dart';
 import '../models/volunteer_reflection.dart';
 import '../services/api_client.dart';
 import '../widgets/glassmorphic_ui.dart';
+import '../widgets/report_content_dialog.dart';
 import 'full_screen_image_page.dart';
 import 'volunteer_admin_page.dart';
 import 'volunteer_reflection_view_page.dart';
@@ -428,6 +429,34 @@ class _VolunteerOpportunityDetailsPageState
     }
   }
 
+  Future<void> _reportOpportunity() async {
+    final result = await GlassmorphicUI.showDialog<ReportContentResult>(
+      context: context,
+      width: 360,
+      child: const ReportContentDialog(),
+    );
+    if (result == null || !mounted) return;
+
+    try {
+      await widget.apiClient.reportContent(
+        context,
+        entityType: 'volunteer_opportunity',
+        entityId: _opportunity.id,
+        reason: result.reason,
+        details: result.details,
+      );
+      if (!mounted) return;
+      GlassmorphicUI.showGlassSnackBar(context, 'Report submitted');
+    } catch (e) {
+      if (!mounted) return;
+      GlassmorphicUI.showGlassSnackBar(
+        context,
+        e.toString(),
+        isError: true,
+      );
+    }
+  }
+
   Future<void> _openReflections() async {
     final updated = await Navigator.push(
       context,
@@ -836,6 +865,30 @@ class _VolunteerOpportunityDetailsPageState
                             overflow: TextOverflow.ellipsis,
                           ),
                         ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .background
+                            .withOpacity(0.25),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onPrimary
+                              .withOpacity(0.25),
+                        ),
+                      ),
+                      child: IconButton(
+                        tooltip: 'Report',
+                        icon: Icon(
+                          Icons.flag_outlined,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                        onPressed: _reportOpportunity,
                       ),
                     ),
                   ],

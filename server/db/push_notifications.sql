@@ -22,6 +22,18 @@ CREATE TABLE IF NOT EXISTS push_devices (
   FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
+CREATE TABLE IF NOT EXISTS notification_preferences (
+  user_id INT NOT NULL,
+  category VARCHAR(50) NOT NULL,
+  in_app_enabled BOOLEAN DEFAULT TRUE,
+  push_enabled BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id, category),
+  KEY idx_notification_preferences_category (category),
+  FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
 CREATE TABLE IF NOT EXISTS push_notifications (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   user_id INT NOT NULL,

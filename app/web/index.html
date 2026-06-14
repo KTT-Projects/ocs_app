@@ -21,20 +21,107 @@
   <meta name="description" content="A new Flutter project.">
 
   <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="ocs_app">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <meta name="apple-mobile-web-app-title" content="KamiLander">
+  <link rel="apple-touch-icon" sizes="192x192" href="icons/Icon-192.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon.png"/>
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/Icon-192.png"/>
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/Icon-512.png"/>
 
-  <title>ocs_app</title>
+  <title>KamiLander</title>
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js"></script>
   <script>
     window.flutterWebRenderer = "html";
+    const kamiFirebaseConfig = {
+      apiKey: "AIzaSyC629rx4zPZOF_WsShGUW219UZyYE5kZdQ",
+      authDomain: "shineportal-ktt.firebaseapp.com",
+      projectId: "shineportal-ktt",
+      storageBucket: "shineportal-ktt.appspot.com",
+      messagingSenderId: "299843107216",
+      appId: "1:299843107216:web:e06d18c6e193209491db15",
+      measurementId: "G-6YRL4BN758",
+    };
+    const kamiMessagingServiceWorkerScope =
+      "/firebase-cloud-messaging-push-scope";
+
+    let kamiForegroundMessagingConfigured = false;
+
+    function kamiNotificationPayload(payload) {
+      const notification = payload.notification || {};
+      const data = payload.data || {};
+      return {
+        title: notification.title || data.title || "KamiLander",
+        options: {
+          body: notification.body || data.body || "",
+          icon: notification.icon || "/icons/Icon-192.png",
+          data: data,
+        },
+      };
+    }
+
+    function kamiMessaging() {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(kamiFirebaseConfig);
+      }
+      return firebase.messaging();
+    }
+
+    function kamiRegisterMessagingServiceWorker() {
+      return navigator.serviceWorker.register("/firebase-messaging-sw.js", {
+        scope: kamiMessagingServiceWorkerScope,
+      });
+    }
+
+    function kamiConfigureForegroundMessaging(messaging, registration) {
+      if (kamiForegroundMessagingConfigured) return;
+      kamiForegroundMessagingConfigured = true;
+
+      messaging.onMessage(async function (payload) {
+        if (!("Notification" in window) || Notification.permission !== "granted") {
+          return;
+        }
+
+        const notification = kamiNotificationPayload(payload);
+        if (registration && registration.showNotification) {
+          await registration.showNotification(
+            notification.title,
+            notification.options
+          );
+        } else {
+          new Notification(notification.title, notification.options);
+        }
+      });
+    }
+
+    window.kamiGetFcmToken = async function (vapidKey) {
+      const registration = await kamiRegisterMessagingServiceWorker();
+      const messaging = kamiMessaging();
+      kamiConfigureForegroundMessaging(messaging, registration);
+      return messaging.getToken({
+        vapidKey: vapidKey,
+        serviceWorkerRegistration: registration,
+      });
+    };
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        kamiRegisterMessagingServiceWorker()
+          .then(function (registration) {
+            kamiConfigureForegroundMessaging(kamiMessaging(), registration);
+          })
+          .catch(function (error) {
+            console.warn("Firebase messaging service worker setup failed.", error);
+          });
+      });
+    }
   </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>

@@ -39,11 +39,12 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
   String? _iconFilePath;
   List<int>? _iconBytes;
   String? _iconFileName;
-  static const String _hostUrl = 'https://ocs.kttprojects.com';
+  static const String _hostUrl = 'https://kamilander.com';
 
   Future<void> _pickIcon() async {
     try {
-      final XFile? image = await _imagePicker.pickImage(source: ImageSource.gallery);
+      final XFile? image =
+          await _imagePicker.pickImage(source: ImageSource.gallery);
       if (image != null && mounted) {
         setState(() {
           _isUploadingIcon = true;
@@ -52,7 +53,8 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
         if (kIsWeb) {
           _iconBytes = await image.readAsBytes();
           _iconFileName = image.name.isNotEmpty ? image.name : 'icon.png';
-          _iconUrl = 'data:${image.mimeType};base64,${base64Encode(_iconBytes!)}';
+          _iconUrl =
+              'data:${image.mimeType};base64,${base64Encode(_iconBytes!)}';
         } else {
           _iconFilePath = image.path;
           _iconUrl = image.path;
@@ -75,6 +77,7 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
       }
     }
   }
+
   @override
   void initState() {
     super.initState();
@@ -183,12 +186,14 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
           decoration: InputDecoration(
             counterText: '',
             filled: true,
-            fillColor: Theme.of(context).colorScheme.background.withOpacity(0.25),
+            fillColor:
+                Theme.of(context).colorScheme.background.withOpacity(0.25),
             suffixIcon: suffix,
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.25),
+                color:
+                    Theme.of(context).colorScheme.onPrimary.withOpacity(0.25),
               ),
             ),
             focusedBorder: OutlineInputBorder(
@@ -203,7 +208,6 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
       ],
     );
   }
-
 
   Future<void> _saveSettings() async {
     if (!_formKey.currentState!.validate()) return;
@@ -337,10 +341,16 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
                         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .background
+                                .withOpacity(0.2),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimary
+                                  .withOpacity(0.3),
                             ),
                           ),
                           child: Padding(
@@ -356,12 +366,18 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
                                       children: [
                                         CircleAvatar(
                                           radius: 40,
-                                          backgroundColor: Theme.of(context).colorScheme.secondary.withOpacity(0.6),
+                                          backgroundColor: Theme.of(context)
+                                              .colorScheme
+                                              .secondary
+                                              .withOpacity(0.6),
                                           child: _iconUrl != null
                                               ? ClipOval(
-                                                  child: kIsWeb || _iconUrl!.startsWith('http')
+                                                  child: kIsWeb ||
+                                                          _iconUrl!.startsWith(
+                                                              'http')
                                                       ? Image.network(
-                                                          _formatIconUrl(_iconUrl!),
+                                                          _formatIconUrl(
+                                                              _iconUrl!),
                                                           width: 80,
                                                           height: 80,
                                                           fit: BoxFit.cover,
@@ -375,12 +391,16 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
                                                 )
                                               : Icon(
                                                   Icons.camera_alt,
-                                                  color: Theme.of(context).colorScheme.onSecondary,
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onSecondary,
                                                 ),
                                         ),
                                         if (_isUploadingIcon)
                                           CircularProgressIndicator(
-                                            color: Theme.of(context).colorScheme.onPrimary,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onPrimary,
                                           ),
                                       ],
                                     ),
@@ -436,25 +456,33 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
                                 _buildField(
                                   label: l10n.currentAdmin,
                                   controller: TextEditingController(
-                                    text: _selectedAdmin != null ? _selectedAdmin!['display_name'] ?? '' : '',
+                                    text: _selectedAdmin != null
+                                        ? _selectedAdmin!['display_name'] ?? ''
+                                        : '',
                                   ),
                                   readOnly: true,
                                   onTap: _selectAdmin,
                                   suffix: _isMembersLoading
                                       ? Padding(
-                                          padding: const EdgeInsets.only(right: 8),
+                                          padding:
+                                              const EdgeInsets.only(right: 8),
                                           child: SizedBox(
                                             width: 16,
                                             height: 16,
                                             child: CircularProgressIndicator(
                                               strokeWidth: 2,
-                                              color: Theme.of(context).colorScheme.onPrimary,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onPrimary,
                                             ),
                                           ),
                                         )
                                       : Icon(
                                           Icons.arrow_drop_down,
-                                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onPrimary
+                                              .withOpacity(0.7),
                                         ),
                                 ),
                               ],
@@ -473,8 +501,8 @@ class _FeedSettingsPageState extends State<FeedSettingsPage> {
               color: Colors.black.withOpacity(0.5),
               child: Center(
                 child: CircularProgressIndicator(
-                  valueColor:
-                      AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.onPrimary),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                      Theme.of(context).colorScheme.onPrimary),
                 ),
               ),
             ),

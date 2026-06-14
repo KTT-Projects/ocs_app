@@ -6,6 +6,7 @@ import 'package:ocs_app/pages/user_profile_page.dart';
 import 'package:ocs_app/services/api_client.dart';
 import 'package:ocs_app/utils/study_badge.dart';
 import 'package:ocs_app/widgets/glassmorphic_ui.dart';
+import 'package:ocs_app/widgets/report_content_dialog.dart';
 
 class StudyQuestionDetailsPage extends StatefulWidget {
   final ApiClient apiClient;
@@ -156,6 +157,34 @@ class _StudyQuestionDetailsPageState extends State<StudyQuestionDetailsPage> {
           isError: true,
         );
       }
+    }
+  }
+
+  Future<void> _reportContent(String entityType, int entityId) async {
+    final result = await GlassmorphicUI.showDialog<ReportContentResult>(
+      context: context,
+      width: 360,
+      child: const ReportContentDialog(),
+    );
+    if (result == null || !mounted) return;
+
+    try {
+      await widget.apiClient.reportContent(
+        context,
+        entityType: entityType,
+        entityId: entityId,
+        reason: result.reason,
+        details: result.details,
+      );
+      if (!mounted) return;
+      GlassmorphicUI.showGlassSnackBar(context, 'Report submitted');
+    } catch (e) {
+      if (!mounted) return;
+      GlassmorphicUI.showGlassSnackBar(
+        context,
+        e.toString(),
+        isError: true,
+      );
     }
   }
 
@@ -393,6 +422,22 @@ class _StudyQuestionDetailsPageState extends State<StudyQuestionDetailsPage> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
+                  const Spacer(),
+                  IconButton(
+                    tooltip: 'Report',
+                    icon: Icon(
+                      Icons.flag_outlined,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onPrimary
+                          .withOpacity(0.72),
+                      size: 19,
+                    ),
+                    onPressed: () => _reportContent(
+                      'study_question',
+                      _question!.id,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -535,6 +580,21 @@ class _StudyQuestionDetailsPageState extends State<StudyQuestionDetailsPage> {
                         ),
                       ),
                     ),
+                  IconButton(
+                    tooltip: 'Report',
+                    icon: Icon(
+                      Icons.flag_outlined,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onPrimary
+                          .withOpacity(0.72),
+                      size: 18,
+                    ),
+                    onPressed: () => _reportContent(
+                      'study_answer',
+                      answer.id,
+                    ),
+                  ),
                   if (answer.isBest)
                     Container(
                       padding: const EdgeInsets.symmetric(

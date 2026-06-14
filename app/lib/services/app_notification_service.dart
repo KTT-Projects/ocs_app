@@ -5,15 +5,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/app_notification.dart';
+import '../models/notification_preference.dart';
 import '../models/opportunity_experience.dart';
 import 'api_client.dart';
+import 'push_registration_service.dart';
 import 'system_notification_service.dart';
 
 class AppNotificationService extends ChangeNotifier {
   AppNotificationService({
     required ApiClient apiClient,
+    PushRegistrationService? pushRegistrationService,
     SystemNotificationService? systemNotificationService,
   })  : _apiClient = apiClient,
+        _pushRegistrationService = pushRegistrationService,
         _systemNotificationService =
             systemNotificationService ?? SystemNotificationService();
 
@@ -23,6 +27,7 @@ class AppNotificationService extends ChangeNotifier {
   static const _pollInterval = Duration(seconds: 30);
 
   final ApiClient _apiClient;
+  final PushRegistrationService? _pushRegistrationService;
   final SystemNotificationService _systemNotificationService;
 
   SharedPreferences? _prefs;
@@ -30,18 +35,26 @@ class AppNotificationService extends ChangeNotifier {
   bool _initialized = false;
   bool _started = false;
   bool _isLoading = false;
+  bool _isLoadingPreferences = false;
   bool _hasLoadedBaseline = false;
+  bool _preferencesLoaded = false;
   String? _error;
+  String? _preferencesError;
   bool _systemNotificationsEnabled = true;
   SystemNotificationPermission _permission =
       SystemNotificationPermission.prompt;
   final Set<String> _readIds = <String>{};
   final Set<String> _announcedIds = <String>{};
   List<AppNotification> _notifications = <AppNotification>[];
+  List<NotificationPreference> _preferences = _defaultNotificationPreferences();
 
   List<AppNotification> get notifications => List.unmodifiable(_notifications);
+  List<NotificationPreference> get preferences =>
+      List.unmodifiable(_preferences);
   bool get isLoading => _isLoading;
+  bool get isLoadingPreferences => _isLoadingPreferences;
   String? get error => _error;
+  String? get preferencesError => _preferencesError;
   bool get systemNotificationsEnabled => _systemNotificationsEnabled;
   SystemNotificationPermission get permission => _permission;
   int get unreadCount =>
@@ -63,6 +76,15 @@ class AppNotificationService extends ChangeNotifier {
   Future<void> start(BuildContext context) async {
     if (_started) return;
     _started = true;
+    await initialize();
+    if (!context.mounted) return;
+    _permission = await _systemNotificationService.permissionStatus();
+    if (_permission == SystemNotificationPermission.granted) {
+      await _registerPushDevice(context, requestPermission: false);
+    }
+    if (!context.mounted) return;
+    await loadPreferences(context);
+    if (!context.mounted) return;
     await refresh(context, announceNew: false);
     _timer = Timer.periodic(_pollInterval, (_) {
       unawaited(refresh(context, announceNew: true, showLoading: false));
@@ -83,6 +105,10 @@ class AppNotificationService extends ChangeNotifier {
     await initialize();
     if (!context.mounted) return;
     if (_apiClient.token == null) return;
+    if (!_preferencesLoaded) {
+      await loadPreferences(context);
+      if (!context.mounted) return;
+    }
 
     if (showLoading) {
       _isLoading = true;
@@ -131,6 +157,9 @@ class AppNotificationService extends ChangeNotifier {
     _systemNotificationsEnabled =
         _permission == SystemNotificationPermission.granted;
     await _prefs?.setBool(_systemEnabledKey, _systemNotificationsEnabled);
+    if (_systemNotificationsEnabled) {
+      unawaited(_pushRegistrationService?.registerCurrentDevice());
+    }
     notifyListeners();
     return _permission;
   }
@@ -139,12 +168,79 @@ class AppNotificationService extends ChangeNotifier {
     await initialize();
     _systemNotificationsEnabled = enabled;
     await _prefs?.setBool(_systemEnabledKey, enabled);
-    if (enabled && _permission != SystemNotificationPermission.granted) {
-      _permission = await _systemNotificationService.requestPermission();
+    if (enabled) {
       if (_permission != SystemNotificationPermission.granted) {
-        _systemNotificationsEnabled = false;
-        await _prefs?.setBool(_systemEnabledKey, false);
+        _permission = await _systemNotificationService.requestPermission();
+        if (_permission != SystemNotificationPermission.granted) {
+          _systemNotificationsEnabled = false;
+          await _prefs?.setBool(_systemEnabledKey, false);
+        }
       }
+      if (_systemNotificationsEnabled) {
+        unawaited(_pushRegistrationService?.registerCurrentDevice());
+      }
+    } else {
+      unawaited(_pushRegistrationService?.unregisterCurrentDevice());
+    }
+    notifyListeners();
+  }
+
+  Future<void> loadPreferences(BuildContext context) async {
+    await initialize();
+    if (!context.mounted || _apiClient.token == null) return;
+
+    _isLoadingPreferences = true;
+    _preferencesError = null;
+    notifyListeners();
+
+    try {
+      _preferences = await _apiClient.getNotificationPreferences(context);
+      _preferencesLoaded = true;
+      _preferencesError = null;
+    } catch (e) {
+      _preferencesError = e.toString();
+      _preferencesLoaded = true;
+    } finally {
+      _isLoadingPreferences = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> setNotificationPreference(
+    BuildContext context,
+    String category, {
+    bool? inAppEnabled,
+    bool? pushEnabled,
+  }) async {
+    await initialize();
+    if (!context.mounted) return;
+    final index = _preferences.indexWhere((item) => item.category == category);
+    if (index < 0) return;
+
+    final previous = List<NotificationPreference>.from(_preferences);
+    _preferences[index] = _preferences[index].copyWith(
+      inAppEnabled: inAppEnabled,
+      pushEnabled: pushEnabled,
+    );
+    _preferencesError = null;
+    notifyListeners();
+
+    try {
+      _preferences =
+          await _apiClient.updateNotificationPreferences(context, _preferences);
+      if (inAppEnabled == true && context.mounted) {
+        await refresh(context, announceNew: false, showLoading: false);
+      } else {
+        _notifications = _notifications
+            .where((item) =>
+                _isInAppCategoryEnabled(_categoryForNotification(item)))
+            .toList();
+      }
+      _preferencesLoaded = true;
+      _preferencesError = null;
+    } catch (e) {
+      _preferences = previous;
+      _preferencesError = e.toString();
     }
     notifyListeners();
   }
@@ -172,19 +268,25 @@ class AppNotificationService extends ChangeNotifier {
     final l10n = AppLocalizations.of(context)!;
     final localeCode = Localizations.localeOf(context).languageCode;
 
-    final feedPostsFuture = _apiClient.getHomeFeed(context, sort: 'latest');
-    final eventsFuture = _apiClient.getVolunteerOpportunities(
-      context,
-      sort: 'newest',
-      opportunityType: OpportunityExperience.event.apiType,
+    final feedPostsFuture =
+        _emptyListOnFailure(_apiClient.getHomeFeed(context, sort: 'latest'));
+    final eventsFuture = _emptyListOnFailure(
+      _apiClient.getVolunteerOpportunities(
+        context,
+        sort: 'newest',
+        opportunityType: OpportunityExperience.event.apiType,
+      ),
     );
-    final volunteerFuture = _apiClient.getVolunteerOpportunities(
-      context,
-      sort: 'newest',
-      opportunityType: OpportunityExperience.volunteer.apiType,
+    final volunteerFuture = _emptyListOnFailure(
+      _apiClient.getVolunteerOpportunities(
+        context,
+        sort: 'newest',
+        opportunityType: OpportunityExperience.volunteer.apiType,
+      ),
     );
-    final questionsFuture =
-        _apiClient.getStudyQuestions(context, sort: 'latest');
+    final questionsFuture = _emptyListOnFailure(
+      _apiClient.getStudyQuestions(context, sort: 'latest'),
+    );
 
     final feedPosts = await feedPostsFuture;
     final events = await eventsFuture;
@@ -255,11 +357,24 @@ class AppNotificationService extends ChangeNotifier {
     }
 
     notifications.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    return notifications.take(60).toList();
+    return notifications
+        .where(
+            (item) => _isInAppCategoryEnabled(_categoryForNotification(item)))
+        .take(60)
+        .toList();
+  }
+
+  Future<List<T>> _emptyListOnFailure<T>(Future<List<T>> future) async {
+    try {
+      return await future;
+    } catch (_) {
+      return <T>[];
+    }
   }
 
   Future<void> _showSystemNotification(AppNotification notification) async {
     if (!_systemNotificationsEnabled) return;
+    if (!_isPushCategoryEnabled(_categoryForNotification(notification))) return;
     if (_permission == SystemNotificationPermission.unsupported ||
         _permission == SystemNotificationPermission.denied) {
       return;
@@ -274,6 +389,20 @@ class AppNotificationService extends ChangeNotifier {
     _permission = await _systemNotificationService.permissionStatus();
   }
 
+  Future<void> _registerPushDevice(
+    BuildContext context, {
+    bool requestPermission = true,
+  }) async {
+    if (!_systemNotificationsEnabled || _pushRegistrationService == null) {
+      return;
+    }
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    await _pushRegistrationService.registerCurrentDevice(
+      locale: locale,
+      requestPermission: requestPermission,
+    );
+  }
+
   Future<void> _persistState() async {
     _trimIds(_readIds);
     _trimIds(_announcedIds);
@@ -285,6 +414,50 @@ class AppNotificationService extends ChangeNotifier {
     if (ids.length <= 200) return;
     final overflow = ids.length - 200;
     ids.removeAll(ids.take(overflow));
+  }
+
+  String _categoryForNotification(AppNotification notification) {
+    switch (notification.type) {
+      case AppNotificationType.feed:
+        return NotificationPreferenceCategories.feedPosts;
+      case AppNotificationType.event:
+        return NotificationPreferenceCategories.events;
+      case AppNotificationType.volunteer:
+        return NotificationPreferenceCategories.volunteerOpportunities;
+      case AppNotificationType.study:
+        return NotificationPreferenceCategories.studyQuestions;
+    }
+  }
+
+  bool _isInAppCategoryEnabled(String category) {
+    return _preferenceForCategory(category).inAppEnabled;
+  }
+
+  bool _isPushCategoryEnabled(String category) {
+    return _preferenceForCategory(category).pushEnabled;
+  }
+
+  NotificationPreference _preferenceForCategory(String category) {
+    return _preferences.firstWhere(
+      (item) => item.category == category,
+      orElse: () => NotificationPreference(
+        category: category,
+        inAppEnabled: true,
+        pushEnabled: true,
+      ),
+    );
+  }
+
+  static List<NotificationPreference> _defaultNotificationPreferences() {
+    return NotificationPreferenceCategories.all
+        .map(
+          (category) => NotificationPreference(
+            category: category,
+            inAppEnabled: true,
+            pushEnabled: true,
+          ),
+        )
+        .toList();
   }
 
   @override

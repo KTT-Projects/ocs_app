@@ -1,0 +1,4 @@
+[    4286ms] [WARNING] Exception while loading service worker: Error: prepareServiceWorker took more than 4000ms to resolve. Moving on.
+    at http://127.0.0.1:49231/flutter_bootstrap.js:1:2980 @ http://127.0.0.1:49231/flutter_bootstrap.js:30
+[    5133ms] [WARNING] registerExtension() from dart:developer is only supported in build/run/test environments where the developer event method hooks have been set by package:dwds v11.1.0 or higher. @ http://127.0.0.1:49231/dart_sdk.js:56813
+[ 1676456ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:49231/:0

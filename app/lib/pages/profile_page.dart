@@ -8,6 +8,7 @@ import 'dart:io';
 import '../providers/language_provider.dart';
 import '../widgets/language_toggle.dart';
 import '../services/api_client.dart';
+import '../services/push_registration_service.dart';
 import '../utils/study_badge.dart';
 import '../widgets/glassmorphic_ui.dart';
 
@@ -85,7 +86,7 @@ class _ProfilePageState extends State<ProfilePage> {
           // Ensure absolute URL for all platforms
           String url = avatarUrl;
           if (url.startsWith('/')) {
-            url = 'https://ocs.kttprojects.com' + url;
+            url = 'https://kamilander.com' + url;
           }
           _profile!['avatar'] = url;
         });
@@ -131,7 +132,7 @@ class _ProfilePageState extends State<ProfilePage> {
         if (profile != null &&
             profile['avatar'] != null &&
             profile['avatar'].toString().startsWith('/')) {
-          profile['avatar'] = 'https://ocs.kttprojects.com' + profile['avatar'];
+          profile['avatar'] = 'https://kamilander.com' + profile['avatar'];
         }
         setState(() {
           _profile = profile;
@@ -463,6 +464,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                                 ),
                                 onPressed: () async {
+                                  await context
+                                      .read<PushRegistrationService>()
+                                      .unregisterCurrentDevice();
                                   await widget.apiClient.logout(context);
                                   // MainPage listens for token changes and automatically
                                   // displays the login screen, so no navigation is needed here.

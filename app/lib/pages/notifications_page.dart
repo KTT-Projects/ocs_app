@@ -10,6 +10,7 @@ import '../services/app_notification_service.dart';
 import '../services/api_client.dart';
 import '../services/system_notification_service.dart';
 import '../widgets/glassmorphic_ui.dart';
+import 'notification_settings_page.dart';
 
 class NotificationsPage extends StatefulWidget {
   final ApiClient apiClient;
@@ -100,6 +101,21 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         onPressed: service.notifications.isEmpty
                             ? null
                             : service.markAllRead,
+                      ),
+                      GlassmorphicUI.buildAppBarIconButton(
+                        context: context,
+                        icon: Icons.settings_outlined,
+                        size: 38,
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const NotificationSettingsPage(),
+                            ),
+                          );
+                        },
                       ),
                       GlassmorphicUI.buildAppBarIconButton(
                         context: context,

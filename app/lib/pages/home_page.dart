@@ -8,13 +8,11 @@ import '../models/opportunity_experience.dart';
 import '../services/api_client.dart';
 import '../services/app_notification_service.dart';
 import '../widgets/circle_nav_bar.dart';
-// import '../widgets/circle_nav_bar_arc.dart';
 import 'profile_page.dart';
 import 'feeds_page.dart';
 import 'events_page.dart';
 import 'notifications_page.dart';
 import 'post_details_page.dart';
-import 'volunteer_page.dart';
 import 'volunteer_opportunity_details_page.dart';
 import 'study_page.dart';
 import 'study_question_details_page.dart';
@@ -47,7 +45,6 @@ class _HomePageState extends State<HomePage> {
       _pages = [
         FeedsPage(apiClient: widget.apiClient),
         EventsPage(apiClient: widget.apiClient),
-        VolunteerPage(apiClient: widget.apiClient),
         StudyPage(apiClient: widget.apiClient),
         NotificationsPage(
           apiClient: widget.apiClient,
@@ -63,14 +60,6 @@ class _HomePageState extends State<HomePage> {
       _initialized = true;
     }
     _notificationService ??= context.read<AppNotificationService>();
-    if (!_startedNotifications) {
-      _startedNotifications = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _notificationService?.start(context);
-        }
-      });
-    }
   }
 
   @override
@@ -84,6 +73,9 @@ class _HomePageState extends State<HomePage> {
       await widget.apiClient.setToken(widget.token);
       if (!mounted) return;
       await widget.apiClient.getProfile(context);
+      if (!mounted || _startedNotifications) return;
+      _startedNotifications = true;
+      await _notificationService?.start(context);
     } catch (_) {
       // ApiClient clears invalid tokens and notifies MainPage.
     }
@@ -153,80 +145,16 @@ class _HomePageState extends State<HomePage> {
       case AppNotificationType.feed:
         return 0;
       case AppNotificationType.event:
-        return 1;
       case AppNotificationType.volunteer:
-        return 2;
+        return 1;
       case AppNotificationType.study:
-        return 3;
+        return 2;
     }
-  }
-
-  Widget _navIcon(
-    IconData icon, {
-    required bool active,
-    int unreadCount = 0,
-  }) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Icon(icon, color: Colors.white, size: active ? 28 : 26),
-        if (unreadCount > 0)
-          Positioned(
-            right: -8,
-            top: -8,
-            child: Container(
-              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.secondary,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.white, width: 1),
-              ),
-              child: Text(
-                unreadCount > 99 ? '99+' : unreadCount.toString(),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSecondary,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w800,
-                  height: 1.3,
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
-  Widget _inactiveNavItem(IconData icon, String label, {int unreadCount = 0}) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _navIcon(icon, active: false, unreadCount: unreadCount),
-        const SizedBox(height: 2),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 2),
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              label,
-              maxLines: 1,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final unreadCount = context.watch<AppNotificationService>().unreadCount;
 
     return Scaffold(
       body: IndexedStack(
@@ -236,34 +164,55 @@ class _HomePageState extends State<HomePage> {
       extendBody: true,
       bottomNavigationBar: CircleNavBar(
         activeIcons: [
-          _navIcon(Icons.feed, active: true),
-          _navIcon(Icons.event_note, active: true),
-          _navIcon(Icons.volunteer_activism, active: true),
-          _navIcon(Icons.school, active: true),
-          _navIcon(
-            Icons.notifications,
-            active: true,
-            unreadCount: unreadCount,
-          ),
-          _navIcon(Icons.account_circle, active: true),
+          Icon(Icons.feed, color: Colors.white, size: 28),
+          Icon(Icons.event_note, color: Colors.white, size: 28),
+          Icon(Icons.school, color: Colors.white, size: 28),
+          Icon(Icons.notifications, color: Colors.white, size: 28),
+          Icon(Icons.account_circle, color: Colors.white, size: 28),
         ],
         inactiveIcons: [
-          _inactiveNavItem(Icons.feed_outlined, l10n.feed),
-          _inactiveNavItem(Icons.event_note_outlined, l10n.eventsFeature),
-          _inactiveNavItem(
-            Icons.volunteer_activism_outlined,
-            l10n.volunteerFeature,
-          ),
-          _inactiveNavItem(Icons.school_outlined, l10n.studyFeature),
-          _inactiveNavItem(
-            Icons.notifications_outlined,
-            l10n.notifications,
-            unreadCount: unreadCount,
-          ),
-          _inactiveNavItem(Icons.account_circle, l10n.profile),
+          Column(children: [
+            Icon(Icons.feed_outlined, color: Colors.white, size: 28),
+            Text(l10n.feed,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold))
+          ]),
+          Column(children: [
+            Icon(Icons.event_note_outlined, color: Colors.white, size: 28),
+            Text(l10n.eventsFeature,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold))
+          ]),
+          Column(children: [
+            Icon(Icons.school_outlined, color: Colors.white, size: 28),
+            Text(l10n.studyFeature,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold))
+          ]),
+          Column(children: [
+            Icon(Icons.notifications_outlined, color: Colors.white, size: 28),
+            Text(l10n.notifications,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold))
+          ]),
+          Column(children: [
+            Icon(Icons.account_circle, color: Colors.white, size: 28),
+            Text(l10n.profile,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold))
+          ]),
         ],
         color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-        // circleColor: Theme.of(context).colorScheme.secondary,
         height: 60,
         circleWidth: 37,
         padding: EdgeInsets.only(left: 16, right: 16, bottom: 20),

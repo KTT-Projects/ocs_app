@@ -9,23 +9,23 @@ import 'volunteer_opportunity_details_page.dart';
 import 'package:intl/intl.dart';
 import '../widgets/glassmorphic_ui.dart';
 
-class EnhancedVolunteerSchedulePage extends StatefulWidget {
+class OpportunitySchedulePage extends StatefulWidget {
   final ApiClient apiClient;
-  final OpportunityExperience experience;
+  final String? opportunityType;
 
-  const EnhancedVolunteerSchedulePage({
+  const OpportunitySchedulePage({
     super.key,
     required this.apiClient,
-    this.experience = OpportunityExperience.volunteer,
+    this.opportunityType,
   });
 
   @override
-  State<EnhancedVolunteerSchedulePage> createState() =>
-      _EnhancedVolunteerSchedulePageState();
+  State<OpportunitySchedulePage> createState() =>
+      _OpportunitySchedulePageState();
 }
 
-class _EnhancedVolunteerSchedulePageState
-    extends State<EnhancedVolunteerSchedulePage> with TickerProviderStateMixin {
+class _OpportunitySchedulePageState extends State<OpportunitySchedulePage>
+    with TickerProviderStateMixin {
   static const double _maxContentWidth = 1180;
 
   bool _isLoading = true;
@@ -81,11 +81,7 @@ class _EnhancedVolunteerSchedulePageState
         });
       }
 
-      final opportunities = await widget.apiClient.getMyVolunteerOpportunities(
-        context,
-        status: null, // Get all my opportunities
-        opportunityType: widget.experience.apiType,
-      );
+      final opportunities = await _fetchMyOpportunities();
 
       if (mounted) {
         setState(() {
@@ -109,6 +105,40 @@ class _EnhancedVolunteerSchedulePageState
     }
   }
 
+  Future<List<VolunteerOpportunity>> _fetchMyOpportunities() async {
+    if (widget.opportunityType != null) {
+      return widget.apiClient.getMyVolunteerOpportunities(
+        context,
+        status: null,
+        opportunityType: widget.opportunityType,
+      );
+    }
+
+    final results = await Future.wait([
+      widget.apiClient.getMyVolunteerOpportunities(
+        context,
+        status: null,
+        opportunityType: OpportunityExperience.event.apiType,
+      ),
+      widget.apiClient.getMyVolunteerOpportunities(
+        context,
+        status: null,
+        opportunityType: OpportunityExperience.volunteer.apiType,
+      ),
+    ]);
+
+    return [
+      ...results[0],
+      ...results[1],
+    ]..sort((a, b) {
+        final dateComparison = a.date.compareTo(b.date);
+        if (dateComparison != 0) return dateComparison;
+        final aStart = a.startTime ?? a.date;
+        final bStart = b.startTime ?? b.date;
+        return aStart.compareTo(bStart);
+      });
+  }
+
   List<VolunteerOpportunity> _getEventsForDay(DateTime day) {
     return _myOpportunities.where((opportunity) {
       return _isSameDay(opportunity.date, day);
@@ -119,6 +149,17 @@ class _EnhancedVolunteerSchedulePageState
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
+  String _localized(String english, String japanese) {
+    return Localizations.localeOf(context).languageCode == 'ja'
+        ? japanese
+        : english;
+  }
+
+  String get _scheduleTitle => _localized('My Schedule', '予定');
+  String get _opportunitiesLabel => _localized('Opportunities', '募集・イベント');
+  String get _noOpportunitiesLabel =>
+      _localized('No opportunities scheduled', '予定されている募集・イベントはありません');
+
   void _openOpportunityDetails(VolunteerOpportunity opportunity) {
     Navigator.push(
       context,
@@ -126,7 +167,7 @@ class _EnhancedVolunteerSchedulePageState
         builder: (context) => VolunteerOpportunityDetailsPage(
           apiClient: widget.apiClient,
           opportunity: opportunity,
-          experience: widget.experience,
+          experience: opportunity.experience,
         ),
       ),
     );
@@ -308,7 +349,7 @@ class _EnhancedVolunteerSchedulePageState
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  l10n.myVolunteerSchedule,
+                  _scheduleTitle,
                   style: TextStyle(
                     color: colorScheme.onPrimary,
                     fontSize: 22,
@@ -403,7 +444,6 @@ class _EnhancedVolunteerSchedulePageState
     required String monthLabel,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
-    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -428,7 +468,7 @@ class _EnhancedVolunteerSchedulePageState
             const SizedBox(width: 4),
             Flexible(
               child: Text(
-                '$monthEvents ${l10n.volunteerOpportunities}',
+                '$monthEvents $_opportunitiesLabel',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
@@ -536,7 +576,7 @@ class _EnhancedVolunteerSchedulePageState
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            l10n.volunteerOpportunities,
+                            _opportunitiesLabel,
                             style: TextStyle(
                               color: colorScheme.onPrimary.withOpacity(0.7),
                             ),
@@ -574,7 +614,7 @@ class _EnhancedVolunteerSchedulePageState
                     child: Padding(
                       padding: const EdgeInsets.only(top: 4),
                       child: Text(
-                        l10n.noVolunteerOpportunities,
+                        _noOpportunitiesLabel,
                         style: TextStyle(
                           color: colorScheme.onPrimary.withOpacity(0.7),
                         ),
@@ -842,7 +882,7 @@ class _EnhancedVolunteerSchedulePageState
             ),
             const SizedBox(height: 16),
             Text(
-              AppLocalizations.of(context)!.noVolunteerActivities,
+              _noOpportunitiesLabel,
               style: TextStyle(
                 color: Colors.white.withOpacity(0.7),
                 fontSize: 18,
@@ -911,7 +951,7 @@ class _EnhancedVolunteerSchedulePageState
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    '${opportunities.length} ${AppLocalizations.of(context)!.volunteerOpportunities}',
+                    '${opportunities.length} $_opportunitiesLabel',
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.8),
                       fontSize: 12,
@@ -971,7 +1011,7 @@ class _EnhancedVolunteerSchedulePageState
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
-                  Icons.volunteer_activism,
+                  opportunity.experience.createIcon,
                   color: _getStatusColor(opportunity.participantStatus),
                   size: 18,
                 ),
@@ -1069,7 +1109,7 @@ class _EnhancedVolunteerSchedulePageState
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
-                    Icons.volunteer_activism,
+                    opportunity.experience.createIcon,
                     color: _getStatusColor(opportunity.participantStatus),
                     size: 20,
                   ),

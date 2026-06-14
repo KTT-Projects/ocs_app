@@ -1,4 +1,4 @@
-const String _hostUrl = 'https://ocs.kttprojects.com';
+const String _hostUrl = 'https://kamilander.com';
 
 class VolunteerReflectionImage {
   final int id;

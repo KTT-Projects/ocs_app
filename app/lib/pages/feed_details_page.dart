@@ -11,7 +11,7 @@ class FeedDetailsPage extends StatefulWidget {
   final Feed feed;
 
   const FeedDetailsPage({Key? key, required this.apiClient, required this.feed})
-    : super(key: key);
+      : super(key: key);
 
   @override
   State<FeedDetailsPage> createState() => _FeedDetailsPageState();
@@ -21,7 +21,7 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
   bool _isLoadingMembers = true;
   String? _error;
   List<Map<String, dynamic>>? _members;
-  static const String _hostUrl = 'https://ocs.kttprojects.com';
+  static const String _hostUrl = 'https://kamilander.com';
   Timer? _refreshTimer;
   bool _isFetchingMembers = false;
   static final Map<int, List<Map<String, dynamic>>> _memberCache = {};
@@ -75,7 +75,8 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
       _isLoadingMembers = false;
     }
     _startPeriodicRefresh();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadMembers(showLoading: _members == null));
+    WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _loadMembers(showLoading: _members == null));
   }
 
   @override
@@ -213,7 +214,9 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
                             Center(
                               child: Text(
                                 widget.feed.displayName,
-                                style: Theme.of(context).textTheme.headlineMedium
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium
                                     ?.copyWith(
                                       color: Theme.of(
                                         context,
@@ -254,7 +257,8 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
                               Text(
                                 widget.feed.rules!,
                                 style: TextStyle(
-                                  color: Theme.of(context).colorScheme.onPrimary,
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
                                 ),
                               ),
                             ],
@@ -285,62 +289,81 @@ class _FeedDetailsPageState extends State<FeedDetailsPage> {
                                 ),
                               )
                             else if (_members != null && _members!.isNotEmpty)
-                          Column(
-                            children: _members!
-                                .map(
-                                  (m) => Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 4,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        _buildAvatar(
-                                          imageUrl: (m['avatar_url'] as String?),
-                                          displayName: (m['display_name'] ?? '').toString(),
-                                          radius: 16,
+                              Column(
+                                children: _members!
+                                    .map(
+                                      (m) => Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 4,
                                         ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          child: Text(
-                                            m['display_name'] ?? '',
-                                            style: TextStyle(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.onPrimary,
+                                        child: Row(
+                                          children: [
+                                            _buildAvatar(
+                                              imageUrl:
+                                                  (m['avatar_url'] as String?),
+                                              displayName:
+                                                  (m['display_name'] ?? '')
+                                                      .toString(),
+                                              radius: 16,
                                             ),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                        if (m['role'] != null && (m['role'] as String).isNotEmpty)
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                            decoration: BoxDecoration(
-                                              color: Theme.of(context).colorScheme.background.withOpacity(0.18),
-                                              borderRadius: BorderRadius.circular(10),
-                                              border: Border.all(
-                                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.2),
+                                            const SizedBox(width: 10),
+                                            Expanded(
+                                              child: Text(
+                                                m['display_name'] ?? '',
+                                                style: TextStyle(
+                                                  color: Theme.of(
+                                                    context,
+                                                  ).colorScheme.onPrimary,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
-                                            child: Text(
-                                              m['role'],
-                                              style: TextStyle(
-                                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w600,
+                                            if (m['role'] != null &&
+                                                (m['role'] as String)
+                                                    .isNotEmpty)
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 8,
+                                                        vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .background
+                                                      .withOpacity(0.18),
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                  border: Border.all(
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onPrimary
+                                                        .withOpacity(0.2),
+                                                  ),
+                                                ),
+                                                child: Text(
+                                                  m['role'],
+                                                  style: TextStyle(
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onPrimary
+                                                        .withOpacity(0.8),
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                          )
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                              )
                             else
                               Text(
                                 '-',
                                 style: TextStyle(
-                                  color: Theme.of(context).colorScheme.onPrimary,
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
                                 ),
                               ),
                           ],

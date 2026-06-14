@@ -7,13 +7,15 @@ import '../services/api_client.dart';
 import '../widgets/post_list_item.dart';
 import '../widgets/comment_list_item.dart';
 import '../widgets/glassmorphic_ui.dart';
+import '../widgets/report_content_dialog.dart';
 import 'user_profile_page.dart';
 
 class PostDetailsPage extends StatefulWidget {
   final ApiClient apiClient;
   final FeedPost post;
 
-  const PostDetailsPage({super.key, required this.apiClient, required this.post});
+  const PostDetailsPage(
+      {super.key, required this.apiClient, required this.post});
 
   @override
   State<PostDetailsPage> createState() => _PostDetailsPageState();
@@ -73,7 +75,8 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
           _error = null;
         });
       }
-      final comments = await widget.apiClient.getComments(context, widget.post.id);
+      final comments =
+          await widget.apiClient.getComments(context, widget.post.id);
       if (mounted) {
         setState(() {
           _comments = comments;
@@ -115,7 +118,6 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
     }
   }
 
-  @override
   void _openUserProfile(int userId) {
     Navigator.push(
       context,
@@ -126,6 +128,34 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _reportContent(String entityType, int entityId) async {
+    final result = await GlassmorphicUI.showDialog<ReportContentResult>(
+      context: context,
+      width: 360,
+      child: const ReportContentDialog(),
+    );
+    if (result == null || !mounted) return;
+
+    try {
+      await widget.apiClient.reportContent(
+        context,
+        entityType: entityType,
+        entityId: entityId,
+        reason: result.reason,
+        details: result.details,
+      );
+      if (!mounted) return;
+      GlassmorphicUI.showGlassSnackBar(context, 'Report submitted');
+    } catch (e) {
+      if (!mounted) return;
+      GlassmorphicUI.showGlassSnackBar(
+        context,
+        e.toString(),
+        isError: true,
+      );
+    }
   }
 
   Future<void> _vote(FeedPost post, String voteType) async {
@@ -208,6 +238,10 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                         post: widget.post,
                         onVote: _vote,
                         onUserTap: _openUserProfile,
+                        onReport: (post) => _reportContent(
+                          'feed_post',
+                          post.id,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       if (_isLoading)
@@ -230,6 +264,10 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                           (c) => CommentListItem(
                             comment: c,
                             onUserTap: _openUserProfile,
+                            onReport: (comment) => _reportContent(
+                              'comment',
+                              comment.id,
+                            ),
                           ),
                         ),
                     ],
@@ -248,59 +286,80 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
                             width: width,
                             child: Row(
                               children: [
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-                              ),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: TextField(
-                                controller: _controller,
-                                decoration: InputDecoration(
-                                  hintText: 'Add a comment...',
-                                  hintStyle: TextStyle(
-                                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
-                                  ),
-                                  border: InputBorder.none,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 14,
+                                Expanded(
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .background
+                                          .withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimary
+                                            .withOpacity(0.3),
+                                      ),
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(20),
+                                      child: TextField(
+                                        controller: _controller,
+                                        decoration: InputDecoration(
+                                          hintText: 'Add a comment...',
+                                          hintStyle: TextStyle(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onPrimary
+                                                .withOpacity(0.7),
+                                          ),
+                                          border: InputBorder.none,
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 14,
+                                          ),
+                                        ),
+                                        style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onPrimary,
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.onPrimary,
+                                const SizedBox(width: 8),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .background
+                                        .withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary
+                                          .withOpacity(0.3),
+                                    ),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(20),
+                                    child: IconButton(
+                                      icon: Icon(
+                                        Icons.send,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimary,
+                                      ),
+                                      onPressed: _submit,
+                                      constraints: const BoxConstraints(
+                                          minWidth: 48, minHeight: 48),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.background.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
-                            ),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
-                            child: IconButton(
-                              icon: Icon(
-                                Icons.send,
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              ),
-                              onPressed: _submit,
-                              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-                            ),
-                          ),
-                        ),
-                      ],
+                              ],
                             ),
                           ),
                         );

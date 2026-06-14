@@ -27,6 +27,8 @@ dependencies:
   path_provider: ^2.1.5
   gallery_saver: ^2.3.2
   flutter_local_notifications: ^17.2.4
+  firebase_core: ^4.8.0
+  firebase_messaging: ^16.2.1
 
 dev_dependencies:
   flutter_test:

@@ -13,6 +13,7 @@ class PostListItem extends StatefulWidget {
   final void Function(FeedPost)? onComments;
   final void Function(int userId)? onUserTap;
   final void Function(int feedId)? onFeedTap;
+  final void Function(FeedPost)? onReport;
   final bool showFeedName;
 
   const PostListItem({
@@ -22,6 +23,7 @@ class PostListItem extends StatefulWidget {
     this.onComments,
     this.onUserTap,
     this.onFeedTap,
+    this.onReport,
     this.showFeedName = false,
   });
 
@@ -37,7 +39,8 @@ class _PostListItemState extends State<PostListItem> {
 
   bool get _shouldShowToggle {
     final lineCount = widget.post.content.split('\n').length;
-    return lineCount > _collapsedLines || widget.post.content.length > _lengthThreshold;
+    return lineCount > _collapsedLines ||
+        widget.post.content.length > _lengthThreshold;
   }
 
   @override
@@ -58,11 +61,15 @@ class _PostListItemState extends State<PostListItem> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final neutralVoteColor = Theme.of(context).colorScheme.onPrimary.withOpacity(0.7);
+    final neutralVoteColor =
+        Theme.of(context).colorScheme.onPrimary.withOpacity(0.7);
     final activeUpvoteColor = Colors.green.shade400;
     final activeDownvoteColor = Colors.orange.shade400;
-    final upvoteColor = widget.post.userVote == 'upvote' ? activeUpvoteColor : neutralVoteColor;
-    final downvoteColor = widget.post.userVote == 'downvote' ? activeDownvoteColor : neutralVoteColor;
+    final upvoteColor =
+        widget.post.userVote == 'upvote' ? activeUpvoteColor : neutralVoteColor;
+    final downvoteColor = widget.post.userVote == 'downvote'
+        ? activeDownvoteColor
+        : neutralVoteColor;
     return LayoutBuilder(
       builder: (context, constraints) {
         final maxWidth = constraints.maxWidth;
@@ -76,10 +83,14 @@ class _PostListItemState extends State<PostListItem> {
                 width: width,
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+                  color:
+                      Theme.of(context).colorScheme.background.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onPrimary
+                        .withOpacity(0.3),
                   ),
                 ),
                 child: ClipRRect(
@@ -92,10 +103,13 @@ class _PostListItemState extends State<PostListItem> {
                         Row(
                           children: [
                             GestureDetector(
-                              onTap: widget.onUserTap == null ? null : () => widget.onUserTap!(widget.post.userId),
+                              onTap: widget.onUserTap == null
+                                  ? null
+                                  : () => widget.onUserTap!(widget.post.userId),
                               child: CircleAvatar(
                                 radius: 16,
-                                backgroundColor: Theme.of(context).colorScheme.secondary,
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.secondary,
                                 child: widget.post.avatarUrl != null
                                     ? ClipOval(
                                         child: Image.network(
@@ -109,7 +123,9 @@ class _PostListItemState extends State<PostListItem> {
                                         widget.post.displayName[0],
                                         style: TextStyle(
                                           fontSize: 16,
-                                          color: Theme.of(context).colorScheme.onSecondary,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSecondary,
                                         ),
                                       ),
                               ),
@@ -122,26 +138,47 @@ class _PostListItemState extends State<PostListItem> {
                                   Text(
                                     widget.post.displayName,
                                     style: TextStyle(
-                                      color: Theme.of(context).colorScheme.onPrimary,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   Text(
                                     widget.post.getTimeAgo(),
                                     style: TextStyle(
-                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary
+                                          .withOpacity(0.7),
                                       fontSize: 12,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
+                            if (widget.onReport != null)
+                              IconButton(
+                                tooltip: 'Report',
+                                icon: Icon(
+                                  Icons.flag_outlined,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimary
+                                      .withOpacity(0.72),
+                                  size: 20,
+                                ),
+                                onPressed: () => widget.onReport!(widget.post),
+                              ),
                           ],
                         ),
-                        if (widget.showFeedName && widget.post.feedDisplayName != null) ...[
+                        if (widget.showFeedName &&
+                            widget.post.feedDisplayName != null) ...[
                           const SizedBox(height: 4),
                           GestureDetector(
-                            onTap: widget.onFeedTap == null ? null : () => widget.onFeedTap!(widget.post.feedId),
+                            onTap: widget.onFeedTap == null
+                                ? null
+                                : () => widget.onFeedTap!(widget.post.feedId),
                             child: Text(
                               widget.post.feedDisplayName!,
                               style: TextStyle(
@@ -155,7 +192,10 @@ class _PostListItemState extends State<PostListItem> {
                         const SizedBox(height: 16),
                         Text(
                           widget.post.title,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(
                                 color: Theme.of(context).colorScheme.onPrimary,
                               ),
                         ),
@@ -170,7 +210,9 @@ class _PostListItemState extends State<PostListItem> {
                             decoration: TextDecoration.underline,
                           ),
                           maxLines: _expanded ? null : _collapsedLines,
-                          overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                          overflow: _expanded
+                              ? TextOverflow.visible
+                              : TextOverflow.ellipsis,
                           onOpen: (link) async {
                             final uri = Uri.parse(link.url);
                             if (await canLaunchUrl(uri)) {
@@ -182,13 +224,15 @@ class _PostListItemState extends State<PostListItem> {
                           Align(
                             alignment: Alignment.centerLeft,
                             child: GestureDetector(
-                              onTap: () => setState(() => _expanded = !_expanded),
+                              onTap: () =>
+                                  setState(() => _expanded = !_expanded),
                               child: Padding(
                                 padding: const EdgeInsets.only(top: 4),
                                 child: Text(
                                   _expanded ? l10n.showLess : l10n.showMore,
                                   style: TextStyle(
-                                    color: Theme.of(context).colorScheme.secondary,
+                                    color:
+                                        Theme.of(context).colorScheme.secondary,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -211,7 +255,8 @@ class _PostListItemState extends State<PostListItem> {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: ConstrainedBox(
-                                constraints: const BoxConstraints(maxHeight: 300),
+                                constraints:
+                                    const BoxConstraints(maxHeight: 300),
                                 child: Hero(
                                   tag: widget.post.mediaUrl!,
                                   child: Image.network(
@@ -231,7 +276,8 @@ class _PostListItemState extends State<PostListItem> {
                                 Icons.arrow_upward,
                                 color: upvoteColor,
                               ),
-                              onPressed: () => widget.onVote(widget.post, 'upvote'),
+                              onPressed: () =>
+                                  widget.onVote(widget.post, 'upvote'),
                             ),
                             Text(
                               widget.post.upvotes.toString(),
@@ -245,26 +291,36 @@ class _PostListItemState extends State<PostListItem> {
                                 Icons.arrow_downward,
                                 color: downvoteColor,
                               ),
-                              onPressed: () => widget.onVote(widget.post, 'downvote'),
+                              onPressed: () =>
+                                  widget.onVote(widget.post, 'downvote'),
                             ),
                             const Spacer(),
                             InkWell(
-                              onTap: widget.onComments == null ? null : () => widget.onComments!(widget.post),
+                              onTap: widget.onComments == null
+                                  ? null
+                                  : () => widget.onComments!(widget.post),
                               borderRadius: BorderRadius.circular(12),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 8),
                                 child: Row(
                                   children: [
                                     Icon(
                                       Icons.comment,
                                       size: 16,
-                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary
+                                          .withOpacity(0.7),
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
                                       widget.post.commentCount.toString(),
                                       style: TextStyle(
-                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimary
+                                            .withOpacity(0.7),
                                       ),
                                     ),
                                   ],

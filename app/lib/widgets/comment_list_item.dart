@@ -7,7 +7,13 @@ import '../models/comment.dart';
 class CommentListItem extends StatelessWidget {
   final Comment comment;
   final void Function(int userId)? onUserTap;
-  const CommentListItem({super.key, required this.comment, this.onUserTap});
+  final void Function(Comment)? onReport;
+  const CommentListItem({
+    super.key,
+    required this.comment,
+    this.onUserTap,
+    this.onReport,
+  });
 
   Future<void> _openLink(LinkableElement link) async {
     final uri = Uri.parse(link.url);
@@ -31,10 +37,14 @@ class CommentListItem extends StatelessWidget {
                 width: width,
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.background.withOpacity(0.2),
+                  color:
+                      Theme.of(context).colorScheme.background.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.3),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onPrimary
+                        .withOpacity(0.3),
                   ),
                 ),
                 child: ClipRRect(
@@ -47,10 +57,13 @@ class CommentListItem extends StatelessWidget {
                         Row(
                           children: [
                             GestureDetector(
-                              onTap: onUserTap == null ? null : () => onUserTap!(comment.userId),
+                              onTap: onUserTap == null
+                                  ? null
+                                  : () => onUserTap!(comment.userId),
                               child: CircleAvatar(
                                 radius: 12,
-                                backgroundColor: Theme.of(context).colorScheme.secondary,
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.secondary,
                                 child: comment.avatarUrl != null
                                     ? ClipOval(
                                         child: Image.network(
@@ -61,10 +74,14 @@ class CommentListItem extends StatelessWidget {
                                         ),
                                       )
                                     : Text(
-                                        comment.displayName.isNotEmpty ? comment.displayName[0] : '?',
+                                        comment.displayName.isNotEmpty
+                                            ? comment.displayName[0]
+                                            : '?',
                                         style: TextStyle(
                                           fontSize: 12,
-                                          color: Theme.of(context).colorScheme.onSecondary,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSecondary,
                                         ),
                                       ),
                               ),
@@ -77,20 +94,38 @@ class CommentListItem extends StatelessWidget {
                                   Text(
                                     comment.displayName,
                                     style: TextStyle(
-                                      color: Theme.of(context).colorScheme.onPrimary,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   Text(
                                     comment.getTimeAgo(),
                                     style: TextStyle(
-                                      color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary
+                                          .withOpacity(0.7),
                                       fontSize: 12,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
+                            if (onReport != null)
+                              IconButton(
+                                tooltip: 'Report',
+                                icon: Icon(
+                                  Icons.flag_outlined,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimary
+                                      .withOpacity(0.72),
+                                  size: 18,
+                                ),
+                                onPressed: () => onReport!(comment),
+                              ),
                           ],
                         ),
                         const SizedBox(height: 8),

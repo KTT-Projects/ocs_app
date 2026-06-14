@@ -8,18 +8,32 @@ class PushNotificationService
   private $serviceAccountJson;
   private $accessToken = null;
   private $accessTokenExpiresAt = 0;
+  private $preferenceTableEnsured = false;
 
   private const FCM_SCOPE = 'https://www.googleapis.com/auth/firebase.messaging';
   private const DEFAULT_TOKEN_URI = 'https://oauth2.googleapis.com/token';
   private const VALID_PLATFORMS = ['ios', 'android', 'web'];
   private const MAX_ATTEMPTS = 3;
+  private const PREFERENCE_CATEGORIES = [
+    'feed_posts',
+    'feed_comments',
+    'events',
+    'volunteer_opportunities',
+    'opportunity_applications',
+    'study_questions',
+    'study_answers',
+    'study_best_answers'
+  ];
 
   public function __construct($db)
   {
     $this->conn = $db;
-    $this->projectId = $this->env('FCM_PROJECT_ID');
-    $this->serviceAccountPath = $this->env('GOOGLE_APPLICATION_CREDENTIALS') ?: $this->env('FCM_SERVICE_ACCOUNT_PATH');
-    $this->serviceAccountJson = $this->env('FCM_SERVICE_ACCOUNT_JSON');
+    $config = $this->loadLocalConfig();
+    $this->projectId = $this->env('FCM_PROJECT_ID') ?: ($config['FCM_PROJECT_ID'] ?? null);
+    $this->serviceAccountPath = $this->env('GOOGLE_APPLICATION_CREDENTIALS')
+      ?: $this->env('FCM_SERVICE_ACCOUNT_PATH')
+      ?: ($config['FCM_SERVICE_ACCOUNT_PATH'] ?? null);
+    $this->serviceAccountJson = $this->env('FCM_SERVICE_ACCOUNT_JSON') ?: ($config['FCM_SERVICE_ACCOUNT_JSON'] ?? null);
     if (empty($this->serviceAccountJson) && $this->env('FCM_SERVICE_ACCOUNT_JSON_BASE64')) {
       $decoded = base64_decode($this->env('FCM_SERVICE_ACCOUNT_JSON_BASE64'), true);
       $this->serviceAccountJson = $decoded === false ? null : $decoded;
@@ -119,11 +133,79 @@ class PushNotificationService
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
+  public function getNotificationPreferences($userId)
+  {
+    $this->ensurePreferenceTable();
+    $stmt = $this->conn->prepare(
+      "SELECT category, in_app_enabled, push_enabled
+       FROM notification_preferences
+       WHERE user_id = :user_id"
+    );
+    $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+    $stmt->execute();
+
+    $stored = [];
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+      $stored[$row['category']] = [
+        'category' => $row['category'],
+        'in_app_enabled' => intval($row['in_app_enabled']) === 1,
+        'push_enabled' => intval($row['push_enabled']) === 1
+      ];
+    }
+
+    $preferences = [];
+    foreach (self::PREFERENCE_CATEGORIES as $category) {
+      $preferences[] = $stored[$category] ?? [
+        'category' => $category,
+        'in_app_enabled' => true,
+        'push_enabled' => true
+      ];
+    }
+    return $preferences;
+  }
+
+  public function saveNotificationPreferences($userId, array $preferences)
+  {
+    $this->ensurePreferenceTable();
+    $allowed = array_flip(self::PREFERENCE_CATEGORIES);
+    $query = "INSERT INTO notification_preferences
+                (user_id, category, in_app_enabled, push_enabled)
+              VALUES
+                (:user_id, :category, :in_app_enabled, :push_enabled)
+              ON DUPLICATE KEY UPDATE
+                in_app_enabled = VALUES(in_app_enabled),
+                push_enabled = VALUES(push_enabled),
+                updated_at = CURRENT_TIMESTAMP";
+    $stmt = $this->conn->prepare($query);
+
+    foreach ($preferences as $preference) {
+      if (!is_array($preference)) continue;
+      $category = $preference['category'] ?? '';
+      if (!isset($allowed[$category])) continue;
+
+      $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+      $stmt->bindValue(':category', $category);
+      $stmt->bindValue(':in_app_enabled', $this->boolToInt($preference['in_app_enabled'] ?? true), PDO::PARAM_INT);
+      $stmt->bindValue(':push_enabled', $this->boolToInt($preference['push_enabled'] ?? true), PDO::PARAM_INT);
+      $stmt->execute();
+    }
+
+    return $this->getNotificationPreferences($userId);
+  }
+
   public function sendToUsers(array $userIds, $type, $title, $body, array $data = [], $actorUserId = null)
   {
     $userIds = $this->normalizeUserIds($userIds);
     if (empty($userIds)) {
       return ['queued' => 0, 'sent' => 0, 'failed' => 0, 'skipped' => 0];
+    }
+
+    $category = $this->preferenceCategoryForType($type, $data);
+    if ($category !== null) {
+      $userIds = $this->filterUserIdsByPreference($userIds, $category, 'push_enabled');
+      if (empty($userIds)) {
+        return ['queued' => 0, 'sent' => 0, 'failed' => 0, 'skipped' => 0];
+      }
     }
 
     $devices = $this->getActiveDevicesForUsers($userIds);
@@ -150,6 +232,11 @@ class PushNotificationService
     }
 
     return $stats;
+  }
+
+  public static function notificationPreferenceCategories()
+  {
+    return self::PREFERENCE_CATEGORIES;
   }
 
   public function flushPending($limit = 50)
@@ -336,6 +423,96 @@ class PushNotificationService
     $stmt = $this->conn->prepare($query);
     $stmt->execute($userIds);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+
+  private function filterUserIdsByPreference(array $userIds, $category, $column)
+  {
+    if (!in_array($column, ['in_app_enabled', 'push_enabled'], true)) {
+      return $userIds;
+    }
+    if (!in_array($category, self::PREFERENCE_CATEGORIES, true)) {
+      return $userIds;
+    }
+
+    try {
+      $this->ensurePreferenceTable();
+      $placeholders = implode(',', array_fill(0, count($userIds), '?'));
+      $query = "SELECT user_id, $column AS enabled
+                FROM notification_preferences
+                WHERE category = ?
+                  AND user_id IN ($placeholders)";
+      $stmt = $this->conn->prepare($query);
+      $stmt->execute(array_merge([$category], $userIds));
+
+      $disabled = [];
+      foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        if (intval($row['enabled']) !== 1) {
+          $disabled[intval($row['user_id'])] = true;
+        }
+      }
+
+      return array_values(array_filter($userIds, function ($userId) use ($disabled) {
+        return !isset($disabled[intval($userId)]);
+      }));
+    } catch (Exception $e) {
+      error_log('Failed to filter notification preferences: ' . $e->getMessage());
+      return $userIds;
+    }
+  }
+
+  private function preferenceCategoryForType($type, array $data)
+  {
+    $value = (string)($type ?: ($data['type'] ?? ''));
+    switch ($value) {
+      case 'feed_post':
+        return 'feed_posts';
+      case 'feed_comment':
+        return 'feed_comments';
+      case 'event_created':
+        return 'events';
+      case 'volunteer_created':
+        return 'volunteer_opportunities';
+      case 'event_application':
+      case 'volunteer_application':
+        return 'opportunity_applications';
+      case 'study_question':
+        return 'study_questions';
+      case 'study_answer':
+        return 'study_answers';
+      case 'study_best_answer':
+        return 'study_best_answers';
+      default:
+        return null;
+    }
+  }
+
+  private function ensurePreferenceTable()
+  {
+    if ($this->preferenceTableEnsured) {
+      return;
+    }
+
+    $query = "CREATE TABLE IF NOT EXISTS notification_preferences (
+                user_id INT NOT NULL,
+                category VARCHAR(50) NOT NULL,
+                in_app_enabled BOOLEAN DEFAULT TRUE,
+                push_enabled BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (user_id, category),
+                KEY idx_notification_preferences_category (category),
+                FOREIGN KEY (user_id) REFERENCES users (id)
+              )";
+    $this->conn->exec($query);
+    $this->preferenceTableEnsured = true;
+  }
+
+  private function boolToInt($value)
+  {
+    if (is_string($value)) {
+      return in_array(strtolower($value), ['1', 'true', 'yes', 'on'], true) ? 1 : 0;
+    }
+    return $value ? 1 : 0;
   }
 
   private function getAccessToken()
@@ -535,5 +712,21 @@ class PushNotificationService
   {
     $value = getenv($key);
     return $value === false ? null : $value;
+  }
+
+  private function loadLocalConfig()
+  {
+    $paths = [
+      dirname(__DIR__, 4) . '/.config/ocs/push.php',
+      getenv('HOME') ? rtrim(getenv('HOME'), '/') . '/.config/ocs/push.php' : null
+    ];
+
+    foreach ($paths as $path) {
+      if ($path && is_readable($path)) {
+        $config = include $path;
+        return is_array($config) ? $config : [];
+      }
+    }
+    return [];
   }
 }

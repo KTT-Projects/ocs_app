@@ -12,7 +12,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once 'config/Database.php';
 require_once 'config/Auth.php';
 require_once 'config/Response.php';
-require_once 'config/PushNotificationService.php';
+require_once 'config/ModerationService.php';
+
+$pushNotificationServicePath = __DIR__ . '/config/PushNotificationService.php';
+if (file_exists($pushNotificationServicePath)) {
+  require_once $pushNotificationServicePath;
+}
+
+if (!class_exists('PushNotificationService')) {
+  class PushNotificationService
+  {
+    public function __construct($db) {}
+    public function getActiveUserIdsExcept($excludedUserId) { return []; }
+    public function getDisplayName($userId) { return 'Someone'; }
+    public function sendToUsers(array $userIds, $type, $title, $body, array $data = [], $actorUserId = null)
+    {
+      return ['queued' => 0, 'sent' => 0, 'failed' => 0, 'skipped' => 0];
+    }
+  }
+}
 
 class StudyController
 {
@@ -20,6 +38,7 @@ class StudyController
   private $auth;
   private $conn;
   private $push;
+  private $moderation;
   private $hasQuestionMediaTable = null;
   private const BEST_ANSWER_POINTS = 50;
   private const BEST_ANSWER_EVENT_TYPE = 'BEST_ANSWER';
@@ -33,6 +52,7 @@ class StudyController
     $this->conn = $this->db->getConnection();
     $this->auth = new Auth($this->conn);
     $this->push = new PushNotificationService($this->conn);
+    $this->moderation = new ModerationService($this->conn);
   }
 
   public function handleRequest()
@@ -116,6 +136,7 @@ class StudyController
 
     $where = [];
     $params = [];
+    $where[] = "sq.moderation_status = 'approved'";
     if ($q !== '') {
       // Search over title/body/tags.
       $where[] = "(sq.title LIKE :q OR sq.body LIKE :q OR sq.category LIKE :q)";
@@ -149,12 +170,13 @@ class StudyController
                      up.display_name,
                      up.avatar_url,
                      COALESCE(ac.answer_count, 0) AS answer_count,
-                     (SELECT sa2.id FROM study_answers sa2 WHERE sa2.question_id = sq.id AND sa2.is_best = 1 LIMIT 1) AS best_answer_id
+                     (SELECT sa2.id FROM study_answers sa2 WHERE sa2.question_id = sq.id AND sa2.is_best = 1 AND sa2.moderation_status = 'approved' LIMIT 1) AS best_answer_id
               FROM study_questions sq
               JOIN user_profiles up ON up.user_id = sq.author_user_id
               LEFT JOIN (
                 SELECT question_id, COUNT(*) AS answer_count
                 FROM study_answers
+                WHERE moderation_status = 'approved'
                 GROUP BY question_id
               ) ac ON ac.question_id = sq.id";
 
@@ -213,11 +235,12 @@ class StudyController
                      sq.updated_at,
                      up.display_name,
                      up.avatar_url,
-                     (SELECT COUNT(*) FROM study_answers sa WHERE sa.question_id = sq.id) AS answer_count,
-                     (SELECT sa2.id FROM study_answers sa2 WHERE sa2.question_id = sq.id AND sa2.is_best = 1 LIMIT 1) AS best_answer_id
+                     (SELECT COUNT(*) FROM study_answers sa WHERE sa.question_id = sq.id AND sa.moderation_status = 'approved') AS answer_count,
+                     (SELECT sa2.id FROM study_answers sa2 WHERE sa2.question_id = sq.id AND sa2.is_best = 1 AND sa2.moderation_status = 'approved' LIMIT 1) AS best_answer_id
               FROM study_questions sq
               JOIN user_profiles up ON up.user_id = sq.author_user_id
               WHERE sq.id = :question_id
+                AND sq.moderation_status = 'approved'
               LIMIT 1";
     $stmt = $this->conn->prepare($query);
     $stmt->bindValue(':question_id', $questionId, PDO::PARAM_INT);
@@ -269,6 +292,7 @@ class StudyController
               FROM study_answers sa
               JOIN user_profiles up ON up.user_id = sa.author_user_id
               WHERE sa.question_id = :question_id
+                AND sa.moderation_status = 'approved'
               ORDER BY sa.is_best DESC, sa.created_at ASC";
     $stmt = $this->conn->prepare($query);
     $stmt->bindValue(':question_id', $questionId, PDO::PARAM_INT);
@@ -468,20 +492,40 @@ class StudyController
       }
     }
 
-    $query = "INSERT INTO study_questions (author_user_id, title, body, media_url, category, status)
-              VALUES (:author_user_id, :title, :body, :media_url, :category, 'open')";
+    $moderationResult = $this->moderation->moderateText($userId, 'study_question', [
+      'title' => $title,
+      'body' => $body,
+      'category' => $tagsValue,
+    ]);
+    if ($moderationResult['decision'] === 'blocked') {
+      Response::error($moderationResult['message'], 400, ['reasons' => $moderationResult['reasons']]);
+      return;
+    }
+    $moderationStatus = $moderationResult['status'];
+    $moderationReason = !empty($moderationResult['reasons']) ? implode(',', $moderationResult['reasons']) : null;
+
+    $query = "INSERT INTO study_questions (author_user_id, title, body, media_url, category, status, moderation_status, moderation_reason, moderated_at)
+              VALUES (:author_user_id, :title, :body, :media_url, :category, 'open', :moderation_status, :moderation_reason, CURRENT_TIMESTAMP)";
     $stmt = $this->conn->prepare($query);
     $stmt->bindValue(':author_user_id', $userId, PDO::PARAM_INT);
     $stmt->bindValue(':title', $title);
     $stmt->bindValue(':body', $body);
     $stmt->bindValue(':media_url', !empty($mediaUrls) ? $mediaUrls[0] : null);
     $stmt->bindValue(':category', $tagsValue);
+    $stmt->bindValue(':moderation_status', $moderationStatus);
+    $stmt->bindValue(':moderation_reason', $moderationReason);
     $stmt->execute();
     $questionId = intval($this->conn->lastInsertId());
+    $this->moderation->recordAutomaticCase('study_question', $questionId, $userId, $moderationResult);
     $this->insertQuestionMedia($questionId, $mediaUrls);
-    $this->notifyStudyQuestionCreated($userId, $questionId, $title);
+    if ($moderationStatus === 'approved') {
+      $this->notifyStudyQuestionCreated($userId, $questionId, $title);
+    }
 
-    Response::success(['id' => $questionId], 'Question created successfully');
+    Response::success([
+      'id' => $questionId,
+      'moderation_status' => $moderationStatus,
+    ], $moderationStatus === 'pending' ? 'Question submitted for review' : 'Question created successfully');
   }
 
   private function createAnswer($userId)
@@ -508,7 +552,7 @@ class StudyController
       return;
     }
 
-    $checkQuery = "SELECT id, author_user_id, title FROM study_questions WHERE id = :question_id LIMIT 1";
+    $checkQuery = "SELECT id, author_user_id, title FROM study_questions WHERE id = :question_id AND moderation_status = 'approved' LIMIT 1";
     $checkStmt = $this->conn->prepare($checkQuery);
     $checkStmt->bindValue(':question_id', $questionId, PDO::PARAM_INT);
     $checkStmt->execute();
@@ -518,17 +562,35 @@ class StudyController
       return;
     }
 
-    $query = "INSERT INTO study_answers (question_id, author_user_id, body, is_best)
-              VALUES (:question_id, :author_user_id, :body, 0)";
+    $moderationResult = $this->moderation->moderateText($userId, 'study_answer', [
+      'body' => $body,
+    ], ['question_id' => $questionId]);
+    if ($moderationResult['decision'] === 'blocked') {
+      Response::error($moderationResult['message'], 400, ['reasons' => $moderationResult['reasons']]);
+      return;
+    }
+    $moderationStatus = $moderationResult['status'];
+    $moderationReason = !empty($moderationResult['reasons']) ? implode(',', $moderationResult['reasons']) : null;
+
+    $query = "INSERT INTO study_answers (question_id, author_user_id, body, is_best, moderation_status, moderation_reason, moderated_at)
+              VALUES (:question_id, :author_user_id, :body, 0, :moderation_status, :moderation_reason, CURRENT_TIMESTAMP)";
     $stmt = $this->conn->prepare($query);
     $stmt->bindValue(':question_id', $questionId, PDO::PARAM_INT);
     $stmt->bindValue(':author_user_id', $userId, PDO::PARAM_INT);
     $stmt->bindValue(':body', $body);
+    $stmt->bindValue(':moderation_status', $moderationStatus);
+    $stmt->bindValue(':moderation_reason', $moderationReason);
     $stmt->execute();
     $answerId = intval($this->conn->lastInsertId());
-    $this->notifyStudyAnswerCreated($userId, $question, $answerId);
+    $this->moderation->recordAutomaticCase('study_answer', $answerId, $userId, $moderationResult);
+    if ($moderationStatus === 'approved') {
+      $this->notifyStudyAnswerCreated($userId, $question, $answerId);
+    }
 
-    Response::success(['id' => $answerId], 'Answer created successfully');
+    Response::success([
+      'id' => $answerId,
+      'moderation_status' => $moderationStatus,
+    ], $moderationStatus === 'pending' ? 'Answer submitted for review' : 'Answer created successfully');
   }
 
   private function uploadQuestionMedia($userId)
@@ -599,6 +661,8 @@ class StudyController
                       FROM study_answers sa
                       JOIN study_questions sq ON sq.id = sa.question_id
                       WHERE sa.id = :answer_id
+                        AND sa.moderation_status = 'approved'
+                        AND sq.moderation_status = 'approved'
                       LIMIT 1
                       FOR UPDATE";
       $targetStmt = $this->conn->prepare($targetQuery);
@@ -625,6 +689,7 @@ class StudyController
                     FROM study_answers
                     WHERE question_id = :question_id
                       AND is_best = 1
+                      AND moderation_status = 'approved'
                     LIMIT 1
                     FOR UPDATE";
       $bestStmt = $this->conn->prepare($bestQuery);

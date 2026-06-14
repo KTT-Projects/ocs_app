@@ -12,16 +12,20 @@ import '../widgets/volunteer_sort_dialog.dart';
 import '../widgets/volunteer_filter_dialog.dart';
 import 'create_volunteer_opportunity_page.dart';
 import 'volunteer_opportunity_details_page.dart';
-import '../pages/enhanced_volunteer_schedule_page.dart';
+import 'opportunity_schedule_page.dart';
 
 class VolunteerPage extends StatefulWidget {
   final ApiClient apiClient;
   final OpportunityExperience experience;
+  final String? initialOpportunityType;
+  final bool showTypeFilter;
 
   const VolunteerPage({
     super.key,
     required this.apiClient,
     this.experience = OpportunityExperience.volunteer,
+    this.initialOpportunityType,
+    this.showTypeFilter = false,
   });
 
   @override
@@ -36,11 +40,20 @@ class _VolunteerPageState extends State<VolunteerPage> {
   Timer? _refreshTimer;
   String _sortBy = 'newest'; // 'newest', 'oldest', 'upcoming'
   String? _statusFilter; // null for all, 'open', 'filled', etc.
+  String? _typeFilter;
   String? _currentToken;
+
+  OpportunityExperience get _selectedExperience =>
+      _typeFilter == OpportunityExperience.volunteer.apiType
+          ? OpportunityExperience.volunteer
+          : OpportunityExperience.event;
 
   @override
   void initState() {
     super.initState();
+    _typeFilter = widget.showTypeFilter
+        ? widget.initialOpportunityType
+        : widget.experience.apiType;
     _currentToken = widget.apiClient.token;
     widget.apiClient.addListener(_onApiClientChanged);
     _startPeriodicRefresh();
@@ -87,12 +100,7 @@ class _VolunteerPageState extends State<VolunteerPage> {
     }
 
     try {
-      final opportunities = await widget.apiClient.getVolunteerOpportunities(
-        context,
-        status: _statusFilter,
-        sort: _sortBy,
-        opportunityType: widget.experience.apiType,
-      );
+      final opportunities = await _fetchOpportunities();
 
       if (mounted) {
         setState(() {
@@ -113,12 +121,7 @@ class _VolunteerPageState extends State<VolunteerPage> {
 
   Future<void> _loadNewOpportunities() async {
     try {
-      final newOpportunities = await widget.apiClient.getVolunteerOpportunities(
-        context,
-        sort: _sortBy,
-        status: _statusFilter,
-        opportunityType: widget.experience.apiType,
-      );
+      final newOpportunities = await _fetchOpportunities();
 
       if (mounted) {
         final normalized =
@@ -155,6 +158,58 @@ class _VolunteerPageState extends State<VolunteerPage> {
     }
   }
 
+  Future<List<VolunteerOpportunity>> _fetchOpportunities() async {
+    if (_typeFilter != null) {
+      return widget.apiClient.getVolunteerOpportunities(
+        context,
+        status: _statusFilter,
+        sort: _sortBy,
+        opportunityType: _typeFilter,
+      );
+    }
+
+    final results = await Future.wait([
+      widget.apiClient.getVolunteerOpportunities(
+        context,
+        status: _statusFilter,
+        sort: _sortBy,
+        opportunityType: OpportunityExperience.event.apiType,
+      ),
+      widget.apiClient.getVolunteerOpportunities(
+        context,
+        status: _statusFilter,
+        sort: _sortBy,
+        opportunityType: OpportunityExperience.volunteer.apiType,
+      ),
+    ]);
+
+    final opportunities = [
+      ...results[0],
+      ...results[1],
+    ];
+    opportunities.sort(_compareOpportunities);
+    return opportunities;
+  }
+
+  int _compareOpportunities(
+    VolunteerOpportunity a,
+    VolunteerOpportunity b,
+  ) {
+    switch (_sortBy) {
+      case 'oldest':
+        return a.createdAt.compareTo(b.createdAt);
+      case 'upcoming':
+        final dateComparison = a.date.compareTo(b.date);
+        if (dateComparison != 0) return dateComparison;
+        final aStart = a.startTime ?? a.date;
+        final bStart = b.startTime ?? b.date;
+        return aStart.compareTo(bStart);
+      case 'newest':
+      default:
+        return b.createdAt.compareTo(a.createdAt);
+    }
+  }
+
   VolunteerOpportunity _applyReflectionStatus(VolunteerOpportunity o) {
     if (o.reflectionCount > 0 && o.status != 'completed') {
       return o.copyWith(status: 'completed');
@@ -169,7 +224,7 @@ class _VolunteerPageState extends State<VolunteerPage> {
         builder: (context) => VolunteerOpportunityDetailsPage(
           apiClient: widget.apiClient,
           opportunity: opportunity,
-          experience: widget.experience,
+          experience: opportunity.experience,
         ),
       ),
     ).then((_) => _loadNewOpportunities());
@@ -181,7 +236,7 @@ class _VolunteerPageState extends State<VolunteerPage> {
       MaterialPageRoute(
         builder: (context) => CreateVolunteerOpportunityPage(
           apiClient: widget.apiClient,
-          experience: widget.experience,
+          experience: _selectedExperience,
         ),
       ),
     ).then((_) => _loadNewOpportunities());
@@ -191,9 +246,9 @@ class _VolunteerPageState extends State<VolunteerPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EnhancedVolunteerSchedulePage(
+        builder: (context) => OpportunitySchedulePage(
           apiClient: widget.apiClient,
-          experience: widget.experience,
+          opportunityType: _typeFilter,
         ),
       ),
     );
@@ -205,8 +260,15 @@ class _VolunteerPageState extends State<VolunteerPage> {
       width: 320,
       child: VolunteerFilterDialog(
         currentFilter: _statusFilter,
+        currentTypeFilter: widget.showTypeFilter ? _typeFilter : null,
+        showTypeFilter: widget.showTypeFilter,
         onFilterChanged: (value) {
           setState(() => _statusFilter = value);
+          Navigator.pop(context);
+          _loadOpportunities();
+        },
+        onTypeFilterChanged: (value) {
+          setState(() => _typeFilter = value);
           Navigator.pop(context);
           _loadOpportunities();
         },
@@ -231,7 +293,6 @@ class _VolunteerPageState extends State<VolunteerPage> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final mediaQuery = MediaQuery.of(context);
     final toolbarHeight = mediaQuery.padding.top + 52;
 
@@ -325,7 +386,7 @@ class _VolunteerPageState extends State<VolunteerPage> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        widget.experience.createAction(context),
+                        _selectedExperience.createAction(context),
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onPrimary,
                         ),
@@ -430,7 +491,7 @@ class _VolunteerPageState extends State<VolunteerPage> {
             padding: const EdgeInsets.symmetric(vertical: 4),
             child: VolunteerOpportunityListItem(
               opportunity: opportunity,
-              experience: widget.experience,
+              experience: opportunity.experience,
               showFullDetails: true,
               apiClient: widget.apiClient,
               onTap: () => _openOpportunityDetails(opportunity),

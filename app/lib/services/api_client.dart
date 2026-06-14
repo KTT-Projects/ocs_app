@@ -15,6 +15,7 @@ import '../models/volunteer_opportunity.dart';
 import '../models/volunteer_participant.dart';
 import '../models/volunteer_attachment.dart';
 import '../models/volunteer_reflection.dart';
+import '../models/notification_preference.dart';
 import 'auth_service.dart';
 
 class ApiException implements Exception {
@@ -26,8 +27,8 @@ class ApiException implements Exception {
 }
 
 class ApiClient extends ChangeNotifier {
-  static const String baseUrl = 'https://ocs.kttprojects.com/api';
-  static const String baseHost = 'https://ocs.kttprojects.com';
+  static const String baseUrl = 'https://kamilander.com/api';
+  static const String baseHost = 'https://kamilander.com';
   String? _token;
   final _authService = AuthService();
 
@@ -63,6 +64,180 @@ class ApiClient extends ChangeNotifier {
     // Invalidate token on server (optional, depends on backend implementation)
     // For now, just clear local token
     await clearToken();
+  }
+
+  Future<void> registerPushDevice({
+    required String platform,
+    required String token,
+    String? deviceId,
+    String? appVersion,
+    String? locale,
+  }) async {
+    if (_token == null) return;
+
+    final response = await http.post(
+      _buildUri('push_notifications.php?action=register'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $_token',
+      },
+      body: json.encode({
+        'platform': platform,
+        'token': token,
+        if (deviceId != null && deviceId.isNotEmpty) 'device_id': deviceId,
+        if (appVersion != null && appVersion.isNotEmpty)
+          'app_version': appVersion,
+        if (locale != null && locale.isNotEmpty) 'locale': locale,
+      }),
+    );
+
+    _throwIfPushRequestFailed(response, 'Failed to register push device');
+  }
+
+  Future<void> unregisterPushDevice({
+    String? token,
+    String? deviceId,
+  }) async {
+    if (_token == null) return;
+
+    final response = await http.post(
+      _buildUri('push_notifications.php?action=unregister'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $_token',
+      },
+      body: json.encode({
+        if (token != null && token.isNotEmpty) 'token': token,
+        if (deviceId != null && deviceId.isNotEmpty) 'device_id': deviceId,
+      }),
+    );
+
+    _throwIfPushRequestFailed(response, 'Failed to unregister push device');
+  }
+
+  Future<List<NotificationPreference>> getNotificationPreferences(
+    BuildContext context,
+  ) async {
+    if (_token == null) return _defaultNotificationPreferences();
+
+    final response = await http.get(
+      _buildUri('push_notifications.php?action=preferences'),
+      headers: {
+        'Authorization': 'Bearer $_token',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+      },
+    );
+    if (!context.mounted) return _defaultNotificationPreferences();
+
+    return _parseNotificationPreferencesResponse(
+      context,
+      response,
+      'Failed to load notification preferences',
+    );
+  }
+
+  Future<List<NotificationPreference>> updateNotificationPreferences(
+    BuildContext context,
+    List<NotificationPreference> preferences,
+  ) async {
+    if (_token == null) return preferences;
+
+    final response = await http.post(
+      _buildUri('push_notifications.php?action=preferences'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $_token',
+      },
+      body: json.encode({
+        'preferences': preferences.map((item) => item.toJson()).toList(),
+      }),
+    );
+    if (!context.mounted) return preferences;
+
+    return _parseNotificationPreferencesResponse(
+      context,
+      response,
+      'Failed to save notification preferences',
+    );
+  }
+
+  Future<List<NotificationPreference>> _parseNotificationPreferencesResponse(
+    BuildContext context,
+    http.Response response,
+    String fallback,
+  ) async {
+    final data = json.decode(response.body);
+    if (response.statusCode == 401 && data is Map<String, dynamic>) {
+      await _handleUnauthorizedResponse(context, data);
+    }
+    if (response.statusCode != 200 ||
+        data is! Map<String, dynamic> ||
+        data['status'] != 'success') {
+      throw ApiException(
+        data is Map<String, dynamic> ? data['message'] ?? fallback : fallback,
+      );
+    }
+
+    final payload = data['data'];
+    if (payload is! Map<String, dynamic> || payload['preferences'] is! List) {
+      return _defaultNotificationPreferences();
+    }
+
+    final parsed = (payload['preferences'] as List)
+        .whereType<Map<String, dynamic>>()
+        .map(NotificationPreference.fromJson)
+        .where((item) => item.category.isNotEmpty)
+        .toList();
+
+    return _mergeNotificationPreferenceDefaults(parsed);
+  }
+
+  List<NotificationPreference> _defaultNotificationPreferences() {
+    return NotificationPreferenceCategories.all
+        .map(
+          (category) => NotificationPreference(
+            category: category,
+            inAppEnabled: true,
+            pushEnabled: true,
+          ),
+        )
+        .toList();
+  }
+
+  List<NotificationPreference> _mergeNotificationPreferenceDefaults(
+    List<NotificationPreference> preferences,
+  ) {
+    final byCategory = {
+      for (final preference in preferences) preference.category: preference,
+    };
+    return NotificationPreferenceCategories.all
+        .map(
+          (category) =>
+              byCategory[category] ??
+              NotificationPreference(
+                category: category,
+                inAppEnabled: true,
+                pushEnabled: true,
+              ),
+        )
+        .toList();
+  }
+
+  void _throwIfPushRequestFailed(http.Response response, String fallback) {
+    final data = json.decode(response.body);
+    if (response.statusCode == 401 &&
+        data is Map<String, dynamic> &&
+        data['message'] == 'Invalid or expired token') {
+      clearToken();
+    }
+    if (response.statusCode != 200 ||
+        data is! Map<String, dynamic> ||
+        data['status'] != 'success') {
+      throw ApiException(
+        data is Map<String, dynamic> ? data['message'] ?? fallback : fallback,
+      );
+    }
   }
 
   String _mapServerError(BuildContext context, String serverMessage) {
@@ -366,7 +541,7 @@ class ApiClient extends ChangeNotifier {
 
       String url = data['icon_url'];
       if (url.startsWith('/')) {
-        url = 'https://ocs.kttprojects.com' + url;
+        url = 'https://kamilander.com' + url;
       }
       return url;
     } catch (e) {
@@ -423,7 +598,7 @@ class ApiClient extends ChangeNotifier {
 
       String url = data['media_url'];
       if (url.startsWith('/')) {
-        url = 'https://ocs.kttprojects.com' + url;
+        url = 'https://kamilander.com' + url;
       }
       return url;
     } catch (e) {
@@ -484,7 +659,7 @@ class ApiClient extends ChangeNotifier {
 
       String url = data['media_url'];
       if (url.startsWith('/')) {
-        url = 'https://ocs.kttprojects.com' + url;
+        url = 'https://kamilander.com' + url;
       }
       return url;
     } catch (e) {
@@ -1599,19 +1774,126 @@ class ApiClient extends ChangeNotifier {
     }
   }
 
+  Future<void> reportContent(
+    BuildContext context, {
+    required String entityType,
+    required int entityId,
+    String reason = 'other',
+    String? details,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/moderation.php?action=report'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode({
+          'entity_type': entityType,
+          'entity_id': entityId,
+          'reason': reason,
+          if (details != null && details.trim().isNotEmpty)
+            'details': details.trim(),
+        }),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200 && response.statusCode != 201) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getModerationQueue(
+    BuildContext context, {
+    String status = 'pending',
+    int limit = 50,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.get(
+        _buildUri('moderation.php?action=queue&status=$status&limit=$limit'),
+        headers: {
+          'Authorization': 'Bearer $_token',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+
+      return List<Map<String, dynamic>>.from(data['data']?['items'] ?? []);
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
+  Future<Map<String, dynamic>> reviewModerationCase(
+    BuildContext context, {
+    required int caseId,
+    required String action,
+    String? note,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/moderation.php?action=review'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode({
+          'case_id': caseId,
+          'action': action,
+          if (note != null && note.trim().isNotEmpty) 'note': note.trim(),
+        }),
+      );
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 401) {
+        await _handleUnauthorizedResponse(context, data);
+      } else if (response.statusCode != 200) {
+        throw ApiException(
+          _mapServerError(context, data['message'] ?? l10n.errorOccurred),
+        );
+      }
+
+      return Map<String, dynamic>.from(data['data'] ?? {});
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException(l10n.errorOccurred);
+    }
+  }
+
   // Volunteer API methods
   Future<List<VolunteerOpportunity>> getVolunteerOpportunities(
     BuildContext context, {
     String? status,
     String? sort,
     String? search,
-    String opportunityType = 'volunteer',
+    String? opportunityType = 'volunteer',
   }) async {
     final l10n = AppLocalizations.of(context)!;
     try {
       String query = 'volunteers.php?action=list';
       List<String> params = [];
-      params.add('type=$opportunityType');
+      if (opportunityType != null) params.add('type=$opportunityType');
       if (status != null) params.add('status=$status');
       if (sort != null) params.add('sort=$sort');
       if (search != null) params.add('search=${Uri.encodeComponent(search)}');
@@ -1650,13 +1932,15 @@ class ApiClient extends ChangeNotifier {
   Future<List<VolunteerOpportunity>> getMyVolunteerOpportunities(
     BuildContext context, {
     String? status,
-    String opportunityType = 'volunteer',
+    String? opportunityType = 'volunteer',
   }) async {
     final l10n = AppLocalizations.of(context)!;
     try {
-      String query =
-          'volunteers.php?action=my_opportunities&type=$opportunityType';
-      if (status != null) query += '&status=$status';
+      String query = 'volunteers.php?action=my_opportunities';
+      final params = <String>[];
+      if (opportunityType != null) params.add('type=$opportunityType');
+      if (status != null) params.add('status=$status');
+      if (params.isNotEmpty) query += '&${params.join('&')}';
 
       final response = await http.get(
         _buildUri(query),

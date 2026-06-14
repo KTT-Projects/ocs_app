@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'services/api_client.dart';
 import 'services/app_notification_service.dart';
+import 'services/push_registration_service.dart';
 import 'providers/language_provider.dart';
 import 'package:ocs_app/pages/main_page.dart';
 import 'package:ocs_app/pages/login_page.dart'; // Import LoginPage
@@ -19,6 +20,9 @@ void main() async {
 
   final prefs = await SharedPreferences.getInstance();
   final apiClient = ApiClient();
+  final pushRegistrationService = PushRegistrationService(
+    apiClient: apiClient,
+  );
 
   await Future.wait([
     apiClient.initialize(),
@@ -34,10 +38,16 @@ void main() async {
         ),
         ChangeNotifierProvider(
           create: (_) {
-            final service = AppNotificationService(apiClient: apiClient);
+            final service = AppNotificationService(
+              apiClient: apiClient,
+              pushRegistrationService: pushRegistrationService,
+            );
             unawaited(service.initialize());
             return service;
           },
+        ),
+        Provider<PushRegistrationService>.value(
+          value: pushRegistrationService,
         ),
       ],
       child: MyApp(apiClient: apiClient),
@@ -58,7 +68,7 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    const appTitle = 'Osakikamijima Community Site';
+    const appTitle = 'KamiLander';
     return Consumer<LanguageProvider>(
       builder: (context, languageProvider, _) {
         return MaterialApp(

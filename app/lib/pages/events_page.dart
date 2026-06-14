@@ -16,6 +16,8 @@ class EventsPage extends StatelessWidget {
     return VolunteerPage(
       apiClient: apiClient,
       experience: OpportunityExperience.event,
+      initialOpportunityType: null,
+      showTypeFilter: true,
     );
   }
 }
